@@ -1,0 +1,60 @@
+.icon-box {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.icon-box svg {
+    width: 16px;
+    height: 16px;
+}
+
+.icon-box-sm {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    flex-shrink: 0;
+}
+
+.icon-box-sm svg {
+    width: 14px;
+    height: 14px;
+}
+
+.bg-primary-soft {
+    background-color: rgba(13, 110, 253, 0.12);
+}
+
+.bg-light-primary {
+    background-color: rgba(13, 110, 253, 0.10);
+}
+
+.bg-light-success {
+    background-color: rgba(25, 135, 84, 0.10);
+}
+
+.bg-light-info {
+    background-color: rgba(13, 202, 240, 0.10);
+}
+
+.user-info-card {
+    background: rgba(255, 255, 255, 0.30);
+
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+
+    border: 1px solid rgba(0, 0, 0, 0.07);
+
+    border-radius: 8px;
+
+    padding: 14px 16px;
+}

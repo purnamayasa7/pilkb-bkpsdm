@@ -1,0 +1,176 @@
+/* Navbar */
+.topbar {
+    font-family: 'Inter', sans-serif;
+}
+
+/* Table */
+.table {
+    font-size: 13.5px;
+}
+
+/* ===== SIDEBAR BASE ===== */
+.sidebar {
+    background-color: #ffffff !important;
+    font-family: 'Inter', sans-serif;
+    border-right: 1px solid #e3e6f0;
+}
+
+/* ===== BRAND ===== */
+.sidebar-brand {
+    height: 70px;
+    font-weight: 700;
+    /* font-size: 1rem; */
+    color: #4e73df;
+}
+
+.sidebar-brand-icon i {
+    /* font-size: 18px; */
+    color: #4e73df !important;
+}
+
+.sidebar-brand-text {
+    color: #5a5c69 !important;
+    font-weight: 600;
+}
+
+/* ===== HEADING ===== */
+.sidebar-heading {
+    /* font-size: 11px; */
+    font-weight: 700;
+    color: #b7b9cc;
+    letter-spacing: 0.05em;
+    margin-top: 10px;
+}
+
+/* ===== NAV ITEM ===== */
+.sidebar .nav-item {
+    position: relative;
+    margin-bottom: 0 !important;
+}
+
+/* ===== LINK ===== */
+.sidebar .nav-link {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: #6c757d !important;
+    /* font-size: 14px; */
+    padding: 8px 14px;
+    border-radius: 6px;
+    transition: all 0.2s ease;
+}
+
+/* ICON */
+.sidebar .nav-link i {
+    /* font-size: 14px; */
+    transition: all 0.2s ease-in-out;
+    color: #6c757d ip !important;
+}
+
+/* HOVER */
+.sidebar .nav-link:hover {
+    /* background-color: transparent !important; */
+    color: #4e73df !important;
+}
+
+.sidebar .nav-link:hover i {
+    color: #4e73df !important;
+}
+
+/* ===== ACTIVE MENU ===== */
+.sidebar .nav-item.active .nav-link {
+    background-color: transparent !important;
+    color: #4e73df !important;
+    /* font-weight: 600; */
+}
+
+.sidebar .nav-item.active .nav-link i {
+    color: #4e73df !important;
+}
+
+/* GARIS KIRI (INDIKATOR) */
+.sidebar .nav-item.active {
+    border-left: 3px solid #4e73df;
+}
+
+
+/* ===== COLLAPSE MENU ===== */
+.sidebar .collapse-inner {
+    margin-left: 20px;
+    border-left: 1px solid #e3e6f0;
+    padding-left: 10px;
+}
+
+/* SUB MENU */
+.sidebar .collapse-item {
+    display: block;
+    padding: 6px 10px;
+    /* font-size: 13px; */
+    color: #6c757d;
+    border-radius: 4px;
+    text-decoration: none;
+}
+
+/* HOVER SUB */
+.sidebar .collapse-item:hover {
+    color: #4e73df;
+    background-color: #f8f9fc;
+}
+
+/* ACTIVE SUB */
+.sidebar .collapse-item.active {
+    color: #4e73df;
+    /* font-weight: 600; */
+}
+
+/* ===== DIVIDER ===== */
+.sidebar-divider {
+    border-top: 1px solid #e3e6f0;
+}
+
+/* ===== FOOTER USER ===== */
+.sidebar-footer {
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    padding: 15px;
+    /* font-size: 13px; */
+    border-top: 1px solid #e3e6f0;
+    background: #fff;
+}
+
+.sidebar-footer strong {
+    color: #6c757d;
+}
+
+/* MOBILE SIDEBAR MODE */
+@media (max-width: 768px) {
+
+    /* Default: sidebar disembunyikan */
+    .sidebar {
+        position: fixed;
+        left: -250px;
+        top: 0;
+        height: 100%;
+        width: 250px;
+        z-index: 1050;
+        transition: all 0.3s ease;
+    }
+
+    /* Saat toggle aktif */
+    #wrapper.toggled .sidebar {
+        left: 0;
+    }
+
+    /* Overlay background */
+    #wrapper.toggled::after {
+        content: "";
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0,0,0,0.3);
+        z-index: 1040;
+    }
+}
