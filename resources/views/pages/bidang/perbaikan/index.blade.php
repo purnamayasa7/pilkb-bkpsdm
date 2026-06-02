@@ -1,52 +1,13 @@
 @extends('layouts.app')
 
 @section('content')
-{{-- MODAL KONFIRMASI --}}
-<div class="modal fade" id="modalKonfirmasi" tabindex="-1">
-    <div class="modal-dialog">
-        <div class="modal-content">
-
-            <div class="modal-header">
-                <h5 class="modal-title">
-                    Konfirmasi Perbaikan
-                </h5>
-
-                <button class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-
-            <form method="POST" id="formKonfirmasi">
-                @csrf
-
-                <div class="modal-body">
-                    Apakah yakin usulan ini sudah diperbaiki?
-                </div>
-
-                <div class="modal-footer">
-                    <button type="button"
-                        class="btn btn-light"
-                        data-bs-dismiss="modal">
-                        Batal
-                    </button>
-
-                    <button type="submit"
-                        class="btn btn-primary">
-                        Ya, Konfirmasi
-                    </button>
-                </div>
-
-            </form>
-
-        </div>
-    </div>
-</div>
-
 <header class="page-header page-header-compact page-header-light border-bottom bg-white mb-4">
     <div class="container-fluid px-4">
         <div class="page-header-content">
             <div class="row align-items-center justify-content-between pt-3">
                 <div class="col-auto mb-3">
                     <h1 class="page-header-title">
-                        <div class="page-header-icon"><i data-feather="edit"></i></div>
+                        <div class="page-header-icon"><i data-feather="tool"></i></div>
                         List Perbaikan Usulan
                     </h1>
                 </div>
@@ -60,12 +21,12 @@
                         </button>
                         <ul class="dropdown-menu">
                             <li>
-                                <a class="dropdown-item" href="{{ route('adminOpd.perbaikan.exportExcel', request()->all()) }}">
+                                <a class="dropdown-item" href="#">
                                     <i class="me-1" data-feather="file-text"></i> Export Excel
                                 </a>
                             </li>
                             <li>
-                                <a class="dropdown-item" href="{{ route('adminOpd.perbaikan.exportPdf', request()->all()) }}">
+                                <a class="dropdown-item" href="#">
                                     <i class="me-1" data-feather="file"></i> Export PDF
                                 </a>
                             </li>
@@ -124,7 +85,7 @@
 <div class="container-fluid px-4 mt-4">
     <div class="card">
         <div class="card-body">
-            <form method="GET" action="{{ route('adminOpd.perbaikan.index') }}" id="filterForm" class="mb-3">
+            <form method="GET" action="{{ route('adminBidang.perbaikan.index') }}" id="filterForm" class="mb-3">
                 <div class="bg-white p-3 rounded-3 mb-4 border">
                     <div class="row align-items-end">
 
@@ -144,100 +105,89 @@
                         </div>
                         <!-- TOMBOL RESET -->
                         {{-- <div class="col-md-4 d-flex gap-2">
-                            <a href="{{ route('root.syarat') }}" class="btn btn-secondary w-50">
-                        Reset
-                        </a>
-                    </div> --}}
+                            <a href="#" class="btn btn-secondary w-50">
+                                Reset
+                            </a>
+                        </div> --}}
 
+                    </div>
                 </div>
-        </div>
-        </form>
-        <table id="datatablesSimple">
-            <thead>
-                <tr>
-                    <th>No</th>
-                    <th>Diperbaiki</th>
-                    <th>No Tiket</th>
-                    <th>NIP</th>
-                    <th>Nama</th>
-                    <th>Layanan</th>
-                    <th>Unit Kerja</th>
-                    <th>Syarat BTL</th>
-                    <th>Aksi</th>
-                </tr>
-            </thead>
-            <tfoot>
-                <tr>
-                    <th>No</th>
-                    <th>Diperbaiki</th>
-                    <th>No Tiket</th>
-                    <th>NIP</th>
-                    <th>Nama</th>
-                    <th>Layanan</th>
-                    <th>Unit Kerja</th>
-                    <th>Syarat BTL</th>
-                    <th>Aksi</th>
-                </tr>
-            </tfoot>
-            <tbody>
-                @foreach ($data as $item)
-                <tr>
-                    <td>{{ $loop->iteration }}</td>
+            </form>
+            <table id="datatablesSimple">
+                <thead>
+                    <tr>
+                        <th>No</th>
+                        <th>Diperbaiki</th>
+                        <th>No Tiket</th>
+                        <th>NIP</th>
+                        <th>Nama</th>
+                        <th>Layanan</th>
+                        <th>Unit Kerja</th>
+                        <th>Syarat BTL</th>
+                        <th>Aksi</th>
+                    </tr>
+                </thead>
+                <tfoot>
+                    <tr>
+                        <th>No</th>
+                        <th>Diperbaiki</th>
+                        <th>No Tiket</th>
+                        <th>NIP</th>
+                        <th>Nama</th>
+                        <th>Layanan</th>
+                        <th>Unit Kerja</th>
+                        <th>Syarat BTL</th>
+                        <th>Aksi</th>
+                    </tr>
+                </tfoot>
+                <tbody>
+                    @foreach ($data as $item)
+                    <tr>
+                        <td>{{ $loop->iteration }}</td>
 
-                    <td>
-                        @if ($item->diperbaiki == 0)
-                        <span class="badge bg-red-soft text-danger border d-inline-flex align-items-center">
-                            <i data-feather="x" class="me-1"></i>
-                            Belum
-                        </span>
-                        @else
-                        <span class="badge bg-green-soft text-green d-inline-flex align-items-center">
-                            <i data-feather="check" class="me-1"></i>
-                            Sudah
-                        </span>
-                        @endif
-                    </td>
-
-                    <td>{{ $item->no_tiket }}</td>
-                    <td>{{ $item->nip }}</td>
-                    <td>-</td> {{-- dummy nama --}}
-                    <td>{{ $item->layanan->nama_layanan ?? '-' }}</td>
-                    <td>-</td> {{-- dummy unit kerja --}}
-
-                    <td>
-                        <div class="d-flex align-items-center justify-content-center">
-                            <span class="badge bg-light text-danger border d-inline-flex align-items-center">
-                                {{ $item->jumlah_btl }}
+                        <td>
+                            @if ($item->diperbaiki == 0)
+                            <span class="badge bg-red-soft text-danger border d-inline-flex align-items-center">
+                                <i data-feather="x" class="me-1"></i>
+                                Belum
                             </span>
-                        </div>
-                    </td>
+                            @else
+                            <span class="badge bg-green-soft text-green d-inline-flex align-items-center">
+                                <i data-feather="check" class="me-1"></i>
+                                Sudah
+                            </span>
+                            @endif
+                        </td>
 
-                    <td>
-                        <div class="d-flex align-items-center justify-content-center">
-                            {{-- KONFIRMASI --}}
-                            <a class="btn btn-datatable btn-icon btn-transparent-dark btnKonfirmasi"
-                                href="#"
-                                data-notiket="{{ $item->no_tiket }}"
-                                title="Konfirmasi Perbaikan">
+                        <td>{{ $item->no_tiket }}</td>
+                        <td>{{ $item->nip }}</td>
+                        <td>-</td> {{-- dummy nama --}}
+                        <td>{{ $item->layanan->nama_layanan ?? '-' }}</td>
+                        <td>-</td> {{-- dummy unit kerja --}}
 
-                                <i data-feather="upload" class="text-success"></i>
-                            </a>
-                            {{-- DETAIL --}}
-                            <a class="btn btn-datatable btn-icon btn-transparent-dark me-1 btnDetail"
-                                href="#"
-                                data-notiket="{{ $item->no_tiket }}"
-                                title="Lihat Detail">
+                        <td>
+                            <div class="d-flex align-items-center justify-content-center">
+                                <span class="badge bg-light text-danger border d-inline-flex align-items-center">
+                                    {{ $item->jumlah_btl }}
+                                </span>
+                            </div>
+                        </td>
 
-                                <i data-feather="eye" class="text-primary"></i>
-                            </a>
-                        </div>
-                    </td>
-                </tr>
-                @endforeach
-            </tbody>
-        </table>
+                        <td>
+                            <div class="d-flex align-items-center justify-content-center">
+                                <a class="btn btn-datatable btn-icon btn-transparent-dark me-1 btnDetail"
+                                    href="#" data-notiket="{{ $item->no_tiket }}" title="Lihat Detail">
+
+                                    <i data-feather="eye" class="text-primary"></i>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    @endforeach
+                </tbody>
+            </table>
+        </div>
     </div>
-</div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/simple-datatables@7.1.2/dist/umd/simple-datatables.min.js"></script>
@@ -253,7 +203,7 @@
             document.getElementById('filterForm').submit();
         });
 
-        // MODAL DETAIL (biarkan tetap)
+        // MODAL DETAIL
         const modalDetail = new bootstrap.Modal(document.getElementById('modalDetail'));
 
         document.addEventListener('click', function(e) {
@@ -266,7 +216,8 @@
 
             document.getElementById('mdNoTiket').innerText = noTiket;
 
-            fetch(`/adminOpd/perbaikan/detail/${noTiket}`)
+            fetch(`{{ route('adminBidang.perbaikan.detail', ':id') }}`
+                    .replace(':id', noTiket))
                 .then(res => res.json())
                 .then(data => {
 
@@ -290,31 +241,6 @@
 
                     modalDetail.show();
                 });
-        });
-
-        // Konfirmasi
-        const modalKonfirmasi = new bootstrap.Modal(
-            document.getElementById('modalKonfirmasi')
-        );
-
-        document.addEventListener('click', function(e) {
-
-            const btn = e.target.closest('.btnKonfirmasi');
-
-            if (!btn) return;
-
-            e.preventDefault();
-
-            let noTiket = btn.dataset.notiket;
-
-            const actionUrl =
-                `{{ route('adminOpd.perbaikan.konfirmasi', ':id') }}`
-                .replace(':id', noTiket);
-
-            document.getElementById('formKonfirmasi')
-                .setAttribute('action', actionUrl);
-
-            modalKonfirmasi.show();
         });
     });
 </script>

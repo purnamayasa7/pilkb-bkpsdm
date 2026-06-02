@@ -384,8 +384,8 @@ return [
 
         [
             'type' => 'item',
-            'title' => 'Listing Perbaikan Data',
-            'path' => '',
+            'title' => 'List Perbaikan Usulan',
+            'path' => 'adminBidang/perbaikan',
             'icon' => 'tool',
             'active_key' => 'list-permintaan_data',
         ],
@@ -399,7 +399,7 @@ return [
         [
             'type' => 'item',
             'title' => 'Laporan',
-            'path' => '',
+            'path' => 'adminBidang/laporan',
             'icon' => 'bar-chart-2',
             'active_key' => 'laporan',
         ],
@@ -407,7 +407,7 @@ return [
         [
             'type' => 'item',
             'title' => 'Cetak Syarat',
-            'path' => '',
+            'path' => 'adminBidang/cetakSyarat',
             'icon' => 'file-text',
             'active_key' => 'cetak-syarat',
         ],

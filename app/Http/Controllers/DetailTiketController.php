@@ -274,6 +274,22 @@ class DetailTiketController extends Controller
         }
     }
 
+    // Update nilai diperbaiki menjadi = 1 pada menu Admin OPD
+    public function konfirmasiPerbaikan($no_tiket)
+    {
+        $tiket = Regtiket::where('no_tiket', $no_tiket)
+            ->firstOrFail();
+
+        $tiket->update([
+            'diperbaiki' => 1,
+            'diperbaiki_tgl' => now()
+        ]);
+
+        return redirect()
+            ->back()
+            ->with('success', 'Perbaikan berhasil dikonfirmasi.');
+    }
+
     public function detailPerbaikan($no_tiket)
     {
         $data = DetailTiket::with('syarat')

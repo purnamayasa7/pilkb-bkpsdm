@@ -29,6 +29,7 @@ class User extends Authenticatable
         'kode_ukerja',
         'no_wa',
         'email',
+        'must_change_password',
     ];
 
     /**

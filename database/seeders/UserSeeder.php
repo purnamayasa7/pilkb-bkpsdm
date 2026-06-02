@@ -13,13 +13,12 @@ class UserSeeder extends Seeder
     public function run(): void
     {
         User::create([
-            'username' => 'root@bkd123',
+            'nip' => 'root@bkd123',
             'nama' => 'Root',
             'password' => '##r00tpilkb123##',
             'bidang_id' => 'Root',
-            'jabatan' => 'Root',
             'aktif' => 1,
-            'kode_ukerja' => '7501',
+            'kode_ukerja' => '75010203',
             'role_id' => '1'
         ]);
     }

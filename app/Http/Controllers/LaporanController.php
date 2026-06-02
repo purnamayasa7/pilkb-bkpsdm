@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Bidang;
 use App\Models\Layanan;
 use App\Models\Regtiket;
+use App\Models\Tahap;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 
@@ -142,4 +143,54 @@ class LaporanController extends Controller
         return $pdf->stream('laporan-usulan.pdf');
     }
 
+    // Laporan Admin Bidang
+    public function indexBidang(Request $request)
+    {
+        $start = $request->start_date;
+        $end = $request->end_date;
+
+        $tiket = collect();
+
+        if ($start && $end) {
+
+            $tiket = Tahap::with([
+                'statusRel',
+                'regtiket.layanan'
+            ])
+                ->whereBetween('tanggal', [$start, $end])
+                ->whereHas('regtiket')
+                ->orderBy('tanggal', 'desc')
+                ->get();
+        }
+
+        return view('pages.bidang.laporan.index', compact(
+            'tiket',
+            'start',
+            'end'
+        ));
+    }
+
+    // Export Laporan PDF Admin Bidang
+    public function exportPdfBidang(Request $request)
+    {
+        $start = $request->start_date;
+        $end = $request->end_date;
+
+        $data = Tahap::with([
+            'statusRel',
+            'regtiket.layanan'
+        ])
+            ->whereBetween('tanggal', [$start, $end])
+            ->whereHas('regtiket')
+            ->orderBy('tanggal', 'desc')
+            ->get();
+
+        $pdf = Pdf::loadView('pages.bidang.laporan.pdf', [
+            'data' => $data,
+            'start' => $start,
+            'end' => $end
+        ])->setPaper('A4', 'landscape');
+
+        return $pdf->stream('laporan-layanan.pdf');
+    }
 }

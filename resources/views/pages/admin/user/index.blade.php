@@ -1,308 +1,341 @@
 @extends('layouts.app')
 
 @section('content')
-    <style>
-        .modal-header-custom {
-            background: linear-gradient(135deg, #3a7bd5, #2c5aa0);
-            color: #fff;
-            border-bottom: none;
-        }
-    </style>
-    <header class="page-header page-header-compact page-header-light border-bottom bg-white mb-4">
-        <div class="container-fluid px-4">
-            <div class="page-header-content">
-                <div class="row align-items-center justify-content-between pt-3">
-                    <div class="col-auto mb-3">
-                        <h1 class="page-header-title">
-                            <div class="page-header-icon"><i data-feather="user"></i></div>
-                            Manajemen User
-                        </h1>
+<style>
+    .modal-header-custom {
+        background: linear-gradient(135deg, #3a7bd5, #2c5aa0);
+        color: #fff;
+        border-bottom: none;
+    }
+</style>
+<header class="page-header page-header-compact page-header-light border-bottom bg-white mb-4">
+    <div class="container-fluid px-4">
+        <div class="page-header-content">
+            <div class="row align-items-center justify-content-between pt-3">
+                <div class="col-auto mb-3">
+                    <h1 class="page-header-title">
+                        <div class="page-header-icon"><i data-feather="user"></i></div>
+                        Manajemen User
+                    </h1>
+                </div>
+                <div class="col-12 col-xl-auto mb-3">
+                    <!-- Dropdown Export -->
+                    <div class="btn-group">
+                        <button class="btn btn-sm btn-light text-success dropdown-toggle" type="button"
+                            data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="me-1" data-feather="download"></i>
+                            Export
+                        </button>
+                        <ul class="dropdown-menu">
+                            <li>
+                                <a class="dropdown-item" href="{{ route('root.user.exportExcel') }}">
+                                    <i class="me-1" data-feather="file-text"></i> Export Excel
+                                </a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item" href="#">
+                                    <i class="me-1" data-feather="file"></i> Export PDF
+                                </a>
+                            </li>
+                        </ul>
                     </div>
-                    <div class="col-12 col-xl-auto mb-3">
-                        <!-- Dropdown Export -->
-                        <div class="btn-group">
-                            <button class="btn btn-sm btn-light text-success dropdown-toggle" type="button"
-                                data-bs-toggle="dropdown" aria-expanded="false">
-                                <i class="me-1" data-feather="download"></i>
-                                Export
-                            </button>
-                            <ul class="dropdown-menu">
-                                <li>
-                                    <a class="dropdown-item" href="#">
-                                        <i class="me-1" data-feather="file-text"></i> Export Excel
-                                    </a>
-                                </li>
-                                <li>
-                                    <a class="dropdown-item" href="#">
-                                        <i class="me-1" data-feather="file"></i> Export PDF
-                                    </a>
-                                </li>
-                            </ul>
-                        </div>
-                        <a class="btn btn-sm btn-light text-primary" href="{{ route('root.create') }}">
-                            <i class="me-1" data-feather="user-plus"></i>
-                            Tambah User Baru
-                        </a>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </header>
-
-    {{-- Modal Aktif/Nonaktif --}}
-    <div class="modal fade" id="modalAktif" tabindex="-1">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Ubah Status User</h5>
-                    <button class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
-
-                <div class="modal-body">
-                    <p id="textModal"></p>
-                </div>
-
-                <div class="modal-footer">
-                    <button class="btn btn-light" data-bs-dismiss="modal">Batal</button>
-
-                    <form id="formToggle" method="POST">
-                        @csrf
-                        @method('PUT')
-                        <button class="btn btn-primary">Ya, Lanjutkan</button>
-                    </form>
+                    <a class="btn btn-sm btn-light text-primary" href="{{ route('root.create') }}">
+                        <i class="me-1" data-feather="user-plus"></i>
+                        Tambah User Baru
+                    </a>
                 </div>
             </div>
         </div>
     </div>
+</header>
 
-    {{-- Modal Lihat Data --}}
-    <div class="modal fade" id="modalDetail" tabindex="-1">
-        <div class="modal-dialog modal-dialog-centered modal-lg">
-            <div class="modal-content">
+{{-- Modal Aktif/Nonaktif --}}
+<div class="modal fade" id="modalAktif" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Ubah Status User</h5>
+                <button class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
 
-                <div class="modal-header">
-                    <h5 class="modal-title">Detail User</h5>
-                    <button class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-                </div>
+            <div class="modal-body">
+                <p id="textModal"></p>
+            </div>
 
-                <div class="modal-body">
-                    <div class="row">
+            <div class="modal-footer">
+                <button class="btn btn-light" data-bs-dismiss="modal">Batal</button>
 
-                        <div class="col-md-3 text-center">
-                            <img id="detailFoto" src="{{ asset('templatepro/assets/img/demo/user-placeholder.svg') }}"
-                                class="img-fluid rounded" style="width: 170px; height: 200px; object-fit: cover;">
-                        </div>
+                <form id="formToggle" method="POST">
+                    @csrf
+                    @method('PUT')
+                    <button class="btn btn-primary">Ya, Lanjutkan</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
 
-                        <div class="col-md-9">
-                            <div class="card shadow-sm">
-                                <div class="card-body">
+{{-- Modal Lihat Data --}}
+<div class="modal fade" id="modalDetail" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content">
 
-                                    <div class="d-flex justify-content-between align-items-center mb-2">
-                                        <span><i data-feather="hash" class="me-1"></i> Username</span>
-                                        <span id="detailUsername" class="text-end"></span>
-                                    </div>
+            <div class="modal-header">
+                <h5 class="modal-title">Detail User</h5>
+                <button class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
 
-                                    <div class="d-flex justify-content-between align-items-center mb-2">
-                                        <span><i data-feather="user" class="me-1"></i> Nama</span>
-                                        <span id="detailNama" class="text-end"></span>
-                                    </div>
+            <div class="modal-body">
+                <div class="row">
 
-                                    <div class="d-flex justify-content-between align-items-center mb-2">
-                                        <span><i data-feather="layers" class="me-1"></i> Bidang</span>
-                                        <span id="detailBidang" class="text-end"></span>
-                                    </div>
+                    <div class="col-md-3 text-center">
+                        <img id="detailFoto" src="{{ asset('templatepro/assets/img/demo/user-placeholder.svg') }}"
+                            class="img-fluid rounded" style="width: 170px; height: 200px; object-fit: cover;">
+                    </div>
 
-                                    <div class="d-flex justify-content-between align-items-center mb-2">
-                                        <span><i data-feather="briefcase" class="me-1"></i> Jabatan</span>
-                                        <span id="detailJabatan" class="text-end"></span>
-                                    </div>
+                    <div class="col-md-9">
+                        <div class="card shadow-sm">
+                            <div class="card-body">
 
-                                    <div class="d-flex justify-content-between align-items-center mb-2">
-                                        <span><i data-feather="toggle-right" class="me-1"></i> Status</span>
-                                        <span id="detailStatus" class="text-end"></span>
-                                    </div>
-
-                                    <div class="d-flex justify-content-between align-items-center mb-2">
-                                        <span><i data-feather="home" class="me-1"></i> Unit Kerja</span>
-                                        <span id="detailUkerja" class="text-end"></span>
-                                    </div>
-
-                                    <div class="d-flex justify-content-between align-items-center mb-2">
-                                        <span><i data-feather="shield" class="me-1"></i> Role</span>
-                                        <span id="detailRole" class="text-end"></span>
-                                    </div>
-
-                                    <div class="d-flex justify-content-between align-items-center">
-                                        <span><i data-feather="mail" class="me-1"></i> Email</span>
-                                        <span id="detailEmail" class="text-end"></span>
-                                    </div>
-
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <span><i data-feather="hash" class="me-1"></i> Username</span>
+                                    <span id="detailUsername" class="text-end"></span>
                                 </div>
+
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <span><i data-feather="user" class="me-1"></i> Nama</span>
+                                    <span id="detailNama" class="text-end"></span>
+                                </div>
+
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <span><i data-feather="layers" class="me-1"></i> Bidang</span>
+                                    <span id="detailBidang" class="text-end"></span>
+                                </div>
+
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <span><i data-feather="briefcase" class="me-1"></i> Jabatan</span>
+                                    <span id="detailJabatan" class="text-end"></span>
+                                </div>
+
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <span><i data-feather="toggle-right" class="me-1"></i> Status</span>
+                                    <span id="detailStatus" class="text-end"></span>
+                                </div>
+
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <span><i data-feather="home" class="me-1"></i> Unit Kerja</span>
+                                    <span id="detailUkerja" class="text-end"></span>
+                                </div>
+
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <span><i data-feather="shield" class="me-1"></i> Role</span>
+                                    <span id="detailRole" class="text-end"></span>
+                                </div>
+
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <span><i data-feather="mail" class="me-1"></i> Email</span>
+                                    <span id="detailEmail" class="text-end"></span>
+                                </div>
+
                             </div>
                         </div>
                     </div>
                 </div>
-
             </div>
+
         </div>
     </div>
+</div>
 
-    <div class="container-fluid px-4 mt-4">
-        <div class="card">
-            <div class="card-body">
-                <table id="datatablesSimple">
-                    <thead>
-                        <tr>
-                            <th>No</th>
-                            <th>Username</th>
-                            <th>Nama</th>
-                            <th>Bidang</th>
-                            <th>Jabatan</th>
-                            <th>Role</th>
-                            <th>Aksi</th>
-                        </tr>
-                    </thead>
-                    <tfoot>
-                        <tr>
-                            <th>No</th>
-                            <th>Username</th>
-                            <th>Nama</th>
-                            <th>Bidang</th>
-                            <th>Jabatan</th>
-                            <th>Role</th>
-                            <th>Aksi</th>
-                        </tr>
-                    </tfoot>
-                    <tbody>
-                        @foreach ($user as $item)
-                            <tr>
-                                <td>{{ $loop->iteration }}</td>
-                                <td>
-                                    <div class="d-flex align-items-center">
-                                        <div class="avatar me-2"><img class="avatar-img img-fluid"
+<div class="container-fluid px-4 mt-4">
+    <div class="card">
+        <div class="card-body">
+            <table id="datatablesSimple">
+                <thead>
+                    <tr>
+                        <th>No</th>
+                        <th>Username</th>
+                        <th>Nama</th>
+                        <th>Bidang</th>
+                        <th>Jabatan</th>
+                        <th>Role</th>
+                        <th>Aksi</th>
+                    </tr>
+                </thead>
+                <tfoot>
+                    <tr>
+                        <th>No</th>
+                        <th>Username</th>
+                        <th>Nama</th>
+                        <th>Bidang</th>
+                        <th>Jabatan</th>
+                        <th>Role</th>
+                        <th>Aksi</th>
+                    </tr>
+                </tfoot>
+                <tbody>
+                    @foreach ($user as $item)
+                    <tr>
+                        <td>{{ $loop->iteration }}</td>
+                        <td>
+                            <div class="d-flex align-items-center">
+                                @php
+                                $namaParts = explode(' ', trim($item->nama));
+
+                                $first = strtoupper(substr($namaParts[0], 0, 1));
+
+                                if (count($namaParts) > 1) {
+                                $last = strtoupper(substr(end($namaParts), 0, 1));
+                                $inisial = $first . $last;
+                                } else {
+                                $inisial = $first;
+                                }
+
+                                $colors = [
+                                'bg-primary',
+                                'bg-success',
+                                'bg-danger',
+                                'bg-warning',
+                                'bg-info',
+                                'bg-dark',
+                                'bg-secondary',
+                                ];
+
+                                $randomColor = $colors[
+                                abs(crc32($item->nama . $item->id)) % count($colors)
+                                ];
+                                @endphp
+
+                                <div class="me-2">
+                                    <div class="rounded-circle {{ $randomColor }} d-flex align-items-center justify-content-center text-white fw-bold"
+                                        style=" width: 40px; height: 40px; font-size: 14px; letter-spacing: 1px; flex-shrink: 0;">
+                                        {{ $inisial }}
+                                    </div>
+                                </div>
+                                <!-- <div class="avatar me-2"><img class="avatar-img img-fluid"
                                                 src="{{ asset('templatepro/assets/img/demo/user-placeholder.svg') }}" />
-                                        </div>
-                                        {{ $item->username }}
-                                    </div>
-                                </td>
-                                <td>{{ $item->nama }}</td>
-                                <td>{{ $item->nama_bidang }}</td>
-                                <td>{{ $item->jabatan }}</td>
-                                <td>
-                                    @if ($item->role->name === 'root')
-                                        <span class="badge bg-red-soft text-red">Root</span>
-                                    @elseif ($item->role->name === 'admin_bawah')
-                                        <span class="badge bg-yellow-soft text-yellow">Admin Bawah</span>
-                                    @elseif ($item->role->name === 'admin_opd')
-                                        <span class="badge bg-green-soft text-green">Admin OPD</span>
-                                    @elseif ($item->role->name === 'bidang')
-                                        <span class="badge bg-blue-soft text-blue">Bidang</span>
-                                    @else
-                                        <span class="badge bg-purple-soft text-purple">Pimpinan</span>
-                                    @endif
-                                </td>
-                                <td>
-                                    <div class="d-flex align-items-center">
-                                        <a class="btn btn-datatable btn-icon btn-transparent-dark me-1 btnDetail"
-                                            href="#" data-id="{{ $item->id }}"
-                                            data-username="{{ $item->username }}" data-nama="{{ $item->nama }}"
-                                            data-bidang="{{ $item->nama_bidang }}" data-jabatan="{{ $item->jabatan }}"
-                                            data-status="{{ $item->aktif }}" data-ukerja="{{ $item->kode_ukerja }}"
-                                            data-role="{{ $item->role->name }}" data-email="{{ $item->email }}"
-                                            data-foto="{{ $item->foto ?? 'templatepro/assets/img/demo/user-placeholder.svg' }}"
-                                            title="Lihat profil">
+                                        </div> -->
+                                {{ $item->username }}
+                            </div>
+                        </td>
+                        <td>{{ $item->nama }}</td>
+                        <td>{{ $item->nama_bidang }}</td>
+                        <td>{{ $item->jabatan }}</td>
+                        <td>
+                            @if ($item->role->name === 'root')
+                            <span class="badge bg-red-soft text-red">Root</span>
+                            @elseif ($item->role->name === 'admin_bawah')
+                            <span class="badge bg-yellow-soft text-yellow">Admin Bawah</span>
+                            @elseif ($item->role->name === 'admin_opd')
+                            <span class="badge bg-green-soft text-green">Admin OPD</span>
+                            @elseif ($item->role->name === 'bidang')
+                            <span class="badge bg-blue-soft text-blue">Bidang</span>
+                            @else
+                            <span class="badge bg-purple-soft text-purple">Pimpinan</span>
+                            @endif
+                        </td>
+                        <td>
+                            <div class="d-flex align-items-center">
+                                <a class="btn btn-datatable btn-icon btn-transparent-dark me-1 btnDetail"
+                                    href="#" data-id="{{ $item->id }}"
+                                    data-username="{{ $item->username }}" data-nama="{{ $item->nama }}"
+                                    data-bidang="{{ $item->nama_bidang }}" data-jabatan="{{ $item->jabatan }}"
+                                    data-status="{{ $item->aktif }}" data-ukerja="{{ $item->kode_ukerja }}"
+                                    data-role="{{ $item->role->name }}" data-email="{{ $item->email }}"
+                                    data-foto="{{ $item->foto ?? 'templatepro/assets/img/demo/user-placeholder.svg' }}"
+                                    title="Lihat profil">
 
-                                            <i data-feather="eye" class="text-primary"></i>
-                                        </a>
-                                        <a class="btn btn-datatable btn-icon btn-transparent-dark me-1"
-                                            href="{{ route('root.edit', $item->id) }}" data-bs-toggle="tooltip"
-                                            title="Edit profil"><i data-feather="edit" class="text-warning"></i></a>
-                                        <a class="btn btn-datatable btn-icon btn-transparent-dark me-1 btnToggle"
-                                            href="#" data-id="{{ $item->id }}"
-                                            data-nama="{{ $item->nama }}" data-status="{{ $item->aktif }}"
-                                            data-bs-toggle="tooltip" title="Aktif/Nonaktif">
+                                    <i data-feather="eye" class="text-primary"></i>
+                                </a>
+                                <a class="btn btn-datatable btn-icon btn-transparent-dark me-1"
+                                    href="{{ route('root.edit', $item->id) }}" data-bs-toggle="tooltip"
+                                    title="Edit profil"><i data-feather="edit" class="text-warning"></i></a>
+                                <a class="btn btn-datatable btn-icon btn-transparent-dark me-1 btnToggle"
+                                    href="#" data-id="{{ $item->id }}"
+                                    data-nama="{{ $item->nama }}" data-status="{{ $item->aktif }}"
+                                    data-bs-toggle="tooltip" title="Aktif/Nonaktif">
 
-                                            <i data-feather="slash"
-                                                class="{{ $item->aktif ? 'text-success' : 'text-danger' }}"></i>
-                                        </a>
-                                    </div>
+                                    <i data-feather="slash"
+                                        class="{{ $item->aktif ? 'text-success' : 'text-danger' }}"></i>
+                                </a>
+                            </div>
 
-                                </td>
-                            </tr>
-                        @endforeach
-                    </tbody>
-                </table>
-            </div>
+                        </td>
+                    </tr>
+                    @endforeach
+                </tbody>
+            </table>
         </div>
     </div>
+</div>
 
-    <script src="https://cdn.jsdelivr.net/npm/simple-datatables@7.1.2/dist/umd/simple-datatables.min.js"></script>
-    <script src="{{ asset('templatepro/js/datatables/datatables-simple-demo.js') }}"></script>
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
+<script src="https://cdn.jsdelivr.net/npm/simple-datatables@7.1.2/dist/umd/simple-datatables.min.js"></script>
+<script src="{{ asset('templatepro/js/datatables/datatables-simple-demo.js') }}"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
 
-            feather.replace();
+        feather.replace();
 
-            //Modal Aktif
-            const modalAktifEl = document.getElementById('modalAktif');
-            const modalAktif = new bootstrap.Modal(modalAktifEl);
+        //Modal Aktif
+        const modalAktifEl = document.getElementById('modalAktif');
+        const modalAktif = new bootstrap.Modal(modalAktifEl);
 
-            const textModal = document.getElementById('textModal');
-            const form = document.getElementById('formToggle');
+        const textModal = document.getElementById('textModal');
+        const form = document.getElementById('formToggle');
 
-            document.addEventListener('click', function(e) {
+        document.addEventListener('click', function(e) {
 
-                const btn = e.target.closest('.btnToggle');
-                if (!btn) return;
+            const btn = e.target.closest('.btnToggle');
+            if (!btn) return;
 
-                e.preventDefault();
+            e.preventDefault();
 
-                const id = btn.dataset.id;
-                const nama = btn.dataset.nama;
-                const status = btn.dataset.status;
+            const id = btn.dataset.id;
+            const nama = btn.dataset.nama;
+            const status = btn.dataset.status;
 
-                let actionText = status == 1 ? 'menonaktifkan' : 'mengaktifkan';
+            let actionText = status == 1 ? 'menonaktifkan' : 'mengaktifkan';
 
-                textModal.innerHTML =
-                    `Apakah anda yakin ingin <b>${actionText}</b> user <b>${nama}</b>?`;
+            textModal.innerHTML =
+                `Apakah anda yakin ingin <b>${actionText}</b> user <b>${nama}</b>?`;
 
-                form.action = `/root/user/${id}/toggle-aktif`;
+            form.action = `/root/user/${id}/toggle-aktif`;
 
-                modalAktif.show();
-            });
-
-            //Modal Detail
-            const modalDetailEl = document.getElementById('modalDetail');
-            const modalDetail = new bootstrap.Modal(modalDetailEl);
-
-            document.addEventListener('click', function(e) {
-
-                const btn = e.target.closest('.btnDetail');
-                if (!btn) return;
-
-                e.preventDefault();
-
-                document.getElementById('detailUsername').innerText = btn.dataset.username;
-                document.getElementById('detailNama').innerText = btn.dataset.nama;
-                document.getElementById('detailBidang').innerText = btn.dataset.bidang;
-                document.getElementById('detailJabatan').innerText = btn.dataset.jabatan;
-
-                let status = btn.dataset.status == 1 ? 'Aktif' : 'Nonaktif';
-                document.getElementById('detailStatus').innerText = status;
-
-                document.getElementById('detailUkerja').innerText = btn.dataset.ukerja;
-                document.getElementById('detailRole').innerText = btn.dataset.role;
-                document.getElementById('detailEmail').innerText = btn.dataset.email;
-
-                let foto = btn.dataset.foto;
-                document.getElementById('detailFoto').src = "/" + foto;
-
-                modalDetail.show();
-                // setTimeout(() => {
-                //     feather.replace();
-                // }, 200);
-            });
-
+            modalAktif.show();
         });
-    </script>
+
+        //Modal Detail
+        const modalDetailEl = document.getElementById('modalDetail');
+        const modalDetail = new bootstrap.Modal(modalDetailEl);
+
+        document.addEventListener('click', function(e) {
+
+            const btn = e.target.closest('.btnDetail');
+            if (!btn) return;
+
+            e.preventDefault();
+
+            document.getElementById('detailUsername').innerText = btn.dataset.username;
+            document.getElementById('detailNama').innerText = btn.dataset.nama;
+            document.getElementById('detailBidang').innerText = btn.dataset.bidang;
+            document.getElementById('detailJabatan').innerText = btn.dataset.jabatan;
+
+            let status = btn.dataset.status == 1 ? 'Aktif' : 'Nonaktif';
+            document.getElementById('detailStatus').innerText = status;
+
+            document.getElementById('detailUkerja').innerText = btn.dataset.ukerja;
+            document.getElementById('detailRole').innerText = btn.dataset.role;
+            document.getElementById('detailEmail').innerText = btn.dataset.email;
+
+            let foto = btn.dataset.foto;
+            document.getElementById('detailFoto').src = "/" + foto;
+
+            modalDetail.show();
+            // setTimeout(() => {
+            //     feather.replace();
+            // }, 200);
+        });
+
+    });
+</script>
 @endsection

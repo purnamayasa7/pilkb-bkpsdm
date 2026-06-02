@@ -104,6 +104,39 @@ class SyaratController extends Controller
         ));
     }
 
+    // Cetak Syarat Menu Admin Bidang
+    public function indexCetakAdminBidang(Request $request) 
+    {
+        $bidang = Bidang::all();
+
+        $bidangId = $request->bidang ?? $bidang->first()?->id;
+
+        $layanan = Layanan::where('kode_bidang', $bidangId)->get();
+
+        $layananId = $request->filled('layanan') ? $request->layanan : null;
+
+        $syarat = Syarat::with('layanan')
+            ->when($layananId, function ($query) use ($layananId) {
+                $query->where('kode_layanan', $layananId);
+            }, function ($query) {
+                $query->whereRaw('1 = 0');
+            })
+            ->get();
+
+        $selectedLayanan = $layanan->firstWhere('id', $layananId);
+        $selectedBidang  = $bidang->firstWhere('id', $bidangId);
+
+        return view('pages.bidang.cetak-syarat.index', compact(
+            'syarat',
+            'bidang',
+            'bidangId',
+            'layanan',
+            'layananId',
+            'selectedLayanan',
+            'selectedBidang'
+        ));
+    }
+
     public function create(Request $request)
     {
         $bidang = Bidang::all();
@@ -195,6 +228,32 @@ class SyaratController extends Controller
         $bidang = Bidang::find($bidangId);
 
         $pdf = Pdf::loadView('pages.opd.cetak-syarat.pdf', compact(
+            'syarat',
+            'layanan',
+            'bidang'
+        ))->setPaper('A4', 'portrait');
+
+        return $pdf->stream('Syarat_' . $layanan->nama_layanan . '.pdf');
+    }
+
+    // Cetak PDF Menu Admin Bidang
+    public function exportPdfBidang(Request $request)
+    {
+        $bidangId = $request->bidang;
+        $layananId = $request->layanan;
+
+        if (!$layananId) {
+            return back()->with('error', 'Pilih layanan terlebih dahulu');
+        }
+
+        $syarat = Syarat::with('layanan')
+            ->where('kode_layanan', $layananId)
+            ->get();
+
+        $layanan = Layanan::find($layananId);
+        $bidang = Bidang::find($bidangId);
+
+        $pdf = Pdf::loadView('pages.bidang.cetak-syarat.pdf', compact(
             'syarat',
             'layanan',
             'bidang'

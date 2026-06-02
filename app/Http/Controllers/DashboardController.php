@@ -5,14 +5,31 @@ namespace App\Http\Controllers;
 use App\Models\Bidang;
 use App\Models\DetailTiket;
 use App\Models\Regtiket;
+use App\Services\PegawaiService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class DashboardController extends Controller
 {
+    protected $pegawaiService;
+
+    public function __construct(PegawaiService $pegawaiService)
+    {
+        $this->pegawaiService = $pegawaiService;
+    }
+
     public function index(Request $request)
     {
+        $user = Auth::user();
+
+        // GET DATA API
+        $pegawai = $this->pegawaiService
+            ->getPegawaiByNip($user->username);
+
+        $ket_ukerja = $pegawai['ket_ukerja'] ?? '-';
+
         /*
         |--------------------------------------------------------------------------
         | FILTER BULAN
@@ -212,33 +229,25 @@ class DashboardController extends Controller
 |--------------------------------------------------------------------------
 */
 
-        $chartBidang = Bidang::withCount([
-            'layanan as total_pengajuan' => function ($query) use (
-                $month,
-                $year,
-                $user
-            ) {
-
-                $query->whereHas('regtiket', function ($q) use (
-                    $month,
-                    $year,
-                    $user
-                ) {
-
-                    $q->whereMonth('tanggal', $month)
-                        ->whereYear('tanggal', $year);
-
-                    // FILTER KHUSUS ROLE BIDANG
-                    if ($user->role->name == 'bidang') {
-
-                        $q->where(
-                            'kode_ukerja',
-                            $user->kode_ukerja
-                        );
-                    }
-                });
-            }
-        ])->get();
+        $chartBidang = Regtiket::join(
+            'tb_layanan',
+            'tb_regtiket.kode_layanan',
+            '=',
+            'tb_layanan.id'
+        )
+            ->join(
+                'tb_bidang',
+                'tb_layanan.kode_bidang',
+                '=',
+                'tb_bidang.id'
+            )
+            ->whereYear('tb_regtiket.tanggal', $year)
+            ->selectRaw('
+        tb_bidang.nama_bidang,
+        COUNT(*) as total_pengajuan
+    ')
+            ->groupBy('tb_bidang.nama_bidang')
+            ->get();
 
 
         // SINGKATAN BIDANG
@@ -291,28 +300,30 @@ class DashboardController extends Controller
             'Des'
         ];
 
+        $chartTahunQuery = Regtiket::selectRaw('
+        MONTH(tanggal) as bulan,
+        COUNT(*) as total
+    ')
+            ->whereYear('tanggal', $year);
+
+        // FILTER ADMIN OPD
+        if ($user->role->name == 'admin_opd') {
+
+            $chartTahunQuery->where(
+                'kode_ukerja',
+                $user->kode_ukerja
+            );
+        }
+
+        $chartTahun = $chartTahunQuery
+            ->groupBy(DB::raw('MONTH(tanggal)'))
+            ->pluck('total', 'bulan');
+
         $chartTahunData = [];
 
         for ($i = 1; $i <= 12; $i++) {
 
-            $query = Regtiket::whereYear(
-                'tanggal',
-                $year
-            )->whereMonth(
-                'tanggal',
-                $i
-            );
-
-            // FILTER ADMIN OPD
-            if ($user->role->name == 'admin_opd') {
-
-                $query->where(
-                    'kode_ukerja',
-                    $user->kode_ukerja
-                );
-            }
-
-            $chartTahunData[] = $query->count();
+            $chartTahunData[] = $chartTahun[$i] ?? 0;
         }
 
         /*
@@ -322,6 +333,9 @@ class DashboardController extends Controller
         */
 
         return view('pages.dashboard', compact(
+            'user',
+            'ket_ukerja',
+
             'selectedDate',
 
             'pengajuanHariIni',

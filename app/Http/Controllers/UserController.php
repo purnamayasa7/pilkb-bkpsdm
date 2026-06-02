@@ -2,14 +2,55 @@
 
 namespace App\Http\Controllers;
 
+use App\Exports\LaporanUserExport;
 use App\Models\Bidang;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use App\Services\PegawaiService;
+use Maatwebsite\Excel\Facades\Excel;
 
 class UserController extends Controller
 {
+    public function changePasswordForm()
+    {
+        return view('pages.auth.change-password');
+    }
+
+    public function changePassword(Request $request)
+    {
+        $request->validate([
+            'current_password' => ['required'],
+            'password' => ['required', 'confirmed', 'min:8'],
+        ]);
+
+        $user = User::find(Auth::id());
+
+        // check current password
+        if (!Hash::check($request->current_password, $user->password)) {
+            return back()->withErrors([
+                'current_password' => 'Password sekarang tidak sesuai.'
+            ]);
+        }
+
+        // new password cannot be same
+        if (Hash::check($request->password, $user->password)) {
+            return back()->withErrors([
+                'password' => 'Password baru tidak boleh sama dengan password lama.'
+            ]);
+        }
+
+        $user->password = Hash::make($request->password);
+        $user->must_change_password = false;
+
+        $user->save();
+
+        return redirect()
+            ->route('password.change')
+            ->with('password_changed', true);
+    }
+
     public function index()
     {
         $user = User::with('role')
@@ -17,6 +58,46 @@ class UserController extends Controller
             ->get();
 
         return view('pages.admin.user.index', compact('user'));
+    }
+
+    protected $pegawaiService;
+
+    public function __construct(PegawaiService $pegawaiService)
+    {
+        $this->pegawaiService = $pegawaiService;
+    }
+
+    public function getPegawai($nip)
+    {
+        try {
+
+            $pegawai = $this->pegawaiService
+                ->getPegawaiByNip($nip);
+
+            if (!$pegawai) {
+
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Data pegawai tidak ditemukan'
+                ]);
+            }
+
+            return response()->json([
+                'status' => true,
+                'data' => [
+                    'nama_lengkap' => $pegawai['nama_lengkap'] ?? '',
+                    'ket_ukerja' => $pegawai['ket_ukerja'] ?? '',
+                    'kode_ukerja' => $pegawai['kode_ukerja'] ?? '',
+                    'foto' => $pegawai['foto'] ?? null,
+                ]
+            ]);
+        } catch (\Exception $e) {
+
+            return response()->json([
+                'status' => false,
+                'message' => 'Terjadi kesalahan server'
+            ], 500);
+        }
     }
 
     public function create()
@@ -31,11 +112,29 @@ class UserController extends Controller
         $request->validate([
             'username' => 'required|unique:users,username',
             'email' => 'required|email|unique:users,email',
-            'nama' => 'required',
-            'password' => 'required',
             'bidang_id' => 'required',
-            'jabatan' => 'required',
         ]);
+
+        // CHECK API
+        $pegawai = $this->pegawaiService
+            ->getPegawaiByNip($request->username);
+
+        if (!$pegawai) {
+
+            return back()
+                ->withErrors([
+                    'username' => 'NIP tidak ditemukan'
+                ])
+                ->withInput();
+        }
+
+        // GET API
+        $namaLengkap = $pegawai['nama_lengkap']
+            ?? $pegawai['nama']
+            ?? '-';
+
+        $kodeUkerja = $pegawai['kode_ukerja']
+            ?? '-';
 
         $bidangId = $request->bidang_id;
 
@@ -44,45 +143,135 @@ class UserController extends Controller
             'admin_opd' => 3,
         ];
 
+        $role_id = null;
+        $finalBidangId = $bidangId;
+
         if (array_key_exists($bidangId, $roleMap)) {
 
-            User::create([
-                'username' => $request->username,
-                'nama' => $request->nama,
-                'password' => Hash::make($request->password),
-                'bidang_id' => $bidangId,
-                'role_id' => $roleMap[$bidangId],
-                'jabatan' => $request->jabatan,
-                'aktif' => true,
-                'kode_ukerja' => $request->kode_ukerja,
-                'email' => $request->email,
-            ]);
+            $role_id = $roleMap[$bidangId];
         } else {
 
             $bidang = Bidang::with('role')->find($bidangId);
 
             if (!$bidang || !$bidang->role) {
-                return back()->withErrors([
-                    'bidang_id' => 'Bidang belum memiliki role'
-                ])->withInput();
+
+                return back()
+                    ->withErrors([
+                        'bidang_id' => 'Bidang belum memiliki role'
+                    ])
+                    ->withInput();
             }
 
-            User::create([
-                'username' => $request->username,
-                'nama' => $request->nama,
-                'password' => Hash::make($request->password),
-                'bidang_id' => $bidang->id,
-                'role_id' => $bidang->role_id,
-                'jabatan' => $request->jabatan,
-                'aktif' => true,
-                'kode_ukerja' => $request->kode_ukerja,
-                'email' => $request->email,
-            ]);
+            $role_id = $bidang->role_id;
+            $finalBidangId = $bidang->id;
         }
 
-        return redirect()->route('root.user')
-            ->with('success', 'User berhasil ditambahkan');
+        // PASSWORD = 5 digit terakhir NIP
+        $passwordDefault = substr($request->username, -5);
+
+        // dd([
+        //     'username' => $request->username,
+        //     'must_change_password' => true,
+        // ]);
+
+        User::create([
+            'username' => $request->username,
+            'nama' => $namaLengkap,
+            'password' => Hash::make($passwordDefault),
+            'bidang_id' => $finalBidangId,
+            'role_id' => $role_id,
+            'aktif' => true,
+            'kode_ukerja' => $kodeUkerja,
+            'email' => $request->email,
+            'must_change_password' => true,
+        ]);
+
+        return redirect()
+            ->route('root.user')
+            ->with(
+                'success',
+                'User berhasil ditambahkan.'
+            );
     }
+
+    // public function store(Request $request)
+    // {
+    //     $request->validate([
+    //         'username' => 'required|unique:users,username',
+    //         'email' => 'required|email|unique:users,email',
+    //         'nama' => 'required',
+    //         'password' => 'required',
+    //         'bidang_id' => 'required',
+    //     ]);
+
+    //     // CEK ULANG KE API
+    //     $pegawai = $this->pegawaiService
+    //         ->getPegawaiByNip($request->username);
+
+    //     if (!$pegawai) {
+
+    //         return back()
+    //             ->withErrors([
+    //                 'username' => 'NIP tidak ditemukan'
+    //             ])
+    //             ->withInput();
+    //     }
+
+    //     // AMBIL DATA DARI API
+    //     $namaLengkap = $pegawai['nama_lengkap']
+    //         ?? $pegawai['nama']
+    //         ?? $request->nama;
+
+    //     $kodeUkerja = $pegawai['kode_ukerja']
+    //         ?? $request->kode_ukerja;
+
+    //     $bidangId = $request->bidang_id;
+
+    //     $roleMap = [
+    //         'admin_bawah' => 2,
+    //         'admin_opd' => 3,
+    //     ];
+
+    //     // ROLE STATIC
+    //     if (array_key_exists($bidangId, $roleMap)) {
+    //         User::create([
+    //             'username' => $request->username,
+    //             'nama' => $namaLengkap,
+    //             'password' => Hash::make($request->password),
+    //             'bidang_id' => $bidangId,
+    //             'role_id' => $roleMap[$bidangId],
+    //             'aktif' => true,
+    //             'kode_ukerja' => $kodeUkerja,
+    //             'email' => $request->email,
+    //         ]);
+    //     } else {
+    //         $bidang = Bidang::with('role')->find($bidangId);
+
+    //         if (!$bidang || !$bidang->role) {
+
+    //             return back()
+    //                 ->withErrors([
+    //                     'bidang_id' => 'Bidang belum memiliki role'
+    //                 ])
+    //                 ->withInput();
+    //         }
+
+    //         User::create([
+    //             'username' => $request->username,
+    //             'nama' => $namaLengkap,
+    //             'password' => Hash::make($request->password),
+    //             'bidang_id' => $bidang->id,
+    //             'role_id' => $bidang->role_id,
+    //             'aktif' => true,
+    //             'kode_ukerja' => $kodeUkerja,
+    //             'email' => $request->email,
+    //         ]);
+    //     }
+
+    //     return redirect()
+    //         ->route('root.user')
+    //         ->with('success', 'User berhasil ditambahkan');
+    // }
 
     public function update(Request $request, $userId)
     {
@@ -90,11 +279,17 @@ class UserController extends Controller
 
         $request->validate([
             'email' => 'required|email|unique:users,email,' . $user->id,
-            'nama' => 'required',
             'password' => 'nullable',
             'bidang_id' => 'required',
-            'jabatan' => 'required',
         ]);
+
+        // Check value changed
+        if ($request->has('username') && $request->username != $user->username) {
+
+            return back()->withErrors([
+                'username' => 'NIP tidak dapat diubah'
+            ]);
+        }
 
         $roleMap = [
             'admin_bawah' => 2,
@@ -114,12 +309,9 @@ class UserController extends Controller
             ])->withInput();
         }
 
-        $user->nama = $request->nama;
         $user->email = $request->email;
         $user->bidang_id = $request->bidang_id;
         $user->role_id = $role_id;
-        $user->jabatan = $request->jabatan;
-        $user->kode_ukerja = $request->kode_ukerja;
 
         if ($request->filled('password')) {
             $user->password = Hash::make($request->password);
@@ -136,7 +328,22 @@ class UserController extends Controller
         $profile = User::findOrFail($id);
         $bidang = Bidang::all();
 
-        return view('pages.admin.user.edit', compact('profile', 'bidang'));
+        $pegawai = $this->pegawaiService
+            ->getPegawaiByNip($profile->username);
+
+        $nama_lengkap = $pegawai['nama_lengkap'] ?? $profile->nama;
+
+        $ket_ukerja = $pegawai['ket_ukerja'] ?? '-';
+
+        return view(
+            'pages.admin.user.edit',
+            compact(
+                'profile',
+                'bidang',
+                'ket_ukerja',
+                'nama_lengkap'
+            )
+        );
     }
 
     //Aktif/Nonaktif User
@@ -156,34 +363,60 @@ class UserController extends Controller
         $user = Auth::user();
         $bidang = Bidang::all();
 
-        return view('profile.index', compact('user', 'bidang'));
+        // GET API
+        $pegawai = $this->pegawaiService
+            ->getPegawaiByNip($user->username);
+
+        $nama_lengkap = $pegawai['nama_lengkap'] ?? $user->nama;
+
+        $ket_ukerja = $pegawai['ket_ukerja'] ?? '-';
+
+        return view(
+            'profile.index',
+            compact(
+                'user',
+                'bidang',
+                'nama_lengkap',
+                'ket_ukerja'
+            )
+        );
     }
 
-    //Update profile
     public function updateProfile(Request $request)
     {
         /** @var User $user */
         $user = Auth::user();
 
         $request->validate([
-            'nama' => 'required',
             'email' => 'required|email|unique:users,email,' . $user->id,
-            'jabatan' => 'required',
-            'kode_ukerja' => 'required',
-            'password' => 'nullable|min:6',
+            'password' => 'nullable|min:5',
         ]);
 
-        $user->nama = $request->nama;
-        $user->jabatan = $request->jabatan;
-        $user->kode_ukerja = $request->kode_ukerja;
+        if ($request->has('username') && $request->username != $user->username) {
+
+            return back()->withErrors([
+                'username' => 'NIP tidak dapat diubah'
+            ]);
+        }
+
         $user->email = $request->email;
 
-        if ($request->password) {
+        if ($request->filled('password')) {
+
             $user->password = Hash::make($request->password);
         }
 
         $user->save();
 
-        return redirect('/dashboard')->with('success', 'Profil berhasil diperbarui');
+        // REFRESH SESSION
+        Auth::login($user);
+
+        return redirect()->route('dashboard')
+            ->with('success', 'Profil berhasil diperbarui');
+    }
+
+    public function exportExcel(Request $request)
+    {
+        return Excel::download(new LaporanUserExport($request), 'laporan-user.xlsx');
     }
 }

@@ -14,9 +14,12 @@
                 style="height: 32px; width: auto; object-fit: contain;">
         </div>
 
-        <span>
+        <img src="{{ asset('images/NEW_PILKB.png') }}"
+            alt="PILKB"
+            style="height: 28px; width: auto; object-fit: contain;">
+        <!-- <span>
             PILKB
-        </span>
+        </span> -->
     </a>
     <!-- Navbar Search Input-->
     <!-- * * Note: * * Visible only on and above the lg breakpoint-->
@@ -208,37 +211,72 @@
         </li>
         <!-- User Dropdown-->
         @auth
-            <li class="nav-item dropdown no-caret dropdown-user me-3 me-lg-4">
-                <a class="btn btn-icon btn-transparent-dark dropdown-toggle" id="navbarDropdownUserImage"
-                    href="javascript:void(0);" role="button" data-bs-toggle="dropdown" aria-haspopup="true"
-                    aria-expanded="false"><img class="img-fluid"
-                        src="{{ asset('templatepro/assets/img/demo/user-placeholder.svg') }}" /></a>
-                <div class="dropdown-menu dropdown-menu-end border-0 shadow animated--fade-in-up"
-                    aria-labelledby="navbarDropdownUserImage">
-                    <h6 class="dropdown-header d-flex align-items-center">
-                        <img class="dropdown-user-img"
-                            src="{{ asset('templatepro/assets/img/demo/user-placeholder.svg') }}" />
-                        <div class="dropdown-user-details">
-                            <div class="dropdown-user-details-name">{{ auth()->user()->nama }}</div>
-                            <div class="dropdown-user-details-email">{{ auth()->user()->username }}</div>
-                        </div>
-                    </h6>
-                    <div class="dropdown-divider"></div>
-                    <a class="dropdown-item" href="{{ route('profile') }}">
-                        <div class="dropdown-item-icon"><i data-feather="settings"></i></div>
-                        Profil
-                    </a>
-                    <a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#logoutModal">
-                        <div class="dropdown-item-icon"><i data-feather="log-out"></i></div>
-                        Logout
-                    </a>
+        @php
+        $namaParts = explode(' ', trim(auth()->user()->nama));
 
-                    {{-- <a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#logoutModal">
+        $first = strtoupper(substr($namaParts[0], 0, 1));
+
+        if (count($namaParts) > 1) {
+        $last = strtoupper(substr(end($namaParts), 0, 1));
+        $inisial = $first . $last;
+        } else {
+        $inisial = $first;
+        }
+
+        $colors = [
+        'bg-primary',
+        'bg-success',
+        'bg-danger',
+        'bg-warning',
+        'bg-info',
+        'bg-dark',
+        ];
+
+        $randomColor = $colors[crc32(auth()->user()->nama) % count($colors)];
+        @endphp
+        <li class="nav-item dropdown no-caret dropdown-user me-3 me-lg-4">
+            <a class="btn btn-icon btn-transparent-dark dropdown-toggle p-0"
+                id="navbarDropdownUserImage"
+                href="javascript:void(0);"
+                role="button"
+                data-bs-toggle="dropdown"
+                aria-haspopup="true"
+                aria-expanded="false">
+
+                <div class="rounded-circle {{ $randomColor }} d-flex align-items-center justify-content-center text-white fw-bold"
+                    style="width: 40px; height: 40px; font-size: 14px; box-shadow: 0 2px 6px rgba(0,0,0,0.15); flex-shrink: 0;">
+                    {{ $inisial }}
+                </div>
+
+            </a>
+            <div class="dropdown-menu dropdown-menu-end border-0 shadow animated--fade-in-up"
+                aria-labelledby="navbarDropdownUserImage">
+                <h6 class="dropdown-header d-flex align-items-center">
+                    <div class="rounded-circle {{ $randomColor }} me-3 d-flex align-items-center justify-content-center text-white fw-bold"
+                        style="width: 40px; height: 40px; font-size: 14px; flex-shrink: 0;">
+                        {{ $inisial }}
+                    </div>
+                    <div class="dropdown-user-details">
+                        <div class="dropdown-user-details-name">{{ auth()->user()->nama }}</div>
+                        <div class="dropdown-user-details-email">{{ auth()->user()->username }}</div>
+                    </div>
+                </h6>
+                <div class="dropdown-divider"></div>
+                <a class="dropdown-item" href="{{ route('profile') }}">
+                    <div class="dropdown-item-icon"><i data-feather="settings"></i></div>
+                    Profil
+                </a>
+                <a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#logoutModal">
+                    <div class="dropdown-item-icon"><i data-feather="log-out"></i></div>
+                    Logout
+                </a>
+
+                {{-- <a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#logoutModal">
                     <i class="fas fa-sign-out-alt fa-sm fa-fw mr-2 text-gray-400"></i>
                     Logout
                 </a> --}}
-                </div>
-            </li>
+            </div>
+        </li>
         @endauth
 
     </ul>

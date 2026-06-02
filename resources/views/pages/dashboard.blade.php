@@ -143,8 +143,7 @@
                                     </div>
 
                                     <div class="small">
-                                        199508112025061001
-                                        {{-- {{ auth()->user()->nip ?? '-' }} --}}
+                                        {{ auth()->user()->username ?? '-' }}
                                     </div>
                                 </div>
 
@@ -163,7 +162,7 @@
                                     </div>
 
                                     <div class="small">
-                                        BKPSDM
+                                        {{ $ket_ukerja ?? '-' }}
                                     </div>
                                 </div>
 
@@ -320,7 +319,7 @@
                             </div>
 
                             <div class="ms-2">
-                                <i class="fas fa-layer-group fa-2x text-gray-200"></i>
+                                <i class="fas fa-check-circle fa-2x text-gray-200"></i>
                             </div>
                         </div>
                     </div>

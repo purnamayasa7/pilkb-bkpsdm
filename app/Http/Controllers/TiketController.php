@@ -8,6 +8,7 @@ use App\Models\Layanan;
 use App\Models\Regtiket;
 use App\Models\Syarat;
 use App\Models\Tahap;
+use App\Services\PegawaiService;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -18,6 +19,7 @@ use BaconQrCode\Renderer\Image\SvgImageBackEnd;
 use BaconQrCode\Renderer\RendererStyle\RendererStyle;
 use BaconQrCode\Writer;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Http;
 
 class TiketController extends Controller
 {
@@ -167,13 +169,25 @@ class TiketController extends Controller
                 'email' => 'required|email'
             ]);
 
+            // GET API
+            $pegawaiService = app(PegawaiService::class);
+
+            $pegawai = $pegawaiService->getPegawaiByNip($request->nip);
+
+            if (!$pegawai) {
+                return back()->with('error', 'Data pegawai tidak ditemukan');
+            }
+
             session([
                 'pengajuan.nip' => $request->nip,
                 'pengajuan.email' => $request->email,
                 'pengajuan.started_at' => now(),
-                // 'pengajuan.nama' => 'Kadek Purnamayasa, S.Kom',
-                // 'pengajuan.golongan' => 'III/a',
-                // 'pengajuan.unit' => 'BKPSDM'
+
+                // DATA API
+                'pengajuan.nama' => $pegawai['nama_lengkap'] ?? null,
+                'pengajuan.kode_opd' => $pegawai['kode_opd'] ?? null,
+                'pengajuan.foto' => $pegawai['foto_url'] ?? null,
+                'pengajuan.unit' => $pegawai['ket_ukerja'] ?? null,
             ]);
 
             return redirect()->route('adminOpd.tiket.create', ['step' => 2]);
@@ -224,7 +238,7 @@ class TiketController extends Controller
                     'nip'           => $data['nip'],
                     'kode_layanan'  => $data['layanan_id'],
                     'tanggal'       => now(),
-                    'kode_ukerja'   => Auth::user()->kode_ukerja,
+                    'kode_ukerja'   => $data['kode_opd'] ?? null,
                     'no_hp'         => $request->no_hp ?? null,
                     'email'         => $data['email'] ?? null,
                     'nama_penerima' => Auth::user()->username,
@@ -299,6 +313,52 @@ class TiketController extends Controller
     {
         return Syarat::where('kode_layanan', $id)->get();
     }
+
+    public function getPegawai($nip, PegawaiService $pegawaiService)
+    {
+        $pegawai = $pegawaiService->getPegawaiByNip($nip);
+
+        if (!$pegawai) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Data tidak ditemukan'
+            ]);
+        }
+
+        return response()->json([
+            'success' => true,
+            'data' => $pegawai
+        ]);
+    }
+
+    // public function getFotoPegawai($nip)
+    // {
+    //     try {
+
+    //         $response = Http::withToken(env('API_TOKEN'))
+    //             ->get(env('API_URL') . '/admin/pegawai/foto/' . $nip);
+
+    //         if (!$response->successful()) {
+
+    //             return response()->file(
+    //                 public_path('templatepro/assets/img/demo/user-placeholder.svg')
+    //             );
+    //         }
+
+    //         return response(
+    //             $response->body(),
+    //             200,
+    //             [
+    //                 'Content-Type' => $response->header('Content-Type')
+    //             ]
+    //         );
+    //     } catch (\Exception $e) {
+
+    //         return response()->file(
+    //             public_path('templatepro/assets/img/demo/user-placeholder.svg')
+    //         );
+    //     }
+    // }
 
     public function cetak($no_tiket)
     {

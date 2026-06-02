@@ -24,7 +24,7 @@ class PermintaanController extends Controller
             'layanan.bidang',
             'tahapTerakhir.statusRel'
         ])
-            ->where('archives', 0)
+            // ->where('archives', 0)
             ->whereMonth('tanggal', $month)
             ->whereYear('tanggal', $year)
             ->has('tahap', '>', 1)

@@ -18,7 +18,7 @@ return new class extends Migration
             $table->string('rangkap', 10)->nullable();
             $table->string('waktu_penyelesaian', 50);
             $table->boolean('aktif')->default(true);
-            $table->string('no_wa', 50)->nullable();
+            // $table->string('no_wa', 50)->nullable();
             $table->text('deskripsi')->nullable();
             $table->timestamps();
 

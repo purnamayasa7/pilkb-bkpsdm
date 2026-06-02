@@ -21,7 +21,7 @@
                             </button>
                             <ul class="dropdown-menu">
                                 <li>
-                                    <a class="dropdown-item" href="#">
+                                    <a class="dropdown-item" href="{{ route('root.layanan.exportExcelList') }}">
                                         <i class="me-1" data-feather="file-text"></i> Export Excel
                                     </a>
                                 </li>

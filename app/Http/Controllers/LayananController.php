@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Exports\LaporanLayananExport;
 use App\Exports\LaporanPermintaanExport;
 use App\Exports\ListProsesPengajuanExport;
 use App\Models\Bidang;
@@ -199,5 +200,11 @@ class LayananController extends Controller
         ]);
 
         return $pdf->stream("Laporan_Proses_{$namaBulan}_{$year}.pdf");
+    }
+
+    //Export Excel Master Data Layanan - Root
+    public function exportExcelList(Request $request)
+    {
+        return Excel::download(new LaporanLayananExport($request), 'laporan-layanan.xlsx');    
     }
 }

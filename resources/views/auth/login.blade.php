@@ -71,7 +71,7 @@
                                                 {{ $message }}
                                             </div>
                                         @enderror
-                                        <label>Username</label>
+                                        <label>NIP</label>
                                     </div>
 
                                     <div class="form-floating mb-3 position-relative">

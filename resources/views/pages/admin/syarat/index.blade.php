@@ -95,7 +95,7 @@
                 </div>
 
                 <div class="modal-footer">
-                    <button class="btn btn-dark" data-bs-dismiss="modal">Batal</button>
+                    <button class="btn btn-light" data-bs-dismiss="modal">Batal</button>
 
                     <form id="formDelete" method="POST">
                         @csrf

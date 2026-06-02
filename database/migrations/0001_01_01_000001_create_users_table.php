@@ -19,17 +19,17 @@ return new class extends Migration
 
         Schema::create('users', function (Blueprint $table) {
             $table->id();
-            $table->string('username', 50);
+            $table->string('nip', 18);
             $table->string('nama', 200);
             $table->string('password');
             $table->string('bidang_id', 15);
-            $table->string('jabatan', 100)->nullable();
             $table->string('foto', 200)->nullable();
             $table->integer('aktif');
             $table->string('kode_ukerja', 30)->nullable();
             $table->unsignedBigInteger('role_id')->nullable();
             $table->string('no_wa', 50)->nullable();
             $table->string('email')->unique()->nullable();
+            $table->boolean('must_change_password')->default(true);
             $table->timestamp('email_verified_at')->nullable();
             $table->rememberToken();
             $table->timestamps();

@@ -12,18 +12,18 @@
                     </h1>
                 </div>
                 <div class="col-12 col-xl-auto mb-3">
-                <div class="btn-group">
-                    @if ($start && $end)
-                    <a class="btn btn-sm btn-light text-success"
-                        href="{{ route('adminOpd.laporan.exportLaporan', ['start_date' => $start, 'end_date' => $end]) }}"
-                        target="_blank">
+                    <div class="btn-group">
+                        @if ($start && $end)
+                        <a class="btn btn-sm btn-light text-success"
+                            href="{{ route('adminBidang.laporan.exportPdfBidang', ['start_date' => $start, 'end_date' => $end]) }}"
+                            target="_blank">
 
-                        <i class="me-1" data-feather="download"></i>
-                        Export Excel
-                    </a>
-                    @endif
+                            <i class="me-1" data-feather="download"></i>
+                            Export PDF
+                        </a>
+                        @endif
+                    </div>
                 </div>
-            </div>
             </div>
         </div>
     </div>
@@ -32,7 +32,7 @@
 <div class="container-fluid px-4 mt-4">
     <div class="card">
         <div class="card-body">
-            <form method="GET" action="{{ route('adminOpd.laporan.indexLaporan') }}" id="filterForm">
+            <form method="GET" action="{{ route('adminBidang.laporan.indexBidang') }}" id="filterForm">
                 <div class="bg-white p-3 rounded-3 mb-4 border">
                     <div class="row align-items-end">
                         <!-- DATE RANGE -->
@@ -68,6 +68,7 @@
                         <th>NIP</th>
                         <th>Nama</th>
                         <th>Layanan</th>
+                        <th>Unit Kerja</th>
                         <th>Tanggal</th>
                         <th>Status</th>
                     </tr>
@@ -79,6 +80,7 @@
                         <th>NIP</th>
                         <th>Nama</th>
                         <th>Layanan</th>
+                        <th>Unit Kerja</th>
                         <th>Tanggal</th>
                         <th>Status</th>
                     </tr>
@@ -91,6 +93,7 @@
                         <td>{{ $item->regtiket->nip }}</td>
                         <td>-</td>
                         <td>{{ $item->regtiket->layanan->nama_layanan ?? '-' }}</td>
+                        <td>{{ $item->regtiket->kode_ukerja}}</td>
                         <td>{{ $item->tanggal }}</td>
                         <td>{{ $item->statusRel->status ?? '-' }}</td>
                     </tr>
