@@ -519,4 +519,24 @@ class TiketController extends Controller
 
         return view('pages.admin-bawah.tiket.cetak', compact('data'));
     }
+
+    // PINDAH DATA TIKET
+    public function indexPindah(Request $request)
+    {
+        $keyword = $request->keyword;
+
+        $data = collect();
+
+        if($keyword){
+            $data = Regtiket::with([
+                'layanan',
+                'tahapTerakhir.statusRel'
+            ])
+            ->where(function ($query) use ($keyword) {
+                $query->where('no_tiket', 'like', "%$keyword%");
+            })->get();
+        }
+
+        return view('pages.admin-bawah.pindah-tiket.index', compact('data'));
+    }
 }

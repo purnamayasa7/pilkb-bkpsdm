@@ -12,26 +12,6 @@
                         </h1>
                     </div>
                     <div class="col-12 col-xl-auto mb-3">
-                        <!-- Dropdown Export -->
-                        <div class="btn-group">
-                            <button class="btn btn-sm btn-light text-success dropdown-toggle" type="button"
-                                data-bs-toggle="dropdown" aria-expanded="false">
-                                <i class="me-1" data-feather="download"></i>
-                                Export
-                            </button>
-                            <ul class="dropdown-menu">
-                                <li>
-                                    <a class="dropdown-item" href="#">
-                                        <i class="me-1" data-feather="file-text"></i> Export Excel
-                                    </a>
-                                </li>
-                                <li>
-                                    <a class="dropdown-item" href="#">
-                                        <i class="me-1" data-feather="file"></i> Export PDF
-                                    </a>
-                                </li>
-                            </ul>
-                        </div>
                         <a class="btn btn-sm btn-light text-primary" href="{{ route('root.syarat.create') }}">
                             <i class="me-1" data-feather="plus"></i>
                             Tambah Syarat Baru

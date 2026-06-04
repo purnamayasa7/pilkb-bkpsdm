@@ -120,6 +120,11 @@ Route::prefix('root')
         // TIKET
         Route::get('tiket', [TiketController::class, 'index'])->name('tiket');
         Route::get('filter', [TiketController::class, 'filter'])->name('filter');
+
+        // LAPORAN
+        Route::get('laporan', [LaporanController::class, 'index'])->name('laporan.index');
+        Route::get('laporan/layanan', [LaporanController::class, 'getLayananByBidang'])->name('laporan.getLayananByBidang');
+        Route::get('laporan/export-pdf', [LaporanController::class, 'exportPdf'])->name('laporan.exportPdf');
     });
 
 Route::prefix('adminOpd')
@@ -242,6 +247,10 @@ Route::prefix('adminBawah')
         Route::get('pengambilan/cek-tiket/{no_tiket}', [PengambilanController::class, 'cekTiket'])->name('pengambilan.cekTiket');
         Route::post('pengambilan/store', [PengambilanController::class, 'store'])->name('pengambilan.store');
         Route::get('pengambilan/export-pdf', [PengambilanController::class, 'exportPdf'])->name('pengambilan.exportPdf');
+
+        // PINDAH DATA TIKET
+        Route::get('pindah', [TiketController::class, 'indexPindah'])->name('pindah.indexPindah');
+        Route::get('pindah/{no_tiket}', [TiketController::class, 'editPindah'])->name('pindah.editPindah');
     });
 
 /* Auth (Breeze) */

@@ -78,22 +78,6 @@ return [
 
         [
             'type' => 'item',
-            'title' => 'Pengambilan',
-            'path' => '',
-            'icon' => 'download',
-            'active_key' => 'pengambilan',
-        ],
-
-        [
-            'type' => 'item',
-            'title' => 'Archives',
-            'path' => '',
-            'icon' => 'archive',
-            'active_key' => 'archives',
-        ],
-
-        [
-            'type' => 'item',
             'title' => 'Laporan',
             'path' => '',
             'icon' => 'bar-chart-2',
@@ -171,7 +155,7 @@ return [
         [
             'type' => 'item',
             'title' => 'Pindah Data Tiket',
-            'path' => '',
+            'path' => 'adminBawah/pindah',
             'icon' => 'shuffle',
             'active_key' => 'pindah-tiket',
         ],
