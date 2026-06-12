@@ -8,6 +8,7 @@ use App\Models\Layanan;
 use App\Models\Regtiket;
 use App\Models\Syarat;
 use App\Models\Tahap;
+use App\Services\ActivityLogService;
 use App\Services\PegawaiService;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
@@ -39,8 +40,8 @@ class TiketController extends Controller
                 'layanan',
                 'tahapTerakhir.statusRel'
             ])
-                ->whereHas('layanan', function ($q) use ($bidangId) {
-                    $q->where('kode_bidang', $bidangId);
+                ->whereHas('layanan', function ($query) use ($bidangId) {
+                    $query->where('kode_bidang', $bidangId);
                 })
                 ->whereBetween('tanggal', [$start, $end])
                 ->orderBy('tanggal', 'desc')
@@ -233,7 +234,7 @@ class TiketController extends Controller
 
                 $noTiket = $this->generateNoTiket();
 
-                Regtiket::create([
+                $regTiket = Regtiket::create([
                     'no_tiket'      => $noTiket,
                     'nip'           => $data['nip'],
                     'kode_layanan'  => $data['layanan_id'],
@@ -249,10 +250,18 @@ class TiketController extends Controller
                     'dihapus'       => 0,
                 ]);
 
+                ActivityLogService::log(
+                    'Manajemen Data Tiket',
+                    'CREATE',
+                    'Menambah Tiket Baru ID: ' . $regTiket->no_tiket,
+                    [],
+                    $regTiket->toArray()
+                );
+
                 $syaratList = Syarat::where('kode_layanan', $data['layanan_id'])->get();
 
                 foreach ($syaratList as $s) {
-                    DetailTiket::create([
+                    $detailTiket = DetailTiket::create([
                         'no_tiket' => $noTiket,
                         'id_syarat' => $s->id,
                         'status' => 1,
@@ -260,13 +269,29 @@ class TiketController extends Controller
                     ]);
                 }
 
-                Tahap::create([
+                ActivityLogService::log(
+                    'Manajemen Data Tiket',
+                    'CREATE',
+                    'Menambah Detail Tiket ID: ' . $detailTiket->no_tiket,
+                    [],
+                    $detailTiket->toArray()
+                );
+
+                $tahap = Tahap::create([
                     'no_tiket' => $noTiket,
                     'tanggal' => now(),
                     'status' => 20000,
                     'operator' => Auth::user()->username,
                     'comment' => '-'
                 ]);
+
+                ActivityLogService::log(
+                    'Manajemen Data Tiket',
+                    'CREATE',
+                    'Menambah Tahap Pertama Tiket ID: ' . $tahap->no_tiket,
+                    [],
+                    $detailTiket->toArray()
+                );
 
                 DB::commit();
 
@@ -527,16 +552,178 @@ class TiketController extends Controller
 
         $data = collect();
 
-        if($keyword){
+        if ($keyword) {
             $data = Regtiket::with([
                 'layanan',
                 'tahapTerakhir.statusRel'
             ])
-            ->where(function ($query) use ($keyword) {
-                $query->where('no_tiket', 'like', "%$keyword%");
-            })->get();
+                ->where(function ($query) use ($keyword) {
+                    $query->where('no_tiket', 'like', "%$keyword%");
+                })->get();
         }
 
         return view('pages.admin-bawah.pindah-tiket.index', compact('data'));
+    }
+
+    public function editPindah($no_tiket)
+    {
+        $tiket = Regtiket::with('layanan')
+            ->where('no_tiket', $no_tiket)
+            ->firstOrFail();
+
+        $bidang = Bidang::all();
+
+        $layanan = Layanan::where(
+            'kode_bidang',
+            $tiket->layanan->kode_bidang
+        )->get();
+
+        $syarat = Syarat::where(
+            'kode_layanan',
+            $tiket->kode_layanan
+        )->get();
+
+        return view(
+            'pages.admin-bawah.pindah-tiket.edit',
+            compact(
+                'tiket',
+                'bidang',
+                'layanan',
+                'syarat'
+            )
+        );
+    }
+
+    public function getLayananPindah($bidang)
+    {
+        return Layanan::where(
+            'kode_bidang',
+            $bidang
+        )
+            ->where('aktif', 1)
+            ->get();
+    }
+
+    public function getSyaratPindah($layanan)
+    {
+        return Syarat::where(
+            'kode_layanan',
+            $layanan
+        )->get();
+    }
+
+    public function updatePindah(Request $request, $no_tiket)
+    {
+        $request->validate([
+            'kode_layanan' => 'required'
+        ]);
+
+        $jumlahSyarat = Syarat::where(
+            'kode_layanan',
+            $request->kode_layanan
+        )->count();
+
+        if (
+            !isset($request->syarat_id) ||
+            count($request->syarat_id) != $jumlahSyarat
+        ) {
+            return back()->with(
+                'error',
+                'Semua syarat wajib divalidasi.'
+            );
+        }
+
+        DB::beginTransaction();
+
+        try {
+
+            $tiket = Regtiket::where(
+                'no_tiket',
+                $no_tiket
+            )->firstOrFail();
+
+            $olddata = [
+                'no_tiket' => $tiket->no_tiket,
+                'kode_layanan' => $tiket->kode_layanan,
+                'diperbaiki' => $tiket->diperbaiki,
+                'diperbaiki_tgl' => $tiket->diperbaiki_tgl,
+            ];
+
+            $tiket->update([
+                'kode_layanan' => $request->kode_layanan,
+                'diperbaiki' => 1,
+                'diperbaiki_tgl' => now(),
+            ]);
+
+            $newdata = [
+                'no_tiket' => $tiket->fresh()->no_tiket,
+                'kode_layanan' => $tiket->fresh()->kode_layanan,
+                'diperbaiki' => $tiket->fresh()->diperbaiki,
+                'diperbaiki_tgl' => $tiket->fresh()->diperbaiki_tgl,
+            ];
+
+            ActivityLogService::log(
+                'Manajemen Data Tiket',
+                'UPDATE',
+                'Update Pindah Layanan Tiket ID: ' . $tiket->no_tiket,
+                $olddata,
+                $newdata
+            );
+
+            // Delete Old Detail Tiket
+            DetailTiket::where(
+                'no_tiket',
+                $no_tiket
+            )->delete();
+
+
+            foreach ($request->syarat_id ?? [] as $idSyarat) {
+
+                $detailTiket = DetailTiket::create([
+                    'no_tiket' => $no_tiket,
+                    'id_syarat' => $idSyarat,
+                    'status' => 1,
+                    'comment' => null
+                ]);
+
+                ActivityLogService::log(
+                    'Manajemen Data Tiket',
+                    'CREATE',
+                    'Menambah Detail Tiket ID: ' . $detailTiket->no_tiket,
+                    [],
+                    $detailTiket->toArray()
+                );
+            }
+
+            $tahap = Tahap::create([
+                'no_tiket' => $no_tiket,
+                'tanggal' => now(),
+                'status' => 20000, // sesuaikan
+                'operator' => Auth::user()->username,
+                'comment' => 'Layanan tiket dipindahkan'
+            ]);
+
+            ActivityLogService::log(
+                'Manajemen Data Tiket',
+                'CREATE',
+                'Menambah Tahap Tiket ID: ' . $tahap->no_tiket,
+                [],
+                $tahap->toArray()
+            );
+
+            DB::commit();
+
+            return redirect()
+                ->route('adminBawah.pindah.indexPindah')->with('success', 'Data tiket berhasil dipindahkan.');
+        } catch (\Exception $e) {
+
+            DB::rollBack();
+
+            return back()
+                ->with(
+                    'error',
+                    $e->getMessage()
+                );
+        }
     }
 }

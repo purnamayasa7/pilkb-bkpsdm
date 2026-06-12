@@ -6,6 +6,7 @@ use App\Models\DetailTiket;
 use App\Models\Regtiket;
 use App\Models\Status;
 use App\Models\Tahap;
+use App\Services\ActivityLogService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -60,8 +61,8 @@ class PermintaanController extends Controller
         ])
             ->where('no_tiket', $no_tiket)
 
-            ->whereHas('layanan', function ($q) use ($user) {
-                $q->where('kode_bidang', $user->bidang_id);
+            ->whereHas('layanan', function ($query) use ($user) {
+                $query->where('kode_bidang', $user->bidang_id);
             })
 
             ->firstOrFail();
@@ -121,7 +122,7 @@ class PermintaanController extends Controller
                 }
             }
 
-            Tahap::create([
+            $tahap = Tahap::create([
                 'no_tiket' => $no_tiket,
                 'tanggal' => now(),
 
@@ -132,12 +133,20 @@ class PermintaanController extends Controller
             ]);
 
             Regtiket::where('no_tiket', $no_tiket)
-            ->update([
-                'data_baru' => 0,
-                'diperbaiki_tgl' => now()
-            ]);
+                ->update([
+                    'data_baru' => 0,
+                    'diperbaiki_tgl' => now()
+                ]);
 
             DB::commit();
+
+            ActivityLogService::log(
+                'Manajemen Data Tiket',
+                'CREATE',
+                'Submit Review Tiket',
+                [],
+                $tahap->toArray()
+            );
 
             return redirect()
                 ->route('adminBidang.permintaan.index')
@@ -160,14 +169,30 @@ class PermintaanController extends Controller
                 $no_tiket
             )->firstOrFail();
 
+            $olddata = [
+                'archives' => $tiket->archives,
+            ];
+
             $tiket->update([
                 'archives' => 1,
                 'operator_archives' => Auth::user()->username
             ]);
 
+            $newdata = [
+                'archives' => $tiket->fresh()->archives,
+            ];
+
+            ActivityLogService::log(
+                'Manajemen Data Tiket',
+                'UPDATE',
+                'Submit Proses Selesai Tiket',
+                $olddata,
+                $newdata
+            );
+
             return redirect()
                 ->route('adminBidang.permintaan.index')
-                ->with('success','Pengajuan Layanan berhasil diselesaikan.');
+                ->with('success', 'Pengajuan Layanan berhasil diselesaikan.');
         } catch (\Exception $e) {
             return back()->with('error', $e->getMessage());
         }

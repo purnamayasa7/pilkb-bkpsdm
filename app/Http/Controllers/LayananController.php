@@ -9,6 +9,7 @@ use App\Models\Bidang;
 use App\Models\Layanan;
 use App\Models\Regtiket;
 use App\Models\Tahap;
+use App\Services\ActivityLogService;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -43,7 +44,7 @@ class LayananController extends Controller
 
         $kode_bidang = $request->kode_bidang;
 
-        Layanan::create([
+        $layanan = Layanan::create([
             'kode_bidang' => $kode_bidang,
             'nama_layanan' => $request->nama_layanan,
             'rangkap' => $request->rangkap,
@@ -52,6 +53,14 @@ class LayananController extends Controller
             'no_wa' => $request->no_wa,
             'deskripsi' => $request->deskripsi,
         ]);
+
+        ActivityLogService::log(
+            'Master Data Layanan',
+            'CREATE',
+            'Menambah Layanan Baru',
+            [],
+            $layanan->toArray()
+        );
 
         return redirect()->route('root.layanan')
             ->with('success', 'Layanan berhasil ditambahkan');
@@ -67,15 +76,41 @@ class LayananController extends Controller
             'waktu_penyelesaian' => 'required',
         ]);
 
-        $layanan->kode_bidang = $request->kode_bidang;
-        $layanan->nama_layanan = $request->nama_layanan;
-        $layanan->rangkap = $request->rangkap;
-        $layanan->waktu_penyelesaian = $request->waktu_penyelesaian;
-        $layanan->no_wa = $request->no_wa;
-        $layanan->deskripsi = $request->deskripsi;
-        $layanan->aktif = $request->aktif;
+        $oldData = [
+            'nama_layanan' => $layanan->nama_layanan,
+            'rangkap' => $layanan->rangkap,
+            'waktu_penyelesaian' => $layanan->waktu_penyelesaian,
+            'no_wa' => $layanan->no_wa,
+            'deskripsi' => $layanan->deskripsi,
+            'aktif' => $layanan->aktif,
+        ];
 
-        $layanan->save();
+        $layanan->update([
+            'kode_bidang' => $request->kode_bidang,
+            'nama_layanan' => $request->nama_layanan,
+            'rangkap' => $request->rangkap,
+            'waktu_penyelesaian' => $request->waktu_penyelesaian,
+            'no_wa' => $request->no_wa,
+            'deskripsi' => $request->deskripsi,
+            'aktif' => $request->aktif,
+        ]);
+
+        $newData = [
+            'nama_layanan' => $layanan->fresh()->nama_layanan,
+            'rangkap' => $layanan->fresh()->rangkap,
+            'waktu_penyelesaian' => $layanan->fresh()->waktu_penyelesaian,
+            'no_wa' => $layanan->fresh()->no_wa,
+            'deskripsi' => $layanan->fresh()->deskripsi,
+            'aktif' => $layanan->fresh()->aktif,
+        ];
+
+        ActivityLogService::log(
+            'Master Data Layanan',
+            'UPDATE',
+            'Mengubah Data Layanan ID: ' . $layanan->id,
+            $oldData,
+            $newData
+        );
 
         return redirect()->route('root.layanan')
             ->with('success', 'Layanan berhasil diupdate');
@@ -94,8 +129,22 @@ class LayananController extends Controller
     {
         $layanan = Layanan::findOrFail($id);
 
+        $oldData = ['aktif' => $layanan->aktif,];
+
         $layanan->aktif = !$layanan->aktif;
         $layanan->save();
+
+        $newData = ['aktif' => $layanan->aktif,];
+
+        ActivityLogService::log(
+            'Master Data Bidang',
+            'UPDATE',
+            $layanan->aktif
+                ? 'Mengaktifkan layanan ID: ' . $layanan->id
+                : 'Menonaktifkan layanan ID: ' . $layanan->id,
+            $oldData,
+            $newData
+        );
 
         return redirect()->back()->with('success', 'Status layanan berhasil diubah');
     }
@@ -205,6 +254,6 @@ class LayananController extends Controller
     //Export Excel Master Data Layanan - Root
     public function exportExcelList(Request $request)
     {
-        return Excel::download(new LaporanLayananExport($request), 'laporan-layanan.xlsx');    
+        return Excel::download(new LaporanLayananExport($request), 'laporan-layanan.xlsx');
     }
 }

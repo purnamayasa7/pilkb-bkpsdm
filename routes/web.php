@@ -4,6 +4,7 @@ use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\BidangController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DetailTiketController;
+use App\Http\Controllers\FaQController;
 use App\Http\Controllers\LaporanController;
 use App\Http\Controllers\LayananController;
 use App\Http\Controllers\PengambilanController;
@@ -25,6 +26,8 @@ Route::get('/', function () {
 Route::get('/cek-tiket', [TiketController::class, 'formCek'])->name('tiket.form');
 Route::post('/cek-tiket', [TiketController::class, 'cekTiket'])->middleware('throttle:10,1')->name('tiket.cek');
 Route::get('/cek-tiket/{no_tiket}', [TiketController::class, 'showPublic'])->name('tiket.public');
+Route::get('/get-layanan-syarat/{bidang}', [SyaratController::class, 'getLayanan'])->name('getLayanan');
+Route::get('/syarat/export-pdf', [SyaratController::class, 'exportPdf'])->name('exportPdf');
 
 //Cetak PDF
 Route::get('/tiket/cetak/{no_tiket}', [TiketController::class, 'cetak'])->name('tiket.cetak');
@@ -38,11 +41,6 @@ Route::middleware(['auth', 'force.password'])->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])
         ->middleware('role:admin_bawah,admin_opd,root,bidang')
         ->name('dashboard');
-
-    // Route::get('/dashboard', function () {
-    //     return view('pages.dashboard');
-    // })->middleware('role:admin_bawah,admin_opd,root,bidang')
-    //     ->name('dashboard');
 
     Route::post('/logout', [AuthenticatedSessionController::class, 'destroy'])
         ->name('logout');
@@ -125,6 +123,14 @@ Route::prefix('root')
         Route::get('laporan', [LaporanController::class, 'index'])->name('laporan.index');
         Route::get('laporan/layanan', [LaporanController::class, 'getLayananByBidang'])->name('laporan.getLayananByBidang');
         Route::get('laporan/export-pdf', [LaporanController::class, 'exportPdf'])->name('laporan.exportPdf');
+
+       //FAQ
+       Route::get('faq', [FaQController::class, 'index'])->name('faq.index');
+       Route::get('faq/create', [FaQController::class, 'create'])->name('faq.create');
+       Route::post('faq/store', [FaQController::class, 'store'])->name('faq.store');
+       Route::get('faq/{id}', [FaQController::class, 'edit'])->name('faq.edit');
+       Route::put('faq/{id}', [FaQController::class, 'update'])->name('faq.update');
+       Route::delete('faq/{id}', [FaQController::class, 'destroy'])->name('faq.destroy');
     });
 
 Route::prefix('adminOpd')
@@ -184,8 +190,8 @@ Route::prefix('adminBidang')
 
         // UPDATE STATUS
         Route::get('status', [UpdateStatusController::class, 'index'])->name('status.index');
-        Route::get('status/{no_tiket}/edit', [UpdateStatusController::class, 'editStatus'])->name('status.editStatus');
-        Route::post('status/{no_tiket}/update', [UpdateStatusController::class, 'updateStatus'])->name('status.updateStatus');
+        Route::get('status/{no_tiket}/edit', [UpdateStatusController::class, 'edit'])->name('status.edit');
+        Route::post('status/{no_tiket}/update', [UpdateStatusController::class, 'update'])->name('status.update');
 
         // PERBAIKAN
         Route::get('perbaikan', [PerbaikanController::class, 'index'])->name('perbaikan.index');
@@ -251,6 +257,9 @@ Route::prefix('adminBawah')
         // PINDAH DATA TIKET
         Route::get('pindah', [TiketController::class, 'indexPindah'])->name('pindah.indexPindah');
         Route::get('pindah/{no_tiket}', [TiketController::class, 'editPindah'])->name('pindah.editPindah');
+        Route::post('pindah/{no_tiket}', [TiketController::class, 'updatePindah'])->name('pindah.updatePindah');
+        Route::get('pindah/get-layanan/{bidang}', [TiketController::class, 'getLayananPindah'])->name('pindah.getLayanan');
+        Route::get('pindah/get-syarat/{layanan}', [TiketController::class, 'getSyaratPindah'])->name('pindah.getSyarat');
     });
 
 /* Auth (Breeze) */

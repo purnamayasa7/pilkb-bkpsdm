@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Bidang;
 use App\Models\Layanan;
 use App\Models\Status;
+use App\Services\ActivityLogService;
 use Illuminate\Http\Request;
 
 class StatusController extends Controller
@@ -17,8 +18,8 @@ class StatusController extends Controller
 
         $status = Status::with(['layanan.bidang'])
             ->when($bidangId, function ($query) use ($bidangId) {
-                $query->whereHas('layanan', function ($q) use ($bidangId) {
-                    $q->where('kode_bidang', $bidangId);
+                $query->whereHas('layanan', function ($query) use ($bidangId) {
+                    $query->where('kode_bidang', $bidangId);
                 });
             })
             ->get();
@@ -43,10 +44,18 @@ class StatusController extends Controller
 
         $kode_layanan = $request->kode_layanan;
 
-        Status::create([
+        $status = Status::create([
             'kode_layanan' => $kode_layanan,
             'status' => $request->status,
         ]);
+
+        ActivityLogService::log(
+            'Master Data Status',
+            'CREATE',
+            'Menambah Status Baru',
+            [],
+            $status->toArray()
+        );
 
         return redirect()->route('root.status')
             ->with('success', 'Status berhasil ditambahkan');
@@ -61,10 +70,28 @@ class StatusController extends Controller
             'status' => 'required',
         ]);
 
+        $olddata = [
+            'kode_layanan' => $status->kode_layanan,
+            'status' => $status->status,
+        ];
+
         $status->kode_layanan = $request->kode_layanan;
         $status->status = $request->status;
 
         $status->save();
+
+        $newdata = [
+            'kode_layanan' => $status->fresh()->kode_layanan,
+            'status' => $status->fresh()->status,
+        ];
+
+        ActivityLogService::log(
+            'Master Data Status',
+            'UPDATE',
+            'Mengubah Data status',
+            $olddata,
+            $newdata
+        );
 
         return redirect()->route('root.status')
             ->with('success', 'Status berhasil diupdate');
@@ -82,7 +109,22 @@ class StatusController extends Controller
     public function destroy($id)
     {
         $status = Status::findOrFail($id);
+
+        $olddata = [
+            'id' => $status->id,
+            'kode_layanan' => $status->kode_layanan,
+            'status' => $status->status,
+        ];
+
         $status->delete();
+
+        ActivityLogService::log(
+            'Master Data Status',
+            'DELETE',
+            'Menghapus Data Status',
+            $olddata,
+            []
+        );
 
         return redirect()->route('root.status')
             ->with('success', 'Status berhasil dihapus');

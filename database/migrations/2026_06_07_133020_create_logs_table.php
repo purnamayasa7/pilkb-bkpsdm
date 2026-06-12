@@ -13,15 +13,17 @@ return new class extends Migration
     {
         Schema::create('tb_log', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('admin_id')
-                ->constrained('users')
-                ->cascadeOnDelete();
-            $table->string('bidang', 20);
-            $table->string('module', 150);
-            $table->string('action', 150);
+            $table->foreignId('user_id')->nullable()->constrained()->nullOnDelete();
+            $table->string('kode_ukerja')->nullable();
+            $table->string('module');
+            $table->string('action');
             $table->text('description')->nullable();
-            $table->string('ip_address', 150)->nullable();
-            $table->string('user_agent', 255)->nullable();
+            $table->string('url')->nullable();
+            $table->string('method')->nullable();
+            $table->ipAddress('ip_address')->nullable();
+            $table->longText('user_agent')->nullable();
+            $table->json('old_data')->nullable();
+            $table->json('new_data')->nullable();
             $table->timestamps();
         });
     }

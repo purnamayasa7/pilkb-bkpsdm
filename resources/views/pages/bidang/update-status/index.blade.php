@@ -77,7 +77,7 @@
                                     <td>
                                         <div class="d-flex align-items-center">
                                             <a class="btn btn-datatable btn-icon btn-transparent-dark me-1 btnDetail"
-                                                href="{{ route('adminBidang.status.editStatus', $item->no_tiket) }}"
+                                                href="{{ route('adminBidang.status.edit', $item->no_tiket) }}"
                                                 title="Update">
 
                                                 <i data-feather="edit" class="text-warning"></i>

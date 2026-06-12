@@ -12,7 +12,7 @@
                  </div>
                  <div class="modal-body">Apakah anda yakin menyimpan data layanan ini?</div>
                  <div class="modal-footer"><button class="btn btn-light" type="button"
-                         data-bs-dismiss="modal">Close</button><button class="btn btn-primary" type="button"
+                         data-bs-dismiss="modal">Kembali</button><button class="btn btn-primary" type="button"
                          id="confirmSimpan">Simpan</button></div>
              </div>
          </div>

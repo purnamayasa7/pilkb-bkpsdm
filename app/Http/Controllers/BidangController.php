@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Bidang;
+use App\Services\ActivityLogService;
 use Illuminate\Http\Request;
 
 class BidangController extends Controller
@@ -28,11 +29,19 @@ class BidangController extends Controller
             'nama_bidang' => 'required',
         ]);
 
-        Bidang::create([
+        $bidang = Bidang::create([
             'nama_bidang' => $request->nama_bidang,
             'aktif' => true,
             'role_id' => 4,
         ]);
+
+        ActivityLogService::log(
+            'Master Data Bidang',
+            'CREATE',
+            'Menambah Bidang Baru',
+            [],
+            $bidang->toArray()
+        );
 
         return redirect()->route('root.bidang')
             ->with('success', 'Bidang berhasil ditambahkan');
@@ -54,10 +63,28 @@ class BidangController extends Controller
             'aktif' => 'required|boolean',
         ]);
 
+        $oldData = [
+            'nama_bidang' => $bidang->nama_bidang,
+            'aktif' => $bidang->aktif,
+        ];
+
         $bidang->update([
             'nama_bidang' => $validated['nama_bidang'],
             'aktif' => $validated['aktif'],
         ]);
+
+        $newData = [
+            'nama_bidang' => $bidang->fresh()->nama_bidang,
+            'aktif' => $bidang->fresh()->aktif,
+        ];
+
+        ActivityLogService::log(
+            'Master Data Bidang',
+            'UPDATE',
+            'Mengubah Data Bidang',
+            $oldData,
+            $newData
+        );
 
         return redirect()->route('root.bidang')
             ->with('success', 'Bidang berhasil diupdate');
@@ -67,15 +94,25 @@ class BidangController extends Controller
     {
         $bidang = Bidang::findOrFail($id);
 
+        $oldData = ['aktif' => $bidang->aktif,];
+
         $bidang->aktif = !$bidang->aktif;
         $bidang->save();
 
+        $newData = ['aktif' => $bidang->aktif,];
+
+        ActivityLogService::log(
+            'Master Data Bidang',
+            'UPDATE',
+            $bidang->aktif
+                ? 'Mengaktifkan bidang'
+                : 'Menonaktifkan bidang',
+            $oldData,
+            $newData
+        );
+
         return redirect()->back()->with('success', 'Status bidang berhasil diubah');
     }
-
-
-
-
 
     // public function update(Request $request, $id){
     //     $validated = $request->validate([

@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Bidang;
 use App\Models\Pengambilan;
 use App\Models\Regtiket;
+use App\Services\ActivityLogService;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -116,7 +117,7 @@ class PengambilanController extends Controller
             return back()->with('error', 'Tiket sudah diambil');
         }
 
-        Pengambilan::create([
+        $pengambilan = Pengambilan::create([
             'no_tiket' => $request->no_tiket,
             'tanggal_pengambilan' => Carbon::now(),
             'nama_pengambil' => $request->nama_pengambil,
@@ -126,6 +127,14 @@ class PengambilanController extends Controller
         $tiket->diambil = 1;
         $tiket->save();
 
+        ActivityLogService::log(
+            'Manajemen Data Tiket',
+            'CREATE',
+            'Submit Pengambilan Usulan',
+            [],
+            $pengambilan->toArray()
+        );
+        
         return back()->with('success', 'Data pengambilan berhasil ditambahkan');
     }
 

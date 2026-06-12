@@ -255,6 +255,35 @@ body {
     bottom: 10px;
     width: 100%;
     text-align: center;
-    font-size: 13px;
+    font-size: 14px;
     color: #6c757d;
+}
+
+#modalFaq .accordion-button {
+    padding: 1rem 0;
+    font-weight: 600;
+}
+
+#modalFaq .accordion-button:focus {
+    box-shadow: none;
+}
+
+#modalFaq .accordion-button:not(.collapsed) {
+    background: transparent;
+    color: var(--bs-primary);
+    box-shadow: none;
+}
+
+#modalFaq .accordion-item {
+    border-bottom: 1px solid #e9ecef;
+}
+
+#modalFaq .accordion-body {
+    padding-left: 2rem;
+    color: #6c757d;
+    line-height: 1.8;
+}
+
+#modalFaq .modal-body {
+    min-height: 500px;
 }

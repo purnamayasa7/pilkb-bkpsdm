@@ -30,11 +30,7 @@ class DashboardController extends Controller
 
         $ket_ukerja = $pegawai['ket_ukerja'] ?? '-';
 
-        /*
-        |--------------------------------------------------------------------------
-        | FILTER BULAN
-        |--------------------------------------------------------------------------
-        */
+        // Filter Bulan
         if ($request->filled('bulan')) {
 
             $selectedDate = Carbon::createFromFormat(
@@ -54,27 +50,13 @@ class DashboardController extends Controller
         $lastMonth = $lastMonthDate->month;
         $lastMonthYear = $lastMonthDate->year;
 
-        /*
-        |--------------------------------------------------------------------------
-        | USER LOGIN
-        |--------------------------------------------------------------------------
-        */
         $user = Auth::user();
 
-        /*
-        |--------------------------------------------------------------------------
-        | BASE QUERY
-        |--------------------------------------------------------------------------
-        */
         $baseQuery = Regtiket::query();
 
         $baseLastMonthQuery = Regtiket::query();
 
-        /*
-        |--------------------------------------------------------------------------
-        | FILTER KHUSUS ROLE BIDANG
-        |--------------------------------------------------------------------------
-        */
+        // Filter untuk Role Bidang
         if ($user->role->name == 'bidang') {
 
             $baseQuery->where(
@@ -88,15 +70,9 @@ class DashboardController extends Controller
             );
         }
 
-        /*
-        |--------------------------------------------------------------------------
-        | WIDGET 1
-        | Pengajuan Hari Ini
-        |--------------------------------------------------------------------------
-        */
+        // Widget 1 Pengajuan Hari ini
 
         $pengajuanHariIniQuery = Regtiket::query();
-
         $pengajuanKemarinQuery = Regtiket::query();
 
         if ($user->role->name == 'bidang') {
@@ -125,12 +101,7 @@ class DashboardController extends Controller
             $pengajuanKemarin
         );
 
-        /*
-        |--------------------------------------------------------------------------
-        | WIDGET 2
-        | Pengajuan Bulan Ini
-        |--------------------------------------------------------------------------
-        */
+        // Widget 2 Pengajuan Bulan ini
 
         $pengajuanBulanIni = (clone $baseQuery)
             ->whereMonth('tanggal', $month)
@@ -147,12 +118,7 @@ class DashboardController extends Controller
             $pengajuanBulanLalu
         );
 
-        /*
-        |--------------------------------------------------------------------------
-        | WIDGET 3
-        | Jumlah BTL
-        |--------------------------------------------------------------------------
-        */
+        // Widget 3 Jumlah BTL
 
         $btlBulanIni = DetailTiket::where('status', 2)
             ->whereHas('regtiket', function ($query) use (
@@ -160,12 +126,10 @@ class DashboardController extends Controller
                 $year,
                 $user
             ) {
-
                 $query->whereMonth('tanggal', $month)
                     ->whereYear('tanggal', $year);
 
                 if ($user->role->name == 'bidang') {
-
                     $query->where(
                         'kode_ukerja',
                         $user->kode_ukerja
@@ -180,12 +144,10 @@ class DashboardController extends Controller
                 $lastMonthYear,
                 $user
             ) {
-
                 $query->whereMonth('tanggal', $lastMonth)
                     ->whereYear('tanggal', $lastMonthYear);
 
                 if ($user->role->name == 'bidang') {
-
                     $query->where(
                         'kode_ukerja',
                         $user->kode_ukerja
@@ -199,12 +161,7 @@ class DashboardController extends Controller
             $btlBulanLalu
         );
 
-        /*
-        |--------------------------------------------------------------------------
-        | WIDGET 4
-        | Tiket Archives
-        |--------------------------------------------------------------------------
-        */
+       // Widget 4 Pengajuan Selesai (Archives)
 
         $tiketArchives = (clone $baseQuery)
             ->whereMonth('tanggal', $month)
@@ -223,11 +180,7 @@ class DashboardController extends Controller
             $tiketArchivesBulanLalu
         );
 
-        /*
-|--------------------------------------------------------------------------
-| CHART PENGAJUAN PER BIDANG
-|--------------------------------------------------------------------------
-*/
+        // Chart Jumlah Pengajuan Per Bidang
 
         $chartBidang = Regtiket::join(
             'tb_layanan',
@@ -279,11 +232,7 @@ class DashboardController extends Controller
         $chartBidangData = $chartBidang
             ->pluck('total_pengajuan');
 
-        /*
-|--------------------------------------------------------------------------
-| CHART PENGAJUAN TAHUN INI
-|--------------------------------------------------------------------------
-*/
+        // Chart Pengajuan Tahun ini
 
         $chartTahunLabels = [
             'Jan',
@@ -326,12 +275,6 @@ class DashboardController extends Controller
             $chartTahunData[] = $chartTahun[$i] ?? 0;
         }
 
-        /*
-        |--------------------------------------------------------------------------
-        | RETURN VIEW
-        |--------------------------------------------------------------------------
-        */
-
         return view('pages.dashboard', compact(
             'user',
             'ket_ukerja',
@@ -356,11 +299,8 @@ class DashboardController extends Controller
         ));
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | HELPER TREND NORMAL
-    |--------------------------------------------------------------------------
-    */
+    // Helper Trend
+    
     private function calculateTrend($current, $previous)
     {
         $difference = $current - $previous;
@@ -393,12 +333,7 @@ class DashboardController extends Controller
         ];
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | HELPER TREND REVERSE
-    | (Semakin kecil semakin baik)
-    |--------------------------------------------------------------------------
-    */
+    // Helper trend - Semakin Kecil semakin baik
     private function calculateReverseTrend($current, $previous)
     {
         $difference = $current - $previous;

@@ -16,8 +16,6 @@ class PegawaiService
                 ->withToken(env('SIMPEG_API_TOKEN'))
                 ->get(env('SIMPEG_API_URL') . '/pegawai/' . $nip);
 
-            // dd($response->json());
-
             if ($response->failed()) {
 
                 Log::error($response->body());

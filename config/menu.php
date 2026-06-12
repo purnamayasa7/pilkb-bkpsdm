@@ -101,7 +101,7 @@ return [
         [
             'type' => 'item',
             'title' => 'FAQ',
-            'path' => '',
+            'path' => 'root/faq',
             'icon' => 'message-circle',
             'active_key' => 'faq',
         ],

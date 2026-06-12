@@ -9,12 +9,26 @@ class Log extends Model
     protected $table = 'tb_log';
 
     protected $fillable = [
-        'admin_id',
-        'bidang',
+        'user_id',
+        'kode_ukerja',
         'module',
         'action',
         'description',
+        'url',
+        'method',
         'ip_address',
         'user_agent',
+        'old_data',
+        'new_data',
     ];
+
+    protected $casts = [
+        'old_data' => 'array',
+        'new_data' => 'array',
+    ];
+
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
 }

@@ -4,7 +4,9 @@ namespace App\Http\Controllers;
 
 use App\Models\DetailTiket;
 use App\Models\Regtiket;
+use App\Models\Status;
 use App\Models\Tahap;
+use App\Services\ActivityLogService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -45,7 +47,7 @@ class UpdateStatusController extends Controller
         ));
     }
 
-    public function editStatus($no_tiket)
+    public function edit($no_tiket)
     {
         $user = Auth::user();
 
@@ -54,8 +56,8 @@ class UpdateStatusController extends Controller
         ])
             ->where('no_tiket', $no_tiket)
 
-            ->whereHas('layanan', function ($q) use ($user) {
-                $q->where('kode_bidang', $user->bidang_id);
+            ->whereHas('layanan', function ($query) use ($user) {
+                $query->where('kode_bidang', $user->bidang_id);
             })
 
             ->firstOrFail();
@@ -63,6 +65,12 @@ class UpdateStatusController extends Controller
         $detail = DetailTiket::with('syarat')
             ->where('no_tiket', $no_tiket)
             ->get();
+
+        $statusList = Status::where(
+            'kode_layanan',
+            $tiket->kode_layanan
+        )->get();
+
 
         $dataPegawai = [
             'nama' => '-',
@@ -73,11 +81,12 @@ class UpdateStatusController extends Controller
         return view('pages.bidang.update-status.edit', compact(
             'tiket',
             'detail',
-            'dataPegawai'
+            'dataPegawai',
+            'statusList'
         ));
     }
 
-    public function updateStatus(Request $request, $no_tiket)
+    public function update(Request $request, $no_tiket)
     {
         DB::beginTransaction();
 
@@ -89,7 +98,6 @@ class UpdateStatusController extends Controller
 
             foreach ($detailList as $detail) {
 
-                // CHECKBOX CHECKED
                 $checked = isset($request->status[$detail->id]);
 
                 if ($checked) {
@@ -99,7 +107,6 @@ class UpdateStatusController extends Controller
                         'comment' => null
                     ]);
                 } else {
-
                     $semuaValid = false;
 
                     $detail->update([
@@ -111,19 +118,27 @@ class UpdateStatusController extends Controller
 
             if ($semuaValid) {
 
-                Tahap::create([
+                $tahap = Tahap::create([
                     'no_tiket' => $no_tiket,
                     'tanggal' => now(),
-                    'status' => 1,
+                    'status' => $request->status_tahap,
                     'operator' => Auth::user()->username,
-                    'comment' => 'Berkas Sudah Diterima BKPSDM'
+                    'comment' => $request->catatan ?? '-'
                 ]);
 
                 DB::commit();
 
+                ActivityLogService::log(
+                    'Manajemen Data Tiket',
+                    'CREATE',
+                    'Menambah Tahap Tiket ID: ' . $tahap->no_tiket,
+                    [],
+                    $tahap->toArray()
+                );
+
                 return redirect()
                     ->route('adminBidang.status.index')
-                    ->with('success', 'Berkas berhasil diterima.');
+                    ->with('success', 'Status usulan berhasil dirubah.');
             }
 
             DB::commit();

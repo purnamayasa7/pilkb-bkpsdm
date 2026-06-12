@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Models\Bidang;
+use App\Models\Faq;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -15,7 +17,11 @@ class AuthenticatedSessionController extends Controller
      */
     public function create(): View
     {
-        return view('auth.login');
+        $faq = Faq::orderBy('pertanyaan')->get();
+
+        $bidang = Bidang::orderBy('nama_bidang')->get();
+        
+        return view('auth.login', compact('faq', 'bidang'));
     }
 
     /**
@@ -38,10 +44,8 @@ class AuthenticatedSessionController extends Controller
 
         $request->session()->regenerate();
 
-        // get user login
         $user = Auth::user();
 
-        // force ganti password pertama kali
         if ($user->must_change_password) {
             return redirect()->route('password.change');
         }

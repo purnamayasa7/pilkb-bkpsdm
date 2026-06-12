@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Exports\LaporanUserExport;
 use App\Models\Bidang;
 use App\Models\User;
+use App\Services\ActivityLogService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -45,6 +46,14 @@ class UserController extends Controller
         $user->must_change_password = false;
 
         $user->save();
+
+        ActivityLogService::log(
+            'Manajemen Data User',
+            'CHANGE_PASSWORD',
+            'Mengubah password user: ' . $user->username,
+            [],
+            []
+        );
 
         return redirect()
             ->route('password.change')
@@ -174,7 +183,7 @@ class UserController extends Controller
         //     'must_change_password' => true,
         // ]);
 
-        User::create([
+        $user = User::create([
             'username' => $request->username,
             'nama' => $namaLengkap,
             'password' => Hash::make($passwordDefault),
@@ -186,6 +195,14 @@ class UserController extends Controller
             'must_change_password' => true,
         ]);
 
+        ActivityLogService::log(
+            'Manajemen Data User',
+            'CREATE',
+            'Menambah User Baru',
+            [],
+            $user->toArray()
+        );
+
         return redirect()
             ->route('root.user')
             ->with(
@@ -193,85 +210,6 @@ class UserController extends Controller
                 'User berhasil ditambahkan.'
             );
     }
-
-    // public function store(Request $request)
-    // {
-    //     $request->validate([
-    //         'username' => 'required|unique:users,username',
-    //         'email' => 'required|email|unique:users,email',
-    //         'nama' => 'required',
-    //         'password' => 'required',
-    //         'bidang_id' => 'required',
-    //     ]);
-
-    //     // CEK ULANG KE API
-    //     $pegawai = $this->pegawaiService
-    //         ->getPegawaiByNip($request->username);
-
-    //     if (!$pegawai) {
-
-    //         return back()
-    //             ->withErrors([
-    //                 'username' => 'NIP tidak ditemukan'
-    //             ])
-    //             ->withInput();
-    //     }
-
-    //     // AMBIL DATA DARI API
-    //     $namaLengkap = $pegawai['nama_lengkap']
-    //         ?? $pegawai['nama']
-    //         ?? $request->nama;
-
-    //     $kodeUkerja = $pegawai['kode_ukerja']
-    //         ?? $request->kode_ukerja;
-
-    //     $bidangId = $request->bidang_id;
-
-    //     $roleMap = [
-    //         'admin_bawah' => 2,
-    //         'admin_opd' => 3,
-    //     ];
-
-    //     // ROLE STATIC
-    //     if (array_key_exists($bidangId, $roleMap)) {
-    //         User::create([
-    //             'username' => $request->username,
-    //             'nama' => $namaLengkap,
-    //             'password' => Hash::make($request->password),
-    //             'bidang_id' => $bidangId,
-    //             'role_id' => $roleMap[$bidangId],
-    //             'aktif' => true,
-    //             'kode_ukerja' => $kodeUkerja,
-    //             'email' => $request->email,
-    //         ]);
-    //     } else {
-    //         $bidang = Bidang::with('role')->find($bidangId);
-
-    //         if (!$bidang || !$bidang->role) {
-
-    //             return back()
-    //                 ->withErrors([
-    //                     'bidang_id' => 'Bidang belum memiliki role'
-    //                 ])
-    //                 ->withInput();
-    //         }
-
-    //         User::create([
-    //             'username' => $request->username,
-    //             'nama' => $namaLengkap,
-    //             'password' => Hash::make($request->password),
-    //             'bidang_id' => $bidang->id,
-    //             'role_id' => $bidang->role_id,
-    //             'aktif' => true,
-    //             'kode_ukerja' => $kodeUkerja,
-    //             'email' => $request->email,
-    //         ]);
-    //     }
-
-    //     return redirect()
-    //         ->route('root.user')
-    //         ->with('success', 'User berhasil ditambahkan');
-    // }
 
     public function update(Request $request, $userId)
     {
@@ -282,6 +220,12 @@ class UserController extends Controller
             'password' => 'nullable',
             'bidang_id' => 'required',
         ]);
+
+        $oldData = [
+            'email' => $user->email,
+            'bidang_id' => $user->bidang_id,
+            'role_id' => $user->role_id,
+        ];
 
         // Check value changed
         if ($request->has('username') && $request->username != $user->username) {
@@ -319,6 +263,20 @@ class UserController extends Controller
 
         $user->save();
 
+        $newData = [
+            'email' => $user->email,
+            'bidang_id' => $user->bidang_id,
+            'role_id' => $user->role_id,
+        ];
+
+        ActivityLogService::log(
+            'Manajemen Data User',
+            'UPDATE',
+            'Mengubah data user: ' . $user->username,
+            $oldData,
+            $newData
+        );
+
         return redirect()->route('root.user')
             ->with('success', 'User berhasil diupdate');
     }
@@ -351,8 +309,22 @@ class UserController extends Controller
     {
         $user = User::findOrFail($id);
 
+        $oldData = ['aktif' => $user->aktif,];
+
         $user->aktif = !$user->aktif;
         $user->save();
+
+        $newData = ['aktif' => $user->aktif,];
+
+        ActivityLogService::log(
+            'Manajemen Data User',
+            'UPDATE',
+            $user->aktif
+                ? 'Mengaktifkan user: ' . $user->username
+                : 'Menonaktifkan user: ' . $user->username,
+            $oldData,
+            $newData
+        );
 
         return redirect()->back()->with('success', 'Status user berhasil diubah');
     }
@@ -392,6 +364,10 @@ class UserController extends Controller
             'password' => 'nullable|min:5',
         ]);
 
+        $oldData = [
+            'email' => $user->email,
+        ];
+
         if ($request->has('username') && $request->username != $user->username) {
 
             return back()->withErrors([
@@ -407,6 +383,18 @@ class UserController extends Controller
         }
 
         $user->save();
+
+        $newData = [
+            'email' => $user->email,
+        ];
+
+        ActivityLogService::log(
+            'Manajemen Data User',
+            'UPDATE',
+            'Mengubah Data User: ' . $user->username,
+            $oldData,
+            $newData
+        );
 
         // REFRESH SESSION
         Auth::login($user);

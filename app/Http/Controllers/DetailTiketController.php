@@ -7,6 +7,7 @@ use App\Models\DetailTiket;
 use App\Models\Layanan;
 use App\Models\Regtiket;
 use App\Models\Tahap;
+use App\Services\ActivityLogService;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -29,7 +30,7 @@ class DetailTiketController extends Controller
             $query->where('kode_ukerja', Auth::user()->kode_ukerja);
         }
 
-        // ADMIN BAWAH, TIKET LEBIH DARI 1
+        // ADMIN BAWAH, TAHAP TIKET LEBIH DARI 1
         if ($isAdminBawah) {
             $query->has('tahap', '>', 1);
         }
@@ -190,7 +191,7 @@ class DetailTiketController extends Controller
 
             if ($semuaValid) {
 
-                Tahap::create([
+                $tahap = Tahap::create([
                     'no_tiket' => $no_tiket,
                     'tanggal' => now(),
                     'status' => 20000,
@@ -200,6 +201,14 @@ class DetailTiketController extends Controller
             }
 
             DB::commit();
+
+            ActivityLogService::log(
+                'Manajemen Data Tiket',
+                'CREATE',
+                'Submit Review Tiket',
+                [],
+                $tahap->toArray()
+            );
 
             return redirect()
                 ->route('adminBawah.perbaikan.indexAdminBawah')
@@ -247,7 +256,7 @@ class DetailTiketController extends Controller
 
             if ($semuaValid) {
 
-                Tahap::create([
+                $tahap = Tahap::create([
                     'no_tiket' => $no_tiket,
                     'tanggal' => now(),
                     'status' => 1,
@@ -256,6 +265,14 @@ class DetailTiketController extends Controller
                 ]);
 
                 DB::commit();
+
+                ActivityLogService::log(
+                    'Manajemen Data Tiket',
+                    'CREATE',
+                    'Submit Permintaan Usulan',
+                    [],
+                    $tahap->toArray()
+                );
 
                 return redirect()
                     ->route('adminBawah.permintaan.indexPermintaan')
@@ -280,10 +297,28 @@ class DetailTiketController extends Controller
         $tiket = Regtiket::where('no_tiket', $no_tiket)
             ->firstOrFail();
 
+        $oldData = [
+            'diperbaiki' => $tiket->diperbaiki,
+            'diperbaiki_tgl' => $tiket->diperbaiki_tgl,
+        ];
+
         $tiket->update([
             'diperbaiki' => 1,
             'diperbaiki_tgl' => now()
         ]);
+
+        $newData = [
+            'diperbaiki' => $tiket->fresh()->diperbaiki,
+            'diperbaiki_tgl' => $tiket->fresh()->diperbaiki_tgl,
+        ];
+
+        ActivityLogService::log(
+            'Manajemen Data Tiket',
+            'UPDATE',
+            'Konfirmasi Perbaikan Tiket: ' . $tiket->no_tiket,
+            $oldData,
+            $newData
+        );
 
         return redirect()
             ->back()

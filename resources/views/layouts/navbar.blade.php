@@ -14,12 +14,12 @@
                 style="height: 32px; width: auto; object-fit: contain;">
         </div>
 
-        <img src="{{ asset('images/NEW_PILKB.png') }}"
+        <!-- <img src="{{ asset('images/NEW_PILKB.png') }}"
             alt="PILKB"
-            style="height: 28px; width: auto; object-fit: contain;">
-        <!-- <span>
+            style="height: 28px; width: auto; object-fit: contain;"> -->
+        <span class="text-primary">
             PILKB
-        </span> -->
+        </span>
     </a>
     <!-- Navbar Search Input-->
     <!-- * * Note: * * Visible only on and above the lg breakpoint-->
@@ -44,16 +44,16 @@
                     <div class="icon-stack bg-primary-soft text-primary me-4"><i data-feather="book"></i></div>
                     <div>
                         <div class="small text-gray-500">Dokumentasi</div>
-                        Usage instructions and reference
+                        Admin OPD
                     </div>
                 </a>
                 <div class="dropdown-divider m-0"></div>
                 <a class="dropdown-item py-3" href="https://docs.startbootstrap.com/sb-admin-pro/components"
                     target="_blank">
-                    <div class="icon-stack bg-primary-soft text-primary me-4"><i data-feather="code"></i></div>
+                    <div class="icon-stack bg-primary-soft text-primary me-4"><i data-feather="book"></i></div>
                     <div>
-                        <div class="small text-gray-500">Components</div>
-                        Code snippets and reference
+                        <div class="small text-gray-500">Dokumentasi</div>
+                        Admin Bidang
                     </div>
                 </a>
                 <div class="dropdown-divider m-0"></div>
