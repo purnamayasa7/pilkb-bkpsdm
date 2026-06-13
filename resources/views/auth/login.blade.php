@@ -481,7 +481,7 @@
 </body>
 
 <footer class="footer">
-    © 2026 BKPSDM Kabupaten Buleleng - Prakom Bidang PPI
+    © 2026 BKPSDM Kabupaten Buleleng
 </footer>
 
 </html>

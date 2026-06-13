@@ -79,7 +79,7 @@ return [
         [
             'type' => 'item',
             'title' => 'Laporan',
-            'path' => '',
+            'path' => 'root/laporan',
             'icon' => 'bar-chart-2',
             'active_key' => 'laporan',
         ],

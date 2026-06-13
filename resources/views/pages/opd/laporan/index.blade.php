@@ -12,18 +12,18 @@
                     </h1>
                 </div>
                 <div class="col-12 col-xl-auto mb-3">
-                <div class="btn-group">
-                    @if ($start && $end)
-                    <a class="btn btn-sm btn-light text-success"
-                        href="{{ route('adminOpd.laporan.exportLaporan', ['start_date' => $start, 'end_date' => $end]) }}"
-                        target="_blank">
+                    <div class="btn-group">
+                        @if ($start && $end)
+                        <a class="btn btn-sm btn-light text-success"
+                            href="{{ route('adminOpd.laporan.exportPdfOpd', ['start_date' => $start, 'end_date' => $end]) }}"
+                            target="_blank">
 
-                        <i class="me-1" data-feather="download"></i>
-                        Export Excel
-                    </a>
-                    @endif
+                            <i class="me-1" data-feather="download"></i>
+                            Export PDF
+                        </a>
+                        @endif
+                    </div>
                 </div>
-            </div>
             </div>
         </div>
     </div>
@@ -68,8 +68,9 @@
                         <th>NIP</th>
                         <th>Nama</th>
                         <th>Layanan</th>
+                        <th>Unit Kerja</th>
                         <th>Tanggal</th>
-                        <th>Status</th>
+                        <th>Status Terakhir</th>
                     </tr>
                 </thead>
                 <tfoot>
@@ -79,8 +80,9 @@
                         <th>NIP</th>
                         <th>Nama</th>
                         <th>Layanan</th>
+                        <th>Unit Kerja</th>
                         <th>Tanggal</th>
-                        <th>Status</th>
+                        <th>Status Terakhir</th>
                     </tr>
                 </tfoot>
                 <tbody>
@@ -88,11 +90,12 @@
                     <tr>
                         <td>{{ $loop->iteration }}</td>
                         <td>{{ $item->no_tiket }}</td>
-                        <td>{{ $item->regtiket->nip }}</td>
+                        <td>{{ $item->nip }}</td>
                         <td>-</td>
-                        <td>{{ $item->regtiket->layanan->nama_layanan ?? '-' }}</td>
-                        <td>{{ $item->tanggal }}</td>
-                        <td>{{ $item->statusRel->status ?? '-' }}</td>
+                        <td>{{ $item->layanan->nama_layanan ?? '-' }}</td>
+                        <td>{{ $item->kode_ukerja }}</td>
+                        <td>{{ \Carbon\Carbon::parse($item->tanggal)->format('d-m-Y') }}</td>
+                        <td>{{ $item->tahapTerakhir->statusRel->status ?? '-' }}</td>
                     </tr>
                     @endforeach
                 </tbody>
@@ -106,13 +109,8 @@
 
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-
         const startInput = document.getElementById('startDate');
         const endInput = document.getElementById('endDate');
-        const form = document.getElementById('filterForm');
-        const btnExport = document.getElementById('btnExport');
-
-        const baseExportUrl = "{{ route('adminOpd.laporan.exportLaporan') }}";
 
         const picker = new Litepicker({
             element: document.getElementById('myCustomDateRange'),
@@ -130,7 +128,6 @@
                 });
             }
         });
-
     });
 </script>
 @endsection

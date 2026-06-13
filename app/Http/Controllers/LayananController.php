@@ -155,19 +155,22 @@ class LayananController extends Controller
         $start = $request->start_date;
         $end = $request->end_date;
 
+        $user = Auth::user();
+
         $tiket = collect();
 
         if ($start && $end) {
 
-            $tiket = Tahap::with([
-                'statusRel',
-                'regtiket.layanan'
+            $tiket = Regtiket::with([
+                'layanan.bidang',
+                'tahapTerakhir.statusRel'
             ])
-                ->whereBetween('tanggal', [$start, $end])
-                ->whereHas('regtiket', function ($q) {
-                    $q->where('kode_ukerja', Auth::user()->kode_ukerja);
-                })
-                ->orderBy('tanggal', 'desc')
+                ->whereBetween('tanggal', [
+                    $start . ' 00:00:00',
+                    $end . ' 23:59:59'
+                ])
+                ->where('kode_ukerja', $user->kode_ukerja)
+                ->orderByDesc('tanggal')
                 ->get();
         }
 
@@ -195,6 +198,34 @@ class LayananController extends Controller
             new LaporanPermintaanExport($request),
             $fileName
         );
+    }
+
+    //Export PDF Laporan Pengajuan Layanan - Admin OPD
+    public function exportPdfOpd(Request $request)
+    {
+        $start = $request->start_date;
+        $end = $request->end_date;
+
+        $user = Auth::user();
+
+        $data = Regtiket::with([
+            'layanan.bidang',
+            'tahapTerakhir.statusRel'
+        ])
+            ->whereBetween('tanggal', [
+                $start . ' 00:00:00',
+                $end . ' 23:59:59'
+            ])
+            ->where('kode_ukerja', $user->kode_ukerja)
+            ->orderByDesc('tanggal')
+            ->get();
+
+        $pdf = Pdf::loadView(
+            'pages.opd.laporan.export.pdf',
+            compact('data', 'start', 'end')
+        )->setPaper('A4', 'landscape');
+
+        return $pdf->stream('Laporan-Layanan.pdf');
     }
 
     //Export Excel List Proses Pengajuan - Admin OPD

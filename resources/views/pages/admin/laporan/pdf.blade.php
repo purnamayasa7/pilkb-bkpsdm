@@ -4,7 +4,7 @@
 <head>
 
     <meta charset="utf-8">
-    <title>Laporan Permintaan Layanan</title>
+    <title>Laporan Usulan</title>
     <style>
         body {
             font-family: sans-serif;
@@ -95,13 +95,6 @@
         LAPORAN USULAN LAYANAN
     </div>
 
-    <div style="text-align:center; margin-bottom:15px;">
-        Periode :
-        {{ \Carbon\Carbon::parse($start)->format('d-m-Y') }}
-        s/d
-        {{ \Carbon\Carbon::parse($end)->format('d-m-Y') }}
-    </div>
-
     <br>
 
     <table>
@@ -111,28 +104,31 @@
                 <th>No Tiket</th>
                 <th>NIP</th>
                 <th>Nama</th>
-                <th>Layanan</th>
                 <th>Unit Kerja</th>
-                <th>Tanggal</th>
+                <th>Layanan</th>
+                <th>Tanggal Masuk</th>
                 <th>Status Terakhir</th>
             </tr>
         </thead>
 
         <tbody>
             @foreach ($data as $item)
-            <tr>
-                <td>{{ $loop->iteration }}</td>
-                <td>{{ $item->no_tiket }}</td>
-                <td>{{ $item->nip }}</td>
-                <td>-</td>
-                <td>{{ $item->layanan->nama_layanan ?? '-' }}</td>
-                <td>{{ $item->kode_ukerja }}</td>
-                <td>{{ \Carbon\Carbon::parse($item->tanggal)->format('d-m-Y') }}</td>
-                <td>{{ $item->tahapTerakhir->statusRel->status ?? '-' }}</td>
-            </tr>
+                <tr>
+                    <td>{{ $loop->iteration }}</td>
+                    <td>{{ $item->no_tiket }}</td>
+                    <td>{{ $item->nip }}</td>
+                    <td>-</td>
+                    <td>-</td>
+                    <td>
+                        {{ $item->layanan->nama_layanan ?? '-' }}
+                    </td>
+                    <td>
+                        {{ \Carbon\Carbon::parse($item->tanggal)->translatedFormat('d F Y H:i') }}
+                    </td>
+                     <td>{{ $item->tahapTerakhir->statusRel->status ?? '-' }}</td>
+                </tr>
             @endforeach
         </tbody>
     </table>
 </body>
-
 </html>

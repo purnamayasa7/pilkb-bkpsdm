@@ -70,7 +70,7 @@
                         <th>Layanan</th>
                         <th>Unit Kerja</th>
                         <th>Tanggal</th>
-                        <th>Status</th>
+                        <th>Status Terakhir</th>
                     </tr>
                 </thead>
                 <tfoot>
@@ -82,7 +82,7 @@
                         <th>Layanan</th>
                         <th>Unit Kerja</th>
                         <th>Tanggal</th>
-                        <th>Status</th>
+                        <th>Status Terakhir</th>
                     </tr>
                 </tfoot>
                 <tbody>
@@ -90,12 +90,12 @@
                     <tr>
                         <td>{{ $loop->iteration }}</td>
                         <td>{{ $item->no_tiket }}</td>
-                        <td>{{ $item->regtiket->nip }}</td>
+                        <td>{{ $item->nip }}</td>
                         <td>-</td>
-                        <td>{{ $item->regtiket->layanan->nama_layanan ?? '-' }}</td>
-                        <td>{{ $item->regtiket->kode_ukerja}}</td>
-                        <td>{{ $item->tanggal }}</td>
-                        <td>{{ $item->statusRel->status ?? '-' }}</td>
+                        <td>{{ $item->layanan->nama_layanan ?? '-' }}</td>
+                        <td>{{ $item->kode_ukerja }}</td>
+                        <td>{{ \Carbon\Carbon::parse($item->tanggal)->format('d-m-Y') }}</td>
+                        <td>{{ $item->tahapTerakhir->statusRel->status ?? '-' }}</td>
                     </tr>
                     @endforeach
                 </tbody>
@@ -109,13 +109,8 @@
 
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-
         const startInput = document.getElementById('startDate');
         const endInput = document.getElementById('endDate');
-        const form = document.getElementById('filterForm');
-        const btnExport = document.getElementById('btnExport');
-
-        const baseExportUrl = "{{ route('adminOpd.laporan.exportLaporan') }}";
 
         const picker = new Litepicker({
             element: document.getElementById('myCustomDateRange'),
@@ -133,7 +128,6 @@
                 });
             }
         });
-
     });
 </script>
 @endsection

@@ -8,6 +8,7 @@ use App\Models\Regtiket;
 use App\Models\Tahap;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class LaporanController extends Controller
 {
@@ -15,19 +16,30 @@ class LaporanController extends Controller
     {
         $bidangList = Bidang::orderBy('nama_bidang')->get();
 
-        $layananList = [];
+        $layananList = collect();
 
         $data = collect();
 
-        // LOAD LAYANAN
+        /**
+         * LOAD DROPDOWN LAYANAN
+         */
         if ($request->filled('bidang')) {
-
-            $layananList = Layanan::where('kode_bidang', $request->bidang)
-                ->orderBy('nama_layanan')
-                ->get();
+            if ($request->bidang == 'all') {
+                $layananList = Layanan::orderBy('nama_layanan')
+                    ->get();
+            } else {
+                $layananList = Layanan::where(
+                    'kode_bidang',
+                    $request->bidang
+                )
+                    ->orderBy('nama_layanan')
+                    ->get();
+            }
         }
 
-        // FILTER DATA
+        /**
+         * FILTER DATA
+         */
         if ($request->has('filter')) {
 
             $query = Regtiket::with([
@@ -35,40 +47,57 @@ class LaporanController extends Controller
                 'tahapTerakhir.statusRel'
             ]);
 
-            // FILTER BIDANG
-            if ($request->filled('bidang')) {
-
+            /**
+             * FILTER BIDANG
+             */
+            if (
+                $request->filled('bidang') &&
+                $request->bidang != 'all'
+            ) {
                 $query->whereHas('layanan', function ($q) use ($request) {
-
-                    $q->where('kode_bidang', $request->bidang);
+                    $q->where(
+                        'kode_bidang',
+                        $request->bidang
+                    );
                 });
             }
 
-            // FILTER LAYANAN
+            /**
+             * FILTER LAYANAN
+             */
             if (
                 $request->filled('layanan') &&
                 $request->layanan != 'all'
             ) {
-
-                $query->where('kode_layanan', $request->layanan);
+                $query->where(
+                    'kode_layanan',
+                    $request->layanan
+                );
             }
 
-            // FILTER RENTANG TANGGAL
+            /**
+             * FILTER TANGGAL
+             */
             if (
                 $request->filled('tanggal_awal') &&
                 $request->filled('tanggal_akhir')
             ) {
-
                 $query->whereBetween('tanggal', [
                     $request->tanggal_awal . ' 00:00:00',
                     $request->tanggal_akhir . ' 23:59:59'
                 ]);
             } elseif ($request->filled('tanggal_awal')) {
-
-                $query->whereDate('tanggal', '>=', $request->tanggal_awal);
+                $query->whereDate(
+                    'tanggal',
+                    '>=',
+                    $request->tanggal_awal
+                );
             } elseif ($request->filled('tanggal_akhir')) {
-
-                $query->whereDate('tanggal', '<=', $request->tanggal_akhir);
+                $query->whereDate(
+                    'tanggal',
+                    '<=',
+                    $request->tanggal_akhir
+                );
             }
 
             $data = $query
@@ -76,7 +105,17 @@ class LaporanController extends Controller
                 ->get();
         }
 
-        return view('pages.admin-bawah.laporan.index', compact(
+        $user = Auth::user();
+
+        if ($user->role->name == 'root') {
+            $view = 'pages.admin.laporan.index';
+        } elseif ($user->role->name == 'admin_bawah') {
+            $view = 'pages.admin-bawah.laporan.index';
+        } else {
+            abort(403);
+        }
+
+        return view($view, compact(
             'bidangList',
             'layananList',
             'data'
@@ -100,9 +139,17 @@ class LaporanController extends Controller
         ]);
 
         // FILTER BIDANG
-        if ($request->filled('bidang')) {
+        if (
+            $request->filled('bidang') &&
+            $request->bidang != 'all'
+        ) {
+
             $query->whereHas('layanan', function ($q) use ($request) {
-                $q->where('kode_bidang', $request->bidang);
+
+                $q->where(
+                    'kode_bidang',
+                    $request->bidang
+                );
             });
         }
 
@@ -111,7 +158,11 @@ class LaporanController extends Controller
             $request->filled('layanan') &&
             $request->layanan != 'all'
         ) {
-            $query->where('kode_layanan', $request->layanan);
+
+            $query->where(
+                'kode_layanan',
+                $request->layanan
+            );
         }
 
         // FILTER TANGGAL
@@ -119,22 +170,47 @@ class LaporanController extends Controller
             $request->filled('tanggal_awal') &&
             $request->filled('tanggal_akhir')
         ) {
+
             $query->whereBetween('tanggal', [
                 $request->tanggal_awal . ' 00:00:00',
                 $request->tanggal_akhir . ' 23:59:59'
             ]);
         } elseif ($request->filled('tanggal_awal')) {
-            $query->whereDate('tanggal', '>=', $request->tanggal_awal);
+
+            $query->whereDate(
+                'tanggal',
+                '>=',
+                $request->tanggal_awal
+            );
         } elseif ($request->filled('tanggal_akhir')) {
-            $query->whereDate('tanggal', '<=', $request->tanggal_akhir);
+
+            $query->whereDate(
+                'tanggal',
+                '<=',
+                $request->tanggal_akhir
+            );
         }
 
         $data = $query
             ->latest('tanggal')
             ->get();
 
+        /** @var \App\Models\User $user */
+        $user = Auth::user();
+
+        if ($user->role->name == 'root') {
+
+            $view = 'pages.admin.laporan.pdf';
+        } elseif ($user->role->name == 'admin_bawah') {
+
+            $view = 'pages.admin-bawah.laporan.pdf';
+        } else {
+
+            abort(403);
+        }
+
         $pdf = Pdf::loadView(
-            'pages.admin-bawah.laporan.pdf',
+            $view,
             compact('data')
         );
 
@@ -143,46 +219,21 @@ class LaporanController extends Controller
         return $pdf->stream('laporan-usulan.pdf');
     }
 
-    // Laporan Admin Bidang
-    public function indexBidang(Request $request)
-    {
-        $start = $request->start_date;
-        $end = $request->end_date;
-
-        $tiket = collect();
-
-        if ($start && $end) {
-
-            $tiket = Tahap::with([
-                'statusRel',
-                'regtiket.layanan'
-            ])
-                ->whereBetween('tanggal', [$start, $end])
-                ->whereHas('regtiket')
-                ->orderBy('tanggal', 'desc')
-                ->get();
-        }
-
-        return view('pages.bidang.laporan.index', compact(
-            'tiket',
-            'start',
-            'end'
-        ));
-    }
-
     // Export Laporan PDF Admin Bidang
     public function exportPdfBidang(Request $request)
     {
         $start = $request->start_date;
         $end = $request->end_date;
 
-        $data = Tahap::with([
-            'statusRel',
-            'regtiket.layanan'
+        $data = Regtiket::with([
+            'layanan.bidang',
+            'tahapTerakhir.statusRel'
         ])
-            ->whereBetween('tanggal', [$start, $end])
-            ->whereHas('regtiket')
-            ->orderBy('tanggal', 'desc')
+            ->whereBetween('tanggal', [
+                $start . ' 00:00:00',
+                $end . ' 23:59:59'
+            ])
+            ->orderByDesc('tanggal')
             ->get();
 
         $pdf = Pdf::loadView('pages.bidang.laporan.pdf', [

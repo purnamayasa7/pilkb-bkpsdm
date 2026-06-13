@@ -15,7 +15,7 @@
                     </div>
                     <div class="col-12 col-xl-auto mb-3">
                         <div class="btn-group">
-                            <a class="btn btn-sm btn-light text-success" href="{{ route('adminBawah.laporan.exportPdf', request()->query()) }}"
+                            <a class="btn btn-sm btn-light text-success" href="{{ route('root.laporan.exportPdf', request()->query()) }}"
                                 target="_blank">
                                 <i class="me-1" data-feather="download"></i>
                                 Export PDF
@@ -30,7 +30,7 @@
     <div class="container-fluid px-4 mt-4">
         <div class="card">
             <div class="card-body">
-                <form method="GET" action="{{ route('adminBawah.laporan.index') }}">
+                <form method="GET" action="{{ route('root.laporan.index') }}">
                     <div class="bg-white p-3 rounded-3 border mb-4">
                         <div class="row">
 
@@ -184,7 +184,7 @@
                     '<option value="all">Semua Layanan</option>';
                 if (bidangId) {
                     fetch(
-                            `{{ route('adminBawah.laporan.getLayananByBidang') }}?bidang_id=${bidangId}`
+                            `{{ route('root.laporan.getLayananByBidang') }}?bidang_id=${bidangId}`
                         )
 
                         .then(response => response.json())
