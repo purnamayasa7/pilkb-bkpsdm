@@ -1,3 +1,53 @@
+<style>
+    .notification-dot {
+        width: 9px;
+        height: 9px;
+        border-radius: 50%;
+        position: absolute;
+        top: 8px;
+        right: 8px;
+        background-color: #dc3545;
+        box-shadow: 0 0 0 2px #fff;
+    }
+
+    .notification-dot::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        border-radius: 50%;
+        background-color: #dc3545;
+        animation: notification-ripple 2s infinite;
+    }
+
+    .notification-badge {
+        position: absolute;
+        top: -1px;
+        right: -1px;
+
+        min-width: 18px;
+        height: 18px;
+        padding: 0 4px;
+
+        font-size: 10px;
+        font-weight: 700;
+        line-height: 18px;
+
+        border-radius: 999px;
+    }
+
+    @keyframes notification-ripple {
+        0% {
+            transform: scale(1);
+            opacity: .7;
+        }
+
+        100% {
+            transform: scale(2.5);
+            opacity: 0;
+        }
+    }
+</style>
+
 <nav class="topnav navbar navbar-expand shadow justify-content-between justify-content-sm-start navbar-light bg-white"
     id="sidenavAccordion">
     <!-- Sidenav Toggle Button-->
@@ -87,55 +137,132 @@
         </li>
         <!-- Alerts Dropdown-->
         <li class="nav-item dropdown no-caret d-none d-sm-block me-3 dropdown-notifications">
-            <a class="btn btn-icon btn-transparent-dark dropdown-toggle" id="navbarDropdownAlerts"
-                href="javascript:void(0);" role="button" data-bs-toggle="dropdown" aria-haspopup="true"
-                aria-expanded="false"><i data-feather="bell"></i></a>
-            <div class="dropdown-menu dropdown-menu-end border-0 shadow animated--fade-in-up"
-                aria-labelledby="navbarDropdownAlerts">
+
+            <a class="btn btn-icon btn-transparent-dark dropdown-toggle position-relative"
+                id="navbarDropdownAlerts"
+                href="#"
+                role="button"
+                data-bs-toggle="dropdown">
+
+                <i data-feather="bell"></i>
+
+                <!-- @if($unreadCount > 0)
+                <span class="badge bg-danger notification-badge">
+                    {{ $unreadCount > 99 ? '99+' : $unreadCount }}
+                </span>
+                @endif -->
+
+                @if($unreadCount > 0)
+                <span class="notification-dot"></span>
+                @endif
+
+            </a>
+
+            <div class="dropdown-menu dropdown-menu-end border-0 shadow animated--fade-in-up">
+
                 <h6 class="dropdown-header dropdown-notifications-header">
                     <i class="me-2" data-feather="bell"></i>
-                    Alerts Center
+                    Notifikasi
                 </h6>
-                <!-- Example Alert 1-->
-                <a class="dropdown-item dropdown-notifications-item" href="#!">
-                    <div class="dropdown-notifications-item-icon bg-warning"><i data-feather="activity"></i></div>
+
+                @forelse($notifications as $notification)
+
+                @php
+
+                $notificationTypes = [
+                'usulan_baru' => [
+                'class' => 'bg-success',
+                'icon' => 'file-text'
+                ],
+
+                'berkas_diterima' => [
+                'class' => 'bg-primary',
+                'icon' => 'check'
+                ],
+
+                'berkas_tidak_lengkap' => [
+                'class' => 'bg-warning',
+                'icon' => 'alert-triangle'
+                ],
+
+                'review_perbaikan' => [
+                'class' => 'bg-info',
+                'icon' => 'edit'
+                ],
+
+                'status_update' => [
+                'class' => 'bg-info',
+                'icon' => 'refresh-cw'
+                ],
+
+                'pengambilan' => [
+                'class' => 'bg-dark',
+                'icon' => 'archive'
+                ],
+
+                'pindah_layanan' => [
+                'class' => 'bg-secondary',
+                'icon' => 'shuffle'
+                ],
+
+                'selesai' => [
+                'class' => 'bg-success',
+                'icon' => 'check'
+                ]
+                ];
+
+                $type = $notification->data['type'] ?? 'default';
+
+                $bgClass = $notificationTypes[$type]['class'] ?? 'bg-secondary';
+                $icon = $notificationTypes[$type]['icon'] ?? 'bell';
+
+                @endphp
+                <a class="dropdown-item dropdown-notifications-item"
+                    href="{{ route('notifications.read', $notification->id) }}">
+
+                    <div class="dropdown-notifications-item-icon {{ $bgClass }}">
+                        <i data-feather="{{ $icon }}"></i>
+                    </div>
+
                     <div class="dropdown-notifications-item-content">
-                        <div class="dropdown-notifications-item-content-details">December 29, 2021</div>
-                        <div class="dropdown-notifications-item-content-text">This is an alert message. It's
-                            nothing serious, but it requires your attention.</div>
+                        <div class="dropdown-notifications-item-content-details d-flex align-items-center"
+                            style="font-size: 0.72rem;">
+
+                            {{ $notification->created_at->diffForHumans() }}
+
+                            @if(is_null($notification->read_at))
+                            <span class="ms-2 rounded-circle bg-danger"
+                                style="width:8px;height:8px;display:inline-block;">
+                            </span>
+                            @endif
+
+                        </div>
+
+                        <div class="dropdown-notifications-item-content-text"
+                            style="font-size: 0.80rem; line-height: 1.25;">
+                            <strong
+                                class="{{ is_null($notification->read_at) ? 'fw-bold' : 'fw-normal' }}"
+                                style="font-size: 0.90rem;">
+                                {{ $notification->data['title'] ?? '-' }}
+                            </strong>
+                            <br>
+                            {{ $notification->data['message'] ?? '-' }}
+                        </div>
                     </div>
                 </a>
-                <!-- Example Alert 2-->
-                <a class="dropdown-item dropdown-notifications-item" href="#!">
-                    <div class="dropdown-notifications-item-icon bg-info"><i data-feather="bar-chart"></i></div>
-                    <div class="dropdown-notifications-item-content">
-                        <div class="dropdown-notifications-item-content-details">December 22, 2021</div>
-                        <div class="dropdown-notifications-item-content-text">A new monthly report is ready. Click
-                            here to view!</div>
-                    </div>
+
+                @empty
+
+                <div class="dropdown-item text-center text-muted py-3">
+                    Tidak ada notifikasi
+                </div>
+
+                @endforelse
+
+                <a class="dropdown-item dropdown-notifications-footer"
+                    href="{{ route('notifications.index') }}">
+                    Lihat Semua
                 </a>
-                <!-- Example Alert 3-->
-                <a class="dropdown-item dropdown-notifications-item" href="#!">
-                    <div class="dropdown-notifications-item-icon bg-danger"><i
-                            class="fas fa-exclamation-triangle"></i>
-                    </div>
-                    <div class="dropdown-notifications-item-content">
-                        <div class="dropdown-notifications-item-content-details">December 8, 2021</div>
-                        <div class="dropdown-notifications-item-content-text">Critical system failure, systems
-                            shutting down.</div>
-                    </div>
-                </a>
-                <!-- Example Alert 4-->
-                <a class="dropdown-item dropdown-notifications-item" href="#!">
-                    <div class="dropdown-notifications-item-icon bg-success"><i data-feather="user-plus"></i>
-                    </div>
-                    <div class="dropdown-notifications-item-content">
-                        <div class="dropdown-notifications-item-content-details">December 2, 2021</div>
-                        <div class="dropdown-notifications-item-content-text">New user request. Woody has requested
-                            access to the organization.</div>
-                    </div>
-                </a>
-                <a class="dropdown-item dropdown-notifications-footer" href="#!">View All Alerts</a>
             </div>
         </li>
         <!-- Messages Dropdown-->
@@ -233,6 +360,7 @@
         ];
 
         $randomColor = $colors[crc32(auth()->user()->nama) % count($colors)];
+
         @endphp
         <li class="nav-item dropdown no-caret dropdown-user me-3 me-lg-4">
             <a class="btn btn-icon btn-transparent-dark dropdown-toggle p-0"

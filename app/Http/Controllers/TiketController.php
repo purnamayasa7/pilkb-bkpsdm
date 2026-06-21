@@ -8,6 +8,8 @@ use App\Models\Layanan;
 use App\Models\Regtiket;
 use App\Models\Syarat;
 use App\Models\Tahap;
+use App\Models\User;
+use App\Notifications\TiketNotification;
 use App\Services\ActivityLogService;
 use App\Services\PegawaiService;
 use Barryvdh\DomPDF\Facade\Pdf;
@@ -206,6 +208,23 @@ class TiketController extends Controller
                 'layanan_id' => 'required'
             ]);
 
+            $dataSession = session('pengajuan');
+
+            $existing = Regtiket::where('nip', $dataSession['nip'])
+                ->where('kode_layanan', $request->layanan_id)
+                ->where('archives', 0)
+                ->exists();
+
+            if ($existing) {
+
+                return back()
+                    ->withInput()
+                    ->with(
+                        'warning',
+                        'Data pengajuan dengan NIP dan layanan yang sama masih dalam proses.'
+                    );
+            }
+
             session([
                 'pengajuan.bidang_id' => $request->bidang_id,
                 'pengajuan.layanan_id' => $request->layanan_id,
@@ -292,6 +311,22 @@ class TiketController extends Controller
                     [],
                     $detailTiket->toArray()
                 );
+
+                // Kirim Notifikasi
+                $adminBawah = User::where('role_id', 2)->get();
+
+                foreach ($adminBawah as $user) {
+                    $user->notify(
+                        new TiketNotification(
+                            'Usulan Baru',
+                            'No Tiket: ' . $regTiket->no_tiket .
+                                ' usulan perlu diverifikasi.',
+                            route('adminBawah.permintaan.reviewPermintaan', ['no_tiket' => $regTiket->no_tiket]),
+                            $regTiket->no_tiket,
+                            'usulan_baru'
+                        )
+                    );
+                }
 
                 DB::commit();
 
@@ -642,6 +677,15 @@ class TiketController extends Controller
                 $no_tiket
             )->firstOrFail();
 
+            // simpan data layanan lama dan baru
+            $layananLama = Layanan::with('bidang')
+                ->where('kode_layanan', $tiket->kode_layanan)
+                ->first();
+
+            $layananBaru = Layanan::with('bidang')
+                ->where('kode_layanan', $request->kode_layanan)
+                ->first();
+
             $olddata = [
                 'no_tiket' => $tiket->no_tiket,
                 'kode_layanan' => $tiket->kode_layanan,
@@ -710,6 +754,95 @@ class TiketController extends Controller
                 [],
                 $tahap->toArray()
             );
+
+            // Notifkasi ke Admin OPD
+            $adminOpd = User::where('role_id', 3)
+                ->where('kode_ukerja', $tiket->kode_ukerja)
+                ->get();
+
+            foreach ($adminOpd as $user) {
+
+                $user->notify(
+                    new TiketNotification(
+                        'Layanan Dipindahkan',
+                        'No Tiket: ' . $tiket->no_tiket .
+                            ' telah dipindahkan ke layanan lain dan sedang diproses.',
+                        route('adminOpd.tiket.indexProses'),
+                        $tiket->no_tiket,
+                        'pindah_layanan'
+                    )
+                );
+            }
+
+            // Notifikasi ke Admin Bidang
+            if (
+                $layananLama &&
+                $layananBaru &&
+                $layananLama->kode_bidang != $layananBaru->kode_bidang
+            ) {
+
+                // BIDANG LAMA
+                $adminBidangLama = User::where('role_id', 4)
+                    ->where('bidang_id', $layananLama->kode_bidang)
+                    ->get();
+
+                foreach ($adminBidangLama as $user) {
+
+                    $user->notify(
+                        new TiketNotification(
+                            'Tiket Dipindahkan',
+                            'No Tiket: ' . $tiket->no_tiket .
+                                ' telah dipindahkan ke bidang lain.',
+                            route('adminBidang.permintaan.index'),
+                            $tiket->no_tiket,
+                            'pindah_layanan'
+                        )
+                    );
+                }
+
+                // BIDANG BARU
+                $adminBidangBaru = User::where('role_id', 4)
+                    ->where('bidang_id', $layananBaru->kode_bidang)
+                    ->get();
+
+                foreach ($adminBidangBaru as $user) {
+
+                    $user->notify(
+                        new TiketNotification(
+                            'Usulan Baru Hasil Pemindahan',
+                            'No Tiket: ' . $tiket->no_tiket .
+                                ' dipindahkan ke layanan bidang anda dan perlu ditindaklanjuti.',
+                            route(
+                                'adminBidang.permintaan.editPermintaan',
+                                ['no_tiket' => $tiket->no_tiket]
+                            ),
+                            $tiket->no_tiket
+                        )
+                    );
+                }
+            } else {
+
+                // MASIH BIDANG YANG SAMA
+                $adminBidang = User::where('role_id', 4)
+                    ->where('bidang_id', $layananBaru->kode_bidang)
+                    ->get();
+
+                foreach ($adminBidang as $user) {
+
+                    $user->notify(
+                        new TiketNotification(
+                            'Layanan Dipindahkan',
+                            'No Tiket: ' . $tiket->no_tiket .
+                                ' dipindahkan ke layanan lain dalam bidang yang sama.',
+                            route(
+                                'adminBidang.permintaan.editPermintaan',
+                                ['no_tiket' => $tiket->no_tiket]
+                            ),
+                            $tiket->no_tiket
+                        )
+                    );
+                }
+            }
 
             DB::commit();
 

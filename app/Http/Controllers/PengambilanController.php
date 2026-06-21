@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\Bidang;
 use App\Models\Pengambilan;
 use App\Models\Regtiket;
+use App\Models\User;
+use App\Notifications\TiketNotification;
 use App\Services\ActivityLogService;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
@@ -127,6 +129,49 @@ class PengambilanController extends Controller
         $tiket->diambil = 1;
         $tiket->save();
 
+        // Notifikasi ke Admin OPD
+        $adminOpd = User::where('role_id', 3)
+            ->where('kode_ukerja', $tiket->kode_ukerja)
+            ->get();
+
+        foreach ($adminOpd as $user) {
+
+            $user->notify(
+                new TiketNotification(
+                    'Dokumen Telah Diambil',
+                    'No Tiket: ' . $tiket->no_tiket .
+                        ' telah diambil oleh pemohon.',
+                    route('adminOpd.tiket.indexProses'),
+                    $tiket->no_tiket,
+                    'pengambilan'
+                )
+            );
+        }
+
+        // Notifikasi ke Admin Bidang
+        $tiket->load('layanan');
+
+        $adminBidang = User::where('role_id', 4)
+            ->where('bidang_id', $tiket->layanan->kode_bidang)
+            ->get();
+
+        foreach ($adminBidang as $user) {
+
+            $user->notify(
+                new TiketNotification(
+                    'Dokumen Telah Diambil',
+                    'No Tiket ' . $tiket->no_tiket .
+                        ' telah diambil oleh pemohon.',
+                    route(
+                        'adminBidang.permintaan.editPermintaan',
+                        ['no_tiket' => $tiket->no_tiket]
+                    ),
+                    $tiket->no_tiket,
+                    'pengambilan'
+                )
+            );
+        }
+
         ActivityLogService::log(
             'Manajemen Data Tiket',
             'CREATE',
@@ -134,7 +179,7 @@ class PengambilanController extends Controller
             [],
             $pengambilan->toArray()
         );
-        
+
         return back()->with('success', 'Data pengambilan berhasil ditambahkan');
     }
 

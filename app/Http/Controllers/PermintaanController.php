@@ -6,6 +6,8 @@ use App\Models\DetailTiket;
 use App\Models\Regtiket;
 use App\Models\Status;
 use App\Models\Tahap;
+use App\Models\User;
+use App\Notifications\TiketNotification;
 use App\Services\ActivityLogService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -105,6 +107,8 @@ class PermintaanController extends Controller
                 $no_tiket
             )->get();
 
+            $semuaValid = true;
+
             foreach ($detailList as $detail) {
                 $checked = isset($request->status[$detail->id]);
 
@@ -119,8 +123,15 @@ class PermintaanController extends Controller
                         'status' => 2,
                         'comment' => $request->comment[$detail->id] ?? null
                     ]);
+
+                    $semuaValid = false;
                 }
             }
+
+            // Get Data Tiket
+            $tiket = Regtiket::with('layanan')
+                ->where('no_tiket', $no_tiket)
+                ->firstOrFail();
 
             $tahap = Tahap::create([
                 'no_tiket' => $no_tiket,
@@ -147,6 +158,45 @@ class PermintaanController extends Controller
                 [],
                 $tahap->toArray()
             );
+
+            // Get Tiket
+            $tiket = Regtiket::where('no_tiket', $no_tiket)
+                ->firstOrFail();
+
+            // Kirim Notifikasi ke Admin OPD
+            $adminOpd = User::where('role_id', 3)
+                ->where('kode_ukerja', $tiket->kode_ukerja)
+                ->get();
+
+            foreach ($adminOpd as $user) {
+
+                if ($semuaValid) {
+                    $user->notify(
+                        new TiketNotification(
+                            'Status Usulan Diperbarui',
+                            'No Tiket: ' . $tahap->no_tiket .
+                                ' status sudah diperbarui menjadi ' .
+                                $tahap->statusRel->status,
+                            route('adminOpd.tiket.indexProses'),
+                            $tahap->no_tiket,
+                            'status_update'
+                        )
+                    );
+                } else {
+                    $user->notify(
+                        new TiketNotification(
+                            'Berkas Tidak Lengkap',
+                            'No Tiket: ' . $tahap->no_tiket .
+                                ' memerlukan perbaikan dokumen.',
+                            route(
+                                'adminOpd.perbaikan.index',
+                            ),
+                            $tahap->no_tiket,
+                            'berkas_tidak_lengkap'
+                        )
+                    );
+                }
+            }
 
             return redirect()
                 ->route('adminBidang.permintaan.index')
@@ -189,6 +239,24 @@ class PermintaanController extends Controller
                 $olddata,
                 $newdata
             );
+
+            $adminOpd = User::where('role_id', 3)
+                ->where('kode_ukerja', $tiket->kode_ukerja)
+                ->get();
+
+            foreach ($adminOpd as $user) {
+
+                $user->notify(
+                    new TiketNotification(
+                        'Usulan Selesai Diproses',
+                        'No Tiket: ' . $tiket->no_tiket .
+                            ' telah selesai diproses.',
+                        route('adminOpd.tiket.indexProses'),
+                        $tiket->no_tiket,
+                        'selesai'
+                    )
+                );
+            }
 
             return redirect()
                 ->route('adminBidang.permintaan.index')

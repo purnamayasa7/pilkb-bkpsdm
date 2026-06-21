@@ -8,6 +8,12 @@
 </div>
 @endif
 
+@if(session('warning'))
+<input type="hidden"
+    id="showWarningModal"
+    value="1">
+@endif
+
 @php
 $step = $step ?? 1;
 $data = $data ?? [];
@@ -227,6 +233,34 @@ $stepHeader = [
                 <button class="btn btn-light" data-bs-dismiss="modal">Batal</button>
                 <button class="btn btn-primary" id="btnSubmitFinal">
                     Ya, Lanjutkan
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+{{-- Modal Pengajuan Sudah Ada --}}
+<div class="modal fade" id="modalPengajuanAda" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+
+            <div class="modal-header bg-warning">
+                <h5 class="modal-title text-white">
+                    Pengajuan Masih Diproses
+                </h5>
+
+                <button class="btn-close"
+                    data-bs-dismiss="modal"></button>
+            </div>
+
+            <div class="modal-body">
+                Data pengajuan usulan dengan NIP dan layanan yang sama
+                sudah pernah diajukan dan saat ini masih dalam proses.
+            </div>
+
+            <div class="modal-footer">
+                <button class="btn btn-primary" data-bs-dismiss="modal">
+                    <i data-feather="check" class="me-1"></i>Mengerti
                 </button>
             </div>
         </div>
@@ -884,6 +918,19 @@ $stepHeader = [
                 const form = btnNextStep3.form;
                 if (form) form.submit();
             });
+        }
+
+        // Modal pengajuan sudah ada
+        const showWarningModal = document.getElementById('showWarningModal');
+
+        if (showWarningModal) {
+            const modalPengajuanAdaEl =
+                document.getElementById('modalPengajuanAda');
+            if (modalPengajuanAdaEl) {
+                const modalPengajuanAda =
+                    new bootstrap.Modal(modalPengajuanAdaEl);
+                modalPengajuanAda.show();
+            }
         }
     });
 </script>

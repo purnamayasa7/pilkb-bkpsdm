@@ -6,6 +6,8 @@ use App\Models\DetailTiket;
 use App\Models\Regtiket;
 use App\Models\Status;
 use App\Models\Tahap;
+use App\Models\User;
+use App\Notifications\TiketNotification;
 use App\Services\ActivityLogService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -97,11 +99,9 @@ class UpdateStatusController extends Controller
             $semuaValid = true;
 
             foreach ($detailList as $detail) {
-
                 $checked = isset($request->status[$detail->id]);
 
                 if ($checked) {
-
                     $detail->update([
                         'status' => 1,
                         'comment' => null
@@ -117,7 +117,6 @@ class UpdateStatusController extends Controller
             }
 
             if ($semuaValid) {
-
                 $tahap = Tahap::create([
                     'no_tiket' => $no_tiket,
                     'tanggal' => now(),
@@ -136,6 +135,29 @@ class UpdateStatusController extends Controller
                     $tahap->toArray()
                 );
 
+                // Ambil tiket untuk mendapatkan kode_ukerja
+                $tiket = Regtiket::where('no_tiket', $no_tiket)
+                    ->firstOrFail();
+
+                // Kirim Notifikasi ke Admin OPD pemilik tiket
+                $adminOpd = User::where('role_id', 3)
+                    ->where('kode_ukerja', $tiket->kode_ukerja)
+                    ->get();
+
+                foreach ($adminOpd as $user) {
+
+                    $user->notify(
+                        new TiketNotification(
+                            'Status Usulan Diperbarui',
+                            'No Tiket: ' . $tahap->no_tiket .
+                                ' status sudah diperbarui menjadi ' .
+                                $tahap->statusRel->status,
+                            route('adminOpd.tiket.indexProses'),
+                            $tahap->no_tiket
+                        )
+                    );
+                }
+
                 return redirect()
                     ->route('adminBidang.status.index')
                     ->with('success', 'Status usulan berhasil dirubah.');
@@ -146,9 +168,7 @@ class UpdateStatusController extends Controller
             return redirect()
                 ->route('adminBidang.status.index');
         } catch (\Exception $e) {
-
             DB::rollBack();
-
             return back()->with('error', $e->getMessage());
         }
     }

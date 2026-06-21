@@ -7,6 +7,7 @@ use App\Http\Controllers\DetailTiketController;
 use App\Http\Controllers\FaQController;
 use App\Http\Controllers\LaporanController;
 use App\Http\Controllers\LayananController;
+use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\PengambilanController;
 use App\Http\Controllers\PerbaikanController;
 use App\Http\Controllers\PermintaanController;
@@ -54,6 +55,12 @@ Route::middleware(['auth', 'force.password'])->group(function () {
     // Change Password
     Route::get('/change-password', [UserController::class, 'changePasswordForm'])->name('password.change');
     Route::post('/change-password', [UserController::class, 'changePassword'])->name('password.update');
+
+    // Notification
+    Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications.index');
+    Route::get('/notifications/read/{id}', [NotificationController::class, 'read'])->name('notifications.read');
+    Route::post('/notifications/read-all', [NotificationController::class, 'readAll'])->name('notifications.readAll');
+    Route::post('/notifications/delete-all', [NotificationController::class, 'deleteAll'])->name('notifications.deleteAll');
 });
 
 /* ROOT */
@@ -124,13 +131,13 @@ Route::prefix('root')
         Route::get('laporan/layanan', [LaporanController::class, 'getLayananByBidang'])->name('laporan.getLayananByBidang');
         Route::get('laporan/export-pdf', [LaporanController::class, 'exportPdf'])->name('laporan.exportPdf');
 
-       //FAQ
-       Route::get('faq', [FaQController::class, 'index'])->name('faq.index');
-       Route::get('faq/create', [FaQController::class, 'create'])->name('faq.create');
-       Route::post('faq/store', [FaQController::class, 'store'])->name('faq.store');
-       Route::get('faq/{id}', [FaQController::class, 'edit'])->name('faq.edit');
-       Route::put('faq/{id}', [FaQController::class, 'update'])->name('faq.update');
-       Route::delete('faq/{id}', [FaQController::class, 'destroy'])->name('faq.destroy');
+        //FAQ
+        Route::get('faq', [FaQController::class, 'index'])->name('faq.index');
+        Route::get('faq/create', [FaQController::class, 'create'])->name('faq.create');
+        Route::post('faq/store', [FaQController::class, 'store'])->name('faq.store');
+        Route::get('faq/{id}', [FaQController::class, 'edit'])->name('faq.edit');
+        Route::put('faq/{id}', [FaQController::class, 'update'])->name('faq.update');
+        Route::delete('faq/{id}', [FaQController::class, 'destroy'])->name('faq.destroy');
     });
 
 Route::prefix('adminOpd')
