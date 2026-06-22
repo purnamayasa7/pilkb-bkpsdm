@@ -7,6 +7,7 @@ use App\Http\Controllers\DetailTiketController;
 use App\Http\Controllers\FaQController;
 use App\Http\Controllers\LaporanController;
 use App\Http\Controllers\LayananController;
+use App\Http\Controllers\LogController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\PengambilanController;
 use App\Http\Controllers\PerbaikanController;
@@ -61,6 +62,10 @@ Route::middleware(['auth', 'force.password'])->group(function () {
     Route::get('/notifications/read/{id}', [NotificationController::class, 'read'])->name('notifications.read');
     Route::post('/notifications/read-all', [NotificationController::class, 'readAll'])->name('notifications.readAll');
     Route::post('/notifications/delete-all', [NotificationController::class, 'deleteAll'])->name('notifications.deleteAll');
+
+    // Notification Index
+    Route::get('/log-aktivitas', [LogController::class, 'index'])->middleware('role:root,admin_bawah,admin_opd,bidang')->name('log.index');
+    Route::get('/log-aktivitas/export-excel', [LogController::class, 'exportExcel'])->middleware('role:root,admin_bawah,admin_opd,bidang')->name('log.exportExcel');
 });
 
 /* ROOT */

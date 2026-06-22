@@ -92,6 +92,14 @@ return [
 
         [
             'type' => 'item',
+            'title' => 'Aktivitas User',
+            'path' => 'log-aktivitas',
+            'icon' => 'activity',
+            'active_key' => 'aktivitas',
+        ],
+
+        [
+            'type' => 'item',
             'title' => 'Backup Database',
             'path' => '',
             'icon' => 'database',
@@ -210,6 +218,14 @@ return [
 
         [
             'type' => 'item',
+            'title' => 'Aktivitas Anda',
+            'path' => 'log-aktivitas',
+            'icon' => 'activity',
+            'active_key' => 'aktivitas',
+        ],
+
+        [
+            'type' => 'item',
             'title' => 'Laporan',
             'path' => 'adminBawah/laporan',
             'icon' => 'bar-chart-2',
@@ -313,6 +329,14 @@ return [
 
         [
             'type' => 'item',
+            'title' => 'Aktivitas Instansi',
+            'path' => 'log-aktivitas',
+            'icon' => 'activity',
+            'active_key' => 'aktivitas',
+        ],
+
+        [
+            'type' => 'item',
             'title' => 'Laporan',
             'path' => 'adminOpd/laporan',
             'icon' => 'bar-chart-2',
@@ -378,6 +402,14 @@ return [
         [
             'type' => 'heading',
             'title' => 'Lainnya',
+        ],
+
+        [
+            'type' => 'item',
+            'title' => 'Aktivitas Bidang',
+            'path' => 'log-aktivitas',
+            'icon' => 'activity',
+            'active_key' => 'aktivitas',
         ],
 
         [
