@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
+use App\Http\Controllers\BackupController;
 use App\Http\Controllers\BidangController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DetailTiketController;
@@ -143,6 +144,9 @@ Route::prefix('root')
         Route::get('faq/{id}', [FaQController::class, 'edit'])->name('faq.edit');
         Route::put('faq/{id}', [FaQController::class, 'update'])->name('faq.update');
         Route::delete('faq/{id}', [FaQController::class, 'destroy'])->name('faq.destroy');
+
+        // Backup Database
+        Route::get('backup/database', [BackupController::class, 'runBackup'])->name('backup.database');
     });
 
 Route::prefix('adminOpd')

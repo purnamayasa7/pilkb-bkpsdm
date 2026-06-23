@@ -101,7 +101,7 @@ return [
         [
             'type' => 'item',
             'title' => 'Backup Database',
-            'path' => '',
+            'path' => 'root/backup/database',
             'icon' => 'database',
             'active_key' => 'backup',
         ],

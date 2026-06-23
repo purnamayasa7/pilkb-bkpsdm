@@ -81,7 +81,7 @@
                         'text' =>
                             'Silakan melakukan pengelolaan master data, pemantauan sistem, serta pelaksanaan <i><b>backup database</b></i> secara berkala untuk menjaga keamanan dan konsistensi data.',
                         'button' => 'Backup Database',
-                        'url' => '#',
+                        'url' => route('root.backup.database'),
                     ],
                 ];
 
