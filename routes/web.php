@@ -3,6 +3,7 @@
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\BackupController;
 use App\Http\Controllers\BidangController;
+use App\Http\Controllers\ChatController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DetailTiketController;
 use App\Http\Controllers\FaQController;
@@ -35,6 +36,13 @@ Route::get('/syarat/export-pdf', [SyaratController::class, 'exportPdf'])->name('
 //Cetak PDF
 Route::get('/tiket/cetak/{no_tiket}', [TiketController::class, 'cetak'])->name('tiket.cetak');
 
+// Guest Chat
+Route::get('/guest-chat/bidang', [ChatController::class, 'getBidang']);
+Route::get('/guest-chat/layanan/{bidang}',[ChatController::class, 'getLayanan']);
+Route::post('/guest-chat/start',[ChatController::class, 'startGuestChat']);
+Route::post('/guest-chat/resume',[ChatController::class, 'resumeGuestChat']);
+Route::get('/guest-chat/{conversation}/messages',[ChatController::class, 'loadGuestMessages']);
+Route::post('/guest-chat/{conversation}/message',[ChatController::class, 'sendGuestMessage']);
 
 /* Authenticated */
 
@@ -67,6 +75,19 @@ Route::middleware(['auth', 'force.password'])->group(function () {
     // Notification Index
     Route::get('/log-aktivitas', [LogController::class, 'index'])->middleware('role:root,admin_bawah,admin_opd,bidang')->name('log.index');
     Route::get('/log-aktivitas/export-excel', [LogController::class, 'exportExcel'])->middleware('role:root,admin_bawah,admin_opd,bidang')->name('log.exportExcel');
+
+    // Chat
+    Route::get('/chat', [ChatController::class, 'index'])->name('chat.index');
+    Route::get('/chat/{conversation}', [ChatController::class, 'show'])->whereNumber('conversation')->name('chat.show');
+    Route::post('/chat/search-ticket', [ChatController::class, 'searchTicket'])->name('chat.search-ticket');
+    Route::post('/chat/start-ticket', [ChatController::class, 'startTicketConversation'])->name('chat.start-ticket');
+    Route::post('/chat/start-global', [ChatController::class, 'startGlobalChat'])->name('chat.start-global');
+    Route::get('/chat/{conversation}/messages', [ChatController::class, 'loadMessages'])->whereNumber('conversation')->name('chat.messages');
+    Route::post('/chat/{conversation}/message', [ChatController::class, 'sendMessage'])->whereNumber('conversation')->name('chat.message.send');
+    Route::get(
+        '/chat/admin/inbox',
+        [ChatController::class, 'adminInbox']
+    );
 });
 
 /* ROOT */

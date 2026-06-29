@@ -77,4 +77,35 @@ class User extends Authenticatable
             ?? $map[$this->bidang_id]
             ?? $this->bidang_id;
     }
+
+    public function conversationsCreated()
+    {
+        return $this->hasMany(
+            ChatConversation::class,
+            'created_by'
+        );
+    }
+
+    public function chatMessages()
+    {
+        return $this->hasMany(
+            ChatMessage::class,
+            'sender_id'
+        );
+    }
+
+    public function chatParticipations()
+    {
+        return $this->hasMany(ChatParticipant::class);
+    }
+
+    public function chatConversationsAsParticipant()
+    {
+        return $this->belongsToMany(
+            ChatConversation::class,
+            'chat_participants',
+            'user_id',
+            'conversation_id'
+        );
+    }
 }

@@ -41,4 +41,20 @@ class Bidang extends Model
     {
         return $this->hasMany(Layanan::class, 'kode_bidang', 'id');
     }
+
+    public function conversations()
+    {
+        return $this->hasMany(
+            ChatConversation::class,
+            'bidang_id'
+        );
+    }
+
+    public function users()
+    {
+        return $this->hasMany(
+            User::class,
+            'bidang_id'
+        );
+    }
 }

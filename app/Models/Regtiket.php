@@ -55,4 +55,13 @@ class Regtiket extends Model
     {
         return $this->belongsTo(User::class, 'operator_archives');
     }
+
+    public function conversation()
+    {
+        return $this->hasOne(
+            ChatConversation::class,
+            'no_tiket',
+            'no_tiket'
+        );
+    }
 }
