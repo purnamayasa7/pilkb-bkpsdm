@@ -387,21 +387,17 @@
             <!-- PAGE 1 -->
             <div class="chat-page" id="pageHome">
 
-                <div class="text-center mt-3 mb-4">
+                <div class="chat-welcome-card">
 
-                    <div class="chat-logo mx-auto mb-3">
-                        <img
-                            src="{{ asset('images/KabBuleleng.png') }}"
-                            alt="PILKB">
+                    <div class="chat-welcome-icon">
+                        <span class="wave-hand">👋</span>
                     </div>
 
-                    <h6 class="fw-bold mb-1">
-                        Selamat Datang
-                    </h6>
+                    <h6>Halo, ada yang bisa kami bantu?</h6>
 
-                    <small class="text-muted">
-                        Pusat Bantuan PILKB
-                    </small>
+                    <p>
+                        Silakan pilih salah satu layanan berikut
+                    </p>
 
                 </div>
 
@@ -428,7 +424,7 @@
 
                     <div>
                         <div class="fw-semibold">
-                            Sudah Punya Nomor Tiket
+                            Sudah Punya Tiket
                         </div>
 
                         <small class="text-muted">
@@ -636,6 +632,14 @@
                                 -
                             </span>
 
+                            <span id="roomTicketNo">-</span>
+
+                            <span
+                                id="chatStatusBadge"
+                                class="badge bg-success-soft text-success">
+                                Open
+                            </span>
+
                         </div>
 
                     </div>
@@ -654,11 +658,11 @@
 
                     <div class="chat-input-wrapper">
 
-                        <input
-                            type="text"
+                        <textarea
                             id="chatInput"
                             class="form-control"
-                            placeholder="Tulis pesan...">
+                            placeholder="Tulis pesan..."
+                            rows="1"></textarea>
 
                         <button
                             class="chat-send-btn"
@@ -780,6 +784,26 @@
 
             // Chat
             function initGuestChat() {
+
+                function updateChatStatus(status) {
+                    const badge =
+                        document.getElementById('chatStatusBadge');
+
+                    if (!badge) return;
+
+                    if (status === 'closed') {
+                        badge.className = 'badge bg-danger-soft text-danger';
+                        badge.innerText = 'Closed';
+                        messageInput.disabled = true;
+                        sendButton.disabled = true;
+                    } else {
+                        badge.className = 'badge bg-success-soft text-success';
+                        badge.innerText = 'Open';
+                        messageInput.disabled = false;
+                        sendButton.disabled = false;
+                    }
+                }
+
                 function formatChatTime(dateString) {
 
                     const date = new Date(dateString);
@@ -854,7 +878,7 @@
 
                 messageInput?.addEventListener('keydown', function(e) {
 
-                    if (e.key === 'Enter') {
+                    if (e.key === 'Enter' && !e.shiftKey) {
 
                         e.preventDefault();
 
@@ -1054,10 +1078,16 @@
                             document.getElementById('chatMessages');
 
                         messages.innerHTML = `
-<div class="message-row">
+<div
+    class="message-row"
+    id="ticketInfoMessage">
+
     <div class="message-bubble system">
+
         Silakan tuliskan pertanyaan Anda.
+
     </div>
+
 </div>
 `;
                     });
@@ -1070,15 +1100,16 @@
                     .getElementById('btnOpenConversation')
                     ?.addEventListener('click', async function() {
 
+                        const btn = this;
+                        const originalHtml = btn.innerHTML;
+
                         const email =
                             document.getElementById('guestTicketEmail')
-                            .value
-                            .trim();
+                            .value.trim();
 
                         const noTiket =
                             document.getElementById('guestTicket')
-                            .value
-                            .trim();
+                            .value.trim();
 
                         if (!email || !noTiket) {
 
@@ -1088,6 +1119,16 @@
 
                             return;
                         }
+
+                        btn.disabled = true;
+
+                        btn.innerHTML = `
+            <span
+                class="spinner-border spinner-border-sm me-2"
+                role="status">
+            </span>
+            Membuka Percakapan...
+        `;
 
                         try {
 
@@ -1139,6 +1180,8 @@
                                 .innerHTML =
                                 result.ticket_number;
 
+                            updateChatStatus(result.status);
+
                             showPage(pageRoom);
 
                             loadGuestMessages(
@@ -1153,6 +1196,13 @@
                             alert(
                                 'Terjadi kesalahan sistem'
                             );
+
+                        } finally {
+
+                            btn.disabled = false;
+                            btn.innerHTML = originalHtml;
+
+                            feather.replace();
                         }
                     });
 
@@ -1222,6 +1272,47 @@
                                     )
                                     .innerHTML =
                                     result.no_tiket;
+
+                                const ticketInfo =
+                                    document.getElementById(
+                                        'ticketInfoMessage'
+                                    );
+
+                                if (ticketInfo) {
+
+                                    ticketInfo.innerHTML = `
+        <div class="message-bubble system ticket-info">
+
+            <div class="fw-bold mb-2">
+                Nomor Tiket
+            </div>
+
+            <div class="d-flex align-items-center gap-2 mb-2">
+
+                <span id="ticketNumberText">
+                    ${result.no_tiket}
+                </span>
+
+                <button
+                    type="button"
+                    class="btn btn-sm btn-light"
+                    id="copyTicketBtn">
+
+                    📋
+
+                </button>
+
+            </div>
+
+            <small>
+                Nomor tiket sudah dikirim ke email.
+                Mohon disimpan untuk melanjutkan
+                percakapan di kemudian hari.
+            </small>
+
+        </div>
+    `;
+                                }
                             }
 
                             /*
@@ -1315,12 +1406,14 @@
                                 `/guest-chat/${conversationId}/messages?email=${encodeURIComponent(email)}`
                             );
 
-                        const messages =
+                        const res =
                             await response.json();
+
+                        updateChatStatus(res.status);
 
                         chatMessages.innerHTML = '';
 
-                        messages.forEach(msg => {
+                        res.messages.forEach(msg => {
 
                             const isGuest =
                                 msg.sender_guest_id !== null;
@@ -1343,7 +1436,7 @@
         <div class="message-info ${isGuest ? 'me' : 'other'}">
 
             <span class="sender-name">
-                ${senderName}
+                ${senderName},
             </span>
 
             <span class="message-time">
@@ -1373,6 +1466,29 @@
                         console.error(error);
                     }
                 }
+
+                document.addEventListener(
+                    'click',
+                    function(e) {
+
+                        if (
+                            e.target.id === 'copyTicketBtn'
+                        ) {
+
+                            const ticket =
+                                document.getElementById(
+                                    'ticketNumberText'
+                                )?.innerText;
+
+                            navigator.clipboard
+                                .writeText(ticket);
+
+                            alert(
+                                'Nomor tiket berhasil disalin'
+                            );
+                        }
+                    }
+                );
             }
 
             const drawer = document.getElementById('chatDrawer');
@@ -1435,6 +1551,14 @@
                 icon.classList.add('bi-eye');
             }
         }
+
+        // Auto Height Text
+        $(document).on('input', '#chatInput', function() {
+
+            this.style.height = 'auto';
+
+            this.style.height = this.scrollHeight + 'px';
+        });
     </script>
 </body>
 

@@ -88,7 +88,15 @@
     <!-- Floating Chat Button -->
     <div id="chatFloatingButton">
         <button type="button" id="openChatDrawer">
+
             <i data-feather="message-square"></i>
+
+            <span
+                id="chatUnreadBadge"
+                class="chat-unread-badge d-none">
+                0
+            </span>
+
         </button>
     </div>
 
@@ -142,239 +150,312 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap-datepicker@1.10.0/dist/js/bootstrap-datepicker.min.js"></script>
     @stack('scripts')
     <script>
-$(document).ready(function() {
+        $(document).ready(function() {
 
-    // =====================
-    // AUTH
-    // =====================
-    window.ChatAuth = {
-        id: Number({{ Auth::id() }}),
-        name: @json(optional(Auth::user())->nama)
-    };
+            // =====================
+            // AUTH
+            // =====================
+            window.ChatAuth = {
+    id: Number({{ Auth::id() }}),
+    name: @json(optional(Auth::user())->nama)
+};
 
-    // =====================
-    // STATE
-    // =====================
-    let activeConversationId = null;
-    let isSearching = false;
+            function loadUnreadBadge() {
 
-    // =====================
-    // INIT
-    // =====================
-    function initUI() {
+    $.get('/chat/unread-count', function(res) {
 
-    if (typeof feather !== 'undefined') {
-        feather.replace();
-    }
+        const badge =
+            $('#chatUnreadBadge');
 
-    document.querySelectorAll('.toast').forEach(function(el) {
-        new bootstrap.Toast(el, {
-            delay: 5000
-        }).show();
-    });
+        if (res.count > 0) {
 
-    const role = @json(optional(Auth::user()->role)->name);
-
-    if (
-    role === 'admin_bawah' ||
-    role === 'bidang'
-) {
-    loadInboxAdminFo();
-} else {
-    loadMainMenu();
-}
-    }
-
-    initUI();
-
-    // =====================
-    // SAFE HTML ESCAPE (WAJIB)
-    // =====================
-    function escapeHtml(text) {
-        return String(text ?? '')
-            .replace(/&/g, "&amp;")
-            .replace(/</g, "&lt;")
-            .replace(/>/g, "&gt;")
-            .replace(/"/g, "&quot;")
-            .replace(/'/g, "&#039;");
-    }
-
-    // Format Jam pada pengirim dan penerima chat
-    function formatChatTime(dateString) {
-
-    const date = new Date(dateString);
-    const now = new Date();
-
-    const today = new Date(
-        now.getFullYear(),
-        now.getMonth(),
-        now.getDate()
-    );
-
-    const msgDate = new Date(
-        date.getFullYear(),
-        date.getMonth(),
-        date.getDate()
-    );
-
-    const diffDays = Math.floor(
-        (today - msgDate) /
-        (1000 * 60 * 60 * 24)
-    );
-
-    const jam = date.toLocaleTimeString(
-        'id-ID',
-        {
-            hour: '2-digit',
-            minute: '2-digit'
-        }
-    ).replace(':', '.');
-
-    if (diffDays === 0) {
-        return `Hari ini ${jam}`;
-    }
-
-    if (diffDays === 1) {
-        return `Kemarin ${jam}`;
-    }
-
-    return (
-        date.toLocaleDateString(
-            'id-ID',
-            {
-                day: '2-digit',
-                month: '2-digit',
-                year: 'numeric'
-            }
-        ) +
-        ' ' +
-        jam
-    );
-}
-
-    // =====================
-    // RENDER PAGE
-    // =====================
-    function renderPage(html, direction = 'forward') {
-
-        const body = $('.chat-body');
-        const currentPage = body.find('.chat-page');
-
-        const newPage = $(`<div class="chat-page">${html}</div>`);
-
-        if (!currentPage.length) {
-    body.html(newPage);
-
-    if (typeof feather !== 'undefined') {
-        feather.replace();
-    }
-
-    return;
-}
-
-        if (direction === 'forward') {
-            newPage.addClass('page-enter-right');
-            body.append(newPage);
-
-            requestAnimationFrame(() => {
-                newPage.addClass('page-enter-right-active');
-                currentPage.addClass('page-exit-left-active');
-            });
+            badge
+                .text(
+                    res.count > 99
+                    ? '99+'
+                    : res.count
+                )
+                .removeClass('d-none');
 
         } else {
-            newPage.addClass('page-enter-left');
-            body.append(newPage);
 
-            requestAnimationFrame(() => {
-                newPage.addClass('page-enter-left-active');
-                currentPage.addClass('page-exit-right-active');
-            });
+            badge.addClass('d-none');
         }
+    });
+}
 
-        setTimeout(() => {
-            currentPage.remove();
-            newPage.removeClass(
-                'page-enter-right page-enter-right-active page-enter-left page-enter-left-active'
-            );
-            feather.replace();
-        }, 300);
-    }
+            // =====================
+            // STATE
+            // =====================
+            let activeConversationStatus = 'open';
+            let activeConversationId = null;
+            let isSearching = false;
 
-    // =====================
-    // MAIN MENU
-    // =====================
-    function loadMainMenu(direction = 'back') {
+            function loadTicketSearch(direction = 'back') {
 
-        renderPage(`
-            <div class="help-card" id="btnCekTiket">
-                <div>
-                    <h6 class="mb-1">Cek Tiket</h6>
-                    <small>Cari tiket & mulai chat</small>
-                </div>
-                <i data-feather="chevron-right"></i>
+                const userName = shortName(
+    window.ChatAuth.name || 'Pengguna'
+);
+
+                renderPage(`
+
+        <div class="chat-welcome-card">
+
+            <div class="chat-welcome-icon">
+                <span class="wave-hand">👋</span>
             </div>
 
-            <div class="help-card" id="btnTanyaAdmin">
-                <div>
-                    <h6 class="mb-1">Tanya Admin FO</h6>
-                    <small>Chat langsung dengan FO</small>
-                </div>
-                <i data-feather="chevron-right"></i>
-            </div>
-        `, direction);
-    }
+            <h6>Halo, ${escapeHtml(userName)}!</h6>
 
-    function loadInboxAdminFo() {
+            <p>
+                Silakan masukkan nomor tiket untuk memulai percakapan.
+            </p>
 
-    $.get('/chat/admin/inbox', function(res) {
+        </div>
 
-        let html = `<div class="chat-list">`;
+        <div class="mb-3">
 
-        if (!res.length) {
+            <label class="form-label fw-semibold text-dark">
+                Nomor Tiket
+            </label>
 
-            html += `
+            <input
+                type="text"
+                class="form-control text-dark"
+                id="ticketNumber"
+                placeholder="Masukkan nomor tiket">
+
+        </div>
+
+        <button
+    class="btn chat-gradient-btn w-100 d-flex align-items-center justify-content-center"
+    id="searchTicket">
+
+    <i data-feather="search" class="me-2"></i>
+    Cari Tiket
+
+</button>
+
+    `, direction);
+            }
+
+            // =====================
+            // INIT
+            // =====================
+            function initUI() {
+
+                if (typeof feather !== 'undefined') {
+                    feather.replace();
+                }
+
+                document.querySelectorAll('.toast').forEach(function(el) {
+                    new bootstrap.Toast(el, {
+                        delay: 5000
+                    }).show();
+                });
+
+                const role = @json(optional(Auth::user()->role)->name);
+
+                if (
+                    role === 'admin_bawah' ||
+                    role === 'bidang'
+                ) {
+
+                    loadInboxAdminFo();
+
+                } else {
+
+                    loadTicketSearch();
+                }
+            }
+
+            initUI();
+
+            loadUnreadBadge();
+
+            // =====================
+            // SAFE HTML ESCAPE (WAJIB)
+            // =====================
+            function escapeHtml(text) {
+                return String(text ?? '')
+                    .replace(/&/g, "&amp;")
+                    .replace(/</g, "&lt;")
+                    .replace(/>/g, "&gt;")
+                    .replace(/"/g, "&quot;")
+                    .replace(/'/g, "&#039;");
+            }
+
+            function shortName(name) {
+
+    if (!name) return 'Unknown';
+
+    // Ambil nama sebelum koma (gelar dibuang)
+    return String(name)
+        .split(',')[0]
+        .trim();
+}
+
+            // Format Jam pada pengirim dan penerima chat
+            function formatChatTime(dateString) {
+
+                const date = new Date(dateString);
+                const now = new Date();
+
+                const today = new Date(
+                    now.getFullYear(),
+                    now.getMonth(),
+                    now.getDate()
+                );
+
+                const msgDate = new Date(
+                    date.getFullYear(),
+                    date.getMonth(),
+                    date.getDate()
+                );
+
+                const diffDays = Math.floor(
+                    (today - msgDate) /
+                    (1000 * 60 * 60 * 24)
+                );
+
+                const jam = date.toLocaleTimeString(
+                    'id-ID', {
+                        hour: '2-digit',
+                        minute: '2-digit'
+                    }
+                ).replace(':', '.');
+
+                if (diffDays === 0) {
+                    return `Hari ini ${jam}`;
+                }
+
+                if (diffDays === 1) {
+                    return `Kemarin ${jam}`;
+                }
+
+                return (
+                    date.toLocaleDateString(
+                        'id-ID', {
+                            day: '2-digit',
+                            month: '2-digit',
+                            year: 'numeric'
+                        }
+                    ) +
+                    ' ' +
+                    jam
+                );
+            }
+
+            // =====================
+            // RENDER PAGE
+            // =====================
+            function renderPage(html, direction = 'forward') {
+
+                const body = $('.chat-body');
+                const currentPage = body.find('.chat-page');
+
+                const newPage = $(`<div class="chat-page">${html}</div>`);
+
+                if (!currentPage.length) {
+                    body.html(newPage);
+
+                    if (typeof feather !== 'undefined') {
+                        feather.replace();
+                    }
+
+                    return;
+                }
+
+                if (direction === 'forward') {
+                    newPage.addClass('page-enter-right');
+                    body.append(newPage);
+
+                    requestAnimationFrame(() => {
+                        newPage.addClass('page-enter-right-active');
+                        currentPage.addClass('page-exit-left-active');
+                    });
+
+                } else {
+                    newPage.addClass('page-enter-left');
+                    body.append(newPage);
+
+                    requestAnimationFrame(() => {
+                        newPage.addClass('page-enter-left-active');
+                        currentPage.addClass('page-exit-right-active');
+                    });
+                }
+
+                setTimeout(() => {
+                    currentPage.remove();
+                    newPage.removeClass(
+                        'page-enter-right page-enter-right-active page-enter-left page-enter-left-active'
+                    );
+                    feather.replace();
+                }, 300);
+            }
+
+            function loadInboxAdminFo() {
+
+                $.get('/chat/admin/inbox', function(res) {
+
+                    let html = `<div class="chat-list">`;
+
+                    if (!res.length) {
+
+                        html += `
                 <div class="chat-empty">
                     Belum ada pesan masuk
                 </div>
             `;
 
-        } else {
+                    } else {
 
-            res.forEach(item => {
+                        res.forEach(item => {
 
-                let badge = '';
+                            let unreadBadge = '';
 
-                switch (item.type) {
+                            if (item.unread > 0) {
 
-                    case 'guest':
-                        badge = `
+                                unreadBadge = `
+        <span class="badge bg-danger rounded-pill">
+            ${item.unread}
+        </span>
+    `;
+                            }
+
+                            let badge = '';
+
+                            switch (item.type) {
+
+                                case 'guest':
+                                    badge = `
                             <span class="badge bg-success-soft text-success">
                                 Tamu
                             </span>
                         `;
-                        break;
+                                    break;
 
-                    case 'ticket':
-                        badge = `
+                                case 'ticket':
+                                    badge = `
                             <span class="badge bg-primary-soft text-primary">
                                 OPD
                             </span>
                         `;
-                        break;
+                                    break;
 
-                    case 'admin':
-                        badge = `
+                                case 'admin':
+                                    badge = `
                             <span class="badge bg-primary-soft text-primary">
                                 Tamu
                             </span>
                         `;
-                        break;
+                                    break;
 
-                    default:
-                        badge = '';
-                }
+                                default:
+                                    badge = '';
+                            }
 
-                html += `
+                            html += `
                     <div
                         class="chat-item openConversation"
                         data-id="${item.id}">
@@ -401,245 +482,328 @@ $(document).ready(function() {
 
                         </div>
 
-                        <div class="chat-meta">
-                            <i data-feather="chevron-right"></i>
+                        <div class="chat-meta d-flex flex-column align-items-end gap-1">
+                                ${unreadBadge}
+                                <i data-feather="chevron-right"></i>
                         </div>
 
                     </div>
                 `;
-            });
-        }
+                        });
+                    }
 
-        html += `</div>`;
+                    html += `</div>`;
 
-        $('.chat-body').html(html);
+                    $('.chat-body').html(html);
 
-        feather.replace();
-    });
-}
+                    feather.replace();
+                });
+            }
 
-$(document).on('click', '#btnBackInbox', function() {
+            $(document).on('click', '#btnBackInbox', function() {
 
-    activeConversationId = null;
+                activeConversationId = null;
 
-    const role = @json(optional(Auth::user()->role)->name);
+                const role = @json(optional(Auth::user()->role)->name);
 
-    if (
-        role === 'admin_bawah' ||
-        role === 'bidang'
-    ) {
-        loadInboxAdminFo();
-    } else {
-        loadMainMenu();
-    }
-});
-
-// setInterval(function() {
-
-//     if (!activeConversationId) {
-//         return;
-//     }
-
-//     $.get(
-//         `/chat/${activeConversationId}/messages`,
-//         function(res) {
-
-//             renderMessages(res);
-//         }
-//     );
-
-// }, 3000);
-
-$(document).on('click', '.openConversation', function() {
-
-    let conversationId = $(this).data('id');
-
-    loadChat(conversationId);
-});
-
-    // =====================
-    // DRAWER
-    // =====================
-    $('#openChatDrawer').on('click', function(e) {
-        e.stopPropagation();
-        $('#chatDrawer').toggleClass('show');
-    });
-
-    $('#closeChatDrawer').on('click', function() {
-        $('#chatDrawer').removeClass('show');
-    });
-
-    $(document).on('mouseup', function(e) {
-        let drawer = $('#chatDrawer');
-        let button = $('#openChatDrawer');
-
-        if (
-            drawer.hasClass('show') &&
-            !drawer.is(e.target) &&
-            drawer.has(e.target).length === 0 &&
-            !button.is(e.target) &&
-            button.has(e.target).length === 0
-        ) {
-            drawer.removeClass('show');
-        }
-    });
-
-    // =====================
-    // CEK TIKET
-    // =====================
-    $(document).on('click', '#btnCekTiket', function() {
-
-        renderPage(`
-            <button class="btn btn-link p-0 mb-3" id="backToMenu">← Kembali</button>
-
-            <div class="mb-3">
-                <label>Nomor Tiket</label>
-                <input type="text" class="form-control" id="ticketNumber">
-            </div>
-
-            <button class="btn btn-primary w-100" id="searchTicket">
-                Cari Tiket
-            </button>
-        `, 'forward');
-    });
-
-    // =====================
-    // SEARCH TIKET
-    // =====================
-    $(document).on('click', '#searchTicket', function(e) {
-
-        e.preventDefault();
-
-        if (isSearching) return;
-        isSearching = true;
-
-        const btn = $(this);
-        let nomorTiket = $('#ticketNumber').val();
-
-        if (!nomorTiket) {
-            alert('Masukkan nomor tiket');
-            isSearching = false;
-            return;
-        }
-
-        btn.prop('disabled', true).html(`
-            <span class="spinner-border spinner-border-sm"></span> Mencari...
-        `);
-
-        $.ajax({
-            url: '/chat/search-ticket',
-            method: 'POST',
-            data: {
-                no_tiket: nomorTiket,
-                _token: "{{ csrf_token() }}"
-            },
-            success: function(res) {
-
-                isSearching = false;
-                btn.prop('disabled', false).html('Cari Tiket');
-
-                if (!res.success) {
-                    alert(res.message);
+                if (
+                    role === 'admin_bawah' ||
+                    role === 'bidang'
+                ) {
+                    loadInboxAdminFo();
                     return;
                 }
 
-                renderPage(`
+                loadTicketSearch('back');
+            });
+
+            // setInterval(function() {
+
+            //     if (!activeConversationId) {
+            //         return;
+            //     }
+
+            //     $.get(
+            //         `/chat/${activeConversationId}/messages`,
+            //         function(res) {
+
+            //             renderMessages(res);
+            //         }
+            //     );
+
+            // }, 3000);
+
+            $(document).on('click', '.openConversation', function() {
+
+                let conversationId = $(this).data('id');
+
+                loadChat(conversationId);
+            });
+
+            // =====================
+            // DRAWER
+            // =====================
+            $('#openChatDrawer').on('click', function(e) {
+                e.stopPropagation();
+                $('#chatDrawer').toggleClass('show');
+            });
+
+            $('#closeChatDrawer').on('click', function() {
+                $('#chatDrawer').removeClass('show');
+            });
+
+            $(document).on('mouseup', function(e) {
+                let drawer = $('#chatDrawer');
+                let button = $('#openChatDrawer');
+
+                if (
+                    drawer.hasClass('show') &&
+                    !drawer.is(e.target) &&
+                    drawer.has(e.target).length === 0 &&
+                    !button.is(e.target) &&
+                    button.has(e.target).length === 0
+                ) {
+                    drawer.removeClass('show');
+                }
+            });
+
+            // =====================
+            // CEK TIKET
+            // =====================
+            // $(document).on('click', '#btnCekTiket', function() {
+
+            //     renderPage(`
+            //         <button class="btn btn-link p-0 mb-3" id="backToMenu">← Kembali</button>
+
+            //         <div class="mb-3">
+            //             <label>Nomor Tiket</label>
+            //             <input type="text" class="form-control" id="ticketNumber">
+            //         </div>
+
+            //         <button class="btn btn-primary w-100" id="searchTicket">
+            //             Cari Tiket
+            //         </button>
+            //     `, 'forward');
+            // });
+
+            // =====================
+            // SEARCH TIKET
+            // =====================
+            $(document).on('click', '#searchTicket', function(e) {
+
+                e.preventDefault();
+
+                if (isSearching) return;
+                isSearching = true;
+
+                const btn = $(this);
+                let nomorTiket = $('#ticketNumber').val();
+
+                if (!nomorTiket) {
+                    alert('Masukkan nomor tiket');
+                    isSearching = false;
+                    return;
+                }
+
+                btn.prop('disabled', true).html(`
+            <span class="spinner-border spinner-border-sm"></span> Mencari...
+        `);
+
+                $.ajax({
+                    url: '/chat/search-ticket',
+                    method: 'POST',
+                    data: {
+                        no_tiket: nomorTiket,
+                        _token: "{{ csrf_token() }}"
+                    },
+                    success: function(res) {
+
+                        isSearching = false;
+                        btn.prop('disabled', false).html('Cari Tiket');
+
+                        if (!res.success) {
+                            alert(res.message);
+                            return;
+                        }
+
+                        renderPage(`
                     <button class="btn btn-link p-0 mb-3" id="backToMenu">← Kembali</button>
 
-                    <div class="card p-3 mb-3">
-                        <b>${escapeHtml(res.tiket.no_tiket)}</b><br>
-                        ${escapeHtml(res.tiket.layanan)}<br>
-                        Status: ${escapeHtml(res.tiket.status)}
-                    </div>
+                    <div class="ticket-result-card mb-3">
 
-                    <button class="btn btn-primary w-100"
-                        id="startChat"
-                        data-id="${res.tiket.no_tiket}">
-                        Mulai Chat
-                    </button>
+    <div class="ticket-result-header">
+
+        <i data-feather="tag"></i>
+
+        <span>
+            Tiket Ditemukan!
+        </span>
+
+    </div>
+
+    <div class="ticket-result-number">
+
+        ${escapeHtml(res.tiket.no_tiket)}
+
+    </div>
+
+    <div class="ticket-result-service">
+
+        ${escapeHtml(res.tiket.layanan)}
+
+    </div>
+
+    <div class="ticket-result-status">
+
+        <span class="
+            badge
+            ${res.tiket.status === 'open'
+                ? 'bg-success-soft text-success'
+                : 'bg-danger-soft text-danger'}
+        ">
+
+            ${escapeHtml(res.tiket.status)}
+
+        </span>
+
+    </div>
+
+</div>
+
+                    <button
+    class="btn chat-gradient-btn w-100"
+    id="startChat"
+    data-id="${res.tiket.no_tiket}">
+
+    <i
+        data-feather="message-circle"
+        class="me-2">
+    </i>
+
+    Mulai Chat
+
+</button>
                 `, 'forward');
-            },
-            error: function(xhr) {
+                    },
+                    error: function(xhr) {
 
-                isSearching = false;
-                btn.prop('disabled', false).html('Cari Tiket');
+                        isSearching = false;
+                        btn.prop('disabled', false).html('Cari Tiket');
 
-                console.log(xhr.responseText);
-                alert('Gagal mencari tiket');
-            }
-        });
-    });
+                        console.log(xhr.responseText);
+                        alert('Gagal mencari tiket');
+                    }
+                });
+            });
 
-    // =====================
-    // START CHAT
-    // =====================
-    $(document).on('click', '#startChat', function() {
+            // =====================
+            // START CHAT
+            // =====================
+            $(document).on('click', '#startChat', function() {
 
-        let noTiket = $(this).data('id');
+                const btn = $(this);
 
-        $.ajax({
-            url: '/chat/start-ticket',
-            method: 'POST',
-            data: {
-                no_tiket: noTiket,
-                _token: "{{ csrf_token() }}"
-            },
-            success: function(res) {
+                const originalHtml = btn.html();
 
-                if (res.conversation_id) {
-                    loadChat(res.conversation_id);
-                    $('#chatDrawer').addClass('show');
-                } else {
-                    alert('Chat gagal dibuat');
-                }
-            },
-            error: function(xhr) {
-                console.log(xhr.responseText);
-                alert('Server error saat membuat chat');
-            }
-        });
-    });
+                btn.prop('disabled', true);
 
-    // =====================
-    // GLOBAL CHAT
-    // =====================
-    $(document).on('click', '#btnTanyaAdmin', function() {
+                btn.html(`
+        <span
+            class="spinner-border spinner-border-sm me-2">
+        </span>
+        Membuka Chat...
+    `);
 
-        $.ajax({
-            url: '/chat/start-global',
-            method: 'POST',
-            data: {
-                _token: "{{ csrf_token() }}"
-            },
-            success: function(res) {
+                let noTiket = btn.data('id');
 
-                if (res.conversation_id) {
-                    loadChat(res.conversation_id);
-                    $('#chatDrawer').addClass('show');
-                } else {
-                    alert('Gagal membuka chat FO');
-                }
-            },
-            error: function(xhr) {
-                console.log(xhr.responseText);
-                alert('Server error FO chat');
-            }
-        });
-    });
+                $.ajax({
+                    url: '/chat/start-ticket',
+                    method: 'POST',
+                    data: {
+                        no_tiket: noTiket,
+                        _token: "{{ csrf_token() }}"
+                    },
+                    success: function(res) {
 
-    // =====================
-    // LOAD CHAT
-    // =====================
-   function loadChat(conversationId) {
+                        btn.prop('disabled', false);
+                        btn.html(originalHtml);
 
-    activeConversationId = conversationId;
+                        if (res.conversation_id) {
 
-    $.get(`/chat/${conversationId}/messages`, function(res) {
+                            loadChat(res.conversation_id);
 
-        let html = `
+                            $('#chatDrawer').addClass('show');
+
+                        } else {
+
+                            alert('Chat gagal dibuat');
+                        }
+
+                        feather.replace();
+                    },
+                    error: function(xhr) {
+
+                        btn.prop('disabled', false);
+
+                        btn.html(`
+    <span class="spinner-border spinner-border-sm me-2"></span>
+    Menyiapkan Percakapan...
+`);
+
+                        btn.html(originalHtml);
+
+                        feather.replace();
+
+                        console.log(xhr.responseText);
+
+                        alert('Server error saat membuat chat');
+                    }
+                });
+            });
+
+            // =====================
+            // GLOBAL CHAT
+            // =====================
+            // $(document).on('click', '#btnTanyaAdmin', function() {
+
+            //     $.ajax({
+            //         url: '/chat/start-global',
+            //         method: 'POST',
+            //         data: {
+            //             _token: "{{ csrf_token() }}"
+            //         },
+            //         success: function(res) {
+
+            //             if (res.conversation_id) {
+            //                 loadChat(res.conversation_id);
+            //                 $('#chatDrawer').addClass('show');
+            //             } else {
+            //                 alert('Gagal membuka chat FO');
+            //             }
+            //         },
+            //         error: function(xhr) {
+            //             console.log(xhr.responseText);
+            //             alert('Server error FO chat');
+            //         }
+            //     });
+            // });
+
+            // =====================
+            // LOAD CHAT
+            // =====================
+            function loadChat(conversationId) {
+
+                activeConversationId = conversationId;
+
+                $.get(`/chat/${conversationId}/messages`, function(res) {
+                    activeConversationStatus = res.status;
+
+                    let html = `
         <div class="d-flex flex-column h-100">
 
            <div class="border-bottom bg-white p-3">
+
+    <div class="d-flex justify-content-between align-items-center">
 
     <div class="d-flex align-items-center gap-2">
 
@@ -650,19 +814,56 @@ $(document).on('click', '.openConversation', function() {
             <i data-feather="arrow-left"></i>
         </button>
 
-        <div class="small d-flex align-items-center gap-1">
+        <div class="small d-flex align-items-center gap-1 flex-nowrap">
 
-    <span class="fw-bold">No Tiket :</span>
+            <span class="fw-semibold text-dark">Tiket :</span>
 
-    <span
-        class="fw-bold"
-        id="roomTicketNo">
-        -
-    </span>
+            <span
+                class="fw-semibold text-dark"
+                id="roomTicketNo">
+                -
+            </span>
 
-</div>
+        </div>
 
     </div>
+
+    <div class="dropdown">
+
+        <button
+    class="chat-menu-btn"
+    type="button"
+    data-bs-toggle="dropdown">
+
+    <i data-feather="more-vertical"></i>
+
+</button>
+
+        <ul class="dropdown-menu dropdown-menu-end">
+
+            <li>
+                <a
+                    class="dropdown-item"
+                    href="#"
+                    id="btnCloseChat">
+                    Tutup Chat
+                </a>
+            </li>
+
+            <li>
+                <a
+                    class="dropdown-item"
+                    href="#"
+                    id="btnReopenChat">
+                    Buka Chat
+                </a>
+            </li>
+
+        </ul>
+
+    </div>
+
+</div>
 
 </div>
 
@@ -675,11 +876,11 @@ $(document).on('click', '.openConversation', function() {
 
                 <div class="chat-input-wrapper">
 
-    <input
-        type="text"
-        id="chatInput"
-        class="form-control"
-        placeholder="Tulis pesan...">
+    <textarea
+    id="chatInput"
+    class="form-control"
+    placeholder="Tulis pesan..."
+    rows="1"></textarea>
 
     <button
         class="chat-send-btn"
@@ -696,44 +897,73 @@ $(document).on('click', '.openConversation', function() {
         </div>
         `;
 
-        $('.chat-body').html(html);
+                    $('.chat-body').html(html);
 
-        renderMessages(res.messages);
+                    renderMessages(res.messages);
 
-        $('#roomTicketNo').text(
-    res.ticket_number || '-'
+                    loadUnreadBadge();
+
+                    $('#roomTicketNo').text(
+                        res.ticket_number || '-'
+                    );
+
+                    $('#roomTicketNo').after(`
+    <span
+        id="chatStatusBadge"
+        class="badge ms-2 ${
+            res.status === 'closed'
+                ? 'bg-danger-soft text-danger'
+                : 'bg-success-soft text-success'
+        }">
+
+        ${
+            res.status === 'closed'
+                ? 'Closed'
+                : 'Open'
+        }
+
+    </span>
+`);
+
+                    feather.replace();
+                    if (res.status === 'closed') {
+
+                        $('#btnCloseChat').hide();
+
+                    } else {
+
+                        $('#btnReopenChat').hide();
+                    }
+                });
+            }
+
+            // =====================
+            // RENDER MESSAGES (FIXED)
+            // =====================
+            function renderMessages(messages) {
+
+                let box = $('#chatMessages');
+
+                if (!box.length) return;
+
+                box.html('');
+
+                messages.forEach(msg => {
+
+                    let isMe =
+                        Number(msg.sender_user_id) ===
+                        Number(window.ChatAuth.id);
+
+                    let senderName = shortName(
+    msg.sender_name
 );
 
-        feather.replace();
-    });
-}
+                    let chatTime =
+                        formatChatTime(
+                            msg.created_at
+                        );
 
-    // =====================
-    // RENDER MESSAGES (FIXED)
-    // =====================
-    function renderMessages(messages) {
-
-    let box = $('#chatMessages');
-
-    if (!box.length) return;
-
-    box.html('');
-
-    messages.forEach(msg => {
-
-        let isMe =
-            Number(msg.sender_user_id) ===
-            Number(window.ChatAuth.id);
-
-        let senderName =
-            msg.sender_name || 'Unknown';
-
-        let chatTime =
-    formatChatTime(
-        msg.created_at
-    );
-
-        box.append(`
+                    box.append(`
 
 <div class="message-row ${isMe ? 'me' : 'other'}">
 
@@ -742,7 +972,7 @@ $(document).on('click', '.openConversation', function() {
         <div class="message-info ${isMe ? 'me' : 'other'}">
 
             <span class="sender-name">
-                ${escapeHtml(senderName)}
+                ${escapeHtml(senderName)},
             </span>
 
             <span class="message-time">
@@ -762,37 +992,37 @@ $(document).on('click', '.openConversation', function() {
 </div>
 
 `);
-    });
+                });
 
-    box.scrollTop(box[0].scrollHeight);
-}
+                box.scrollTop(box[0].scrollHeight);
+            }
 
-    // =====================
-    // SEND MESSAGE (FIXED)
-    // =====================
-    $(document).on('click', '#sendMessage', function() {
+            // =====================
+            // SEND MESSAGE (FIXED)
+            // =====================
+            $(document).on('click', '#sendMessage', function() {
 
-        let input = $('#chatInput');
-        let message = input.val();
+                let input = $('#chatInput');
+                let message = input.val();
 
-        if (!message.trim()) return;
+                if (!message.trim()) return;
 
-        $.ajax({
-            url: `/chat/${activeConversationId}/message`,
-            method: 'POST',
-            data: {
-                message: message,
-                _token: "{{ csrf_token() }}"
-            },
-            success: function(res) {
+                $.ajax({
+                    url: `/chat/${activeConversationId}/message`,
+                    method: 'POST',
+                    data: {
+                        message: message,
+                        _token: "{{ csrf_token() }}"
+                    },
+                    success: function(res) {
 
-    input.val('');
+                        input.val('');
 
-    let box = $('#chatMessages');
+                        let box = $('#chatMessages');
 
-    if (!box.length) return;
+                        if (!box.length) return;
 
-    box.append(`
+                        box.append(`
 
 <div class="message-row me">
 
@@ -801,7 +1031,7 @@ $(document).on('click', '.openConversation', function() {
         <div class="message-info me">
 
             <span class="sender-name">
-                ${escapeHtml(window.ChatAuth.name)}
+                ${escapeHtml(shortName(window.ChatAuth.name))}
             </span>
 
             <span class="message-time">
@@ -825,51 +1055,99 @@ $(document).on('click', '.openConversation', function() {
 
 `);
 
-    box.scrollTop(box[0].scrollHeight);
-}
+                        box.scrollTop(box[0].scrollHeight);
+                    }
+                });
+            });
+
+            // =====================
+            // BACK
+            // =====================
+            $(document).on('click', '#backToMenu', function() {
+                loadTicketSearch('back');
+            });
+
+            function getInitials(name) {
+
+                if (!name) return 'U';
+
+                const words = name
+                    .trim()
+                    .split(/\s+/);
+
+                if (words.length >= 2) {
+
+                    return (
+                        words[0][0] +
+                        words[1][0]
+                    ).toUpperCase();
+                }
+
+                return words[0]
+                    .substring(0, 2)
+                    .toUpperCase();
+            }
+
+            $(document).on(
+                'click',
+                '#btnCloseChat',
+                function(e) {
+                    e.preventDefault();
+
+                    if (!confirm('Tutup chat ini?')) {
+                        return;
+                    }
+
+                    $.post(
+                        `/chat/${activeConversationId}/close`, {
+                            _token: "{{ csrf_token() }}"
+                        },
+                        function() {
+
+                            loadChat(activeConversationId);
+
+                        }
+                    );
+                });
+
+            $(document).on(
+                'click',
+                '#btnReopenChat',
+                function(e) {
+                    e.preventDefault();
+
+                    $.post(
+                        `/chat/${activeConversationId}/reopen`, {
+                            _token: "{{ csrf_token() }}"
+                        },
+                        function() {
+
+                            loadChat(activeConversationId);
+
+                        }
+                    );
+                });
+
+            // Enter
+            $(document).on('keydown', '#chatInput', function(e) {
+
+                if (e.key === 'Enter' && !e.shiftKey) {
+
+                    e.preventDefault();
+
+                    $('#sendMessage').click();
+                }
+            });
+
+            // Auto Height Text
+            $(document).on('input', '#chatInput', function() {
+
+                this.style.height = 'auto';
+
+                this.style.height = this.scrollHeight + 'px';
+            });
         });
-    });
-
-    // =====================
-    // BACK
-    // =====================
-    $(document).on('click', '#backToMenu', function() {
-        loadMainMenu('back');
-    });
-
-    function getInitials(name) {
-
-    if (!name) return 'U';
-
-    const words = name
-        .trim()
-        .split(/\s+/);
-
-    if (words.length >= 2) {
-
-        return (
-            words[0][0] +
-            words[1][0]
-        ).toUpperCase();
-    }
-
-    return words[0]
-        .substring(0, 2)
-        .toUpperCase();
-}
-
-// Enter
-$(document).on('keypress', '#chatInput', function(e){
-
-    if(e.which === 13){
-
-        e.preventDefault();
-
-        $('#sendMessage').click();
-    }
-});
-});
-</script>
+    </script>
 </body>
 
 </html>

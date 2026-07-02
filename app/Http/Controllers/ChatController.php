@@ -161,11 +161,31 @@ class ChatController extends Controller
             ], 403);
         }
 
+        // CHAT SUDAH DITUTUP
+        if ($conversation->status === 'closed') {
+
+            return response()->json([
+                'message' => 'Chat sudah ditutup'
+            ], 422);
+        }
+
         $message = ChatMessage::create([
             'conversation_id' => $conversation->id,
             'sender_user_id'  => $user->id,
             'message'         => $request->message,
         ]);
+
+        ChatParticipant::where(
+            'conversation_id',
+            $conversation->id
+        )
+            ->where(
+                'user_id',
+                $user->id
+            )
+            ->update([
+                'last_read_message_id' => $message->id
+            ]);
 
         $needReply = false;
 
@@ -255,6 +275,7 @@ class ChatController extends Controller
 
         return response()->json([
             'ticket_number' => $conversation->no_tiket,
+            'status'        => $conversation->status,
             'messages'      => $messages
         ]);
         // return response()->json($messages);
@@ -323,6 +344,7 @@ class ChatController extends Controller
         $query = ChatConversation::with([
             'creator',
             'guest',
+            'participants',
             'messages' => function ($q) {
                 $q->latest();
             }
@@ -417,7 +439,11 @@ class ChatController extends Controller
             ->orderBy('id')
             ->get();
 
-        return response()->json($messages);
+        return response()->json([
+            'status'        => $conversation->status,
+            'ticket_number' => $conversation->no_tiket,
+            'messages'      => $messages
+        ]);
     }
 
     public function getBidang()
@@ -530,6 +556,13 @@ class ChatController extends Controller
             'message' => 'required|string'
         ]);
 
+        if ($conversation->status === 'closed') {
+
+            return response()->json([
+                'message' => 'Chat sudah ditutup'
+            ], 422);
+        }
+
         $message = ChatMessage::create([
             'conversation_id' => $conversation->id,
             'sender_guest_id' => $conversation->guest_id,
@@ -584,7 +617,96 @@ class ChatController extends Controller
             'success' => true,
             'conversation_id' => $conversation->id,
             'guest_name' => $conversation->guest->nama,
-            'ticket_number' => $conversation->no_tiket
+            'ticket_number' => $conversation->no_tiket,
+            'status'        => $conversation->status
+        ]);
+    }
+
+    public function closeChat(ChatConversation $conversation)
+    {
+        $user = Auth::user();
+
+        if (
+            !$this->isParticipant(
+                $conversation->id,
+                $user->id
+            )
+        ) {
+            return response()->json([
+                'message' => 'Unauthorized'
+            ], 403);
+        }
+
+        $conversation->update([
+            'status' => 'closed'
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'status' => 'closed'
+        ]);
+    }
+
+    public function reopenChat(ChatConversation $conversation)
+    {
+        $user = Auth::user();
+
+        if (
+            !$this->isParticipant(
+                $conversation->id,
+                $user->id
+            )
+        ) {
+            return response()->json([
+                'message' => 'Unauthorized'
+            ], 403);
+        }
+
+        $conversation->update([
+            'status' => 'open'
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'status' => 'open'
+        ]);
+    }
+
+    public function unreadCount()
+    {
+        $user = Auth::user();
+
+        $count = 0;
+
+        $participants = ChatParticipant::where(
+            'user_id',
+            $user->id
+        )->get();
+
+        foreach ($participants as $participant) {
+
+            $lastReadId =
+                $participant->last_read_message_id ?? 0;
+
+            $count += ChatMessage::where(
+                'conversation_id',
+                $participant->conversation_id
+            )
+                ->where('id', '>', $lastReadId)
+                ->where(function ($q) use ($user) {
+
+                    $q->whereNull('sender_user_id')
+                        ->orWhere(
+                            'sender_user_id',
+                            '!=',
+                            $user->id
+                        );
+                })
+                ->count();
+        }
+
+        return response()->json([
+            'count' => $count
         ]);
     }
 }

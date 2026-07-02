@@ -38,11 +38,16 @@ Route::get('/tiket/cetak/{no_tiket}', [TiketController::class, 'cetak'])->name('
 
 // Guest Chat
 Route::get('/guest-chat/bidang', [ChatController::class, 'getBidang']);
-Route::get('/guest-chat/layanan/{bidang}',[ChatController::class, 'getLayanan']);
+Route::get('/guesct-chat/layanan/{bidang}',[ChatController::class, 'getLayanan']);
 Route::post('/guest-chat/start',[ChatController::class, 'startGuestChat']);
 Route::post('/guest-chat/resume',[ChatController::class, 'resumeGuestChat']);
 Route::get('/guest-chat/{conversation}/messages',[ChatController::class, 'loadGuestMessages']);
 Route::post('/guest-chat/{conversation}/message',[ChatController::class, 'sendGuestMessage']);
+// Open & close chat
+Route::post('/chat/{conversation}/close', [ChatController::class, 'closeChat']);
+Route::post('/chat/{conversation}/reopen', [ChatController::class, 'reopenChat']);
+// Total Unread Count
+Route::get('/chat/unread-count', [ChatController::class, 'unreadCount']);
 
 /* Authenticated */
 
