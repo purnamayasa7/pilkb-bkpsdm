@@ -34,7 +34,7 @@ body {
 
 .left-box {
     position: relative;
-    background: url('https://raw.githubusercontent.com/purnamayasa7/Images/main/BoxLogin.jpg') center center / cover no-repeat;
+    background: url('/images/BoxLogin.jpg') center center / cover no-repeat;
     display: flex;
     align-items: center;
     padding: 50px;

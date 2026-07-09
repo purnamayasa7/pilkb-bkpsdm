@@ -266,7 +266,7 @@
             </div>
         </li>
         <!-- Messages Dropdown-->
-        <li class="nav-item dropdown no-caret d-none d-sm-block me-3 dropdown-notifications">
+        <!-- <li class="nav-item dropdown no-caret d-none d-sm-block me-3 dropdown-notifications">
             <a class="btn btn-icon btn-transparent-dark dropdown-toggle" id="navbarDropdownMessages"
                 href="javascript:void(0);" role="button" data-bs-toggle="dropdown" aria-haspopup="true"
                 aria-expanded="false"><i data-feather="mail"></i></a>
@@ -276,7 +276,7 @@
                     <i class="me-2" data-feather="mail"></i>
                     Message Center
                 </h6>
-                <!-- Example Message 1  -->
+
                 <a class="dropdown-item dropdown-notifications-item" href="#!">
                     <img class="dropdown-notifications-item-img"
                         src="{{ asset('templatepro/assets/img/illustrations/profiles/profile-2.png') }}" />
@@ -290,7 +290,7 @@
                         <div class="dropdown-notifications-item-content-details">Thomas Wilcox · 58m</div>
                     </div>
                 </a>
-                <!-- Example Message 2-->
+
                 <a class="dropdown-item dropdown-notifications-item" href="#!">
                     <img class="dropdown-notifications-item-img"
                         src="{{ asset('templatepro/assets/img/illustrations/profiles/profile-3.png') }}" />
@@ -304,7 +304,7 @@
                         <div class="dropdown-notifications-item-content-details">Emily Fowler · 2d</div>
                     </div>
                 </a>
-                <!-- Example Message 3-->
+
                 <a class="dropdown-item dropdown-notifications-item" href="#!">
                     <img class="dropdown-notifications-item-img"
                         src="{{ asset('templatepro/assets/img/illustrations/profiles/profile-4.png') }}" />
@@ -318,7 +318,7 @@
                         <div class="dropdown-notifications-item-content-details">Marshall Rosencrantz · 3d</div>
                     </div>
                 </a>
-                <!-- Example Message 4-->
+
                 <a class="dropdown-item dropdown-notifications-item" href="#!">
                     <img class="dropdown-notifications-item-img"
                         src="{{ asset('templatepro/assets/img/illustrations/profiles/profile-5.png') }}" />
@@ -332,10 +332,10 @@
                         <div class="dropdown-notifications-item-content-details">Colby Newton · 3d</div>
                     </div>
                 </a>
-                <!-- Footer Link-->
+
                 <a class="dropdown-item dropdown-notifications-footer" href="#!">Read All Messages</a>
             </div>
-        </li>
+        </li> -->
         <!-- User Dropdown-->
         @auth
         @php

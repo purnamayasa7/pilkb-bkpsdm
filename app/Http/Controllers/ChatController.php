@@ -10,12 +10,20 @@ use App\Models\ChatParticipant;
 use App\Models\Layanan;
 use App\Models\Regtiket;
 use App\Models\User;
+use App\Services\PegawaiService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 
 class ChatController extends Controller
 {
+    protected $pegawaiService;
+
+    public function __construct(PegawaiService $pegawaiService)
+    {
+        $this->pegawaiService = $pegawaiService;
+    }
+
     // OPD, Bidang
     public function index()
     {
@@ -378,6 +386,8 @@ class ChatController extends Controller
                 return [
                     'id' => $c->id,
 
+                    'last_message_id' => $c->last_message_id,
+
                     'nama_pengirim' =>
                     $c->guest?->nama
                         ?? $c->creator?->nama
@@ -476,6 +486,7 @@ class ChatController extends Controller
     public function startGuestChat(Request $request)
     {
         $request->validate([
+            'nip'        => 'required|string|size:18',
             'nama'       => 'required|string|max:100',
             'email'      => 'required|email|max:100',
             'bidang_id'  => 'required|exists:tb_bidang,id',
@@ -487,6 +498,7 @@ class ChatController extends Controller
                 'email' => $request->email
             ],
             [
+                'nip'  => $request->nip,
                 'nama' => $request->nama
             ]
         );
@@ -530,15 +542,35 @@ class ChatController extends Controller
         ]);
     }
 
+    public function getPegawaiByNip($nip)
+    {
+        $pegawai = $this->pegawaiService->getPegawaiByNip($nip);
+
+        if (!$pegawai) {
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Pegawai tidak ditemukan'
+            ], 404);
+        }
+
+        return response()->json([
+            'success' => true,
+            'nip' => $pegawai['nip'],
+            'nama' => $pegawai['nama_lengkap'] ?? $pegawai['nama'],
+            'unit_kerja' => $pegawai['ket_ukerja']
+        ]);
+    }
+
     private function generateGuestTicketNumber()
     {
         do {
             $ticketNumber =
-                'CHT-' .
+                'CH' .
                 now()->format('dmY') .
                 '-' .
                 strtoupper(
-                    \Illuminate\Support\Str::random(10)
+                    \Illuminate\Support\Str::random(8)
                 );
         } while (
             ChatConversation::where(
@@ -577,6 +609,7 @@ class ChatController extends Controller
         return response()->json([
             'success' => true,
             'message' => $message,
+            'message_id' => $message->id,
             'ticket_number' => $conversation->no_tiket
         ]);
     }
@@ -708,5 +741,196 @@ class ChatController extends Controller
         return response()->json([
             'count' => $count
         ]);
+    }
+
+    public function pollMessages(Request $request, ChatConversation $conversation)
+    {
+        $user = Auth::user();
+
+        if (
+            !$this->isParticipant(
+                $conversation->id,
+                $user->id
+            )
+        ) {
+            return response()->json([
+                'message' => 'Unauthorized'
+            ], 403);
+        }
+
+        $lastMessageId = (int)
+        $request->get(
+            'last_message_id',
+            0
+        );
+
+        $newMessages = $conversation->messages()
+            ->with([
+                'senderUser:id,nama',
+                'senderGuest:id,nama'
+            ])
+            ->where('id', '>', $lastMessageId)
+            ->orderBy('id')
+            ->get();
+
+        $messages = $this->formatMessages(
+            $newMessages
+        );
+
+        if ($messages->isNotEmpty()) {
+            ChatParticipant::where(
+                'conversation_id',
+                $conversation->id
+            )
+                ->where(
+                    'user_id',
+                    $user->id
+                )
+                ->update([
+                    'last_read_message_id' =>
+                    $messages->last()['id']
+                ]);
+        }
+
+        return response()->json([
+            'messages' => $messages,
+            'status' => $conversation->status
+        ]);
+    }
+
+    public function pollGuestMessages(Request $request, ChatConversation $conversation)
+    {
+        $request->validate([
+            'email' => 'required|email'
+        ]);
+
+        $conversation->load('guest');
+
+        if (
+            !$conversation->guest ||
+            strtolower($conversation->guest->email) !== strtolower($request->email)
+        ) {
+            return response()->json([
+                'message' => 'Unauthorized'
+            ], 403);
+        }
+
+        $lastMessageId = (int) $request->get('last_message_id', 0);
+
+        $newMessages = $conversation->messages()
+            ->with([
+                'senderUser:id,nama',
+                'senderGuest:id,nama'
+            ])
+            ->where('id', '>', $lastMessageId)
+
+            ->whereNotNull('sender_user_id')
+
+            ->orderBy('id')
+            ->get();
+
+        $messages = $this->formatMessages($newMessages);
+
+        return response()->json([
+            'messages' => $messages,
+            'status'   => $conversation->status,
+        ]);
+    }
+
+    private function formatMessages($messages)
+    {
+        return $messages->map(function ($msg) {
+            return [
+                'id' => $msg->id,
+                'message' => $msg->message,
+                'sender_user_id' => $msg->sender_user_id,
+                'sender_name' =>
+                $msg->senderUser?->nama
+                    ?? $msg->senderGuest?->nama
+                    ?? 'Unknown',
+                'created_at' =>
+                $msg->created_at
+                    ->format('Y-m-d H:i:s')
+            ];
+        });
+    }
+
+    public function pollInbox(Request $request)
+    {
+        $user = Auth::user();
+
+        $lastMessageId = (int) $request->get(
+            'last_message_id',
+            0
+        );
+
+        $query = ChatConversation::with([
+            'creator',
+            'guest',
+            'participants',
+            'messages' => function ($q) {
+                $q->latest();
+            }
+        ])
+            ->whereHas('participants', function ($q) use ($user) {
+
+                $q->where(
+                    'user_id',
+                    $user->id
+                );
+            })
+            ->where(
+                'last_message_id',
+                '>',
+                $lastMessageId
+            );
+
+        if ($user->role->name == 'admin_bawah') {
+
+            $query->where('type', 'admin');
+        } elseif ($user->role->name == 'bidang') {
+
+            $query->whereIn('type', [
+                'ticket',
+                'guest'
+            ]);
+        }
+
+        $conversations = $query
+            ->orderByDesc('last_message_id')
+            ->get();
+
+        return response()->json(
+
+            $conversations->map(function ($c) use ($user) {
+
+                return [
+
+                    'id' => $c->id,
+
+                    'last_message_id' =>
+                    $c->last_message_id,
+
+                    'nama_pengirim' =>
+                    $c->guest?->nama
+                        ?? $c->creator?->nama
+                        ?? '-',
+
+                    'last_message' =>
+                    optional($c->messages->first())->message,
+
+                    'unread' =>
+                    $c->unreadCount($user->id),
+
+                    'need_reply' =>
+                    $c->need_reply,
+
+                    'type' =>
+                    $c->type,
+
+                ];
+            })
+
+        );
     }
 }

@@ -7,8 +7,9 @@ use Illuminate\Database\Eloquent\Model;
 class ChatGuest extends Model
 {
     protected $fillable = [
+        'nip',
         'nama',
-        'email',
+        'email'
     ];
 
     public function conversations()

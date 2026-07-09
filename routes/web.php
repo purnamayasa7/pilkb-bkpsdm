@@ -42,12 +42,15 @@ Route::get('/guesct-chat/layanan/{bidang}',[ChatController::class, 'getLayanan']
 Route::post('/guest-chat/start',[ChatController::class, 'startGuestChat']);
 Route::post('/guest-chat/resume',[ChatController::class, 'resumeGuestChat']);
 Route::get('/guest-chat/{conversation}/messages',[ChatController::class, 'loadGuestMessages']);
+Route::get('/guest-chat/{conversation}/poll', [ChatController::class, 'pollGuestMessages']);
 Route::post('/guest-chat/{conversation}/message',[ChatController::class, 'sendGuestMessage']);
 // Open & close chat
 Route::post('/chat/{conversation}/close', [ChatController::class, 'closeChat']);
 Route::post('/chat/{conversation}/reopen', [ChatController::class, 'reopenChat']);
 // Total Unread Count
 Route::get('/chat/unread-count', [ChatController::class, 'unreadCount']);
+// Check NIP Tanya Admin
+Route::get('/guest-chat/pegawai/{nip}', [ChatController::class, 'getPegawaiByNip']);
 
 /* Authenticated */
 
@@ -89,10 +92,9 @@ Route::middleware(['auth', 'force.password'])->group(function () {
     Route::post('/chat/start-global', [ChatController::class, 'startGlobalChat'])->name('chat.start-global');
     Route::get('/chat/{conversation}/messages', [ChatController::class, 'loadMessages'])->whereNumber('conversation')->name('chat.messages');
     Route::post('/chat/{conversation}/message', [ChatController::class, 'sendMessage'])->whereNumber('conversation')->name('chat.message.send');
-    Route::get(
-        '/chat/admin/inbox',
-        [ChatController::class, 'adminInbox']
-    );
+    Route::get('/chat/admin/inbox', [ChatController::class, 'adminInbox']);
+    Route::get('/chat/{conversation}/poll', [ChatController::class, 'pollMessages'])->whereNumber('conversation');
+    Route::get('/chat/admin/inbox/poll', [ChatController::class, 'pollInbox'])->name('chat.admin.poll');
 });
 
 /* ROOT */

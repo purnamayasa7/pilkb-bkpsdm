@@ -450,7 +450,6 @@
                         id="backHome1">
 
                         <i data-feather="arrow-left"></i>
-
                     </button>
 
                 </div>
@@ -461,15 +460,76 @@
                     <div class="card-body">
 
                         <div class="mb-3">
+
                             <label class="form-label fw-semibold">
+                                NIP
+                            </label>
+
+                            <div class="input-group">
+
+                                <input
+                                    type="text"
+                                    class="form-control"
+                                    id="guestNip"
+                                    maxlength="18"
+                                    placeholder="Masukkan NIP">
+
+                                <button
+                                    class="btn btn-gradient-search"
+                                    type="button"
+                                    id="btnCariNip">
+
+                                    <i data-feather="search"></i>
+
+                                </button>
+
+                            </div>
+
+                            <div
+                                id="nipLoading"
+                                class="small text-primary mt-2 d-none">
+
+                                Mencari data pegawai...
+
+                            </div>
+
+                            <div
+                                id="nipError"
+                                class="small text-danger mt-2 d-none">
+                            </div>
+
+                        </div>
+
+                        <div class="mb-3">
+
+                            <label class="form-label fw-semibold">
+
                                 Nama
+
                             </label>
 
                             <input
                                 type="text"
                                 class="form-control"
                                 id="guestNama"
-                                placeholder="Masukkan nama lengkap">
+                                readonly>
+
+                        </div>
+
+                        <div class="mb-3">
+
+                            <label class="form-label fw-semibold">
+
+                                Unit Kerja
+
+                            </label>
+
+                            <input
+                                type="text"
+                                class="form-control"
+                                id="guestUnitKerja"
+                                readonly>
+
                         </div>
 
                         <div class="mb-3">
@@ -481,7 +541,7 @@
                                 type="email"
                                 class="form-control"
                                 id="guestEmail"
-                                placeholder="nama@email.com">
+                                placeholder="Masukkan email aktif">
                         </div>
 
                         <div class="mb-3">
@@ -525,9 +585,11 @@
 
                         <button
                             class="btn chat-gradient-btn w-100"
-                            id="btnStartChat">
+                            id="btnStartChat"
+                            >
 
                             <i data-feather="message-square" class="me-2"></i>
+
                             Mulai Chat
 
                         </button>
@@ -632,8 +694,6 @@
                                 -
                             </span>
 
-                            <span id="roomTicketNo">-</span>
-
                             <span
                                 id="chatStatusBadge"
                                 class="badge bg-success-soft text-success">
@@ -683,6 +743,8 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://unpkg.com/feather-icons"></script>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="{{ asset('js/chat/chat-widget-login.js') }}"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
 
@@ -783,713 +845,7 @@
             }
 
             // Chat
-            function initGuestChat() {
 
-                function updateChatStatus(status) {
-                    const badge =
-                        document.getElementById('chatStatusBadge');
-
-                    if (!badge) return;
-
-                    if (status === 'closed') {
-                        badge.className = 'badge bg-danger-soft text-danger';
-                        badge.innerText = 'Closed';
-                        messageInput.disabled = true;
-                        sendButton.disabled = true;
-                    } else {
-                        badge.className = 'badge bg-success-soft text-success';
-                        badge.innerText = 'Open';
-                        messageInput.disabled = false;
-                        sendButton.disabled = false;
-                    }
-                }
-
-                function formatChatTime(dateString) {
-
-                    const date = new Date(dateString);
-                    const now = new Date();
-
-                    const today = new Date(
-                        now.getFullYear(),
-                        now.getMonth(),
-                        now.getDate()
-                    );
-
-                    const msgDate = new Date(
-                        date.getFullYear(),
-                        date.getMonth(),
-                        date.getDate()
-                    );
-
-                    const diffDays = Math.floor(
-                        (today - msgDate) /
-                        (1000 * 60 * 60 * 24)
-                    );
-
-                    const jam = date.toLocaleTimeString(
-                        'id-ID', {
-                            hour: '2-digit',
-                            minute: '2-digit'
-                        }
-                    ).replace(':', '.');
-
-                    if (diffDays === 0) {
-                        return `Hari ini ${jam}`;
-                    }
-
-                    if (diffDays === 1) {
-                        return `Kemarin ${jam}`;
-                    }
-
-                    return (
-                        date.toLocaleDateString(
-                            'id-ID', {
-                                day: '2-digit',
-                                month: '2-digit',
-                                year: 'numeric'
-                            }
-                        ) + ' ' + jam
-                    );
-                }
-
-                const pageHome =
-                    document.getElementById('pageHome');
-
-                const pageNewChat =
-                    document.getElementById('pageNewChat');
-
-                const pageTicket =
-                    document.getElementById('pageTicket');
-
-                const pageRoom =
-                    document.getElementById('pageRoom');
-
-                const chatMessages =
-                    document.getElementById('chatMessages');
-
-                const conversationIdInput =
-                    document.getElementById('conversationId');
-
-                const sendButton =
-                    document.getElementById('sendChatBtn');
-
-                const messageInput =
-                    document.getElementById('chatInput');
-
-                messageInput?.addEventListener('keydown', function(e) {
-
-                    if (e.key === 'Enter' && !e.shiftKey) {
-
-                        e.preventDefault();
-
-                        sendButton?.click();
-                    }
-                });
-
-                function showPage(page) {
-
-                    [
-                        pageHome,
-                        pageNewChat,
-                        pageTicket,
-                        pageRoom
-                    ].forEach(item => {
-
-                        item.classList.add('d-none');
-
-                    });
-
-                    page.classList.remove('d-none');
-                }
-
-                document.getElementById('btnBackInbox')
-                    ?.addEventListener('click', function() {
-
-                        const keluar = confirm(
-                            'Anda akan menutup chat. Percakapan tetap tersimpan dan dapat dibuka kembali menggunakan nomor tiket. Lanjutkan?'
-                        );
-
-                        if (!keluar) {
-                            return;
-                        }
-
-                        showPage(pageHome);
-
-                        conversationIdInput.value = '';
-
-                        document.getElementById('roomTicketNo').innerHTML = '-';
-
-                        chatMessages.innerHTML = '';
-
-                        document.getElementById('guestTicketEmail').value = '';
-                        document.getElementById('guestTicket').value = '';
-                        document.getElementById('guestNama').value = '';
-                        document.getElementById('guestEmail').value = '';
-                        document.getElementById('guestBidang').selectedIndex = 0;
-                        document.getElementById('guestLayanan').innerHTML =
-                            '<option>Pilih bidang terlebih dahulu</option>';
-                        document.getElementById('guestLayanan').disabled = true;
-
-                        guestSession = null;
-                    });
-
-                // COMBOBOX LAYANAN
-
-                const guestBidang =
-                    document.getElementById('guestBidang');
-
-                const guestLayanan =
-                    document.getElementById('guestLayanan');
-
-                if (guestBidang && guestLayanan) {
-
-                    guestBidang.addEventListener('change', function() {
-
-                        if (!this.value) {
-
-                            guestLayanan.innerHTML =
-                                '<option>Pilih bidang terlebih dahulu</option>';
-
-                            guestLayanan.disabled = true;
-
-                            return;
-                        }
-
-                        guestLayanan.innerHTML =
-                            '<option>Loading...</option>';
-
-                        guestLayanan.disabled = true;
-
-                        fetch(`/get-layanan-syarat/${this.value}`)
-
-                            .then(response => response.json())
-
-                            .then(data => {
-
-                                guestLayanan.innerHTML =
-                                    '<option value="">Pilih Layanan</option>';
-
-                                if (data.length === 0) {
-
-                                    guestLayanan.innerHTML +=
-                                        '<option disabled>Tidak ada layanan</option>';
-
-                                } else {
-
-                                    data.forEach(item => {
-
-                                        guestLayanan.innerHTML += `
-                            <option value="${item.id}">
-                                ${item.nama_layanan}
-                            </option>
-                        `;
-                                    });
-                                }
-
-                                guestLayanan.disabled = false;
-                            })
-
-                            .catch(error => {
-
-                                console.error(error);
-
-                                guestLayanan.innerHTML =
-                                    '<option>Gagal memuat layanan</option>';
-
-                                guestLayanan.disabled = false;
-                            });
-                    });
-                }
-
-                document.getElementById('btnNewChat')
-                    ?.addEventListener('click', function() {
-                        showPage(pageNewChat);
-                    });
-
-                document.getElementById('btnOpenTicket')
-                    ?.addEventListener('click', function() {
-                        showPage(pageTicket);
-                    });
-
-                document.getElementById('backHome1')
-                    ?.addEventListener('click', function() {
-                        showPage(pageHome);
-                    });
-
-                document.getElementById('backHome2')
-                    ?.addEventListener('click', function() {
-                        showPage(pageHome);
-                    });
-
-                // =====================
-                // HOME -> CHAT BARU
-                // =====================
-
-                document
-                    .getElementById('btnStartChat')
-                    ?.addEventListener('click', function() {
-
-                        const nama =
-                            document.getElementById('guestNama')
-                            .value.trim();
-
-                        const email =
-                            document.getElementById('guestEmail')
-                            .value.trim();
-
-                        const bidangId =
-                            document.getElementById('guestBidang')
-                            .value;
-
-                        const layananId =
-                            document.getElementById('guestLayanan')
-                            .value;
-
-                        if (
-                            !nama ||
-                            !email ||
-                            !bidangId ||
-                            !layananId
-                        ) {
-                            alert(
-                                'Silakan lengkapi data terlebih dahulu.'
-                            );
-                            return;
-                        }
-
-                        guestSession = {
-                            nama: nama,
-                            email: email,
-                            bidang_id: bidangId,
-                            layanan_id: layananId
-                        };
-
-                        document
-                            .getElementById('conversationId')
-                            .value = '';
-
-                        showPage(pageRoom);
-
-                        document
-                            .getElementById('roomTicketNo')
-                            .innerHTML = '-';
-
-                        const messages =
-                            document.getElementById('chatMessages');
-
-                        messages.innerHTML = `
-<div
-    class="message-row"
-    id="ticketInfoMessage">
-
-    <div class="message-bubble system">
-
-        Silakan tuliskan pertanyaan Anda.
-
-    </div>
-
-</div>
-`;
-                    });
-
-                // =====================
-                // BUKA TIKET
-                // =====================
-
-                document
-                    .getElementById('btnOpenConversation')
-                    ?.addEventListener('click', async function() {
-
-                        const btn = this;
-                        const originalHtml = btn.innerHTML;
-
-                        const email =
-                            document.getElementById('guestTicketEmail')
-                            .value.trim();
-
-                        const noTiket =
-                            document.getElementById('guestTicket')
-                            .value.trim();
-
-                        if (!email || !noTiket) {
-
-                            alert(
-                                'Email dan nomor tiket wajib diisi'
-                            );
-
-                            return;
-                        }
-
-                        btn.disabled = true;
-
-                        btn.innerHTML = `
-            <span
-                class="spinner-border spinner-border-sm me-2"
-                role="status">
-            </span>
-            Membuka Percakapan...
-        `;
-
-                        try {
-
-                            const response =
-                                await fetch(
-                                    '/guest-chat/resume', {
-                                        method: 'POST',
-
-                                        headers: {
-                                            'Content-Type': 'application/json',
-
-                                            'X-CSRF-TOKEN': document
-                                                .querySelector(
-                                                    'meta[name="csrf-token"]'
-                                                )
-                                                .content
-                                        },
-
-                                        body: JSON.stringify({
-                                            email: email,
-                                            no_tiket: noTiket
-                                        })
-                                    }
-                                );
-
-                            const result =
-                                await response.json();
-
-                            if (!response.ok || !result.success) {
-
-                                alert(
-                                    result.message ??
-                                    'Percakapan tidak ditemukan'
-                                );
-
-                                return;
-                            }
-
-                            conversationIdInput.value =
-                                result.conversation_id;
-
-                            guestSession = {
-                                nama: result.nama_pengirim,
-                                email: email
-                            };
-
-                            document
-                                .getElementById('roomTicketNo')
-                                .innerHTML =
-                                result.ticket_number;
-
-                            updateChatStatus(result.status);
-
-                            showPage(pageRoom);
-
-                            loadGuestMessages(
-                                result.conversation_id,
-                                email
-                            );
-
-                        } catch (error) {
-
-                            console.error(error);
-
-                            alert(
-                                'Terjadi kesalahan sistem'
-                            );
-
-                        } finally {
-
-                            btn.disabled = false;
-                            btn.innerHTML = originalHtml;
-
-                            feather.replace();
-                        }
-                    });
-
-                sendButton?.addEventListener(
-                    'click',
-                    async function() {
-
-                        const message =
-                            messageInput.value.trim();
-
-                        if (!message) {
-                            return;
-                        }
-
-                        try {
-
-                            let conversationId =
-                                conversationIdInput.value;
-
-                            /*
-                             CHAT BELUM DIBUAT
-                             BUAT SAAT PESAN PERTAMA
-                            */
-                            if (!conversationId) {
-
-                                const response =
-                                    await fetch(
-                                        '/guest-chat/start', {
-                                            method: 'POST',
-
-                                            headers: {
-                                                'Content-Type': 'application/json',
-
-                                                'X-CSRF-TOKEN': document.querySelector(
-                                                    'meta[name="csrf-token"]'
-                                                ).content
-                                            },
-
-                                            body: JSON.stringify(
-                                                guestSession
-                                            )
-                                        }
-                                    );
-
-                                const result =
-                                    await response.json();
-
-                                if (!response.ok) {
-
-                                    alert(
-                                        result.message ??
-                                        'Gagal membuat percakapan'
-                                    );
-
-                                    return;
-                                }
-
-                                conversationId =
-                                    result.conversation_id;
-
-                                conversationIdInput.value =
-                                    conversationId;
-
-                                document
-                                    .getElementById(
-                                        'roomTicketNo'
-                                    )
-                                    .innerHTML =
-                                    result.no_tiket;
-
-                                const ticketInfo =
-                                    document.getElementById(
-                                        'ticketInfoMessage'
-                                    );
-
-                                if (ticketInfo) {
-
-                                    ticketInfo.innerHTML = `
-        <div class="message-bubble system ticket-info">
-
-            <div class="fw-bold mb-2">
-                Nomor Tiket
-            </div>
-
-            <div class="d-flex align-items-center gap-2 mb-2">
-
-                <span id="ticketNumberText">
-                    ${result.no_tiket}
-                </span>
-
-                <button
-                    type="button"
-                    class="btn btn-sm btn-light"
-                    id="copyTicketBtn">
-
-                    📋
-
-                </button>
-
-            </div>
-
-            <small>
-                Nomor tiket sudah dikirim ke email.
-                Mohon disimpan untuk melanjutkan
-                percakapan di kemudian hari.
-            </small>
-
-        </div>
-    `;
-                                }
-                            }
-
-                            /*
-                             KIRIM PESAN
-                            */
-
-                            const sendResponse =
-                                await fetch(
-                                    `/guest-chat/${conversationId}/message`, {
-                                        method: 'POST',
-
-                                        headers: {
-                                            'Content-Type': 'application/json',
-
-                                            'X-CSRF-TOKEN': document.querySelector(
-                                                'meta[name="csrf-token"]'
-                                            ).content
-                                        },
-
-                                        body: JSON.stringify({
-                                            message: message
-                                        })
-                                    }
-                                );
-
-                            const sendResult =
-                                await sendResponse.json();
-
-                            if (!sendResponse.ok) {
-
-                                alert(
-                                    sendResult.message ??
-                                    'Gagal mengirim pesan'
-                                );
-
-                                return;
-                            }
-
-                            chatMessages.innerHTML += `
-
-<div class="message-row me">
-
-    <div class="message-wrapper">
-
-        <div class="message-info me">
-
-            <span class="sender-name">
-                ${guestSession?.nama ?? 'Saya'}
-            </span>
-
-            <span class="message-time">
-                ${formatChatTime(new Date().toISOString())}
-            </span>
-
-        </div>
-
-        <div class="message-bubble me">
-
-            ${message}
-
-        </div>
-
-    </div>
-
-</div>
-
-`;
-
-                            messageInput.value = '';
-
-                        } catch (error) {
-
-                            console.error(error);
-
-                            alert(
-                                'Terjadi kesalahan sistem'
-                            );
-                        }
-                    }
-                );
-
-                async function loadGuestMessages(
-                    conversationId,
-                    email
-                ) {
-
-                    try {
-
-                        const response =
-                            await fetch(
-                                `/guest-chat/${conversationId}/messages?email=${encodeURIComponent(email)}`
-                            );
-
-                        const res =
-                            await response.json();
-
-                        updateChatStatus(res.status);
-
-                        chatMessages.innerHTML = '';
-
-                        res.messages.forEach(msg => {
-
-                            const isGuest =
-                                msg.sender_guest_id !== null;
-
-                            const senderName =
-                                msg.sender_name ??
-                                (isGuest ? 'Saya' : 'Admin');
-
-                            const chatTime =
-                                formatChatTime(
-                                    msg.created_at
-                                );
-
-                            chatMessages.innerHTML += `
-
-<div class="message-row ${isGuest ? 'me' : 'other'}">
-
-    <div class="message-wrapper">
-
-        <div class="message-info ${isGuest ? 'me' : 'other'}">
-
-            <span class="sender-name">
-                ${senderName},
-            </span>
-
-            <span class="message-time">
-                ${chatTime}
-            </span>
-
-        </div>
-
-        <div class="message-bubble ${isGuest ? 'me' : 'other'}">
-
-            ${msg.message}
-
-        </div>
-
-    </div>
-
-</div>
-
-`;
-                        });
-
-                        chatMessages.scrollTop =
-                            chatMessages.scrollHeight;
-
-                    } catch (error) {
-
-                        console.error(error);
-                    }
-                }
-
-                document.addEventListener(
-                    'click',
-                    function(e) {
-
-                        if (
-                            e.target.id === 'copyTicketBtn'
-                        ) {
-
-                            const ticket =
-                                document.getElementById(
-                                    'ticketNumberText'
-                                )?.innerText;
-
-                            navigator.clipboard
-                                .writeText(ticket);
-
-                            alert(
-                                'Nomor tiket berhasil disalin'
-                            );
-                        }
-                    }
-                );
-            }
 
             const drawer = document.getElementById('chatDrawer');
             const openBtn = document.getElementById('openChatDrawer');
@@ -1507,6 +863,10 @@
                 closeBtn.addEventListener('click', function() {
 
                     drawer.classList.remove('show');
+
+                    resetGuestSession();
+
+                    showPage(el.pageHome);
                 });
 
                 document.addEventListener('click', function(e) {
@@ -1522,7 +882,7 @@
 
                 let guestSession = null;
 
-                initGuestChat();
+                ChatWidgetLogin.init();
             }
         });
 
@@ -1553,11 +913,15 @@
         }
 
         // Auto Height Text
-        $(document).on('input', '#chatInput', function() {
+        document.addEventListener('input', function(e) {
 
-            this.style.height = 'auto';
+            if (e.target.id === 'chatInput') {
 
-            this.style.height = this.scrollHeight + 'px';
+                e.target.style.height = 'auto';
+                e.target.style.height = e.target.scrollHeight + 'px';
+
+            }
+
         });
     </script>
 </body>

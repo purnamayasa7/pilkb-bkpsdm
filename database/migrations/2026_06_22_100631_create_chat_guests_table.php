@@ -14,6 +14,7 @@ return new class extends Migration
         Schema::create('chat_guests', function (Blueprint $table) {
             $table->id();
 
+            $table->string('nip', 18);
             $table->string('nama');
             $table->string('email');
 
