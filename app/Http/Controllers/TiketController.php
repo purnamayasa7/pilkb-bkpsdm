@@ -112,6 +112,20 @@ class TiketController extends Controller
         return now()->format('dmy') . strtoupper(Str::random(4));
     }
 
+    private function generateQr($url)
+    {
+        $renderer = new ImageRenderer(
+            new RendererStyle(120),
+            new SvgImageBackEnd()
+        );
+
+        $writer = new Writer($renderer);
+
+        $qrString = $writer->writeString($url);
+
+        return base64_encode($qrString);
+    }
+
     public function create(Request $request)
     {
         $step = $request->step ?? 1;
@@ -145,9 +159,27 @@ class TiketController extends Controller
             }
         }
 
+        $qr = null;
+
         if ($step == 4 && isset($data['no_tiket'])) {
 
             $tiket = Regtiket::with('layanan')->find($data['no_tiket']);
+
+            if ($tiket) {
+
+                $url = route('tiket.public', $tiket->no_tiket);
+
+                $renderer = new ImageRenderer(
+                    new RendererStyle(120),
+                    new SvgImageBackEnd()
+                );
+
+                $writer = new Writer($renderer);
+
+                $qrString = $writer->writeString($url);
+
+                $qr = base64_encode($qrString);
+            }
         }
 
         return view('pages.opd.tiket.create', compact(
@@ -156,7 +188,8 @@ class TiketController extends Controller
             'data',
             'syarat',
             'nama_layanan',
-            'tiket'
+            'tiket',
+            'qr'
         ));
     }
 
@@ -858,5 +891,19 @@ class TiketController extends Controller
                     $e->getMessage()
                 );
         }
+    }
+
+    public function showQr($no_tiket)
+    {
+        $tiket = Regtiket::findOrFail($no_tiket);
+
+        $url = route('tiket.public', $tiket->no_tiket);
+
+        $qr = $this->generateQr($url);
+
+        return view('pages.public.qr', compact(
+            'qr',
+            'tiket'
+        ));
     }
 }

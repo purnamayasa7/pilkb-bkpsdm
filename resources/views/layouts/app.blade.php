@@ -170,7 +170,7 @@
             ChatWidgetApp.activeConversationId = null;
             ChatWidgetApp.isSearching = false;
 
-            function loadTicketSearch(direction = 'back') {
+            function loadTicketSearch(direction = 'back', animate = true) {
 
                 const userName = ChatWidgetApp.shortName(
     window.ChatAuth.name || 'Pengguna'
@@ -184,7 +184,7 @@
                 <span class="wave-hand">👋</span>
             </div>
 
-            <h6>Halo, ${ChatWidgetApp.escapeHtml(userName)}!</h6>
+            <h6>Hai, ${ChatWidgetApp.escapeHtml(userName)}!</h6>
 
             <p>
                 Silakan masukkan nomor tiket untuk memulai percakapan.
@@ -215,7 +215,7 @@
 
 </button>
 
-    `, direction);
+    `, direction, animate);
             }
 
             // =====================
@@ -251,50 +251,59 @@
             // =====================
             // RENDER PAGE
             // =====================
-            function renderPage(html, direction = 'forward') {
+            function renderPage(html, direction = 'forward', animate = true) {
 
-                const body = $('.chat-body');
-                const currentPage = body.find('.chat-page');
+    const body = $('.chat-body');
+    const currentPage = body.find('.chat-page');
 
-                const newPage = $(`<div class="chat-page">${html}</div>`);
+    const newPage = $(`<div class="chat-page">${html}</div>`);
 
-                if (!currentPage.length) {
-                    body.html(newPage);
+    // Tidak ada halaman sebelumnya
+    if (!currentPage.length || !animate) {
 
-                    if (typeof feather !== 'undefined') {
-                        feather.replace();
-                    }
+        body.html(newPage);
 
-                    return;
-                }
+        if (typeof feather !== 'undefined') {
+            feather.replace();
+        }
 
-                if (direction === 'forward') {
-                    newPage.addClass('page-enter-right');
-                    body.append(newPage);
+        return;
+    }
 
-                    requestAnimationFrame(() => {
-                        newPage.addClass('page-enter-right-active');
-                        currentPage.addClass('page-exit-left-active');
-                    });
+    if (direction === 'forward') {
 
-                } else {
-                    newPage.addClass('page-enter-left');
-                    body.append(newPage);
+        newPage.addClass('page-enter-right');
+        body.append(newPage);
 
-                    requestAnimationFrame(() => {
-                        newPage.addClass('page-enter-left-active');
-                        currentPage.addClass('page-exit-right-active');
-                    });
-                }
+        requestAnimationFrame(() => {
+            newPage.addClass('page-enter-right-active');
+            currentPage.addClass('page-exit-left-active');
+        });
 
-                setTimeout(() => {
-                    currentPage.remove();
-                    newPage.removeClass(
-                        'page-enter-right page-enter-right-active page-enter-left page-enter-left-active'
-                    );
-                    feather.replace();
-                }, 300);
-            }
+    } else {
+
+        newPage.addClass('page-enter-left');
+        body.append(newPage);
+
+        requestAnimationFrame(() => {
+            newPage.addClass('page-enter-left-active');
+            currentPage.addClass('page-exit-right-active');
+        });
+
+    }
+
+    setTimeout(() => {
+
+        currentPage.remove();
+
+        newPage.removeClass(
+            'page-enter-right page-enter-right-active page-enter-left page-enter-left-active'
+        );
+
+        feather.replace();
+
+    }, 300);
+}
 
             function loadInboxAdminFo() {
 
@@ -385,7 +394,11 @@
 
     }else{
 
-        loadTicketSearch();
+       if(!ChatWidgetApp.activeConversationId){
+
+        loadTicketSearch('back', false);
+
+    }
 
     }
 
@@ -398,13 +411,6 @@
     ChatWidgetApp.stopPolling();
 
     ChatWidgetApp.stopInboxPolling();
-
-    ChatWidgetApp.activeConversationId = null;
-    ChatWidgetApp.lastMessageId = null;
-    ChatWidgetApp.lastInboxMessageId = 0;
-
-    ChatWidgetApp.renderedMessageIds.clear();
-
 });
 
             $(document).on('mouseup', function(e) {
@@ -422,12 +428,6 @@
                     ChatWidgetApp.stopPolling();
 
 ChatWidgetApp.stopInboxPolling();
-
-ChatWidgetApp.activeConversationId = null;
-ChatWidgetApp.lastMessageId = null;
-ChatWidgetApp.lastInboxMessageId = 0;
-
-ChatWidgetApp.renderedMessageIds.clear();
 
                 }
             });

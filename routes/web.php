@@ -33,7 +33,7 @@ Route::get('/cek-tiket/{no_tiket}', [TiketController::class, 'showPublic'])->nam
 Route::get('/get-layanan-syarat/{bidang}', [SyaratController::class, 'getLayanan'])->name('getLayanan');
 Route::get('/syarat/export-pdf', [SyaratController::class, 'exportPdf'])->name('exportPdf');
 
-//Cetak PDF
+// Cetak PDF
 Route::get('/tiket/cetak/{no_tiket}', [TiketController::class, 'cetak'])->name('tiket.cetak');
 
 // Guest Chat
@@ -83,6 +83,9 @@ Route::middleware(['auth', 'force.password'])->group(function () {
     // Notification Index
     Route::get('/log-aktivitas', [LogController::class, 'index'])->middleware('role:root,admin_bawah,admin_opd,bidang')->name('log.index');
     Route::get('/log-aktivitas/export-excel', [LogController::class, 'exportExcel'])->middleware('role:root,admin_bawah,admin_opd,bidang')->name('log.exportExcel');
+
+    // Cetak QR
+    Route::get('/tiket/{no_tiket}/qr', [TiketController::class, 'showQr'])->name('tiket.qr');
 
     // Chat
     Route::get('/chat', [ChatController::class, 'index'])->name('chat.index');

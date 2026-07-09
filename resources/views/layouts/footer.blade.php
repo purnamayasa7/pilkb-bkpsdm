@@ -12,10 +12,10 @@
     <div class="container-fluid px-4">
         <div class="row">
             <div class="col-md-6 small">Copyright &copy; <a href="https://bkpsdm.bulelengkab.go.id/"
-                    class="text-primary">BKPSDM Kabupaten Buleleng</a> 2026</div>
-            <div class="col-md-6 text-md-end small">
+                    class="text-primary">BKPSDM Kabupaten Buleleng</a> - <a href="https://www.linkedin.com/in/kadek-purnamayasa-bba44a16b/" target="_blank">Prakom Bidang PPI</a> 2026 </div>
+            <!-- <div class="col-md-6 text-md-end small">
                 <a href="https://www.linkedin.com/in/kadek-purnamayasa-bba44a16b/" target="_blank">Prakom Bidang PPI</a>
-            </div>
+            </div> -->
         </div>
     </div>
 </footer>

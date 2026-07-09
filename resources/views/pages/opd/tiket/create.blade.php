@@ -574,10 +574,21 @@ $stepHeader = [
                                 </div>
                             </div>
 
-                            {{-- BARCODE (dummy dulu) --}}
+                            @if($qr)
+                            <a
+                                href="{{ route('tiket.qr',$tiket->no_tiket) }}"
+                                target="_blank">
 
-                            <img
-                                src="https://api.qrserver.com/v1/create-qr-code/?size=120x120&data={{ $tiket->no_tiket ?? '-' }}">
+                                <img
+                                    src="data:image/svg+xml;base64,{{ $qr }}"
+                                    width="160">
+
+                            </a>
+
+                            <div class="small mt-2">
+                                Klik QR untuk memperbesar
+                            </div>
+                            @endif
                         </div>
                     </div>
 
