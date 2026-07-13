@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use App\Models\User;
 
 class Regtiket extends Model
 {
@@ -29,6 +30,40 @@ class Regtiket extends Model
         'dihapus',
         'dihapus_tgl',
     ];
+
+    /**
+     * Scope data tiket berdasarkan hak akses user.
+     */
+    public function scopeVisibleBy($query, User $user)
+    {
+        switch ($user->role_id) {
+
+            // Root & Admin Bawah
+            case 1:
+            case 2:
+                return $query;
+
+                // Admin OPD
+            case 3:
+                return $query->where(
+                    'kode_ukerja',
+                    $user->kode_ukerja
+                );
+
+                // Admin Bidang
+            case 4:
+                return $query->whereHas('layanan', function ($q) use ($user) {
+
+                    $q->where(
+                        'kode_bidang',
+                        $user->bidang_id
+                    );
+                });
+
+            default:
+                return $query->whereRaw('1 = 0');
+        }
+    }
 
     public function layanan()
     {

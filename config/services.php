@@ -35,4 +35,9 @@ return [
         ],
     ],
 
+    'simpeg' => [
+        'url' => env('SIMPEG_API_URL'),
+        'token' => env('SIMPEG_API_TOKEN'),
+    ],
+
 ];

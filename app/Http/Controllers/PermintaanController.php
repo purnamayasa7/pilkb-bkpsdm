@@ -9,6 +9,7 @@ use App\Models\Tahap;
 use App\Models\User;
 use App\Notifications\TiketNotification;
 use App\Services\ActivityLogService;
+use App\Services\PegawaiService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -16,6 +17,10 @@ use Illuminate\Support\Facades\DB;
 
 class PermintaanController extends Controller
 {
+    public function __construct(
+        protected PegawaiService $pegawaiService
+    ) {}
+
     public function index(Request $request)
     {
         $month = $request->month ?? Carbon::now()->month;
@@ -73,15 +78,17 @@ class PermintaanController extends Controller
             ->where('no_tiket', $no_tiket)
             ->get();
 
+        $pegawai = $this->pegawaiService->getPegawaiByNip($tiket->nip);
+
         $statusList = Status::where(
             'kode_layanan',
             $tiket->kode_layanan
         )->get();
 
         $dataPegawai = [
-            'nama' => '-',
-            'golongan' => '-',
-            'unit' => 'BKPSDM Kabupaten Buleleng'
+            'nama' => $pegawai['nama_lengkap'] ?? '-',
+            'golongan' => $pegawai['ket_gol'] ?? '-',
+            'unit' => $pegawai['ket_ukerja'] ?? '-',
         ];
 
         return view('pages.bidang.permintaan.edit', compact(

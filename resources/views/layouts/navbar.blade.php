@@ -1,52 +1,4 @@
-<style>
-    .notification-dot {
-        width: 9px;
-        height: 9px;
-        border-radius: 50%;
-        position: absolute;
-        top: 8px;
-        right: 8px;
-        background-color: #dc3545;
-        box-shadow: 0 0 0 2px #fff;
-    }
-
-    .notification-dot::after {
-        content: '';
-        position: absolute;
-        inset: 0;
-        border-radius: 50%;
-        background-color: #dc3545;
-        animation: notification-ripple 2s infinite;
-    }
-
-    .notification-badge {
-        position: absolute;
-        top: -1px;
-        right: -1px;
-
-        min-width: 18px;
-        height: 18px;
-        padding: 0 4px;
-
-        font-size: 10px;
-        font-weight: 700;
-        line-height: 18px;
-
-        border-radius: 999px;
-    }
-
-    @keyframes notification-ripple {
-        0% {
-            transform: scale(1);
-            opacity: .7;
-        }
-
-        100% {
-            transform: scale(2.5);
-            opacity: 0;
-        }
-    }
-</style>
+<link rel="stylesheet" href="{{ asset('css/navbar.css') }}">
 
 <nav class="topnav navbar navbar-expand shadow justify-content-between justify-content-sm-start navbar-light bg-white"
     id="sidenavAccordion">
@@ -73,11 +25,29 @@
     </a>
     <!-- Navbar Search Input-->
     <!-- * * Note: * * Visible only on and above the lg breakpoint-->
-    <form class="form-inline me-auto d-none d-lg-block me-3">
+    <form class="form-inline me-auto d-none d-lg-block me-3 position-relative">
+
         <div class="input-group input-group-joined input-group-solid">
-            <input class="form-control pe-0" type="search" placeholder="Cari Data Tiket" aria-label="Search" />
-            <div class="input-group-text"><i data-feather="search"></i></div>
+
+            <input
+                id="ticketSearch"
+                class="form-control pe-0"
+                type="search"
+                autocomplete="off"
+                placeholder="Cari No Tiket atau NIP"
+                aria-label="Cari Tiket">
+
+            <div class="input-group-text">
+                <i data-feather="search"></i>
+            </div>
+
         </div>
+
+        <div id="ticketSearchDropdown"
+            class="ticket-search-dropdown d-none">
+
+        </div>
+
     </form>
     <!-- Navbar Items-->
     <ul class="navbar-nav align-items-center ms-auto">
@@ -406,6 +376,169 @@
             </div>
         </li>
         @endauth
-
     </ul>
 </nav>
+
+<!-- Modal Detail Tiket -->
+<div class="modal fade" id="ticketDetailModal" tabindex="-1">
+
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+
+        <div class="modal-content">
+
+            <div class="modal-header">
+
+                <h5 class="modal-title">
+                    Detail Tiket
+                </h5>
+
+                <button
+                    type="button"
+                    class="btn-close"
+                    data-bs-dismiss="modal">
+                </button>
+
+            </div>
+
+            <div class="modal-body">
+
+                <!-- Ringkasan -->
+                <div class="border rounded p-3 mb-4">
+
+                    <div class="text-muted small">
+                        Nomor Tiket
+                    </div>
+
+                    <div class="d-flex align-items-center mb-3">
+
+                        <h4
+                            class="fw-bold text-primary mb-0 me-2"
+                            id="detailNavNoTiket">
+                            -
+                        </h4>
+
+                        <button
+                            type="button"
+                            id="btnCopyTicket"
+                            class="btn btn-outline-primary btn-sm"
+                            data-bs-toggle="tooltip"
+                            title="Salin Nomor Tiket">
+
+                            <i data-feather="copy"></i>
+
+                        </button>
+
+                    </div>
+
+                    <div class="text-muted small">
+                        Status Terakhir
+                    </div>
+
+                    <div class="fw-semibold"
+                        id="detailNavStatus">
+                        -
+                    </div>
+
+                </div>
+
+                <!-- Informasi -->
+                <div class="row gy-3">
+
+                    <div class="col-md-6">
+
+                        <div class="text-muted small">
+                            NIP
+                        </div>
+
+                        <div class="fw-semibold"
+                            id="detailNavNip">
+                            -
+                        </div>
+
+                    </div>
+
+                    <div class="col-md-6">
+
+                        <div class="text-muted small">
+                            Nama Pengusul
+                        </div>
+
+                        <div class="fw-semibold"
+                            id="detailNavNama">
+                            -
+                        </div>
+
+                    </div>
+
+                    <div class="col-md-6">
+
+                        <div class="text-muted small">
+                            Tanggal Pengajuan
+                        </div>
+
+                        <div id="detailNavTanggal">
+                            -
+                        </div>
+
+                    </div>
+
+                    <div class="col-md-6">
+
+                        <div class="text-muted small">
+                            Bidang
+                        </div>
+
+                        <div id="detailNavBidang">
+                            -
+                        </div>
+
+                    </div>
+
+                    <div class="col-12">
+
+                        <div class="text-muted small">
+                            Layanan
+                        </div>
+
+                        <div class="fw-semibold"
+                            id="detailNavLayanan">
+                            -
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+            <div class="modal-footer">
+
+                <a
+                    id="btnPrintTicket"
+                    href="#"
+                    target="_blank"
+                    class="btn btn-outline-warning">
+
+                    <i data-feather="printer" class="me-1"></i>
+                    Cetak
+
+                </a>
+
+                <button
+                    id="btnReviewTicket"
+                    class="btn btn-primary">
+
+                    <i data-feather="arrow-right" class="me-1"></i>
+                    Review
+
+                </button>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<script src="{{ asset('js/navbar.js') }}"></script>

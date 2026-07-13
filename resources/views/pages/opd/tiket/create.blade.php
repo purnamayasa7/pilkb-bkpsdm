@@ -38,26 +38,45 @@ $stepHeader = [
         background-color: #e9ecef;
         border-radius: 10px;
         overflow: hidden;
-        height: 6px;
+        height: 8px;
     }
 
     .progress-bar {
-        transition: width 0.6s ease;
+        position: relative;
+        overflow: hidden;
+        transition: width .6s ease;
+        background: linear-gradient(90deg,
+                #0061f2,
+                #3b82f6,
+                #4dabf7);
     }
 
-    .progress-animate {
-        background: linear-gradient(90deg, #0061f2, #4dabf7, #0061f2);
-        background-size: 200% 100%;
-        animation: loadingMove 5.2s linear infinite;
+    .progress-bar::after {
+        content: "";
+        position: absolute;
+        top: -40%;
+        left: -35%;
+        width: 35%;
+        height: 180%;
+
+        background: linear-gradient(90deg,
+                rgba(255, 255, 255, 0),
+                rgba(255, 255, 255, .95),
+                rgba(255, 255, 255, 0));
+
+        filter: blur(6px);
+        transform: skewX(-25deg);
+
+        animation: shine 2.8s linear infinite;
     }
 
-    @keyframes loadingMove {
-        0% {
-            background-position: 200% 0;
+    @keyframes shine {
+        from {
+            left: -35%;
         }
 
-        100% {
-            background-position: -200% 0;
+        to {
+            left: 130%;
         }
     }
 </style>
@@ -67,68 +86,150 @@ $stepHeader = [
     <div class="modal-dialog modal-dialog-centered modal-lg">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title">Detail Pegawai</h5> <button class="btn-close btn-close-white"
-                    data-bs-dismiss="modal"></button>
+                <h5 class="modal-title">
+                    Detail Pegawai
+                </h5>
+
+                <button
+                    class="btn-close"
+                    data-bs-dismiss="modal">
+                </button>
             </div>
+
             <div class="modal-body">
-                <div class="row">
-                    <div class="col-md-3 text-center">
-                        <img id="detailFoto"
-                            src="{{ asset('templatepro/assets/img/demo/user-placeholder.svg') }}"
-                            class="rounded shadow-sm border"
-                            style="
-            width: 170px;
-            height: 200px;
-            object-fit: cover;
-            object-position: center;
-        ">
+                <div class="row align-items-start">
+
+                    {{-- FOTO --}}
+                    <div class="col-md-3 d-flex justify-content-center ps-md-4">
+                        <div class="text-center">
+                            <img
+                                id="detailFoto"
+                                src="{{ asset('templatepro/assets/img/demo/user-placeholder.svg') }}"
+                                class="shadow rounded-3 border"
+                                style="
+                                    width:190px;
+                                    height:235px;
+                                    object-fit:cover;
+                                    object-position:center;
+                                ">
+
+                            <div class="small mt-3">
+                                <i>Data pada SIMPEG</i>
+                            </div>
+                        </div>
                     </div>
+
+                    {{-- DATA --}}
                     <div class="col-md-9">
-                        <div class="card shadow-sm" style="height: 200px;">
-                            <div class="card-body d-flex flex-column justify-content-center h-100">
+                        <div class="card border shadow-sm">
+                            <div class="card-body">
+                                {{-- Header --}}
+                                <div class="mb-4">
+                                    <div class="small">
+                                        Nama Pegawai
+                                    </div>
 
-                                <div class="d-flex justify-content-between align-items-center mb-2">
-                                    <span>
-                                        <i data-feather="hash" class="me-1"></i> NIP
-                                    </span>
-
-                                    <span id="detailNip" class="text-end"></span>
+                                    <h4
+                                        class="fw-bold text-primary mb-0"
+                                        id="detailNama">
+                                        -
+                                    </h4>
                                 </div>
 
-                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                {{-- NIP --}}
+                                <div class="d-flex justify-content-between align-items-center py-2 border-bottom">
                                     <span>
-                                        <i data-feather="user" class="me-1"></i> Nama
+                                        <i data-feather="hash" class="me-2 text-danger"></i>
+                                        NIP
                                     </span>
 
-                                    <span id="detailNama" class="text-end"></span>
+                                    <span
+                                        id="detailNip"
+                                        class="fw-semibold text-end">
+                                        -
+                                    </span>
                                 </div>
 
-                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                {{-- Golongan --}}
+                                <div class="d-flex justify-content-between align-items-center py-2 border-bottom">
+
                                     <span>
-                                        <i data-feather="calendar" class="me-1"></i> Tanggal Lahir
+                                        <i data-feather="award" class="me-2 text-success"></i>
+                                        Golongan
                                     </span>
 
-                                    <span id="detailTgl" class="text-end"></span>
+                                    <span
+                                        id="detailGol"
+                                        class="fw-semibold text-end">
+                                        -
+                                    </span>
                                 </div>
 
-                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                {{-- Jabatan --}}
+                                <div class="d-flex justify-content-between align-items-center py-2 border-bottom">
+
                                     <span>
-                                        <i data-feather="home" class="me-1"></i> Unit Kerja
+                                        <i data-feather="briefcase" class="me-2 text-secondary"></i>
+                                        Jabatan
                                     </span>
 
-                                    <span id="detailUkerja" class="text-end"></span>
+                                    <span
+                                        id="detailJabatan"
+                                        class="fw-semibold text-end">
+                                        -
+                                    </span>
+
                                 </div>
 
+                                {{-- Unit Kerja --}}
+                                <div class="d-flex justify-content-between align-items-center pt-2">
+
+                                    <span>
+                                        <i data-feather="home" class="me-2 text-warning"></i>
+                                        Unit Kerja
+                                    </span>
+
+                                    <span
+                                        id="detailUkerja"
+                                        class="fw-semibold text-end">
+                                        -
+                                    </span>
+
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
-            <div class="modal-footer"><button class="btn btn-light" type="button"
-                    data-bs-dismiss="modal">Batal</button><button class="btn btn-primary" type="button"
-                    id="confirmSimpan">Pilih</button></div>
+
+            <div class="modal-footer">
+
+                <button
+                    class="btn btn-light"
+                    type="button"
+                    data-bs-dismiss="modal">
+
+                    <i data-feather="x" class="me-1"></i>
+                    Batal
+
+                </button>
+
+                <button
+                    class="btn btn-primary"
+                    type="button"
+                    id="confirmSimpan">
+
+                    <i data-feather="check" class="me-1"></i>
+                    Pilih Pegawai
+
+                </button>
+
+            </div>
+
         </div>
+
     </div>
+
 </div>
 
 {{-- Modal Petunjuk --}}
@@ -328,7 +429,9 @@ $stepHeader = [
 
             <div class="progress mt-3">
 
-                <div class="progress-bar progress-animate" style="width: {{ ($step / 4) * 100 }}%">
+                <div
+                    class="progress-bar"
+                    style="width: {{ ($step / 4) * 100 }}%">
                 </div>
 
             </div>
@@ -554,7 +657,7 @@ $stepHeader = [
                             <div class="row mb-1">
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold mb-0">Golongan</label>
-                                    <div class="form-label">{{ $data['golongan'] ?? '-' }}</div>
+                                    <div class="form-label">{{ $data['ket_gol'] ?? '-' }}</div>
                                 </div>
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold mb-0">Unit Kerja</label>
@@ -645,7 +748,7 @@ $stepHeader = [
                     <div class="d-flex justify-content-end mt-4">
 
                         <a href="{{ route('tiket.cetak', $tiket->no_tiket) }}" target="_blank"
-                            class="btn btn-success me-1">
+                            class="btn btn-light me-1">
                             <i data-feather="printer" class="me-1"></i> Cetak
                         </a>
 
@@ -763,27 +866,24 @@ $stepHeader = [
                     document.getElementById('detailNama').innerText =
                         pegawai.nama_lengkap ?? '-';
 
-                    document.getElementById('detailTgl').innerText =
-                        pegawai.tgl_lahir ?
-                        new Date(pegawai.tgl_lahir).toLocaleDateString('id-ID', {
-                            day: 'numeric',
-                            month: 'long',
-                            year: 'numeric'
-                        }) :
-                        '-';
+                    // document.getElementById('detailTgl').innerText =
+                    //     pegawai.tgl_lahir ?
+                    //     new Date(pegawai.tgl_lahir).toLocaleDateString('id-ID', {
+                    //         day: 'numeric',
+                    //         month: 'long',
+                    //         year: 'numeric'
+                    //     }) :
+                    //     '-';
 
-                    // document.getElementById('detailBidang').innerText =
-                    //     pegawai.kode_opd ?? '-';
+                    document.getElementById('detailGol').innerText =
+                        pegawai.ket_gol ?? '-';
 
-                    // document.getElementById('detailJabatan').innerText =
-                    //     pegawai.jabatan ?? '-';
+                    document.getElementById('detailJabatan').innerText =
+                        pegawai.nama_jab ?? '-';
 
                     document.getElementById('detailUkerja').innerText =
                         pegawai.ket_ukerja ?? '-';
 
-                    // FOTO
-                    // document.getElementById('detailFoto').src =
-                    //     '/adminOpd/pegawai/foto/' + pegawai.nip;
                     const foto = document.getElementById('detailFoto');
 
                     foto.src =

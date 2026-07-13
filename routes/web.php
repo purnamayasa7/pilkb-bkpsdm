@@ -14,6 +14,7 @@ use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\PengambilanController;
 use App\Http\Controllers\PerbaikanController;
 use App\Http\Controllers\PermintaanController;
+use App\Http\Controllers\SearchController;
 use App\Http\Controllers\StatusController;
 use App\Http\Controllers\SyaratController;
 use App\Http\Controllers\TiketController;
@@ -98,6 +99,10 @@ Route::middleware(['auth', 'force.password'])->group(function () {
     Route::get('/chat/admin/inbox', [ChatController::class, 'adminInbox']);
     Route::get('/chat/{conversation}/poll', [ChatController::class, 'pollMessages'])->whereNumber('conversation');
     Route::get('/chat/admin/inbox/poll', [ChatController::class, 'pollInbox'])->name('chat.admin.poll');
+
+    // Search
+     Route::get('/search-ticket', [SearchController::class, 'ticket'])->name('search.ticket');
+     Route::get('/ticket/detail/{no_tiket}', [SearchController::class, 'detail'])->name('ticket.detail');
 });
 
 /* ROOT */

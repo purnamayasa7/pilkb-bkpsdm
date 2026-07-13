@@ -26,6 +26,10 @@ use Illuminate\Support\Facades\Http;
 
 class TiketController extends Controller
 {
+    public function __construct(
+        protected PegawaiService $pegawaiService
+    ) {}
+
     public function index(Request $request)
     {
         $bidang = Bidang::all();
@@ -223,6 +227,7 @@ class TiketController extends Controller
                 'pengajuan.nama' => $pegawai['nama_lengkap'] ?? null,
                 'pengajuan.kode_opd' => $pegawai['kode_opd'] ?? null,
                 'pengajuan.foto' => $pegawai['foto_url'] ?? null,
+                'pengajuan.ket_gol' => $pegawai['ket_gol'] ?? null,
                 'pengajuan.unit' => $pegawai['ket_ukerja'] ?? null,
             ]);
 
@@ -461,10 +466,12 @@ class TiketController extends Controller
 
         $syarat = Syarat::where('kode_layanan', $tiket->kode_layanan)->get();
 
+        $pegawai = $this->pegawaiService->getPegawaiByNip($tiket->nip);
+
         $data = session('pengajuan') ?? [
-            'nama' => '-',
-            'golongan' => '-',
-            'unit' => '-'
+            'nama'      => $pegawai['nama_lengkap'] ?? '-',
+            'ket_gol'   => $pegawai['ket_gol'] ?? '-',
+            'unit'      => $pegawai['ket_ukerja'] ?? '-',
         ];
 
         $url = route('tiket.public', $tiket->no_tiket);

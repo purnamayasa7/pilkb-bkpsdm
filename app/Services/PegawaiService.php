@@ -2,73 +2,91 @@
 
 namespace App\Services;
 
-use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
 class PegawaiService
 {
-    // Sementara
-    public function getPegawaiByNip($nip)
+    /**
+     * Mengambil data pegawai dari SIMPEG.
+     */
+    public function getPegawaiByNip(?string $nip): ?array
     {
-        return Cache::remember("pegawai_$nip", 3600, function () use ($nip) {
+        if (blank($nip)) {
+            return null;
+        }
 
-            $response = Http::withoutVerifying()
-                ->withToken(env('SIMPEG_API_TOKEN'))
-                ->get(env('SIMPEG_API_URL') . '/pegawai/' . $nip);
+        return Cache::remember(
+            "pegawai:{$nip}",
+            now()->addDay(),
+            function () use ($nip) {
 
-            if ($response->failed()) {
+                try {
 
-                Log::error($response->body());
+                    $response = Http::withoutVerifying()
+                        ->connectTimeout(5)
+                        ->timeout(10)
+                        ->retry(2, 300, throw: false)
+                        ->acceptJson()
+                        ->withToken(config('services.simpeg.token'))
+                        ->get(
+                            config('services.simpeg.url') . "/pegawai/{$nip}"
+                        );
 
-                return null;
+                    if (! $response->successful()) {
+
+                        Log::warning('SIMPEG API gagal.', [
+                            'nip' => $nip,
+                            'status' => $response->status(),
+                        ]);
+
+                        return null;
+                    }
+
+                    // Hilangkan UTF-8 BOM
+                    $body = preg_replace(
+                        '/^\xEF\xBB\xBF/',
+                        '',
+                        $response->body()
+                    );
+
+                    $json = json_decode($body, true);
+
+                    if (json_last_error() !== JSON_ERROR_NONE) {
+
+                        Log::error('JSON SIMPEG tidak valid.', [
+                            'nip' => $nip,
+                            'error' => json_last_error_msg(),
+                        ]);
+
+                        return null;
+                    }
+
+                    if (
+                        !isset($json['success']) ||
+                        $json['success'] !== true ||
+                        empty($json['data'])
+                    ) {
+
+                        Log::warning('Data pegawai tidak ditemukan.', [
+                            'nip' => $nip,
+                        ]);
+
+                        return null;
+                    }
+
+                    return $json['data'];
+                } catch (\Throwable $e) {
+
+                    Log::error('Exception SIMPEG.', [
+                        'nip' => $nip,
+                        'message' => $e->getMessage(),
+                    ]);
+
+                    return null;
+                }
             }
-
-            $body = $response->body();
-
-            // Hilangkan BOM dari response SIMPEG
-            $body = preg_replace('/^\xEF\xBB\xBF/', '', $body);
-
-            $json = json_decode($body, true);
-
-            if (json_last_error() !== JSON_ERROR_NONE) {
-
-                Log::error('JSON Decode Error: ' . json_last_error_msg(), [
-                    'body' => $body
-                ]);
-
-                return null;
-            }
-
-            if (!$json || empty($json['success'])) {
-                return null;
-            }
-
-            return $json['data'] ?? null;
-        });
+        );
     }
-    // public function getPegawaiByNip($nip)
-    // {
-    //     return Cache::remember("pegawai_$nip", 3600, function () use ($nip) {
-
-    //         $response = Http::withoutVerifying()
-    //             ->withToken(env('SIMPEG_API_TOKEN'))
-    //             ->get(env('SIMPEG_API_URL') . '/pegawai/' . $nip);
-
-    //         if ($response->failed()) {
-
-    //             Log::error($response->body());
-
-    //             return null;
-    //         }
-
-    //         $json = $response->json();
-
-    //         if (!$json || empty($json['success'])) {
-    //             return null;
-    //         }
-
-    //         return $json['data'] ?? null;
-    //     });
-    // }
 }

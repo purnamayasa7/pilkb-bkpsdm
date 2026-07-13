@@ -10,6 +10,7 @@ use App\Models\Tahap;
 use App\Models\User;
 use App\Notifications\TiketNotification;
 use App\Services\ActivityLogService;
+use App\Services\PegawaiService;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -18,6 +19,10 @@ use Maatwebsite\Excel\Facades\Excel;
 
 class DetailTiketController extends Controller
 {
+    public function __construct(
+        protected PegawaiService $pegawaiService
+    ) {}
+
     private function getData($request, $isAdminBawah = false)
     {
         $query = Regtiket::with([
@@ -145,10 +150,12 @@ class DetailTiketController extends Controller
             ->where('no_tiket', $no_tiket)
             ->get();
 
+        $pegawai = $this->pegawaiService->getPegawaiByNip($tiket->nip);
+
         $dataPegawai = [
-            'nama' => '-',
-            'golongan' => '-',
-            'unit' => 'BKPSDM Kabupaten Buleleng'
+            'nama' => $pegawai['nama_lengkap'] ?? '-',
+            'golongan' => $pegawai['ket_gol'] ?? '-',
+            'unit' => $pegawai['ket_ukerja'] ?? '-',
         ];
 
         return view('pages.admin-bawah.registrasi.edit', [

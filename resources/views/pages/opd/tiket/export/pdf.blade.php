@@ -86,7 +86,7 @@
                     </tr>
                     <tr>
                         <td>Golongan</td>
-                        <td>: {{ $data['golongan'] ?? '-' }}</td>
+                        <td>: {{ $data['ket_gol'] ?? '-' }}</td>
                     </tr>
                     <tr>
                         <td>Unit</td>
