@@ -5,10 +5,15 @@ namespace App\Http\Controllers;
 use App\Models\DetailTiket;
 use App\Models\Layanan;
 use App\Models\Regtiket;
+use App\Services\PegawaiService;
 use Illuminate\Http\Request;
 
 class PerbaikanController extends Controller
 {
+    public function __construct(
+        protected PegawaiService $pegawaiService
+    ) {}
+
     public function getData($request)
     {
         $query = Regtiket::with([
@@ -51,8 +56,13 @@ class PerbaikanController extends Controller
     {
         $data = $this->getData($request);
 
+        $pegawaiList = $this->pegawaiService->getPegawaiByNips(
+            $data->pluck('nip')
+        );
+
         return view('pages.bidang.perbaikan.index', [
             'data' => $data,
+            'pegawaiList' => $pegawaiList,
             'layananList' => Layanan::where('aktif', 1)->get()
         ]);
     }

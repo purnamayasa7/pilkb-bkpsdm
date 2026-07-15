@@ -124,7 +124,7 @@
                 <td>{{ $loop->iteration }}</td>
                 <td>{{ $item->no_tiket }}</td>
                 <td>{{ $item->nip }}</td>
-                <td>-</td>
+                <td>{{ $pegawaiList[$item->nip]['nama'] ?? '-' }}</td>
                 <td>{{ $item->layanan->nama_layanan ?? '-' }}</td>
                 <td>{{ $item->kode_ukerja }}</td>
                 <td>{{ \Carbon\Carbon::parse($item->tanggal)->format('d-m-Y') }}</td>

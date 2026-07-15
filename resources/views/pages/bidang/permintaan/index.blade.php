@@ -152,22 +152,22 @@
                         <td>
                             {{ $item->nip }} <br>
                             <small class="text-muted">
-                                Kadek Purnamayasa, S.Kom
+                                {{ $pegawaiList[$item->nip]['nama_lengkap'] ?? '-' }}
                             </small>
                         </td>
                         <td>{{ $item->layanan->nama_layanan ?? '-' }}</td>
-                        <td>-</td>
+                        <td> {{ $pegawaiList[$item->nip]['ket_ukerja'] ?? '-' }}</td>
                         <td>{{ $item->tanggal }}</td>
                         <td>{{ $item->tahapTerakhir->statusRel->status ?? '-' }}</td>
                         <td>
                             <div class="d-flex align-items-center justify-content-center">
                                 @if ($item->archives == 1)
                                 <span class="badge bg-light text-success border d-inline-flex align-items-center">
-                                   Selesai
+                                    Selesai
                                 </span>
                                 @else
                                 <span class="badge bg-light text-warning border d-inline-flex align-items-center">
-                                   Proses
+                                    Proses
                                 </span>
                                 @endif
                             </div>

@@ -40,6 +40,8 @@ class TiketController extends Controller
 
         $tiket = collect();
 
+        $pegawaiList = [];
+
         if ($bidangId && $start && $end) {
 
             $tiket = Regtiket::with([
@@ -52,6 +54,10 @@ class TiketController extends Controller
                 ->whereBetween('tanggal', [$start, $end])
                 ->orderBy('tanggal', 'desc')
                 ->get();
+
+            $pegawaiList = $this->pegawaiService->getPegawaiByNips(
+                $tiket->pluck('nip')
+            );
         }
 
         return view('pages.all.layanan.index', compact(
@@ -59,7 +65,8 @@ class TiketController extends Controller
             'bidang',
             'bidangId',
             'start',
-            'end'
+            'end',
+            'pegawaiList'
         ));
     }
 
@@ -104,10 +111,15 @@ class TiketController extends Controller
 
         $tiket = $query->orderBy('tanggal', 'desc')->get();
 
+        $pegawaiList = $this->pegawaiService->getPegawaiByNips(
+            $tiket->pluck('nip')
+        );
+
         return view('pages.admin-bawah.tiket.index', compact(
             'tiket',
             'year',
-            'diambil'
+            'diambil',
+            'pegawaiList'
         ));
     }
 
@@ -215,7 +227,18 @@ class TiketController extends Controller
             $pegawai = $pegawaiService->getPegawaiByNip($request->nip);
 
             if (!$pegawai) {
-                return back()->with('error', 'Data pegawai tidak ditemukan');
+                return back()->with(
+                    'error',
+                    'Data pegawai tidak ditemukan.'
+                );
+            }
+
+            if (($pegawai['kode_opd'] ?? null) != Auth::user()->kode_ukerja) {
+
+                return back()->with(
+                    'error',
+                    'Pegawai yang dipilih bukan berasal dari OPD Anda.'
+                );
             }
 
             session([
@@ -296,7 +319,7 @@ class TiketController extends Controller
                     'nip'           => $data['nip'],
                     'kode_layanan'  => $data['layanan_id'],
                     'tanggal'       => now(),
-                    'kode_ukerja'   => $data['kode_opd'] ?? null,
+                    'kode_ukerja'   => Auth::user()->kode_ukerja,
                     'no_hp'         => $request->no_hp ?? null,
                     'email'         => $data['email'] ?? null,
                     'nama_penerima' => Auth::user()->username,
@@ -420,6 +443,15 @@ class TiketController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => 'Data tidak ditemukan'
+            ]);
+        }
+
+        // VALIDASI OPD
+        if (($pegawai['kode_opd'] ?? null) != Auth::user()->kode_ukerja) {
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Pegawai bukan berasal dari OPD Anda.'
             ]);
         }
 
@@ -581,6 +613,8 @@ class TiketController extends Controller
 
         $data = collect();
 
+        $pegawaiList = [];
+
         if ($keyword) {
             $data = Regtiket::with([
                 'layanan',
@@ -592,9 +626,13 @@ class TiketController extends Controller
                         ->orWhere('nip', 'like', "%$keyword%");
                 })
                 ->get();
+
+            $pegawaiList = $this->pegawaiService->getPegawaiByNips(
+                $data->pluck('nip')
+            );
         }
 
-        return view('pages.opd.tiket.cetak', compact('data'));
+        return view('pages.opd.tiket.cetak', compact('data', 'pegawaiList'));
     }
 
     // CETAK ULANG TIKET ADMIN BAWAH
@@ -603,6 +641,8 @@ class TiketController extends Controller
         $keyword = $request->keyword;
 
         $data = collect();
+
+        $pegawaiList = [];
 
         if ($keyword) {
             $data = Regtiket::with([
@@ -615,9 +655,13 @@ class TiketController extends Controller
                         ->orWhere('nip', 'like', "%$keyword%");
                 })
                 ->get();
+
+            $pegawaiList = $this->pegawaiService->getPegawaiByNips(
+                $data->pluck('nip')
+            );
         }
 
-        return view('pages.admin-bawah.tiket.cetak', compact('data'));
+        return view('pages.admin-bawah.tiket.cetak', compact('data', 'pegawaiList'));
     }
 
     // PINDAH DATA TIKET
@@ -626,6 +670,7 @@ class TiketController extends Controller
         $keyword = $request->keyword;
 
         $data = collect();
+        $pegawaiList = [];
 
         if ($keyword) {
             $data = Regtiket::with([
@@ -635,9 +680,13 @@ class TiketController extends Controller
                 ->where(function ($query) use ($keyword) {
                     $query->where('no_tiket', 'like', "%$keyword%");
                 })->get();
+
+            $pegawaiList = $this->pegawaiService->getPegawaiByNips(
+                $data->pluck('nip')
+            );
         }
 
-        return view('pages.admin-bawah.pindah-tiket.index', compact('data'));
+        return view('pages.admin-bawah.pindah-tiket.index', compact('data', 'pegawaiList'));
     }
 
     public function editPindah($no_tiket)

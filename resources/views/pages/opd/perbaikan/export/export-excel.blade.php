@@ -18,15 +18,15 @@
     </thead>
     <tbody>
         @foreach ($data as $d)
-            <tr>
-                <td>{{ $loop->iteration }}</td>
-                <td>{{ $d->is_belum ? 'Belum' : 'Sudah' }}</td>
-                <td>{{ $d->no_tiket }}</td>
-                <td>'{{ $d->nip }}</td>
-                <td>-</td>
-                <td>{{ $d->layanan->nama_layanan ?? '-' }}</td>
-                <td>{{ $d->jumlah_btl }}</td>
-            </tr>
+        <tr>
+            <td>{{ $loop->iteration }}</td>
+            <td>{{ $d->is_belum ? 'Belum' : 'Sudah' }}</td>
+            <td>{{ $d->no_tiket }}</td>
+            <td>'{{ $d->nip }}</td>
+            <td>{{ $pegawaiList[$d->nip]['nama_lengkap'] ?? '-' }}</td>
+            <td>{{ $d->layanan->nama_layanan ?? '-' }}</td>
+            <td>{{ $d->jumlah_btl }}</td>
+        </tr>
         @endforeach
     </tbody>
 </table>

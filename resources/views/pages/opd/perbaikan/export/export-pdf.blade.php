@@ -103,6 +103,7 @@
                 <th>No</th>
                 <th>No Tiket</th>
                 <th>NIP</th>
+                <th>Unit Kerja</th>
                 <th>Layanan</th>
                 <th>Status</th>
                 <th>Jumlah BTL</th>
@@ -110,14 +111,21 @@
         </thead>
         <tbody>
             @foreach ($data as $item)
-                <tr>
-                    <td>{{ $loop->iteration }}</td>
-                    <td>{{ $item->no_tiket }}</td>
-                    <td>{{ $item->nip }}</td>
-                    <td>{{ $item->layanan->nama_layanan ?? '-' }}</td>
-                    <td>{{ $item->is_belum ? 'Belum' : 'Sudah' }}</td>
-                    <td>{{ $item->jumlah_btl }}</td>
-                </tr>
+            <tr>
+                <td>{{ $loop->iteration }}</td>
+                <td>{{ $item->no_tiket }}</td>
+                <td>
+                    {{ $item->nip }}<br>
+                    {{ $pegawaiList[$item->nip]['nama_lengkap'] ?? '-' }}
+                </td>
+
+                <td>
+                    {{ $pegawaiList[$item->nip]['ket_ukerja'] ?? '-' }}
+                </td>
+                <td>{{ $item->layanan->nama_layanan ?? '-' }}</td>
+                <td>{{ $item->is_belum ? 'Belum' : 'Sudah' }}</td>
+                <td>{{ $item->jumlah_btl }}</td>
+            </tr>
             @endforeach
         </tbody>
     </table>

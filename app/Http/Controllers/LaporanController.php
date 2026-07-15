@@ -6,12 +6,19 @@ use App\Models\Bidang;
 use App\Models\Layanan;
 use App\Models\Regtiket;
 use App\Models\Tahap;
+use App\Services\PegawaiService;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class LaporanController extends Controller
 {
+
+    public function __construct(
+        protected PegawaiService $pegawaiService
+    ) {}
+
+
     public function index(Request $request)
     {
         $bidangList = Bidang::orderBy('nama_bidang')->get();
@@ -19,6 +26,8 @@ class LaporanController extends Controller
         $layananList = collect();
 
         $data = collect();
+
+        $pegawaiList = [];
 
         /**
          * LOAD DROPDOWN LAYANAN
@@ -103,6 +112,12 @@ class LaporanController extends Controller
             $data = $query
                 ->latest('tanggal')
                 ->get();
+
+            $pegawaiList = $this->pegawaiService->getPegawaiByNips(
+                $data->pluck('nip')
+                    ->unique()
+                    ->values()
+            );
         }
 
         $user = Auth::user();
@@ -118,7 +133,48 @@ class LaporanController extends Controller
         return view($view, compact(
             'bidangList',
             'layananList',
-            'data'
+            'data',
+            'pegawaiList'
+        ));
+    }
+
+    public function indexBidang(Request $request)
+    {
+        $start = $request->start_date;
+        $end = $request->end_date;
+
+        $user = Auth::user();
+
+        $tiket = collect();
+        $pegawaiList = [];
+
+        if ($start && $end) {
+
+            $tiket = Regtiket::with([
+                'layanan.bidang',
+                'tahapTerakhir.statusRel'
+            ])
+                ->visibleBy($user)
+                ->whereBetween('tanggal', [
+                    $start . ' 00:00:00',
+                    $end . ' 23:59:59'
+                ])
+                ->latest('tanggal')
+                ->get();
+
+            $pegawaiList = $this->pegawaiService->getPegawaiByNips(
+                $tiket->pluck('nip')
+                    ->filter()
+                    ->unique()
+                    ->values()
+            );
+        }
+
+        return view('pages.bidang.laporan.index', compact(
+            'tiket',
+            'start',
+            'end',
+            'pegawaiList'
         ));
     }
 
@@ -195,6 +251,12 @@ class LaporanController extends Controller
             ->latest('tanggal')
             ->get();
 
+        $pegawaiList = $this->pegawaiService->getPegawaiByNips(
+            $data->pluck('nip')
+                ->unique()
+                ->values()
+        );
+
         /** @var \App\Models\User $user */
         $user = Auth::user();
 
@@ -211,7 +273,7 @@ class LaporanController extends Controller
 
         $pdf = Pdf::loadView(
             $view,
-            compact('data')
+            compact('data', 'pegawaiList')
         );
 
         $pdf->setPaper('a4', 'landscape');
@@ -225,21 +287,32 @@ class LaporanController extends Controller
         $start = $request->start_date;
         $end = $request->end_date;
 
+        $user = Auth::user();
+
         $data = Regtiket::with([
             'layanan.bidang',
             'tahapTerakhir.statusRel'
         ])
+            ->visibleBy($user)
             ->whereBetween('tanggal', [
                 $start . ' 00:00:00',
                 $end . ' 23:59:59'
             ])
-            ->orderByDesc('tanggal')
+            ->latest('tanggal')
             ->get();
 
+        $pegawaiList = $this->pegawaiService->getPegawaiByNips(
+            $data->pluck('nip')
+                ->filter()
+                ->unique()
+                ->values()
+        );
+
         $pdf = Pdf::loadView('pages.bidang.laporan.pdf', [
-            'data' => $data,
-            'start' => $start,
-            'end' => $end
+            'data'        => $data,
+            'pegawaiList' => $pegawaiList,
+            'start'       => $start,
+            'end'         => $end,
         ])->setPaper('A4', 'landscape');
 
         return $pdf->stream('laporan-layanan.pdf');

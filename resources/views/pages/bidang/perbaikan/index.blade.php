@@ -120,7 +120,6 @@
                         <th>Diperbaiki</th>
                         <th>No Tiket</th>
                         <th>NIP</th>
-                        <th>Nama</th>
                         <th>Layanan</th>
                         <th>Unit Kerja</th>
                         <th>Syarat BTL</th>
@@ -133,7 +132,6 @@
                         <th>Diperbaiki</th>
                         <th>No Tiket</th>
                         <th>NIP</th>
-                        <th>Nama</th>
                         <th>Layanan</th>
                         <th>Unit Kerja</th>
                         <th>Syarat BTL</th>
@@ -160,11 +158,14 @@
                         </td>
 
                         <td>{{ $item->no_tiket }}</td>
-                        <td>{{ $item->nip }}</td>
-                        <td>-</td> {{-- dummy nama --}}
+                        <td>
+                            {{ $item->nip }} <br>
+                            <small class="text-muted">
+                                {{ $pegawaiList[$item->nip]['nama_lengkap'] ?? '-' }}
+                            </small>
+                        </td>
                         <td>{{ $item->layanan->nama_layanan ?? '-' }}</td>
-                        <td>-</td> {{-- dummy unit kerja --}}
-
+                        <td> {{ $pegawaiList[$item->nip]['ket_ukerja'] ?? '-' }}</td>
                         <td>
                             <div class="d-flex align-items-center justify-content-center">
                                 <span class="badge bg-light text-danger border d-inline-flex align-items-center">

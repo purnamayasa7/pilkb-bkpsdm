@@ -10,6 +10,7 @@ use App\Models\Layanan;
 use App\Models\Regtiket;
 use App\Models\Tahap;
 use App\Services\ActivityLogService;
+use App\Services\PegawaiService;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -18,6 +19,10 @@ use Maatwebsite\Excel\Facades\Excel;
 
 class LayananController extends Controller
 {
+    public function __construct(
+        protected PegawaiService $pegawaiService
+    ) {}
+
     public function index()
     {
         $layanan = Layanan::with('bidang')
@@ -159,6 +164,8 @@ class LayananController extends Controller
 
         $tiket = collect();
 
+        $pegawaiList = [];
+
         if ($start && $end) {
 
             $tiket = Regtiket::with([
@@ -172,12 +179,17 @@ class LayananController extends Controller
                 ->where('kode_ukerja', $user->kode_ukerja)
                 ->orderByDesc('tanggal')
                 ->get();
+
+            $pegawaiList = $this->pegawaiService->getPegawaiByNips(
+                $tiket->pluck('nip')
+            );
         }
 
         return view('pages.opd.laporan.index', compact(
             'tiket',
             'start',
-            'end'
+            'end',
+            'pegawaiList'
         ));
     }
 

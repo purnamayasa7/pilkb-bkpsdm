@@ -113,7 +113,7 @@ $stepHeader = [
                                     object-position:center;
                                 ">
 
-                            <div class="small mt-3">
+                            <div class="small mt-3 text-muted">
                                 <i>Data pada SIMPEG</i>
                             </div>
                         </div>
@@ -842,12 +842,11 @@ $stepHeader = [
 
                     if (!result.success || !result.data) {
 
-                        nipError.innerText = 'NIP tidak ditemukan';
+                        nipError.innerText = result.message ?? 'NIP tidak ditemukan';
                         nipError.classList.remove('d-none');
 
                         nipValid = false;
 
-                        // loading OFF
                         btnCek.disabled = false;
                         loadingSpinner.classList.add('d-none');
                         btnCekText.innerText = 'Cek Data';

@@ -103,6 +103,7 @@
                 <th>No</th>
                 <th>No Tiket</th>
                 <th>NIP</th>
+                <th>Unit Kerja</th>
                 <th>Nama Layanan</th>
                 <th>Tanggal</th>
                 <th>Status</th>
@@ -112,37 +113,46 @@
 
         <tbody>
             @foreach ($tiket as $item)
-                <tr>
-                    <td class="text-center">{{ $loop->iteration }}</td>
-                    <td>{{ $item->no_tiket }}</td>
-                    <td>{{ $item->nip }}</td>
-                    <td>{{ $item->layanan->nama_layanan ?? '-' }}</td>
-                    <td>{{ \Carbon\Carbon::parse($item->tanggal)->translatedFormat('d F Y H:i') }}</td>
-                    <td>
-                        <div class="d-flex align-items-center justify-content-center">
-                            @if ($item->detail->contains('status', 2))
-                                <span>
-                                    BTL
-                                </span>
-                            @else
-                                <span>
-                                    {{ $item->tahapTerakhir->statusRel->status ?? '-' }}
-                                </span>
-                            @endif
-                        </div>
-                    </td>
-                    <td>
-                        <div class="d-flex align-items-center justify-content-center">
-                            @if ($item->detail->contains('status', 2))
-                                <span>
-                                    Belum
-                                </span>
-                            @else
-                                -
-                            @endif
-                        </div>
-                    </td>
-                </tr>
+            <tr>
+                <td class="text-center">{{ $loop->iteration }}</td>
+                <td>{{ $item->no_tiket }}</td>
+                <td>
+                    {{ $item->nip }}<br>
+                    <small>
+                        {{ $pegawaiList[$item->nip]['nama_lengkap'] ?? '-' }}
+                    </small>
+                </td>
+
+                <td>
+                    {{ $pegawaiList[$item->nip]['ket_ukerja'] ?? '-' }}
+                </td>
+                <td>{{ $item->layanan->nama_layanan ?? '-' }}</td>
+                <td>{{ \Carbon\Carbon::parse($item->tanggal)->translatedFormat('d F Y H:i') }}</td>
+                <td>
+                    <div class="d-flex align-items-center justify-content-center">
+                        @if ($item->detail->contains('status', 2))
+                        <span>
+                            BTL
+                        </span>
+                        @else
+                        <span>
+                            {{ $item->tahapTerakhir->statusRel->status ?? '-' }}
+                        </span>
+                        @endif
+                    </div>
+                </td>
+                <td>
+                    <div class="d-flex align-items-center justify-content-center">
+                        @if ($item->detail->contains('status', 2))
+                        <span>
+                            Belum
+                        </span>
+                        @else
+                        -
+                        @endif
+                    </div>
+                </td>
+            </tr>
             @endforeach
         </tbody>
     </table>

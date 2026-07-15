@@ -9,12 +9,17 @@ use App\Models\Tahap;
 use App\Models\User;
 use App\Notifications\TiketNotification;
 use App\Services\ActivityLogService;
+use App\Services\PegawaiService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
 class UpdateStatusController extends Controller
 {
+    public function __construct(
+        protected PegawaiService $pegawaiService
+    ) {}
+
     public function index(Request $request)
     {
         $keyword = $request->keyword;
@@ -22,6 +27,7 @@ class UpdateStatusController extends Controller
         $user = Auth::user();
 
         $data = collect();
+        $pegawaiList = [];
 
         if ($keyword) {
 
@@ -42,10 +48,15 @@ class UpdateStatusController extends Controller
                 ->where('archives', 0)
                 ->orderByDesc('tanggal')
                 ->get();
+
+            $pegawaiList = $this->pegawaiService->getPegawaiByNips(
+                $data->pluck('nip')
+            );
         }
 
         return view('pages.bidang.update-status.index', compact(
-            'data'
+            'data',
+            'pegawaiList'
         ));
     }
 
@@ -68,6 +79,8 @@ class UpdateStatusController extends Controller
             ->where('no_tiket', $no_tiket)
             ->get();
 
+        $pegawai = $this->pegawaiService->getPegawaiByNip($tiket->nip);
+
         $statusList = Status::where(
             'kode_layanan',
             $tiket->kode_layanan
@@ -75,9 +88,9 @@ class UpdateStatusController extends Controller
 
 
         $dataPegawai = [
-            'nama' => '-',
-            'golongan' => '-',
-            'unit' => 'BKPSDM Kabupaten Buleleng'
+            'nama' => $pegawai['nama_lengkap'] ?? '-',
+            'golongan' => $pegawai['ket_gol'] ?? '-',
+            'unit' => $pegawai['ket_ukerja'] ?? '-',
         ];
 
         return view('pages.bidang.update-status.edit', compact(

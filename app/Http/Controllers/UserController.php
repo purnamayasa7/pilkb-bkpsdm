@@ -96,7 +96,7 @@ class UserController extends Controller
                 'data' => [
                     'nama_lengkap' => $pegawai['nama_lengkap'] ?? '',
                     'ket_ukerja' => $pegawai['ket_ukerja'] ?? '',
-                    'kode_ukerja' => $pegawai['kode_ukerja'] ?? '',
+                    'kode_ukerja' => $pegawai['kode_opd'] ?? '',
                     'foto' => $pegawai['foto'] ?? null,
                 ]
             ]);
@@ -142,7 +142,7 @@ class UserController extends Controller
             ?? $pegawai['nama']
             ?? '-';
 
-        $kodeUkerja = $pegawai['kode_ukerja']
+        $kodeUkerja = $pegawai['kode_opd']
             ?? '-';
 
         $bidangId = $request->bidang_id;

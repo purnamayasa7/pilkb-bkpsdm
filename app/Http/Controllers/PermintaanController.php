@@ -52,10 +52,15 @@ class PermintaanController extends Controller
 
             ->get();
 
+        $pegawaiList = $this->pegawaiService->getPegawaiByNips(
+            $tiket->pluck('nip')
+        );
+
         return view('pages.bidang.permintaan.index', compact(
             'tiket',
             'month',
-            'year'
+            'year',
+            'pegawaiList'
         ));
     }
 

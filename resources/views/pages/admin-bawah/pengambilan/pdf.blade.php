@@ -92,7 +92,7 @@
     <hr>
 
     <div class="title">
-         Laporan Pengambilan Tahun {{ $year }}
+        Laporan Pengambilan Tahun {{ $year }}
     </div>
 
     <br>
@@ -103,6 +103,7 @@
                 <th>No</th>
                 <th>No Tiket</th>
                 <th>NIP</th>
+                <th>Unit Kerja</th>
                 <th>Nama Layanan</th>
                 <th>Tanggal Pengambilan</th>
                 <th>Nama Pengambil</th>
@@ -111,16 +112,23 @@
 
         <tbody>
             @foreach ($pengambilan as $item)
-                <tr>
-                    <td>{{ $loop->iteration }}</td>
-                    <td>{{ $item->tiket->no_tiket ?? '-' }}</td>
-                    <td>{{ $item->tiket->nip ?? '-' }}</td>
-                    <td>{{ $item->tiket->layanan->nama_layanan ?? '-' }}</td>
-                    <td>{{ $item->tanggal_pengambilan }}</td>
-                    <td>{{ $item->nama_pengambil }}</td>
-                </tr>
+            <tr>
+                <td>{{ $loop->iteration }}</td>
+                <td>{{ $item->tiket->no_tiket ?? '-' }}</td>
+                <td>
+                    {{ $item->tiket->nip }} <br>
+                    <small class="text-muted">
+                        {{ $pegawaiList[$item->tiket->nip]['nama_lengkap'] ?? '-' }}
+                    </small>
+                </td>
+                <td> {{ $pegawaiList[$item->tiket->nip]['ket_ukerja'] ?? '-' }}</td>
+                <td>{{ $item->tiket->layanan->nama_layanan ?? '-' }}</td>
+                <td>{{ $item->tanggal_pengambilan }}</td>
+                <td>{{ $item->nama_pengambil }}</td>
+            </tr>
             @endforeach
         </tbody>
     </table>
 </body>
+
 </html>

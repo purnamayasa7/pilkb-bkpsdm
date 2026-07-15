@@ -74,8 +74,13 @@ class DetailTiketController extends Controller
     {
         $data = $this->getData($request);
 
+        $pegawaiList = $this->pegawaiService->getPegawaiByNips(
+            $data->pluck('nip')
+        );
+
         return view('pages.opd.perbaikan.index', [
             'data' => $data,
+            'pegawaiList' => $pegawaiList,
             'layananList' => \App\Models\Layanan::where('aktif', 1)->get()
         ]);
     }
@@ -85,8 +90,13 @@ class DetailTiketController extends Controller
     {
         $data = $this->getData($request, true);
 
+        $pegawaiList = $this->pegawaiService->getPegawaiByNips(
+            $data->pluck('nip')
+        );
+
         return view('pages.admin-bawah.perbaikan.index', [
             'data' => $data,
+            'pegawaiList' => $pegawaiList,
             'layananList' => \App\Models\Layanan::where('aktif', 1)->get()
         ]);
     }
@@ -109,8 +119,15 @@ class DetailTiketController extends Controller
             ->orderByDesc('tanggal')
             ->get();
 
+        $pegawaiList = $this->pegawaiService->getPegawaiByNips(
+            $tiket->pluck('nip')
+                ->unique()
+                ->values()
+        );
+
         return view('pages.admin-bawah.registrasi.index', [
             'tiket' => $tiket,
+            'pegawaiList' => $pegawaiList,
             'layananList' => Layanan::where('aktif', 1)->get()
         ]);
     }
@@ -126,10 +143,12 @@ class DetailTiketController extends Controller
             ->where('no_tiket', $no_tiket)
             ->get();
 
+        $pegawai = $this->pegawaiService->getPegawaiByNip($tiket->nip);
+
         $dataPegawai = [
-            'nama' => '-',
-            'golongan' => '-',
-            'unit' => 'BKPSDM Kabupaten Buleleng'
+            'nama' => $pegawai['nama_lengkap'] ?? '-',
+            'golongan' => $pegawai['ket_gol'] ?? '-',
+            'unit' => $pegawai['ket_ukerja'] ?? '-',
         ];
 
         return view('pages.admin-bawah.perbaikan.edit', [
@@ -513,18 +532,35 @@ class DetailTiketController extends Controller
     {
         $data = $this->getData($request);
 
-        return Excel::download(new ListPerbaikanUsulanExport($data), 'perbaikan_usulan.xlsx');
+        $pegawaiList = $this->pegawaiService->getPegawaiByNips(
+            $data->pluck('nip')
+                ->filter()
+                ->unique()
+                ->values()
+        );
+
+        return Excel::download(new ListPerbaikanUsulanExport($data, $pegawaiList), 'perbaikan_usulan.xlsx');
     }
 
     public function exportPdf(Request $request)
     {
         $data = $this->getData($request);
 
-        $pdf = Pdf::loadView('pages.opd.perbaikan.export.export-pdf', [
-            'data' => $data
-        ]);
+        $pegawaiList = $this->pegawaiService->getPegawaiByNips(
+            $data->pluck('nip')
+                ->filter()
+                ->unique()
+                ->values()
+        );
 
-        return $pdf->steam('perbaikan_usulan.pdf');
+        $pdf = Pdf::loadView(
+            'pages.opd.perbaikan.export.export-pdf',
+            compact('data', 'pegawaiList')
+        );
+
+        $pdf->setPaper('a4', 'landscape');
+
+        return $pdf->stream('perbaikan_usulan.pdf');
     }
 
     // EXPORT PDF LIST PERMINTAAN LAYANAN SKPD
@@ -546,9 +582,16 @@ class DetailTiketController extends Controller
             ->orderByDesc('tanggal')
             ->get();
 
+        $pegawaiList = $this->pegawaiService->getPegawaiByNips(
+            $tiket->pluck('nip')
+                ->filter()
+                ->unique()
+                ->values()
+        );
+
         $pdf = Pdf::loadView(
             'pages.admin-bawah.registrasi.pdf',
-            compact('tiket')
+            compact('tiket', 'pegawaiList')
         );
 
         $pdf->setPaper('a4', 'landscape');

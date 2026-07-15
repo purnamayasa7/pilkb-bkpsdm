@@ -8,17 +8,25 @@ use App\Models\Regtiket;
 use App\Models\User;
 use App\Notifications\TiketNotification;
 use App\Services\ActivityLogService;
+use App\Services\PegawaiService;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 
 class PengambilanController extends Controller
 {
+
+    public function __construct(
+        protected PegawaiService $pegawaiService
+    ) {}
+
     public function indexArchives(Request $request)
     {
         $bidangList = Bidang::orderBy('nama_bidang')->get();
 
         $data = collect();
+
+        $pegawaiList = [];
 
         if ($request->has('filter')) {
 
@@ -55,11 +63,16 @@ class PengambilanController extends Controller
             $data = $query
                 ->latest('tanggal')
                 ->get();
+
+            $pegawaiList = $this->pegawaiService->getPegawaiByNips(
+                $data->pluck('nip')
+            );
         }
 
         return view('pages.admin-bawah.archives.index', compact(
             'data',
-            'bidangList'
+            'bidangList',
+            'pegawaiList'
         ));
     }
 
@@ -74,9 +87,18 @@ class PengambilanController extends Controller
             ->orderBy('tanggal_pengambilan', 'desc')
             ->get();
 
+        $pegawaiList = $this->pegawaiService->getPegawaiByNips(
+            $pengambilan
+                ->pluck('tiket.nip')
+                ->filter()
+                ->unique()
+                ->values()
+        );
+
         return view('pages.admin-bawah.pengambilan.index', compact(
             'pengambilan',
-            'year'
+            'year',
+            'pegawaiList'
         ));
     }
 
@@ -195,10 +217,22 @@ class PengambilanController extends Controller
             ->orderBy('tanggal_pengambilan', 'desc')
             ->get();
 
-        $pdf = Pdf::loadView('pages.admin-bawah.pengambilan.pdf', [
-            'pengambilan' => $pengambilan,
-            'year' => $year
-        ])->setPaper('a4', 'landscape');
+        $pegawaiList = $this->pegawaiService->getPegawaiByNips(
+            $pengambilan
+                ->pluck('tiket.nip')
+                ->filter()
+                ->unique()
+                ->values()
+        );
+
+        $pdf = Pdf::loadView(
+            'pages.admin-bawah.pengambilan.pdf',
+            compact(
+                'pengambilan',
+                'pegawaiList',
+                'year'
+            )
+        )->setPaper('a4', 'landscape');
 
         return $pdf->stream('laporan-pengambilan.pdf');
     }
@@ -252,12 +286,24 @@ class PengambilanController extends Controller
             ->latest('tanggal')
             ->get();
 
+        $pegawaiList = $this->pegawaiService->getPegawaiByNips(
+            $data->pluck('nip')
+                ->filter()
+                ->unique()
+                ->values()
+        );
+
         $tanggal_awal = $request->tanggal_awal;
         $tanggal_akhir = $request->tanggal_akhir;
 
         $pdf = Pdf::loadView(
             'pages.admin-bawah.archives.pdf',
-            compact('data', 'tanggal_awal', 'tanggal_akhir')
+            compact(
+                'data',
+                'pegawaiList',
+                'tanggal_awal',
+                'tanggal_akhir'
+            )
         );
 
         $pdf->setPaper('a4', 'landscape');

@@ -5,6 +5,7 @@ namespace App\Services;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Collection;
 
 class PegawaiService
 {
@@ -88,5 +89,31 @@ class PegawaiService
                 }
             }
         );
+    }
+
+    /**
+     * Mengambil beberapa data pegawai berdasarkan daftar NIP.
+     *
+     * @param array|Collection $nips
+     * @return array
+     */
+    public function getPegawaiByNips(array|Collection $nips): array
+    {
+        return collect($nips)
+
+            // hilangkan null
+            ->filter()
+
+            // hilangkan duplikat
+            ->unique()
+
+            ->mapWithKeys(function ($nip) {
+
+                return [
+                    $nip => $this->getPegawaiByNip($nip)
+                ];
+            })
+
+            ->all();
     }
 }

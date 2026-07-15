@@ -55,7 +55,7 @@
                     <tr>
                         <th>No Tiket</th>
                         <th>NIP</th>
-                        <th>Nama</th>
+                        <th>Unit Kerja</th>
                         <th>Layanan</th>
                         <th>Tanggal Masuk</th>
                         <th>Status Terakhir</th>
@@ -67,8 +67,13 @@
                     @foreach ($data as $item)
                     <tr>
                         <td>{{ $item->no_tiket }}</td>
-                        <td>{{ $item->nip }}</td>
-                        <td>-</td>
+                        <td>
+                            {{ $item->nip }} <br>
+                            <small class="text-muted">
+                                {{ $pegawaiList[$item->nip]['nama_lengkap'] ?? '-' }}
+                            </small>
+                        </td>
+                        <td> {{ $pegawaiList[$item->nip]['ket_ukerja'] ?? '-' }}</td>
                         <td>{{ $item->layanan->nama_layanan ?? '-' }}</td>
                         <td>{{ $item->tanggal }}</td>
                         <td>
