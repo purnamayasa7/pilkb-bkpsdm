@@ -91,8 +91,11 @@ class DetailTiketController extends Controller
         $data = $this->getData($request, true);
 
         $pegawaiList = $this->pegawaiService->getPegawaiByNips(
-            $data->pluck('nip')
-        );
+        $data->pluck('nip')
+            ->filter()
+            ->unique()
+            ->values()
+    );
 
         return view('pages.admin-bawah.perbaikan.index', [
             'data' => $data,

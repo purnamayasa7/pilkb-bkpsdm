@@ -59,74 +59,83 @@
 
                 </div>
             </form>
-            <table id="datatablesSimple">
-                <thead>
-                    <tr>
-                        <th>No</th>
-                        <th>No Tiket</th>
-                        <th>NIP</th>
-                        <th>Unit Kerja</th>
-                        <th>Nama Layanan</th>
-                        <th>Tanggal</th>
-                        <th>Status Diambil</th>
-                        <th>Aksi</th>
-                    </tr>
-                </thead>
-                <tfoot>
-                    <tr>
-                        <th>No</th>
-                        <th>No Tiket</th>
-                        <th>NIP</th>
-                        <th>Unit Kerja</th>
-                        <th>Nama Layanan</th>
-                        <th>Tanggal</th>
-                        <th>Status Diambil</th>
-                        <th>Aksi</th>
-                    </tr>
-                </tfoot>
-                <tbody>
-                    @foreach ($tiket as $item)
-                    <tr>
-                        <td>{{ $loop->iteration }}</td>
-                        <td>{{ $item->no_tiket }}</td>
-                        <td>
-                            {{ $item->nip }} <br>
-                            <small class="text-muted">
-                                {{ $pegawaiList[$item->nip]['nama_lengkap'] ?? '-' }}
-                            </small>
-                        </td>
-                        <td> {{ $pegawaiList[$item->nip]['ket_ukerja'] ?? '-' }}</td>
-                        <td>{{ $item->layanan->nama_layanan ?? '-' }}</td>
-                        <td>{{ $item->tanggal }}</td>
-                        <td>
-                            @if ($item->diambil == 1)
-                            <span class="badge bg-light text-success border d-inline-flex align-items-center">
-                                Sudah
-                            </span>
-                            @else
-                            <span class="badge bg-light text-warning border d-inline-flex align-items-center">
-                                Belum
-                            </span>
-                            @endif
-                        </td>
-                        <td>
-                            <div class="d-flex align-items-center">
-                                <a class="btn btn-datatable btn-icon btn-transparent-dark me-1"
-                                    href="{{ route('tiket.public', $item->no_tiket) }}" target="_blank"
-                                    title="Lihat Tiket">
+            <div class="position-relative">
+                <div id="tableLoading" class="table-loading">
+                    <div class="loading-content">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                    </div>
+                </div>
+                <table id="datatablesSimple">
+                    <thead>
+                        <tr>
+                            <th>No</th>
+                            <th>No Tiket</th>
+                            <th>NIP</th>
+                            <th>Unit Kerja</th>
+                            <th>Nama Layanan</th>
+                            <th>Tanggal</th>
+                            <th>Status Diambil</th>
+                            <th>Aksi</th>
+                        </tr>
+                    </thead>
+                    <tfoot>
+                        <tr>
+                            <th>No</th>
+                            <th>No Tiket</th>
+                            <th>NIP</th>
+                            <th>Unit Kerja</th>
+                            <th>Nama Layanan</th>
+                            <th>Tanggal</th>
+                            <th>Status Diambil</th>
+                            <th>Aksi</th>
+                        </tr>
+                    </tfoot>
+                    <tbody>
+                        @foreach ($tiket as $item)
+                        <tr>
+                            <td>{{ $loop->iteration }}</td>
+                            <td>{{ $item->no_tiket }}</td>
+                            <td>
+                                {{ $item->nip }} <br>
+                                <small class="text-muted">
+                                    {{ $pegawaiList[$item->nip]['nama_lengkap'] ?? '-' }}
+                                </small>
+                            </td>
+                            <td> {{ $pegawaiList[$item->nip]['ket_ukerja'] ?? '-' }}</td>
+                            <td>{{ $item->layanan->nama_layanan ?? '-' }}</td>
+                            <td>{{ $item->tanggal }}</td>
+                            <td>
+                                @if ($item->diambil == 1)
+                                <span class="badge bg-light text-success border d-inline-flex align-items-center">
+                                    Sudah
+                                </span>
+                                @else
+                                <span class="badge bg-light text-warning border d-inline-flex align-items-center">
+                                    Belum
+                                </span>
+                                @endif
+                            </td>
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    <a class="btn btn-datatable btn-icon btn-transparent-dark me-1"
+                                        href="{{ route('tiket.public', $item->no_tiket) }}" target="_blank"
+                                        title="Lihat Tiket">
 
-                                    <i data-feather="eye" class="text-primary"></i>
-                                </a>
+                                        <i data-feather="eye" class="text-primary"></i>
+                                    </a>
 
-                                <a class="btn btn-datatable btn-icon btn-transparent-dark me-1"
-                                    href="{{ route('tiket.cetak', $item->no_tiket) }}" data-bs-toggle="tooltip"
-                                    title="Cetak Tiket"><i data-feather="printer" class="text-warning"></i></a>
-                            </div>
-                        </td>
-                    </tr>
-                    @endforeach
-                </tbody>
-            </table>
+                                    <a class="btn btn-datatable btn-icon btn-transparent-dark me-1"
+                                        href="{{ route('tiket.cetak', $item->no_tiket) }}" data-bs-toggle="tooltip"
+                                        title="Cetak Tiket"><i data-feather="printer" class="text-warning"></i></a>
+                                </div>
+                            </td>
+                        </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
 </div>

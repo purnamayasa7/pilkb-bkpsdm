@@ -152,88 +152,97 @@
                 </div>
         </div>
         </form>
-        <table id="datatablesSimple">
-            <thead>
-                <tr>
-                    <th>No</th>
-                    <th>Diperbaiki</th>
-                    <th>No Tiket</th>
-                    <th>NIP</th>
-                    <th>Layanan</th>
-                    <th>Syarat BTL</th>
-                    <th>Aksi</th>
-                </tr>
-            </thead>
-            <tfoot>
-                <tr>
-                    <th>No</th>
-                    <th>Diperbaiki</th>
-                    <th>No Tiket</th>
-                    <th>NIP</th>
-                    <th>Layanan</th>
-                    <th>Syarat BTL</th>
-                    <th>Aksi</th>
-                </tr>
-            </tfoot>
-            <tbody>
-                @foreach ($data as $item)
-                <tr>
-                    <td>{{ $loop->iteration }}</td>
+        <div class="position-relative">
+            <div id="tableLoading" class="table-loading">
+                <div class="loading-content">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                </div>
+            </div>
+            <table id="datatablesSimple">
+                <thead>
+                    <tr>
+                        <th>No</th>
+                        <th>Diperbaiki</th>
+                        <th>No Tiket</th>
+                        <th>NIP</th>
+                        <th>Layanan</th>
+                        <th>Syarat BTL</th>
+                        <th>Aksi</th>
+                    </tr>
+                </thead>
+                <tfoot>
+                    <tr>
+                        <th>No</th>
+                        <th>Diperbaiki</th>
+                        <th>No Tiket</th>
+                        <th>NIP</th>
+                        <th>Layanan</th>
+                        <th>Syarat BTL</th>
+                        <th>Aksi</th>
+                    </tr>
+                </tfoot>
+                <tbody>
+                    @foreach ($data as $item)
+                    <tr>
+                        <td>{{ $loop->iteration }}</td>
 
-                    <td>
-                        @if ($item->diperbaiki == 0)
-                        <span class="badge bg-red-soft text-danger border d-inline-flex align-items-center">
-                            <i data-feather="x" class="me-1"></i>
-                            Belum
-                        </span>
-                        @else
-                        <span class="badge bg-green-soft text-green d-inline-flex align-items-center">
-                            <i data-feather="check" class="me-1"></i>
-                            Sudah
-                        </span>
-                        @endif
-                    </td>
-
-                    <td>{{ $item->no_tiket }}</td>
-                    <td>
-                        {{ $item->nip }} <br>
-                        <small class="text-muted">
-                            {{ $pegawaiList[$item->nip]['nama_lengkap'] ?? '-' }}
-                        </small>
-                    </td>
-                    <td>{{ $item->layanan->nama_layanan ?? '-' }}</td>
-                    <td>
-                        <div class="d-flex align-items-center justify-content-center">
-                            <span class="badge bg-light text-danger border d-inline-flex align-items-center">
-                                {{ $item->jumlah_btl }}
+                        <td>
+                            @if ($item->diperbaiki == 0)
+                            <span class="badge bg-red-soft text-danger border d-inline-flex align-items-center">
+                                <i data-feather="x" class="me-1"></i>
+                                Belum
                             </span>
-                        </div>
-                    </td>
+                            @else
+                            <span class="badge bg-green-soft text-green d-inline-flex align-items-center">
+                                <i data-feather="check" class="me-1"></i>
+                                Sudah
+                            </span>
+                            @endif
+                        </td>
 
-                    <td>
-                        <div class="d-flex align-items-center justify-content-center">
-                            {{-- KONFIRMASI --}}
-                            <a class="btn btn-datatable btn-icon btn-transparent-dark btnKonfirmasi"
-                                href="#"
-                                data-notiket="{{ $item->no_tiket }}"
-                                title="Konfirmasi Perbaikan">
+                        <td>{{ $item->no_tiket }}</td>
+                        <td>
+                            {{ $item->nip }} <br>
+                            <small class="text-muted">
+                                {{ $pegawaiList[$item->nip]['nama_lengkap'] ?? '-' }}
+                            </small>
+                        </td>
+                        <td>{{ $item->layanan->nama_layanan ?? '-' }}</td>
+                        <td>
+                            <div class="d-flex align-items-center justify-content-center">
+                                <span class="badge bg-light text-danger border d-inline-flex align-items-center">
+                                    {{ $item->jumlah_btl }}
+                                </span>
+                            </div>
+                        </td>
 
-                                <i data-feather="upload" class="text-success"></i>
-                            </a>
-                            {{-- DETAIL --}}
-                            <a class="btn btn-datatable btn-icon btn-transparent-dark me-1 btnDetail"
-                                href="#"
-                                data-notiket="{{ $item->no_tiket }}"
-                                title="Lihat Detail">
+                        <td>
+                            <div class="d-flex align-items-center justify-content-center">
+                                {{-- KONFIRMASI --}}
+                                <a class="btn btn-datatable btn-icon btn-transparent-dark btnKonfirmasi"
+                                    href="#"
+                                    data-notiket="{{ $item->no_tiket }}"
+                                    title="Konfirmasi Perbaikan">
 
-                                <i data-feather="eye" class="text-primary"></i>
-                            </a>
-                        </div>
-                    </td>
-                </tr>
-                @endforeach
-            </tbody>
-        </table>
+                                    <i data-feather="upload" class="text-success"></i>
+                                </a>
+                                {{-- DETAIL --}}
+                                <a class="btn btn-datatable btn-icon btn-transparent-dark me-1 btnDetail"
+                                    href="#"
+                                    data-notiket="{{ $item->no_tiket }}"
+                                    title="Lihat Detail">
+
+                                    <i data-feather="eye" class="text-primary"></i>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    @endforeach
+                </tbody>
+            </table>
+        </div>
     </div>
 </div>
 </div>
@@ -244,6 +253,10 @@
     document.addEventListener('DOMContentLoaded', function() {
 
         feather.replace();
+
+        window.addEventListener('load', function() {
+            document.getElementById('tableLoading').classList.add('d-none');
+        });
 
         const layananSelect = document.getElementById('layananSelect');
 

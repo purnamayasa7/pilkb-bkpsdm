@@ -116,56 +116,64 @@
                     </div>
                 </div>
             </form>
-
-            <table id="datatablesSimple">
-                <thead>
-                    <tr>
-                        <th>No</th>
-                        <th>No Tiket</th>
-                        <th>NIP</th>
-                        <th>Unit Kerja</th>
-                        <th>Nama Layanan</th>
-                        <th>Tanggal Masuk</th>
-                        <th>Status Terakhir</th>
-                        <th>Nama Penerima</th>
-                    </tr>
-                </thead>
-                <tfoot>
-                    <tr>
-                        <th>No</th>
-                        <th>No Tiket</th>
-                        <th>NIP</th>
-                        <th>Unit Kerja</th>
-                        <th>Nama Layanan</th>
-                        <th>Tanggal Masuk</th>
-                        <th>Status Terakhir</th>
-                        <th>Nama Penerima</th>
-                    </tr>
-                </tfoot>
-                <tbody>
-                    @foreach ($data as $item)
-                    <tr>
-                        <td>{{ $loop->iteration }}</td>
-                        <td>{{ $item->no_tiket }}</td>
-                        <td>
-                            {{ $item->nip }} <br>
-                            <small class="text-muted">
-                                {{ $pegawaiList[$item->nip]['nama_lengkap'] ?? '-' }}
-                            </small>
-                        </td>
-                        <td> {{ $pegawaiList[$item->nip]['ket_ukerja'] ?? '-' }}</td>
-                        <td>
-                            {{ $item->layanan->nama_layanan ?? '-' }}
-                        </td>
-                        <td>
-                            {{ \Carbon\Carbon::parse($item->tanggal)->translatedFormat('d F Y H:i') }}
-                        </td>
-                        <td>{{ $item->tahapTerakhir->statusRel->status ?? '-' }}</td>
-                        <td>{{ $item->nama_penerima }}</td>
-                    </tr>
-                    @endforeach
-                </tbody>
-            </table>
+            <div class="position-relative">
+                <div id="tableLoading" class="table-loading">
+                    <div class="loading-content">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                    </div>
+                </div>
+                <table id="datatablesSimple">
+                    <thead>
+                        <tr>
+                            <th>No</th>
+                            <th>No Tiket</th>
+                            <th>NIP</th>
+                            <th>Unit Kerja</th>
+                            <th>Nama Layanan</th>
+                            <th>Tanggal Masuk</th>
+                            <th>Status Terakhir</th>
+                            <th>Nama Penerima</th>
+                        </tr>
+                    </thead>
+                    <tfoot>
+                        <tr>
+                            <th>No</th>
+                            <th>No Tiket</th>
+                            <th>NIP</th>
+                            <th>Unit Kerja</th>
+                            <th>Nama Layanan</th>
+                            <th>Tanggal Masuk</th>
+                            <th>Status Terakhir</th>
+                            <th>Nama Penerima</th>
+                        </tr>
+                    </tfoot>
+                    <tbody>
+                        @foreach ($data as $item)
+                        <tr>
+                            <td>{{ $loop->iteration }}</td>
+                            <td>{{ $item->no_tiket }}</td>
+                            <td>
+                                {{ $item->nip }} <br>
+                                <small class="text-muted">
+                                    {{ $pegawaiList[$item->nip]['nama_lengkap'] ?? '-' }}
+                                </small>
+                            </td>
+                            <td> {{ $pegawaiList[$item->nip]['ket_ukerja'] ?? '-' }}</td>
+                            <td>
+                                {{ $item->layanan->nama_layanan ?? '-' }}
+                            </td>
+                            <td>
+                                {{ \Carbon\Carbon::parse($item->tanggal)->translatedFormat('d F Y H:i') }}
+                            </td>
+                            <td>{{ $item->tahapTerakhir->statusRel->status ?? '-' }}</td>
+                            <td>{{ $item->nama_penerima }}</td>
+                        </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
 </div>
@@ -176,6 +184,10 @@
     document.addEventListener('DOMContentLoaded', function() {
 
         feather.replace();
+
+        window.addEventListener('load', function() {
+            document.getElementById('tableLoading').classList.add('d-none');
+        });
 
         const bidangSelect = document.getElementById('bidangSelect');
         const layananSelect = document.getElementById('layananSelect');

@@ -21,8 +21,7 @@
                         </a>
                     </div>
                     <div class="btn-group">
-                        <a class="btn btn-sm btn-light text-success" href="{{ route('adminBawah.pengambilan.exportPdf', request()->query()) }}" target="_blank"
-                            target="_blank">
+                        <a class="btn btn-sm btn-light text-success" href="{{ route('adminBawah.pengambilan.exportPdf', request()->query()) }}" target="_blank">
                             <i class="me-1" data-feather="download"></i>
                             Export PDF
                         </a>
@@ -120,55 +119,65 @@
                     </div>
                 </div>
             </form>
-            <table id="datatablesSimple">
-                <thead>
-                    <tr>
-                        <th>No</th>
-                        <th>No Tiket</th>
-                        <th>NIP</th>
-                        <th>Unit Kerja</th>
-                        <th>Nama Layanan</th>
-                        <th>Tanggal Diambil</th>
-                        <th>Status Diambil</th>
-                    </tr>
-                </thead>
-                <tfoot>
-                    <tr>
-                        <th>No</th>
-                        <th>No Tiket</th>
-                        <th>NIP</th>
-                        <th>Unit Kerja</th>
-                        <th>Nama Layanan</th>
-                        <th>Tanggal Diambil</th>
-                        <th>Status Diambil</th>
-                    </tr>
-                </tfoot>
-                <tbody>
-                    @foreach ($pengambilan as $item)
-                    <tr>
-                        <td>{{ $loop->iteration }}</td>
-                        <td>{{ $item->tiket->no_tiket ?? '-' }}</td>
-                        <td>
-                            {{ $item->tiket->nip ?? '-' }} <br>
+            <div class="position-relative">
+                <div id="tableLoading" class="table-loading">
+                    <div class="loading-content">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                    </div>
+                </div>
 
-                            <small class="text-muted">
-                                {{ $pegawaiList[$item->tiket->nip]['nama_lengkap'] ?? '-' }}
-                            </small>
-                        </td>
-                        <td> {{ $pegawaiList[$item->tiket->nip]['ket_ukerja'] ?? '-' }}</td>
-                        <td>{{ $item->tiket->layanan->nama_layanan ?? '-' }}</td>
-                        <td>{{ $item->tanggal_pengambilan }}</td>
-                        <td>
-                            <div class="d-flex align-items-center justify-content-center">
-                                <span class="badge bg-light text-success border d-inline-flex align-items-center">
-                                    Sudah Diambil
-                                </span>
-                            </div>
-                        </td>
-                    </tr>
-                    @endforeach
-                </tbody>
-            </table>
+                <table id="datatablesSimple">
+                    <thead>
+                        <tr>
+                            <th>No</th>
+                            <th>No Tiket</th>
+                            <th>NIP</th>
+                            <th>Unit Kerja</th>
+                            <th>Nama Layanan</th>
+                            <th>Tanggal Diambil</th>
+                            <th>Status Diambil</th>
+                        </tr>
+                    </thead>
+                    <tfoot>
+                        <tr>
+                            <th>No</th>
+                            <th>No Tiket</th>
+                            <th>NIP</th>
+                            <th>Unit Kerja</th>
+                            <th>Nama Layanan</th>
+                            <th>Tanggal Diambil</th>
+                            <th>Status Diambil</th>
+                        </tr>
+                    </tfoot>
+                    <tbody>
+                        @foreach ($pengambilan as $item)
+                        <tr>
+                            <td>{{ $loop->iteration }}</td>
+                            <td>{{ $item->tiket->no_tiket ?? '-' }}</td>
+                            <td>
+                                {{ $item->tiket->nip ?? '-' }} <br>
+
+                                <small class="text-muted">
+                                    {{ $pegawaiList[$item->tiket->nip]['nama_lengkap'] ?? '-' }}
+                                </small>
+                            </td>
+                            <td> {{ $pegawaiList[$item->tiket->nip]['ket_ukerja'] ?? '-' }}</td>
+                            <td>{{ $item->tiket->layanan->nama_layanan ?? '-' }}</td>
+                            <td>{{ $item->tanggal_pengambilan }}</td>
+                            <td>
+                                <div class="d-flex align-items-center justify-content-center">
+                                    <span class="badge bg-light text-success border d-inline-flex align-items-center">
+                                        Sudah Diambil
+                                    </span>
+                                </div>
+                            </td>
+                        </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
 </div>
@@ -179,13 +188,17 @@
 
         feather.replace();
 
+        window.addEventListener('load', function() {
+            document.getElementById('tableLoading').classList.add('d-none');
+        });
+
         const btnCek = document.getElementById('btnCekTiket');
 
         btnCek.addEventListener('click', function() {
 
             const noTiket = document.getElementById('no_tiket').value;
 
-            fetch(`/adminBawah/pengambilan/cek-tiket/${noTiket}`)
+            fetch(`{{ url('adminBawah/pengambilan/cek-tiket') }}/${encodeURIComponent(noTiket)}`)
                 .then(res => res.json())
                 .then(data => {
 

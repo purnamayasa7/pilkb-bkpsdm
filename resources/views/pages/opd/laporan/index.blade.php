@@ -60,45 +60,54 @@
                     <input type="hidden" name="end_date" id="endDate">
                 </div>
             </form>
-            <table id="datatablesSimple">
-                <thead>
-                    <tr>
-                        <th>No</th>
-                        <th>No Tiket</th>
-                        <th>NIP</th>
-                        <th>Layanan</th>
-                        <th>Tanggal</th>
-                        <th>Status Terakhir</th>
-                    </tr>
-                </thead>
-                <tfoot>
-                    <tr>
-                        <th>No</th>
-                        <th>No Tiket</th>
-                        <th>NIP</th>
-                        <th>Layanan</th>
-                        <th>Tanggal</th>
-                        <th>Status Terakhir</th>
-                    </tr>
-                </tfoot>
-                <tbody>
-                    @foreach ($tiket as $item)
-                    <tr>
-                        <td>{{ $loop->iteration }}</td>
-                        <td>{{ $item->no_tiket }}</td>
-                        <td>
-                            {{ $item->nip }} <br>
-                            <small class="text-muted">
-                                {{ $pegawaiList[$item->nip]['nama_lengkap'] ?? '-' }}
-                            </small>
-                        </td>
-                        <td>{{ $item->layanan->nama_layanan ?? '-' }}</td>
-                        <td>{{ \Carbon\Carbon::parse($item->tanggal)->format('d-m-Y') }}</td>
-                        <td>{{ $item->tahapTerakhir->statusRel->status ?? '-' }}</td>
-                    </tr>
-                    @endforeach
-                </tbody>
-            </table>
+            <div class="position-relative">
+                <div id="tableLoading" class="table-loading">
+                    <div class="loading-content">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                    </div>
+                </div>
+                <table id="datatablesSimple">
+                    <thead>
+                        <tr>
+                            <th>No</th>
+                            <th>No Tiket</th>
+                            <th>NIP</th>
+                            <th>Layanan</th>
+                            <th>Tanggal</th>
+                            <th>Status Terakhir</th>
+                        </tr>
+                    </thead>
+                    <tfoot>
+                        <tr>
+                            <th>No</th>
+                            <th>No Tiket</th>
+                            <th>NIP</th>
+                            <th>Layanan</th>
+                            <th>Tanggal</th>
+                            <th>Status Terakhir</th>
+                        </tr>
+                    </tfoot>
+                    <tbody>
+                        @foreach ($tiket as $item)
+                        <tr>
+                            <td>{{ $loop->iteration }}</td>
+                            <td>{{ $item->no_tiket }}</td>
+                            <td>
+                                {{ $item->nip }} <br>
+                                <small class="text-muted">
+                                    {{ $pegawaiList[$item->nip]['nama_lengkap'] ?? '-' }}
+                                </small>
+                            </td>
+                            <td>{{ $item->layanan->nama_layanan ?? '-' }}</td>
+                            <td>{{ \Carbon\Carbon::parse($item->tanggal)->format('d-m-Y') }}</td>
+                            <td>{{ $item->tahapTerakhir->statusRel->status ?? '-' }}</td>
+                        </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
 </div>

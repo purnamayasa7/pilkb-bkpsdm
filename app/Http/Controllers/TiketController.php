@@ -112,15 +112,22 @@ class TiketController extends Controller
         $tiket = $query->orderBy('tanggal', 'desc')->get();
 
         $pegawaiList = $this->pegawaiService->getPegawaiByNips(
-            $tiket->pluck('nip')
+            $tiket
+                ->pluck('nip')
+                ->filter()
+                ->unique()
+                ->values()
         );
 
-        return view('pages.admin-bawah.tiket.index', compact(
-            'tiket',
-            'year',
-            'diambil',
-            'pegawaiList'
-        ));
+        return view(
+            'pages.admin-bawah.tiket.index',
+            compact(
+                'tiket',
+                'year',
+                'diambil',
+                'pegawaiList'
+            )
+        );
     }
 
     private function generateNoTiket()

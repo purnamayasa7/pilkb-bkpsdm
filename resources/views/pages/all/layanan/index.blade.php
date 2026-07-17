@@ -123,59 +123,68 @@
                     <input type="hidden" name="end_date" id="endDate">
                 </div>
             </form>
-            <table id="datatablesSimple">
-                <thead>
-                    <tr>
-                        <th>No</th>
-                        <th>No Tiket</th>
-                        <th>NIP</th>
-                        <th>Unit Kerja</th>
-                        <th>Layanan</th>
-                        <th>Tanggal</th>
-                        <th>Status</th>
-                        <th>Aksi</th>
-                    </tr>
-                </thead>
-                <tfoot>
-                    <tr>
-                        <th>No</th>
-                        <th>No Tiket</th>
-                        <th>NIP</th>
-                        <th>Unit Kerja</th>
-                        <th>Layanan</th>
-                        <th>Tanggal</th>
-                        <th>Status</th>
-                        <th>Aksi</th>
-                    </tr>
-                </tfoot>
-                <tbody>
-                    @foreach ($tiket as $item)
-                    <tr>
-                        <td>{{ $loop->iteration }}</td>
-                        <td>{{ $item->no_tiket }}</td>
-                        <td>
-                            {{ $item->nip }} <br>
-                            <small class="text-muted">
-                                {{ $pegawaiList[$item->nip]['nama_lengkap'] ?? '-' }}
-                            </small>
-                        </td>
-                        <td> {{ $pegawaiList[$item->nip]['ket_ukerja'] ?? '-' }}</td>
-                        <td>{{ $item->layanan->nama_layanan ?? '-' }}</td>
-                        <td>{{ $item->tanggal }}</td>
-                        <td>{{ $item->tahapTerakhir->statusRel->status ?? '-' }}</td>
-                        <td>
-                            <div class="d-flex align-items-center">
-                                <a class="btn btn-datatable btn-icon btn-transparent-dark me-1 btnDetail"
-                                    href="#" data-id="{{ $item->id }}" title="Lihat riwayat">
+            <div class="position-relative">
+                <div id="tableLoading" class="table-loading">
+                    <div class="loading-content">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                    </div>
+                </div>
+                <table id="datatablesSimple">
+                    <thead>
+                        <tr>
+                            <th>No</th>
+                            <th>No Tiket</th>
+                            <th>NIP</th>
+                            <th>Unit Kerja</th>
+                            <th>Layanan</th>
+                            <th>Tanggal</th>
+                            <th>Status</th>
+                            <th>Aksi</th>
+                        </tr>
+                    </thead>
+                    <tfoot>
+                        <tr>
+                            <th>No</th>
+                            <th>No Tiket</th>
+                            <th>NIP</th>
+                            <th>Unit Kerja</th>
+                            <th>Layanan</th>
+                            <th>Tanggal</th>
+                            <th>Status</th>
+                            <th>Aksi</th>
+                        </tr>
+                    </tfoot>
+                    <tbody>
+                        @foreach ($tiket as $item)
+                        <tr>
+                            <td>{{ $loop->iteration }}</td>
+                            <td>{{ $item->no_tiket }}</td>
+                            <td>
+                                {{ $item->nip }} <br>
+                                <small class="text-muted">
+                                    {{ $pegawaiList[$item->nip]['nama_lengkap'] ?? '-' }}
+                                </small>
+                            </td>
+                            <td> {{ $pegawaiList[$item->nip]['ket_ukerja'] ?? '-' }}</td>
+                            <td>{{ $item->layanan->nama_layanan ?? '-' }}</td>
+                            <td>{{ $item->tanggal }}</td>
+                            <td>{{ $item->tahapTerakhir->statusRel->status ?? '-' }}</td>
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    <a class="btn btn-datatable btn-icon btn-transparent-dark me-1 btnDetail"
+                                        href="#" data-id="{{ $item->id }}" title="Lihat riwayat">
 
-                                    <i data-feather="eye" class="text-primary"></i>
-                                </a>
-                            </div>
-                        </td>
-                    </tr>
-                    @endforeach
-                </tbody>
-            </table>
+                                        <i data-feather="eye" class="text-primary"></i>
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
 </div>
@@ -185,6 +194,10 @@
 
 <script>
     document.addEventListener('DOMContentLoaded', function() {
+
+        window.addEventListener('load', function() {
+            document.getElementById('tableLoading').classList.add('d-none');
+        });
 
         const bidangSelect = document.getElementById('bidangSelect');
         const startInput = document.getElementById('startDate');

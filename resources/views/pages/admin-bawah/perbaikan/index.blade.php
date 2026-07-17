@@ -52,72 +52,82 @@
                     </div>
                 </div>
             </form>
-            <table id="datatablesSimple">
-                <thead>
-                    <tr>
-                        <th>No</th>
-                        <th>No Tiket</th>
-                        <th>NIP</th>
-                        <th>Unit Kerja</th>
-                        <th>Layanan</th>
-                        <th>Syarat BTL</th>
-                        <th>Jumlah Tahapan</th>
-                        <th>Proses</th>
-                    </tr>
-                </thead>
-                <tfoot>
-                    <tr>
-                        <th>No</th>
-                        <th>No Tiket</th>
-                        <th>NIP</th>
-                        <th>Unit Kerja</th>
-                        <th>Layanan</th>
-                        <th>Syarat BTL</th>
-                        <th>Jumlah Tahapan</th>
-                        <th>Proses</th>
-                    </tr>
-                </tfoot>
-                <tbody>
-                    @foreach ($data as $item)
-                    <tr>
-                        <td>{{ $loop->iteration }}</td>
-                        <td>{{ $item->no_tiket }}</td>
-                        <td>
-                            {{ $item->nip }} <br>
-                            <small class="text-muted">
-                                {{ $pegawaiList[$item->nip]['nama_lengkap'] ?? '-' }}
-                            </small>
-                        </td>
-                        <td> {{ $pegawaiList[$item->nip]['ket_ukerja'] ?? '-' }}</td>
-                        <td>{{ $item->layanan->nama_layanan ?? '-' }}</td>
-                        <td>
-                            <div class="d-flex align-items-center justify-content-center">
-                                <span class="badge bg-light text-danger border d-inline-flex align-items-center">
-                                    {{ $item->jumlah_btl }}
-                                </span>
-                            </div>
-                        </td>
-                        <td>
-                            <div class="d-flex align-items-center justify-content-center">
-                                <span class="badge bg-light text-info border d-inline-flex align-items-center">
-                                    {{ $item->jumlah_tahap }} Tahapan
-                                </span>
-                            </div>
-                        </td>
-                        <td>
-                            <div class="d-flex align-items-center justify-content-center">
-                                <a class="btn btn-datatable btn-icon btn-transparent-dark me-1"
-                                    href="{{ route('adminBawah.perbaikan.review', $item->no_tiket) }}"
-                                    title="Review">
+            <div class="position-relative">
+                <div id="tableLoading" class="table-loading">
+                    <div class="loading-content">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                    </div>
+                </div>
 
-                                    <i data-feather="edit" class="text-warning"></i>
-                                </a>
-                            </div>
-                        </td>
-                    </tr>
-                    @endforeach
-                </tbody>
-            </table>
+                <table id="datatablesSimple">
+                    <thead>
+                        <tr>
+                            <th>No</th>
+                            <th>No Tiket</th>
+                            <th>NIP</th>
+                            <th>Unit Kerja</th>
+                            <th>Layanan</th>
+                            <th>Syarat BTL</th>
+                            <th>Jumlah Tahapan</th>
+                            <th>Proses</th>
+                        </tr>
+                    </thead>
+                    <tfoot>
+                        <tr>
+                            <th>No</th>
+                            <th>No Tiket</th>
+                            <th>NIP</th>
+                            <th>Unit Kerja</th>
+                            <th>Layanan</th>
+                            <th>Syarat BTL</th>
+                            <th>Jumlah Tahapan</th>
+                            <th>Proses</th>
+                        </tr>
+                    </tfoot>
+                    <tbody>
+                        @foreach ($data as $item)
+                        <tr>
+                            <td>{{ $loop->iteration }}</td>
+                            <td>{{ $item->no_tiket }}</td>
+                            <td>
+                                {{ $item->nip }} <br>
+                                <small class="text-muted">
+                                    {{ $pegawaiList[$item->nip]['nama_lengkap'] ?? '-' }}
+                                </small>
+                            </td>
+                            <td> {{ $pegawaiList[$item->nip]['ket_ukerja'] ?? '-' }}</td>
+                            <td>{{ $item->layanan->nama_layanan ?? '-' }}</td>
+                            <td>
+                                <div class="d-flex align-items-center justify-content-center">
+                                    <span class="badge bg-light text-danger border d-inline-flex align-items-center">
+                                        {{ $item->jumlah_btl }}
+                                    </span>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="d-flex align-items-center justify-content-center">
+                                    <span class="badge bg-light text-info border d-inline-flex align-items-center">
+                                        {{ $item->jumlah_tahap }} Tahapan
+                                    </span>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="d-flex align-items-center justify-content-center">
+                                    <a class="btn btn-datatable btn-icon btn-transparent-dark me-1"
+                                        href="{{ route('adminBawah.perbaikan.review', $item->no_tiket) }}"
+                                        title="Review">
+
+                                        <i data-feather="edit" class="text-warning"></i>
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
 </div>
@@ -129,11 +139,12 @@
 
         feather.replace();
 
-        const layananSelect = document.getElementById('layananSelect');
+        document.getElementById('layananSelect')
+            .addEventListener('change', function() {
 
-        layananSelect.addEventListener('change', function() {
-            document.getElementById('filterForm').submit();
-        });
+                document.getElementById('filterForm').submit();
+
+            });
     });
 </script>
 @endsection

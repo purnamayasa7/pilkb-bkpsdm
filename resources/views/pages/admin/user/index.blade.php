@@ -150,121 +150,130 @@
 <div class="container-fluid px-4 mt-4">
     <div class="card">
         <div class="card-body">
-            <table id="datatablesSimple">
-                <thead>
-                    <tr>
-                        <th>No</th>
-                        <th>Username</th>
-                        <th>Nama</th>
-                        <th>Bidang</th>
-                        <th>Jabatan</th>
-                        <th>Role</th>
-                        <th>Aksi</th>
-                    </tr>
-                </thead>
-                <tfoot>
-                    <tr>
-                        <th>No</th>
-                        <th>Username</th>
-                        <th>Nama</th>
-                        <th>Bidang</th>
-                        <th>Jabatan</th>
-                        <th>Role</th>
-                        <th>Aksi</th>
-                    </tr>
-                </tfoot>
-                <tbody>
-                    @foreach ($user as $item)
-                    <tr>
-                        <td>{{ $loop->iteration }}</td>
-                        <td>
-                            <div class="d-flex align-items-center">
-                                @php
-                                $namaParts = explode(' ', trim($item->nama));
+            <div class="position-relative">
+                <div id="tableLoading" class="table-loading">
+                    <div class="loading-content">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                    </div>
+                </div>
+                <table id="datatablesSimple">
+                    <thead>
+                        <tr>
+                            <th>No</th>
+                            <th>Username</th>
+                            <th>Nama</th>
+                            <th>Bidang</th>
+                            <th>Jabatan</th>
+                            <th>Role</th>
+                            <th>Aksi</th>
+                        </tr>
+                    </thead>
+                    <tfoot>
+                        <tr>
+                            <th>No</th>
+                            <th>Username</th>
+                            <th>Nama</th>
+                            <th>Bidang</th>
+                            <th>Jabatan</th>
+                            <th>Role</th>
+                            <th>Aksi</th>
+                        </tr>
+                    </tfoot>
+                    <tbody>
+                        @foreach ($user as $item)
+                        <tr>
+                            <td>{{ $loop->iteration }}</td>
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    @php
+                                    $namaParts = explode(' ', trim($item->nama));
 
-                                $first = strtoupper(substr($namaParts[0], 0, 1));
+                                    $first = strtoupper(substr($namaParts[0], 0, 1));
 
-                                if (count($namaParts) > 1) {
-                                $last = strtoupper(substr(end($namaParts), 0, 1));
-                                $inisial = $first . $last;
-                                } else {
-                                $inisial = $first;
-                                }
+                                    if (count($namaParts) > 1) {
+                                    $last = strtoupper(substr(end($namaParts), 0, 1));
+                                    $inisial = $first . $last;
+                                    } else {
+                                    $inisial = $first;
+                                    }
 
-                                $colors = [
-                                'bg-primary',
-                                'bg-success',
-                                'bg-danger',
-                                'bg-warning',
-                                'bg-info',
-                                'bg-dark',
-                                'bg-secondary',
-                                ];
+                                    $colors = [
+                                    'bg-primary',
+                                    'bg-success',
+                                    'bg-danger',
+                                    'bg-warning',
+                                    'bg-info',
+                                    'bg-dark',
+                                    'bg-secondary',
+                                    ];
 
-                                $randomColor = $colors[
-                                abs(crc32($item->nama . $item->id)) % count($colors)
-                                ];
-                                @endphp
+                                    $randomColor = $colors[
+                                    abs(crc32($item->nama . $item->id)) % count($colors)
+                                    ];
+                                    @endphp
 
-                                <div class="me-2">
-                                    <div class="rounded-circle {{ $randomColor }} d-flex align-items-center justify-content-center text-white fw-bold"
-                                        style=" width: 40px; height: 40px; font-size: 14px; letter-spacing: 1px; flex-shrink: 0;">
-                                        {{ $inisial }}
+                                    <div class="me-2">
+                                        <div class="rounded-circle {{ $randomColor }} d-flex align-items-center justify-content-center text-white fw-bold"
+                                            style=" width: 40px; height: 40px; font-size: 14px; letter-spacing: 1px; flex-shrink: 0;">
+                                            {{ $inisial }}
+                                        </div>
                                     </div>
-                                </div>
-                                <!-- <div class="avatar me-2"><img class="avatar-img img-fluid"
+                                    <!-- <div class="avatar me-2"><img class="avatar-img img-fluid"
                                                 src="{{ asset('templatepro/assets/img/demo/user-placeholder.svg') }}" />
                                         </div> -->
-                                {{ $item->username }}
-                            </div>
-                        </td>
-                        <td>{{ $item->nama }}</td>
-                        <td>{{ $item->nama_bidang }}</td>
-                        <td>{{ $item->jabatan }}</td>
-                        <td>
-                            @if ($item->role->name === 'root')
-                            <span class="badge bg-red-soft text-red">Root</span>
-                            @elseif ($item->role->name === 'admin_bawah')
-                            <span class="badge bg-yellow-soft text-yellow">Admin Bawah</span>
-                            @elseif ($item->role->name === 'admin_opd')
-                            <span class="badge bg-green-soft text-green">Admin OPD</span>
-                            @elseif ($item->role->name === 'bidang')
-                            <span class="badge bg-blue-soft text-blue">Bidang</span>
-                            @else
-                            <span class="badge bg-purple-soft text-purple">Pimpinan</span>
-                            @endif
-                        </td>
-                        <td>
-                            <div class="d-flex align-items-center">
-                                <a class="btn btn-datatable btn-icon btn-transparent-dark me-1 btnDetail"
-                                    href="#" data-id="{{ $item->id }}"
-                                    data-username="{{ $item->username }}" data-nama="{{ $item->nama }}"
-                                    data-bidang="{{ $item->nama_bidang }}" data-jabatan="{{ $item->jabatan }}"
-                                    data-status="{{ $item->aktif }}" data-ukerja="{{ $item->kode_ukerja }}"
-                                    data-role="{{ $item->role->name }}" data-email="{{ $item->email }}"
-                                    data-foto="{{ $item->foto ?? 'templatepro/assets/img/demo/user-placeholder.svg' }}"
-                                    title="Lihat profil">
+                                    {{ $item->username }}
+                                </div>
+                            </td>
+                            <td>{{ $item->nama }}</td>
+                            <td>{{ $item->nama_bidang }}</td>
+                            <td>{{ $item->jabatan }}</td>
+                            <td>
+                                @if ($item->role->name === 'root')
+                                <span class="badge bg-red-soft text-red">Root</span>
+                                @elseif ($item->role->name === 'admin_bawah')
+                                <span class="badge bg-yellow-soft text-yellow">Admin Bawah</span>
+                                @elseif ($item->role->name === 'admin_opd')
+                                <span class="badge bg-green-soft text-green">Admin OPD</span>
+                                @elseif ($item->role->name === 'bidang')
+                                <span class="badge bg-blue-soft text-blue">Bidang</span>
+                                @else
+                                <span class="badge bg-purple-soft text-purple">Pimpinan</span>
+                                @endif
+                            </td>
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    <a class="btn btn-datatable btn-icon btn-transparent-dark me-1 btnDetail"
+                                        href="#" data-id="{{ $item->id }}"
+                                        data-username="{{ $item->username }}" data-nama="{{ $item->nama }}"
+                                        data-bidang="{{ $item->nama_bidang }}" data-jabatan="{{ $item->jabatan }}"
+                                        data-status="{{ $item->aktif }}" data-ukerja="{{ $item->kode_ukerja }}"
+                                        data-role="{{ $item->role->name }}" data-email="{{ $item->email }}"
+                                        data-foto="{{ $item->foto ?? 'templatepro/assets/img/demo/user-placeholder.svg' }}"
+                                        title="Lihat profil">
 
-                                    <i data-feather="eye" class="text-primary"></i>
-                                </a>
-                                <a class="btn btn-datatable btn-icon btn-transparent-dark me-1"
-                                    href="{{ route('root.edit', $item->id) }}" data-bs-toggle="tooltip"
-                                    title="Edit profil"><i data-feather="edit" class="text-warning"></i></a>
-                                <a class="btn btn-datatable btn-icon btn-transparent-dark me-1 btnToggle"
-                                    href="#" data-id="{{ $item->id }}"
-                                    data-nama="{{ $item->nama }}" data-status="{{ $item->aktif }}"
-                                    data-bs-toggle="tooltip" title="Aktif/Nonaktif">
+                                        <i data-feather="eye" class="text-primary"></i>
+                                    </a>
+                                    <a class="btn btn-datatable btn-icon btn-transparent-dark me-1"
+                                        href="{{ route('root.edit', $item->id) }}" data-bs-toggle="tooltip"
+                                        title="Edit profil"><i data-feather="edit" class="text-warning"></i></a>
+                                    <a class="btn btn-datatable btn-icon btn-transparent-dark me-1 btnToggle"
+                                        href="#" data-id="{{ $item->id }}"
+                                        data-nama="{{ $item->nama }}" data-status="{{ $item->aktif }}"
+                                        data-bs-toggle="tooltip" title="Aktif/Nonaktif">
 
-                                    <i data-feather="slash"
-                                        class="{{ $item->aktif ? 'text-success' : 'text-danger' }}"></i>
-                                </a>
-                            </div>
+                                        <i data-feather="slash"
+                                            class="{{ $item->aktif ? 'text-success' : 'text-danger' }}"></i>
+                                    </a>
+                                </div>
 
-                        </td>
-                    </tr>
-                    @endforeach
-                </tbody>
-            </table>
+                            </td>
+                        </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
 </div>
@@ -275,6 +284,10 @@
     document.addEventListener('DOMContentLoaded', function() {
 
         feather.replace();
+
+        window.addEventListener('load', function() {
+            document.getElementById('tableLoading').classList.add('d-none');
+        });
 
         //Modal Aktif
         const modalAktifEl = document.getElementById('modalAktif');

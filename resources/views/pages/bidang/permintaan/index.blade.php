@@ -120,79 +120,88 @@
 
                 </div>
             </form>
-            <table id="datatablesSimple">
-                <thead>
-                    <tr>
-                        <th>No Tiket</th>
-                        <th>NIP</th>
-                        <th>Layanan</th>
-                        <th>Unit Kerja</th>
-                        <th>Tanggal Masuk</th>
-                        <th>Status Terakhir</th>
-                        <th>Selesai</th>
-                        <th>Aksi</th>
-                    </tr>
-                </thead>
-                <tfoot>
-                    <tr>
-                        <th>No Tiket</th>
-                        <th>NIP</th>
-                        <th>Layanan</th>
-                        <th>Unit Kerja</th>
-                        <th>Tanggal Masuk</th>
-                        <th>Status Terakhir</th>
-                        <th>Selesai</th>
-                        <th>Aksi</th>
-                    </tr>
-                </tfoot>
-                <tbody>
-                    @foreach ($tiket as $item)
-                    <tr>
-                        <td>{{ $item->no_tiket }}</td>
-                        <td>
-                            {{ $item->nip }} <br>
-                            <small class="text-muted">
-                                {{ $pegawaiList[$item->nip]['nama_lengkap'] ?? '-' }}
-                            </small>
-                        </td>
-                        <td>{{ $item->layanan->nama_layanan ?? '-' }}</td>
-                        <td> {{ $pegawaiList[$item->nip]['ket_ukerja'] ?? '-' }}</td>
-                        <td>{{ $item->tanggal }}</td>
-                        <td>{{ $item->tahapTerakhir->statusRel->status ?? '-' }}</td>
-                        <td>
-                            <div class="d-flex align-items-center justify-content-center">
-                                @if ($item->archives == 1)
-                                <span class="badge bg-light text-success border d-inline-flex align-items-center">
-                                    Selesai
-                                </span>
-                                @else
-                                <span class="badge bg-light text-warning border d-inline-flex align-items-center">
-                                    Proses
-                                </span>
-                                @endif
-                            </div>
-                        </td>
-                        <td>
-                            <div class="d-flex align-items-center">
-                                <a class="btn btn-datatable btn-icon btn-transparent-dark me-1 btnDetail"
-                                    href="{{ route('adminBidang.permintaan.editPermintaan', $item->no_tiket) }}"
-                                    title="Update">
+            <div class="position-relative">
+                <div id="tableLoading" class="table-loading">
+                    <div class="loading-content">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                    </div>
+                </div>
+                <table id="datatablesSimple">
+                    <thead>
+                        <tr>
+                            <th>No Tiket</th>
+                            <th>NIP</th>
+                            <th>Layanan</th>
+                            <th>Unit Kerja</th>
+                            <th>Tanggal Masuk</th>
+                            <th>Status Terakhir</th>
+                            <th>Selesai</th>
+                            <th>Aksi</th>
+                        </tr>
+                    </thead>
+                    <tfoot>
+                        <tr>
+                            <th>No Tiket</th>
+                            <th>NIP</th>
+                            <th>Layanan</th>
+                            <th>Unit Kerja</th>
+                            <th>Tanggal Masuk</th>
+                            <th>Status Terakhir</th>
+                            <th>Selesai</th>
+                            <th>Aksi</th>
+                        </tr>
+                    </tfoot>
+                    <tbody>
+                        @foreach ($tiket as $item)
+                        <tr>
+                            <td>{{ $item->no_tiket }}</td>
+                            <td>
+                                {{ $item->nip }} <br>
+                                <small class="text-muted">
+                                    {{ $pegawaiList[$item->nip]['nama_lengkap'] ?? '-' }}
+                                </small>
+                            </td>
+                            <td>{{ $item->layanan->nama_layanan ?? '-' }}</td>
+                            <td> {{ $pegawaiList[$item->nip]['ket_ukerja'] ?? '-' }}</td>
+                            <td>{{ $item->tanggal }}</td>
+                            <td>{{ $item->tahapTerakhir->statusRel->status ?? '-' }}</td>
+                            <td>
+                                <div class="d-flex align-items-center justify-content-center">
+                                    @if ($item->archives == 1)
+                                    <span class="badge bg-light text-success border d-inline-flex align-items-center">
+                                        Selesai
+                                    </span>
+                                    @else
+                                    <span class="badge bg-light text-warning border d-inline-flex align-items-center">
+                                        Proses
+                                    </span>
+                                    @endif
+                                </div>
+                            </td>
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    <a class="btn btn-datatable btn-icon btn-transparent-dark me-1 btnDetail"
+                                        href="{{ route('adminBidang.permintaan.editPermintaan', $item->no_tiket) }}"
+                                        title="Update">
 
-                                    <i data-feather="edit" class="text-warning"></i>
-                                </a>
+                                        <i data-feather="edit" class="text-warning"></i>
+                                    </a>
 
-                                <a class="btn btn-datatable btn-icon btn-transparent-dark me-1 btnSelesai"
-                                    href="#" data-notiket="{{ $item->no_tiket }}" data-bs-toggle="tooltip"
-                                    title="Proses Selesai">
+                                    <a class="btn btn-datatable btn-icon btn-transparent-dark me-1 btnSelesai"
+                                        href="#" data-notiket="{{ $item->no_tiket }}" data-bs-toggle="tooltip"
+                                        title="Proses Selesai">
 
-                                    <i data-feather="check" class="text-success"></i>
-                                </a>
-                            </div>
-                        </td>
-                    </tr>
-                    @endforeach
-                </tbody>
-            </table>
+                                        <i data-feather="check" class="text-success"></i>
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
 </div>
@@ -200,6 +209,10 @@
 <script src="{{ asset('templatepro/js/datatables/datatables-simple-demo.js') }}"></script>
 <script>
     document.addEventListener('DOMContentLoaded', function() {
+
+        window.addEventListener('load', function() {
+            document.getElementById('tableLoading').classList.add('d-none');
+        });
 
         const modalKonfirmasi = new bootstrap.Modal(
             document.getElementById('modalKonfirmasi')

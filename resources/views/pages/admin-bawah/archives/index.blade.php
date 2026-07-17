@@ -16,7 +16,7 @@
                     <div class="btn-group">
                         <a class="btn btn-sm btn-light text-success"
                             href="{{ route('adminBawah.archives.exportArchivesPdf', request()->query()) }}"
-                            target="_blank" target="_blank">
+                            target="_blank">
                             <i class="me-1" data-feather="download"></i>
                             Export PDF
                         </a>
@@ -78,59 +78,69 @@
                     </div>
                 </div>
             </form>
-            <table id="datatablesSimple">
-                <thead>
-                    <tr>
-                        <th>No Tiket</th>
-                        <th>NIP</th>
-                        <th>Unit Kerja</th>
-                        <th>Layanan</th>
-                        <th>Tanggal Masuk</th>
-                        <th>Status Terakhir</th>
-                        <th>Operator Archives</th>
-                        <th>Aksi</th>
-                    </tr>
-                </thead>
-                <tfoot>
-                    <tr>
-                        <th>No Tiket</th>
-                        <th>NIP</th>
-                        <th>Unit Kerja</th>
-                        <th>Layanan</th>
-                        <th>Tanggal Masuk</th>
-                        <th>Status Terakhir</th>
-                        <th>Operator Archives</th>
-                        <th>Aksi</th>
-                    </tr>
-                </tfoot>
-                <tbody>
-                    @foreach ($data as $item)
-                    <tr>
-                        <td>{{ $item->no_tiket }}</td>
-                        <td>
-                            {{ $item->nip }} <br>
-                            <small class="text-muted">
-                                {{ $pegawaiList[$item->nip]['nama_lengkap'] ?? '-' }}
-                            </small>
-                        </td>
-                        <td> {{ $pegawaiList[$item->nip]['ket_ukerja'] ?? '-' }}</td>
-                        <td>{{ $item->layanan->nama_layanan ?? '-' }}</td>
-                        <td>{{ \Carbon\Carbon::parse($item->tanggal)->translatedFormat('d F Y H:i') }}</td>
-                        <td>{{ $item->tahapTerakhir->statusRel->status ?? '-' }}</td>
-                        <td>{{ $item->operatorArchives->nama ?? '-' }}</td>
-                        <td>
-                            <div class="d-flex align-items-center justify-content-center">
-                                <button class="btn btn-sm btn-light text-warning" type="button"
-                                    data-bs-toggle="dropdown" aria-expanded="false">
-                                    <i class="me-1" data-feather="corner-up-left"></i>
-                                    Kembalikan
-                                </button>
-                            </div>
-                        </td>
-                    </tr>
-                    @endforeach
-                </tbody>
-            </table>
+            <div class="position-relative">
+                <div id="tableLoading" class="table-loading">
+                    <div class="loading-content">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                    </div>
+                </div>
+
+                <table id="datatablesSimple">
+                    <thead>
+                        <tr>
+                            <th>No Tiket</th>
+                            <th>NIP</th>
+                            <th>Unit Kerja</th>
+                            <th>Layanan</th>
+                            <th>Tanggal Masuk</th>
+                            <th>Status Terakhir</th>
+                            <th>Operator Archives</th>
+                            <th>Aksi</th>
+                        </tr>
+                    </thead>
+                    <tfoot>
+                        <tr>
+                            <th>No Tiket</th>
+                            <th>NIP</th>
+                            <th>Unit Kerja</th>
+                            <th>Layanan</th>
+                            <th>Tanggal Masuk</th>
+                            <th>Status Terakhir</th>
+                            <th>Operator Archives</th>
+                            <th>Aksi</th>
+                        </tr>
+                    </tfoot>
+                    <tbody>
+                        @foreach ($data as $item)
+                        <tr>
+                            <td>{{ $item->no_tiket }}</td>
+                            <td>
+                                {{ $item->nip }} <br>
+                                <small class="text-muted">
+                                    {{ $pegawaiList[$item->nip]['nama_lengkap'] ?? '-' }}
+                                </small>
+                            </td>
+                            <td> {{ $pegawaiList[$item->nip]['ket_ukerja'] ?? '-' }}</td>
+                            <td>{{ $item->layanan->nama_layanan ?? '-' }}</td>
+                            <td>{{ \Carbon\Carbon::parse($item->tanggal)->translatedFormat('d F Y H:i') }}</td>
+                            <td>{{ $item->tahapTerakhir->statusRel->status ?? '-' }}</td>
+                            <td>{{ $item->operatorArchives->nama ?? '-' }}</td>
+                            <td>
+                                <div class="d-flex align-items-center justify-content-center">
+                                    <button class="btn btn-sm btn-light text-warning" type="button"
+                                        data-bs-toggle="dropdown" aria-expanded="false">
+                                        <i class="me-1" data-feather="corner-up-left"></i>
+                                        Kembalikan
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
 </div>
@@ -140,6 +150,10 @@
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         feather.replace();
+
+        window.addEventListener('load', function() {
+            document.getElementById('tableLoading').classList.add('d-none');
+        });
     });
 </script>
 @endsection
