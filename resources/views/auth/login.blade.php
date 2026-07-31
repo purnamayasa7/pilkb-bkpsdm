@@ -235,9 +235,13 @@
                     <!-- TAGLINE -->
                     <p class="lead mb-3">Pusat Informasi Layanan Kepegawaian BKPSDM Buleleng</p>
 
-                    {{-- <div class="badge bg-light text-dark px-3 py-2 rounded-pill">
-                        Versi 2.0
-                    </div> --}}
+                    <!-- <div class="badge bg-light text-dark px-3 py-2 rounded-pill">
+                        Pre-Production
+                    </div> -->
+
+                     <div class="badge bg-warning text-white px-3 py-2 rounded-pill">
+                        Pre-Production
+                    </div>
 
                 </div>
             </div>
@@ -585,8 +589,7 @@
 
                         <button
                             class="btn chat-gradient-btn w-100"
-                            id="btnStartChat"
-                            >
+                            id="btnStartChat">
 
                             <i data-feather="message-square" class="me-2"></i>
 
