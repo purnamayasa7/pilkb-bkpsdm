@@ -219,7 +219,7 @@
                     <div class="d-flex align-items-center mb-3">
                         <img src="{{ asset('images/KabBuleleng.png') }}" class="logo me-3">
                         <div>
-                            <h6 class="mb-0 fw-semibold text-uppercase small; brand-text">
+                            <h6 class="mb-0 fw-semibold text-uppercase small brand-text">
                                 BKPSDM Kabupaten Buleleng
                             </h6>
                             <small class="opacity-75">Sistem Layanan Kepegawaian</small>
@@ -239,7 +239,12 @@
                         Pre-Production
                     </div> -->
 
-                     <div class="badge bg-warning text-white px-3 py-2 rounded-pill">
+                    <!-- <div class="badge bg-warning text-white px-3 py-2 rounded-pill">
+                        Pre-Production
+                    </div> -->
+
+                    <div class="badge text-white px-3 py-2 rounded-pill"
+                        style="background-color: #f59e0b;">
                         Pre-Production
                     </div>
 
