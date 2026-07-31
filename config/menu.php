@@ -404,6 +404,14 @@ return [
             'title' => 'Lainnya',
         ],
 
+         [
+            'type' => 'item',
+            'title' => 'Syarat',
+            'path' => 'adminBidang/syarat',
+            'icon' => 'check-square',
+            'active_key' => 'syarat',
+        ],
+
         [
             'type' => 'item',
             'title' => 'Aktivitas Bidang',

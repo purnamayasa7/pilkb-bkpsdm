@@ -714,9 +714,11 @@ class TiketController extends Controller
             $pegawaiList = $this->pegawaiService->getPegawaiByNips(
                 $data->pluck('nip')
             );
+
+            $simpegAvailable = $this->pegawaiService->isSimpegAvailable();
         }
 
-        return view('pages.admin-bawah.pindah-tiket.index', compact('data', 'pegawaiList'));
+        return view('pages.admin-bawah.pindah-tiket.index', compact('data', 'pegawaiList', 'simpegAvailable'));
     }
 
     public function editPindah($no_tiket)

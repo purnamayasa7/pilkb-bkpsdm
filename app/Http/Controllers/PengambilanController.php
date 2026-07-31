@@ -67,12 +67,15 @@ class PengambilanController extends Controller
             $pegawaiList = $this->pegawaiService->getPegawaiByNips(
                 $data->pluck('nip')
             );
+
+            $simpegAvailable = $this->pegawaiService->isSimpegAvailable();
         }
 
         return view('pages.admin-bawah.archives.index', compact(
             'data',
             'bidangList',
-            'pegawaiList'
+            'pegawaiList',
+            'simpegAvailable'
         ));
     }
 
@@ -95,10 +98,13 @@ class PengambilanController extends Controller
                 ->values()
         );
 
+        $simpegAvailable = $this->pegawaiService->isSimpegAvailable();
+
         return view('pages.admin-bawah.pengambilan.index', compact(
             'pengambilan',
             'year',
-            'pegawaiList'
+            'pegawaiList',
+            'simpegAvailable'
         ));
     }
 

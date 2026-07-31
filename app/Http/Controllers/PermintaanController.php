@@ -56,11 +56,14 @@ class PermintaanController extends Controller
             $tiket->pluck('nip')
         );
 
+        $simpegAvailable = $this->pegawaiService->isSimpegAvailable();
+
         return view('pages.bidang.permintaan.index', compact(
             'tiket',
             'month',
             'year',
-            'pegawaiList'
+            'pegawaiList',
+            'simpegAvailable'
         ));
     }
 

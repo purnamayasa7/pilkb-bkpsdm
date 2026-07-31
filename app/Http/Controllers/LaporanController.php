@@ -118,6 +118,8 @@ class LaporanController extends Controller
                     ->unique()
                     ->values()
             );
+
+            $simpegAvailable = $this->pegawaiService->isSimpegAvailable();
         }
 
         $user = Auth::user();
@@ -134,7 +136,8 @@ class LaporanController extends Controller
             'bidangList',
             'layananList',
             'data',
-            'pegawaiList'
+            'pegawaiList',
+            'simpegAvailable'
         ));
     }
 
@@ -168,13 +171,16 @@ class LaporanController extends Controller
                     ->unique()
                     ->values()
             );
+
+            $simpegAvailable = $this->pegawaiService->isSimpegAvailable();
         }
 
         return view('pages.bidang.laporan.index', compact(
             'tiket',
             'start',
             'end',
-            'pegawaiList'
+            'pegawaiList',
+            'simpegAvailable'
         ));
     }
 

@@ -1,32 +1,39 @@
 #chatFloatingButton {
     position: fixed;
     right: 25px;
-    bottom: 25px;
+    bottom: 15px;
     z-index: 1051;
 }
 
 #chatFloatingButton button {
+    position: relative;
+
     width: 54px;
     height: 54px;
+
     border: none;
     border-radius: 50%;
-    color: white;
+
+    color: #fff;
+
     background: linear-gradient(135deg,
             #0d6efd,
             #4338ca,
             #6d28d9);
 
-    /* background: #0061F2; */
-    /* linear-gradient(135deg,
-                #0061f2,
-                #00acff); */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
     box-shadow:
         0 10px 30px rgba(0, 97, 242, .35);
+
     transition: .25s;
 }
 
 #chatFloatingButton button:hover {
     transform: translateY(-3px);
+
     box-shadow:
         0 15px 35px rgba(0, 97, 242, .45);
 }
@@ -39,11 +46,13 @@
 
 #chatUnreadBadge {
     position: absolute;
+
     top: -8px;
     right: -8px;
 
     min-width: 24px;
     height: 24px;
+
     padding: 0 6px;
 
     border-radius: 999px;
@@ -67,21 +76,25 @@
         badgePulse 1.8s infinite;
 }
 
+#chatUnreadBadge:not(.d-none) {
+    display: flex !important;
+}
+
 @keyframes badgePulse {
 
     0% {
         box-shadow:
-            0 0 0 0 rgba(220,53,69,.6);
+            0 0 0 0 rgba(220, 53, 69, .6);
     }
 
     70% {
         box-shadow:
-            0 0 0 12px rgba(220,53,69,0);
+            0 0 0 12px rgba(220, 53, 69, 0);
     }
 
     100% {
         box-shadow:
-            0 0 0 0 rgba(220,53,69,0);
+            0 0 0 0 rgba(220, 53, 69, 0);
     }
 }
 
@@ -99,21 +112,41 @@
 
 #chatDrawer {
     position: fixed;
+
     right: 25px;
     bottom: 95px;
+
+    /*
+     * Ukuran normal
+     */
     width: 400px;
     height: 600px;
+
+    /*
+     * Tetapi jika viewport lebih kecil,
+     * ukuran otomatis mengikuti ruang yang tersedia.
+     */
+    max-width: calc(100vw - 32px);
+    max-height: calc(100dvh - 120px);
+
     background: #fff;
+
     border-radius: 20px;
+
     overflow: hidden;
+
     z-index: 1050;
+
     visibility: hidden;
     opacity: 0;
+
     transform: translateY(20px);
+
     transition:
         opacity .25s ease,
         transform .25s ease,
         visibility .25s ease;
+
     box-shadow:
         0 15px 45px rgba(0, 0, 0, .12);
 }
@@ -126,12 +159,16 @@
 
 .chat-header {
     height: 75px;
+
     padding: 15px 20px;
+
     background: linear-gradient(135deg,
             #0d6efd,
             #4338ca,
             #6d28d9);
+
     color: white;
+
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -163,9 +200,34 @@
 
 .chat-body {
     position: relative;
+
     height: calc(100% - 75px);
+
+    min-height: 0;
+
     background: #f8fafc;
+
     overflow: hidden;
+}
+
+@media (max-width: 576px) {
+
+    #chatDrawer {
+        left: 16px;
+        right: 16px;
+
+        width: auto;
+
+        bottom: 80px;
+
+        height: min(500px,
+                calc(100dvh - 95px));
+
+        max-height: calc(100vh - 95px);
+
+        border-radius: 18px;
+    }
+
 }
 
 .chat-page {
@@ -426,8 +488,8 @@
 
     line-height: 1.4;
 
-    padding-top:14px;
-    padding-bottom:14px;
+    padding-top: 14px;
+    padding-bottom: 14px;
 }
 
 #chatInput::-webkit-scrollbar {
@@ -602,12 +664,12 @@
     width: auto;
 }
 
-.chat-read-icon{
-    width:12px;
-    height:12px;
-    margin-left:4px;
-    vertical-align:middle;
-    stroke-width:2.4;
+.chat-read-icon {
+    width: 12px;
+    height: 12px;
+    margin-left: 4px;
+    vertical-align: middle;
+    stroke-width: 2.4;
 }
 
 @keyframes messageIn {
@@ -838,26 +900,22 @@
 }
 
 .btn-gradient-search {
-    background: linear-gradient(
-        135deg,
-        #0d6efd,
-        #4338ca,
-        #6d28d9
-    );
+    background: linear-gradient(135deg,
+            #0d6efd,
+            #4338ca,
+            #6d28d9);
     border: none;
     color: #fff;
     transition: all .25s ease;
 }
 
 .btn-gradient-search:hover {
-    background: linear-gradient(
-        135deg,
-        #0b5ed7,
-        #3b31b7,
-        #5b21b6
-    );
+    background: linear-gradient(135deg,
+            #0b5ed7,
+            #3b31b7,
+            #5b21b6);
     color: #fff;
-    box-shadow: 0 8px 18px rgba(67,56,202,.25);
+    box-shadow: 0 8px 18px rgba(67, 56, 202, .25);
 }
 
 .btn-gradient-search:disabled {
