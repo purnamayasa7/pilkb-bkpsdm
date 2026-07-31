@@ -32,6 +32,16 @@ class LayananController extends Controller
         return view('pages.admin.layanan.index', compact('layanan'));
     }
 
+    public function getHistory($no_tiket)
+    {
+        $data = Tahap::with('statusRel')
+            ->where('no_tiket', $no_tiket)
+            ->orderBy('tanggal', 'asc')
+            ->get();
+
+        return response()->json($data);
+    }
+
     public function create()
     {
         $bidang = Bidang::all();
@@ -55,7 +65,6 @@ class LayananController extends Controller
             'rangkap' => $request->rangkap,
             'waktu_penyelesaian' => $request->waktu_penyelesaian,
             'aktif' => true,
-            'no_wa' => $request->no_wa,
             'deskripsi' => $request->deskripsi,
         ]);
 
@@ -85,7 +94,6 @@ class LayananController extends Controller
             'nama_layanan' => $layanan->nama_layanan,
             'rangkap' => $layanan->rangkap,
             'waktu_penyelesaian' => $layanan->waktu_penyelesaian,
-            'no_wa' => $layanan->no_wa,
             'deskripsi' => $layanan->deskripsi,
             'aktif' => $layanan->aktif,
         ];
@@ -95,7 +103,6 @@ class LayananController extends Controller
             'nama_layanan' => $request->nama_layanan,
             'rangkap' => $request->rangkap,
             'waktu_penyelesaian' => $request->waktu_penyelesaian,
-            'no_wa' => $request->no_wa,
             'deskripsi' => $request->deskripsi,
             'aktif' => $request->aktif,
         ]);
@@ -104,7 +111,6 @@ class LayananController extends Controller
             'nama_layanan' => $layanan->fresh()->nama_layanan,
             'rangkap' => $layanan->fresh()->rangkap,
             'waktu_penyelesaian' => $layanan->fresh()->waktu_penyelesaian,
-            'no_wa' => $layanan->fresh()->no_wa,
             'deskripsi' => $layanan->fresh()->deskripsi,
             'aktif' => $layanan->fresh()->aktif,
         ];

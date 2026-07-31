@@ -42,6 +42,8 @@ class TiketController extends Controller
 
         $pegawaiList = [];
 
+        $simpegAvailable = true;
+
         if ($bidangId && $start && $end) {
 
             $tiket = Regtiket::with([
@@ -58,6 +60,8 @@ class TiketController extends Controller
             $pegawaiList = $this->pegawaiService->getPegawaiByNips(
                 $tiket->pluck('nip')
             );
+
+            $simpegAvailable = $this->pegawaiService->isSimpegAvailable();
         }
 
         return view('pages.all.layanan.index', compact(
@@ -66,7 +70,8 @@ class TiketController extends Controller
             'bidangId',
             'start',
             'end',
-            'pegawaiList'
+            'pegawaiList',
+            'simpegAvailable'
         ));
     }
 
@@ -86,10 +91,21 @@ class TiketController extends Controller
             ->orderBy('tanggal', 'desc')
             ->get();
 
+        $pegawaiList = $this->pegawaiService->getPegawaiByNips(
+            $tiket->pluck('nip')
+                ->filter()
+                ->unique()
+                ->values()
+        );
+
+        $simpegAvailable = $this->pegawaiService->isSimpegAvailable();
+
         return view('pages.opd.layanan.index', compact(
             'tiket',
             'month',
-            'year'
+            'year',
+            'pegawaiList',
+            'simpegAvailable'
         ));
     }
 
@@ -119,13 +135,16 @@ class TiketController extends Controller
                 ->values()
         );
 
+        $simpegAvailable = $this->pegawaiService->isSimpegAvailable();
+
         return view(
             'pages.admin-bawah.tiket.index',
             compact(
                 'tiket',
                 'year',
                 'diambil',
-                'pegawaiList'
+                'pegawaiList',
+                'simpegAvailable'
             )
         );
     }
@@ -434,7 +453,11 @@ class TiketController extends Controller
 
     public function getLayanan($id)
     {
-        return Layanan::where('kode_bidang', $id)->get();
+        return Layanan::where('kode_bidang', $id)
+            ->where('aktif', 1)
+            ->orderBy('nama_layanan')
+            ->get();
+        // return Layanan::where('kode_bidang', $id)->get();
     }
 
     public function getSyarat($id)

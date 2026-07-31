@@ -39,7 +39,7 @@
 </header>
 
 {{-- Modal Lihat Data --}}
-<div class="modal fade" id="modalDetail" tabindex="-1">
+<!-- <div class="modal fade" id="modalDetail" tabindex="-1">
     <div class="modal-dialog modal-dialog-centered modal-lg">
         <div class="modal-content">
 
@@ -84,6 +84,49 @@
                 </div>
             </div>
 
+        </div>
+    </div>
+</div> -->
+
+<div class="modal fade" id="modalDetail" tabindex="-1">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable">
+        <div class="modal-content">
+
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    No Tiket: <span id="mdNoTiket"></span>
+                </h5>
+                <button class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+
+            <div class="modal-body">
+                <div class="card mb-4">
+                    <div class="card-header bg-gradient-primary-to-secondary text-white">
+                        Riwayat Proses Layanan
+                    </div>
+                    <div class="card-body">
+                        <div class="card-body p-0">
+                            <div class="table-responsive">
+                                <table class="table table-bordered table-sm">
+                                    <thead>
+                                        <tr>
+                                            <th>Tahap</th>
+                                            <th>Tanggal</th>
+                                            <th>Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="historyTable">
+                                        <tr>
+                                            <td colspan="3" class="text-center">Loading...</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                                <div class="mt-3 d-flex justify-content-end" id="historyPagination"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </div>
@@ -172,13 +215,13 @@
                             <td>{{ $item->tanggal }}</td>
                             <td>{{ $item->tahapTerakhir->statusRel->status ?? '-' }}</td>
                             <td>
-                                <div class="d-flex align-items-center">
-                                    <a class="btn btn-datatable btn-icon btn-transparent-dark me-1 btnDetail"
-                                        href="#" data-id="{{ $item->id }}" title="Lihat riwayat">
+                                <a class="btn btn-datatable btn-icon btn-transparent-dark me-1 btnDetail"
+                                    href="#"
+                                    data-notiket="{{ $item->no_tiket }}"
+                                    title="Lihat Riwayat">
 
-                                        <i data-feather="eye" class="text-primary"></i>
-                                    </a>
-                                </div>
+                                    <i data-feather="eye" class="text-primary"></i>
+                                </a>
                             </td>
                         </tr>
                         @endforeach
@@ -197,6 +240,149 @@
 
         window.addEventListener('load', function() {
             document.getElementById('tableLoading').classList.add('d-none');
+        });
+
+        const modal = new bootstrap.Modal(document.getElementById('modalDetail'));
+
+        const baseUrl = "{{ url('root/tiket/history') }}";
+
+        let historyData = [];
+        let currentPage = 1;
+        const perPage = 5;
+
+        function renderTable() {
+
+            let start = (currentPage - 1) * perPage;
+            let end = start + perPage;
+
+            let pageData = historyData.slice(start, end);
+
+            let html = '';
+
+            if (pageData.length === 0) {
+
+                html =
+                    `<tr>
+                    <td colspan="3" class="text-center">
+                        Tidak ada data
+                    </td>
+                </tr>`;
+
+            } else {
+
+                pageData.forEach((item, index) => {
+
+                    html += `
+                    <tr>
+                        <td>Tahap ${start + index + 1}</td>
+                        <td>${item.tanggal}</td>
+                        <td>${item.status_rel ? item.status_rel.status : '-'}</td>
+                    </tr>
+                `;
+
+                });
+
+            }
+
+            document.getElementById('historyTable').innerHTML = html;
+
+            renderPagination();
+        }
+
+        function renderPagination() {
+
+            let totalPage = Math.ceil(historyData.length / perPage);
+
+            let html = '';
+
+            if (totalPage > 1) {
+
+                if (currentPage > 1) {
+
+                    html += `
+                    <button class="btn btn-sm btn-outline-primary me-1"
+                        onclick="prevPage()">
+                        Prev
+                    </button>
+                `;
+
+                }
+
+                html += `
+                <span class="me-2">
+                    Page ${currentPage} / ${totalPage}
+                </span>
+            `;
+
+                if (currentPage < totalPage) {
+
+                    html += `
+                    <button class="btn btn-sm btn-outline-primary"
+                        onclick="nextPage()">
+                        Next
+                    </button>
+                `;
+
+                }
+            }
+
+            document.getElementById('historyPagination').innerHTML = html;
+        }
+
+        window.nextPage = function() {
+            currentPage++;
+            renderTable();
+        }
+
+        window.prevPage = function() {
+            currentPage--;
+            renderTable();
+        }
+
+        document.addEventListener('click', function(e) {
+
+            const btn = e.target.closest('.btnDetail');
+
+            if (!btn) return;
+
+            e.preventDefault();
+
+            const noTiket = btn.dataset.notiket;
+
+            document.getElementById('mdNoTiket').innerText = noTiket;
+
+            document.getElementById('historyTable').innerHTML =
+                `<tr>
+                <td colspan="3" class="text-center">
+                    Loading...
+                </td>
+            </tr>`;
+
+            fetch(`${baseUrl}/${noTiket}`)
+                .then(res => res.json())
+                .then(data => {
+
+                    historyData = data;
+
+                    currentPage = 1;
+
+                    renderTable();
+
+                    modal.show();
+
+                })
+                .catch(() => {
+
+                    document.getElementById('historyTable').innerHTML =
+                        `<tr>
+                        <td colspan="3"
+                            class="text-danger text-center">
+                            Gagal load data
+                        </td>
+                    </tr>`;
+
+                });
+
         });
 
         const bidangSelect = document.getElementById('bidangSelect');

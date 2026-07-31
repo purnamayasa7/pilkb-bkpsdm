@@ -15,7 +15,7 @@ class Syarat extends Model
     protected $fillable = [
         'kode_layanan',
         'syarat',
-        'efile',
+        'metode',
         'deskripsi',
     ];
 

@@ -56,18 +56,25 @@ class DashboardController extends Controller
 
         $baseLastMonthQuery = Regtiket::query();
 
-        // Filter untuk Role Bidang
-        if ($user->role->name == 'bidang') {
+        // if ($user->role->name == 'bidang') {
 
-            $baseQuery->where(
-                'kode_ukerja',
-                $user->kode_ukerja
-            );
+        //     $baseQuery->where(
+        //         'kode_ukerja',
+        //         $user->kode_ukerja
+        //     );
 
-            $baseLastMonthQuery->where(
-                'kode_ukerja',
-                $user->kode_ukerja
-            );
+        //     $baseLastMonthQuery->where(
+        //         'kode_ukerja',
+        //         $user->kode_ukerja
+        //     );
+        // }
+
+        if (
+            $user->role->name == 'bidang' ||
+            $user->role->name == 'admin_opd'
+        ) {
+            $baseQuery->where('kode_ukerja', $user->kode_ukerja);
+            $baseLastMonthQuery->where('kode_ukerja', $user->kode_ukerja);
         }
 
         // Widget 1 Pengajuan Hari ini
@@ -75,7 +82,23 @@ class DashboardController extends Controller
         $pengajuanHariIniQuery = Regtiket::query();
         $pengajuanKemarinQuery = Regtiket::query();
 
-        if ($user->role->name == 'bidang') {
+        // if ($user->role->name == 'bidang') {
+
+        //     $pengajuanHariIniQuery->where(
+        //         'kode_ukerja',
+        //         $user->kode_ukerja
+        //     );
+
+        //     $pengajuanKemarinQuery->where(
+        //         'kode_ukerja',
+        //         $user->kode_ukerja
+        //     );
+        // }
+
+        if (
+            $user->role->name == 'bidang' ||
+            $user->role->name == 'admin_opd'
+        ) {
 
             $pengajuanHariIniQuery->where(
                 'kode_ukerja',
@@ -129,7 +152,10 @@ class DashboardController extends Controller
                 $query->whereMonth('tanggal', $month)
                     ->whereYear('tanggal', $year);
 
-                if ($user->role->name == 'bidang') {
+                if (
+                    $user->role->name == 'bidang' ||
+                    $user->role->name == 'admin_opd'
+                ) {
                     $query->where(
                         'kode_ukerja',
                         $user->kode_ukerja
@@ -147,7 +173,17 @@ class DashboardController extends Controller
                 $query->whereMonth('tanggal', $lastMonth)
                     ->whereYear('tanggal', $lastMonthYear);
 
-                if ($user->role->name == 'bidang') {
+                // if ($user->role->name == 'bidang') {
+                //     $query->where(
+                //         'kode_ukerja',
+                //         $user->kode_ukerja
+                //     );
+                // }
+
+                if (
+                    $user->role->name == 'bidang' ||
+                    $user->role->name == 'admin_opd'
+                ) {
                     $query->where(
                         'kode_ukerja',
                         $user->kode_ukerja
@@ -161,7 +197,7 @@ class DashboardController extends Controller
             $btlBulanLalu
         );
 
-       // Widget 4 Pengajuan Selesai (Archives)
+        // Widget 4 Pengajuan Selesai (Archives)
 
         $tiketArchives = (clone $baseQuery)
             ->whereMonth('tanggal', $month)
@@ -300,7 +336,7 @@ class DashboardController extends Controller
     }
 
     // Helper Trend
-    
+
     private function calculateTrend($current, $previous)
     {
         $difference = $current - $previous;

@@ -67,7 +67,8 @@ class SyaratController extends Controller
         $syarat = Syarat::create([
             'kode_layanan' => $kode_layanan,
             'syarat' => $request->syarat,
-            'efile' => $request->efile,
+            'metode' => $request->metode,
+            'kode_efile' => $request->kode_efile,
             'deskripsi' => $request->deskripsi,
         ]);
 
@@ -89,22 +90,27 @@ class SyaratController extends Controller
 
         $request->validate([
             'syarat' => 'required',
+            'metode' => 'required|in:simpeg,upload',
         ]);
 
         $olddata = [
             'kode_layanan' => $syarat->kode_layanan,
             'syarat' => $syarat->syarat,
-            'efile' => $syarat->efile,
+            'metode' => $syarat->metode,
+            'kode_efile' => $syarat->kode_efile,
             'deskripsi' => $syarat->deskripsi,
         ];
 
         $syarat->syarat = $request->syarat;
+        $syarat->metode = $request->metode;
+
         $syarat->save();
 
         $newdata = [
             'kode_layanan' => $syarat->fresh()->kode_layanan,
             'syarat' => $syarat->fresh()->syarat,
-            'efile' => $syarat->fresh()->efile,
+            'metode' => $syarat->fresh()->metode,
+            'kode_efile' => $syarat->fresh()->kode_efile,
             'deskripsi' => $syarat->fresh()->deskripsi,
         ];
 
@@ -134,7 +140,8 @@ class SyaratController extends Controller
         $olddata = [
             'kode_layanan' => $syarat->kode_layanan,
             'syarat' => $syarat->syarat,
-            'efile' => $syarat->efile,
+            'metode' => $syarat->metode,
+            'kode_efile' => $syarat->kode_efile,
             'deskripsi' => $syarat->deskripsi,
         ];
 

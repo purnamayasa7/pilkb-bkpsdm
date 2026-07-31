@@ -39,12 +39,12 @@ Route::get('/tiket/cetak/{no_tiket}', [TiketController::class, 'cetak'])->name('
 
 // Guest Chat
 Route::get('/guest-chat/bidang', [ChatController::class, 'getBidang']);
-Route::get('/guesct-chat/layanan/{bidang}',[ChatController::class, 'getLayanan']);
-Route::post('/guest-chat/start',[ChatController::class, 'startGuestChat']);
-Route::post('/guest-chat/resume',[ChatController::class, 'resumeGuestChat']);
-Route::get('/guest-chat/{conversation}/messages',[ChatController::class, 'loadGuestMessages']);
+Route::get('/guesct-chat/layanan/{bidang}', [ChatController::class, 'getLayanan']);
+Route::post('/guest-chat/start', [ChatController::class, 'startGuestChat']);
+Route::post('/guest-chat/resume', [ChatController::class, 'resumeGuestChat']);
+Route::get('/guest-chat/{conversation}/messages', [ChatController::class, 'loadGuestMessages']);
 Route::get('/guest-chat/{conversation}/poll', [ChatController::class, 'pollGuestMessages']);
-Route::post('/guest-chat/{conversation}/message',[ChatController::class, 'sendGuestMessage']);
+Route::post('/guest-chat/{conversation}/message', [ChatController::class, 'sendGuestMessage']);
 // Open & close chat
 Route::post('/chat/{conversation}/close', [ChatController::class, 'closeChat']);
 Route::post('/chat/{conversation}/reopen', [ChatController::class, 'reopenChat']);
@@ -101,8 +101,8 @@ Route::middleware(['auth', 'force.password'])->group(function () {
     Route::get('/chat/admin/inbox/poll', [ChatController::class, 'pollInbox'])->name('chat.admin.poll');
 
     // Search
-     Route::get('/search-ticket', [SearchController::class, 'ticket'])->name('search.ticket');
-     Route::get('/ticket/detail/{no_tiket}', [SearchController::class, 'detail'])->name('ticket.detail');
+    Route::get('/search-ticket', [SearchController::class, 'ticket'])->name('search.ticket');
+    Route::get('/ticket/detail/{no_tiket}', [SearchController::class, 'detail'])->name('ticket.detail');
 });
 
 /* ROOT */
@@ -167,6 +167,7 @@ Route::prefix('root')
         // TIKET
         Route::get('tiket', [TiketController::class, 'index'])->name('tiket');
         Route::get('filter', [TiketController::class, 'filter'])->name('filter');
+        Route::get('/tiket/history/{no_tiket}', [TiketController::class, 'getHistory'])->name('tiket.getHistory');
 
         // LAPORAN
         Route::get('laporan', [LaporanController::class, 'index'])->name('laporan.index');

@@ -16,7 +16,7 @@ return new class extends Migration
             $table->string('kode_bidang', 10);
             $table->text('nama_layanan');
             $table->string('rangkap', 10)->nullable();
-            $table->string('waktu_penyelesaian', 50);
+            $table->string('waktu_penyelesaian', 50)->nullable();
             $table->boolean('aktif')->default(true);
             // $table->string('no_wa', 50)->nullable();
             $table->text('deskripsi')->nullable();

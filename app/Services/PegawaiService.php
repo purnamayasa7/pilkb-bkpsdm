@@ -9,6 +9,31 @@ use Illuminate\Support\Collection;
 
 class PegawaiService
 {
+    protected bool $simpegAvailable = true;
+
+    protected function isOffline(): bool
+    {
+        return Cache::has('simpeg:offline');
+    }
+
+    protected function setOffline(): void
+    {
+        Cache::put(
+            'simpeg:offline',
+            true,
+            now()->addMinutes(5)
+        );
+
+        $this->simpegAvailable = false;
+    }
+
+    protected function clearOffline(): void
+    {
+        Cache::forget('simpeg:offline');
+
+        $this->simpegAvailable = true;
+    }
+
     /**
      * Mengambil data pegawai dari SIMPEG.
      */
@@ -18,77 +43,93 @@ class PegawaiService
             return null;
         }
 
-        return Cache::remember(
-            "pegawai:{$nip}",
-            now()->addDay(),
-            function () use ($nip) {
+        $cacheKey = "pegawai:{$nip}";
 
-                try {
+        // 1. Ambil dari cache terlebih dahulu
+        if (Cache::has($cacheKey)) {
+            return Cache::get($cacheKey);
+        }
 
-                    $response = Http::withoutVerifying()
-                        ->connectTimeout(5)
-                        ->timeout(10)
-                        ->retry(2, 300, throw: false)
-                        ->acceptJson()
-                        ->withToken(config('services.simpeg.token'))
-                        ->get(
-                            config('services.simpeg.url') . "/pegawai/{$nip}"
-                        );
+        // Jika SIMPEG sedang offline, jangan call API
+        if ($this->isOffline()) {
+            return null;
+        }
 
-                    if (! $response->successful()) {
+        try {
 
-                        Log::warning('SIMPEG API gagal.', [
-                            'nip' => $nip,
-                            'status' => $response->status(),
-                        ]);
+            $response = Http::withoutVerifying()
+                ->connectTimeout(2)
+                ->timeout(3)
+                ->retry(1, 200, throw: false)
+                ->acceptJson()
+                ->withToken(config('services.simpeg.token'))
+                ->get(
+                    config('services.simpeg.url') . "/pegawai/{$nip}"
+                );
 
-                        return null;
-                    }
+            if (! $response->successful()) {
 
-                    // Hilangkan UTF-8 BOM
-                    $body = preg_replace(
-                        '/^\xEF\xBB\xBF/',
-                        '',
-                        $response->body()
-                    );
+                $this->setOffline();
 
-                    $json = json_decode($body, true);
+                Log::warning('SIMPEG API gagal.', [
+                    'nip' => $nip,
+                    'status' => $response->status(),
+                ]);
 
-                    if (json_last_error() !== JSON_ERROR_NONE) {
-
-                        Log::error('JSON SIMPEG tidak valid.', [
-                            'nip' => $nip,
-                            'error' => json_last_error_msg(),
-                        ]);
-
-                        return null;
-                    }
-
-                    if (
-                        !isset($json['success']) ||
-                        $json['success'] !== true ||
-                        empty($json['data'])
-                    ) {
-
-                        Log::warning('Data pegawai tidak ditemukan.', [
-                            'nip' => $nip,
-                        ]);
-
-                        return null;
-                    }
-
-                    return $json['data'];
-                } catch (\Throwable $e) {
-
-                    Log::error('Exception SIMPEG.', [
-                        'nip' => $nip,
-                        'message' => $e->getMessage(),
-                    ]);
-
-                    return null;
-                }
+                return null;
             }
-        );
+
+            $body = preg_replace('/^\xEF\xBB\xBF/', '', $response->body());
+
+            $json = json_decode($body, true);
+
+            if (json_last_error() !== JSON_ERROR_NONE) {
+
+                $this->setOffline();
+
+                Log::error('JSON SIMPEG tidak valid.', [
+                    'nip' => $nip,
+                    'error' => json_last_error_msg(),
+                ]);
+
+                return null;
+            }
+
+            if (
+                !isset($json['success']) ||
+                $json['success'] !== true ||
+                empty($json['data'])
+            ) {
+
+                Log::warning('Data pegawai tidak ditemukan.', [
+                    'nip' => $nip,
+                ]);
+
+                return null;
+            }
+
+            // SIMPEG kembali normal
+            $this->clearOffline();
+
+            // Simpan cache pegawai
+            Cache::put(
+                $cacheKey,
+                $json['data'],
+                now()->addDay()
+            );
+
+            return $json['data'];
+        } catch (\Throwable $e) {
+
+            $this->setOffline();
+
+            Log::error('Exception SIMPEG.', [
+                'nip' => $nip,
+                'message' => $e->getMessage(),
+            ]);
+
+            return null;
+        }
     }
 
     /**
@@ -115,5 +156,10 @@ class PegawaiService
             })
 
             ->all();
+    }
+
+    public function isSimpegAvailable(): bool
+    {
+        return ! Cache::has('simpeg:offline');
     }
 }

@@ -163,7 +163,7 @@
                             <td>
                                 {{ $item->nip }} <br>
                                 <small class="text-muted">
-                                    Kadek Purnamayasa, S.Kom
+                                    {{ $pegawaiList[$item->nip]['nama_lengkap'] ?? '-' }}
                                 </small>
                             </td>
                             <td>{{ $item->layanan->nama_layanan ?? '-' }}</td>
@@ -172,9 +172,9 @@
                             <td>
                                 <div class="d-flex align-items-center">
                                     <a class="btn btn-datatable btn-icon btn-transparent-dark me-1 btnDetail"
-                                        href="#" data-notiket="{{ $item->no_tiket }}"
-                                        data-nip="{{ $item->nip }}" data-nama="Kadek Purnamayasa, S.Kom"
-                                        data-layanan="{{ $item->layanan->nama_layanan ?? '-' }}" title="Lihat Riwayat">
+                                        href="#"
+                                        data-notiket="{{ $item->no_tiket }}"
+                                        title="Lihat Riwayat">
 
                                         <i data-feather="eye" class="text-primary"></i>
                                     </a>

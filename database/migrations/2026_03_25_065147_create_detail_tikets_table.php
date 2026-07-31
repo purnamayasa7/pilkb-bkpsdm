@@ -17,6 +17,14 @@ return new class extends Migration
             $table->string('id_syarat', 5);
             $table->string('status', 10);
             $table->text('comment')->nullable();
+            $table->enum('metode', ['simpeg', 'upload'])->nullable();
+            $table->string('kode_efile', 100)->nullable();
+            $table->string('file_name')->nullable();
+            $table->string('file_path')->nullable();
+            $table->unsignedBigInteger('file_size')->nullable();
+            $table->timestamp('uploaded_at')->nullable();
+            $table->timestamp('retention_until')->nullable();
+            $table->timestamp('deleted_file_at')->nullable();
             $table->timestamps();
 
             $table->foreign('no_tiket')

@@ -19,7 +19,7 @@ return new class extends Migration
 
         Schema::create('users', function (Blueprint $table) {
             $table->id();
-            $table->string('nip', 18);
+            $table->string('username', 18);
             $table->string('nama', 200);
             $table->string('password');
             $table->string('bidang_id', 15);

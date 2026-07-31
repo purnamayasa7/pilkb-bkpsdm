@@ -15,7 +15,8 @@ return new class extends Migration
             $table->string('id', 5)->primary()->unique();
             $table->string('kode_layanan', 10);
             $table->text('syarat');
-            $table->string('efile', 255)->nullable();
+            $table->enum('metode', ['simpeg', 'upload'])->default('simpeg');
+            $table->string('kode_efile', 100)->nullable();
             $table->text('deskripsi')->nullable();
             $table->timestamps();
 
