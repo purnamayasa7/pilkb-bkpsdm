@@ -215,7 +215,7 @@
                                 <div
                                     class="text-xs fw-bold text-{{ $trendHariIni['class'] }} d-inline-flex align-items-center">
                                     <i class="me-1" data-feather="{{ $trendHariIni['icon'] }}"></i>
-                                    {{ $trendHariIni['jumlah'] }} <span class="text-muted fw-normal ms-1"> Dibanding
+                                    {{ $trendHariIni['jumlah'] }} <span class="text-muted fw-normal ms-1 text-nowrap"> Dibanding
                                         kemarin</span>
                                 </div>
                             </div>
@@ -248,7 +248,7 @@
                                     <i class="me-1" data-feather="{{ $trendPengajuan['icon'] }}">
                                     </i>
 
-                                    {{ $trendPengajuan['jumlah'] }} <span class="text-muted fw-normal ms-1"> Dibanding
+                                    {{ $trendPengajuan['jumlah'] }} <span class="text-muted fw-normal ms-1 text-nowrap"> Dibanding
                                         bulan lalu</span>
                                 </div>
                             </div>
@@ -281,7 +281,7 @@
                                     <i class="me-1" data-feather="{{ $trendBTL['icon'] }}">
                                     </i>
 
-                                    {{ $trendBTL['jumlah'] }} <span class="text-muted fw-normal ms-1"> Dibanding bulan
+                                    {{ $trendBTL['jumlah'] }} <span class="text-muted fw-normal ms-1 text-nowrap"> Dibanding bulan
                                         lalu</span>
                                 </div>
                             </div>
@@ -313,7 +313,7 @@
                                     <i class="me-1" data-feather="{{ $trendTahap['icon'] }}">
                                     </i>
 
-                                    {{ $trendTahap['jumlah'] }} <span class="text-muted fw-normal ms-1"> Dibanding bulan
+                                    {{ $trendTahap['jumlah'] }} <span class="text-muted fw-normal ms-1 text-nowrap"> Dibanding bulan
                                         lalu</span>
                                 </div>
                             </div>

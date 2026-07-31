@@ -258,19 +258,6 @@ Route::prefix('adminBidang')
         Route::get('cetakSyarat', [SyaratController::class, 'indexCetakAdminBidang'])->name('cetakSyarat.indexCetakAdminBidang');
         Route::get('get-layanan-syarat/{bidang}', [SyaratController::class, 'getLayanan'])->name('syarat.getLayanan');
         Route::get('cetakSyarat/export', [SyaratController::class, 'exportPdfBidang'])->name('cetakSyarat.exportPdfBidang');
-
-        // MASTER DATA SYARAT
-        Route::get('syarat', [SyaratController::class, 'index'])->name('syarat');
-        Route::get('syarat/create', [SyaratController::class, 'create'])->name('syarat.create');
-        Route::post('syarat', [SyaratController::class, 'store'])->name('syarat.store');
-        Route::get('syarat/{id}', [SyaratController::class, 'edit'])->name('syarat.edit');
-        Route::put('syarat/{id}', [SyaratController::class, 'update'])->name('syarat.update');
-        Route::delete('syarat/{id}', [SyaratController::class, 'destroy'])->name('syarat.destroy');
-        Route::get('/get-layanan-syarat/{bidang}', [SyaratController::class, 'getLayanan'])->name('syarat.getLayanan');
-
-        // AJAX LAYANAN
-        Route::get('get-layanan-syarat/{bidang}', [SyaratController::class, 'getLayanan'])
-            ->name('syarat.getLayanan');
     });
 
 Route::prefix('adminBawah')
