@@ -243,10 +243,10 @@
                         Pre-Production
                     </div> -->
 
-                    <div class="badge text-white px-3 py-2 rounded-pill"
+                    <!-- <div class="badge text-white px-3 py-2 rounded-pill"
                         style="background-color: #f59e0b;">
                         Pre-Production
-                    </div>
+                    </div> -->
 
                 </div>
             </div>
