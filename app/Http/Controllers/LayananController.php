@@ -32,6 +32,18 @@ class LayananController extends Controller
         return view('pages.admin.layanan.index', compact('layanan'));
     }
 
+    public function indexBidang()
+    {
+        $user = Auth::user();
+
+        $layanan = Layanan::with('bidang')
+            ->where('kode_bidang', $user->bidang_id)
+            ->orderBy('nama_layanan')
+            ->get();
+
+        return view('pages.bidang.layanan.index', compact('layanan'));
+    }
+
     public function getHistory($no_tiket)
     {
         $data = Tahap::with('statusRel')
@@ -47,6 +59,45 @@ class LayananController extends Controller
         $bidang = Bidang::all();
 
         return view('pages.admin.layanan.create', compact('bidang'));
+    }
+
+    // Menu Admin Bidang
+    public function createBidang()
+    {
+        $bidang = Bidang::all();
+
+        return view('pages.bidang.layanan.create', compact('bidang'));
+    }
+
+    // Menu Admin Bidang
+    public function storeBidang(Request $request)
+    {
+        $request->validate([
+            'nama_layanan' => 'required',
+            'waktu_penyelesaian' => 'required',
+        ]);
+
+        $kode_bidang = Auth::user()->bidang_id;
+
+        $layanan = Layanan::create([
+            'kode_bidang' => $kode_bidang,
+            'nama_layanan' => $request->nama_layanan,
+            'rangkap' => $request->rangkap,
+            'waktu_penyelesaian' => $request->waktu_penyelesaian,
+            'aktif' => true,
+            'deskripsi' => $request->deskripsi,
+        ]);
+
+        ActivityLogService::log(
+            'Master Data Layanan',
+            'CREATE',
+            'Menambah Layanan Baru',
+            [],
+            $layanan->toArray()
+        );
+
+        return redirect()->route('adminBidang.layanan.indexBidang')
+            ->with('success', 'Layanan berhasil ditambahkan');
     }
 
     public function store(Request $request)
@@ -127,12 +178,66 @@ class LayananController extends Controller
             ->with('success', 'Layanan berhasil diupdate');
     }
 
+    public function updateBidang(Request $request, $layananId)
+    {
+        $layanan = Layanan::findOrFail($layananId);
+
+        $request->validate([
+            'nama_layanan' => 'required',
+            'waktu_penyelesaian' => 'required',
+        ]);
+
+        $oldData = [
+            'nama_layanan' => $layanan->nama_layanan,
+            'rangkap' => $layanan->rangkap,
+            'waktu_penyelesaian' => $layanan->waktu_penyelesaian,
+            'deskripsi' => $layanan->deskripsi,
+            'aktif' => $layanan->aktif,
+        ];
+
+        $layanan->update([
+            'nama_layanan' => $request->nama_layanan,
+            'rangkap' => $request->rangkap,
+            'waktu_penyelesaian' => $request->waktu_penyelesaian,
+            'deskripsi' => $request->deskripsi,
+            'aktif' => $request->aktif,
+        ]);
+
+        $newData = [
+            'nama_layanan' => $layanan->fresh()->nama_layanan,
+            'rangkap' => $layanan->fresh()->rangkap,
+            'waktu_penyelesaian' => $layanan->fresh()->waktu_penyelesaian,
+            'deskripsi' => $layanan->fresh()->deskripsi,
+            'aktif' => $layanan->fresh()->aktif,
+        ];
+
+        ActivityLogService::log(
+            'Master Data Layanan',
+            'UPDATE',
+            'Mengubah Data Layanan ID: ' . $layanan->id,
+            $oldData,
+            $newData
+        );
+
+        return redirect()->route('adminBidang.layanan.indexBidang')
+            ->with('success', 'Layanan berhasil diupdate');
+    }
+
     public function edit($id)
     {
         $layanan = Layanan::findOrFail($id);
         $bidang = Bidang::all();
 
         return view('pages.admin.layanan.edit', compact('layanan', 'bidang'));
+    }
+
+    // Menu Admin Bidang
+    public function editBidang($id)
+    {
+        $layanan = Layanan::findOrFail($id);
+        $bidang = Bidang::all();
+
+        return view('pages.bidang.layanan.edit', compact('layanan', 'bidang'));
     }
 
     //Aktif/Nonaktif Layanan
@@ -158,6 +263,38 @@ class LayananController extends Controller
         );
 
         return redirect()->back()->with('success', 'Status layanan berhasil diubah');
+    }
+
+    //Aktif/Nonaktif Layanan Admin Bidang
+    public function toggleAktifBidang($id)
+    {
+        $layanan = Layanan::where('id', $id)
+            ->where('kode_bidang', Auth::user()->bidang_id)
+            ->firstOrFail();
+
+        $oldData = [
+            'aktif' => $layanan->aktif,
+        ];
+
+        $layanan->update([
+            'aktif' => !$layanan->aktif,
+        ]);
+
+        $newData = [
+            'aktif' => $layanan->aktif,
+        ];
+
+        ActivityLogService::log(
+            'Master Data Layanan',
+            'UPDATE',
+            $layanan->aktif
+                ? 'Mengaktifkan layanan ID: ' . $layanan->id
+                : 'Menonaktifkan layanan ID: ' . $layanan->id,
+            $oldData,
+            $newData
+        );
+
+        return back()->with('success', 'Status layanan berhasil diubah');
     }
 
     //List Laporan Pengajuan Layanan - Admin OPD

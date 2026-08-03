@@ -258,6 +258,15 @@ Route::prefix('adminBidang')
         Route::get('cetakSyarat', [SyaratController::class, 'indexCetakAdminBidang'])->name('cetakSyarat.indexCetakAdminBidang');
         Route::get('get-layanan-syarat/{bidang}', [SyaratController::class, 'getLayanan'])->name('syarat.getLayanan');
         Route::get('cetakSyarat/export', [SyaratController::class, 'exportPdfBidang'])->name('cetakSyarat.exportPdfBidang');
+
+        // MASTER DATA LAYANAN
+        Route::get('layanan', [LayananController::class, 'indexBidang'])->name('layanan.indexBidang');
+        Route::get('layanan/create', [LayananController::class, 'createBidang'])->name('layanan.createBidang');
+        Route::post('layanan', [LayananController::class, 'storeBidang'])->name('layanan.storeBidang');
+        Route::get('layanan/export-excel', [LayananController::class, 'exportExcelList'])->name('layanan.exportExcelList');
+        Route::get('layanan/{id}', [LayananController::class, 'editBidang'])->name('layanan.editBidang');
+        Route::put('layanan/{id}', [LayananController::class, 'updateBidang'])->name('layanan.updateBidang');
+        Route::put('layanan/{id}/toggle-aktif', [LayananController::class, 'toggleAktifBidang'])->name('layanan.toggle-aktifBidang');
     });
 
 Route::prefix('adminBawah')

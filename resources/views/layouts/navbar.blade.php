@@ -60,7 +60,7 @@
             </a>
             <div class="dropdown-menu dropdown-menu-end py-0 me-sm-n15 me-lg-0 o-hidden animated--fade-in-up"
                 aria-labelledby="navbarDropdownDocs">
-                <a class="dropdown-item py-3" href="https://docs.startbootstrap.com/sb-admin-pro" target="_blank">
+                <a class="dropdown-item py-3" href="#">
                     <div class="icon-stack bg-primary-soft text-primary me-4"><i data-feather="book"></i></div>
                     <div>
                         <div class="small text-gray-500">Dokumentasi</div>
@@ -68,8 +68,7 @@
                     </div>
                 </a>
                 <div class="dropdown-divider m-0"></div>
-                <a class="dropdown-item py-3" href="https://docs.startbootstrap.com/sb-admin-pro/components"
-                    target="_blank">
+                <a class="dropdown-item py-3" href="#">
                     <div class="icon-stack bg-primary-soft text-primary me-4"><i data-feather="book"></i></div>
                     <div>
                         <div class="small text-gray-500">Dokumentasi</div>
@@ -77,8 +76,7 @@
                     </div>
                 </a>
                 <div class="dropdown-divider m-0"></div>
-                <a class="dropdown-item py-3" href="https://docs.startbootstrap.com/sb-admin-pro/changelog"
-                    target="_blank">
+                <a class="dropdown-item py-3" href="#">
                     <div class="icon-stack bg-primary-soft text-primary me-4"><i data-feather="file-text"></i></div>
                     <div>
                         <div class="small text-gray-500">Changelog</div>

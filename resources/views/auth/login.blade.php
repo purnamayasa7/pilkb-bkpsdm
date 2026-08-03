@@ -259,7 +259,7 @@
                         <!-- LOGIN -->
                         <div class="form-slide">
                             <div class="form-content">
-                                <h4 class="text-primary fw-bold">Login</h4>
+                                <h4 class="text-primary fw-bold">Login PILKB</h4>
                                 <p class="text-muted mb-4">Masukkan akun anda</p>
 
                                 <form id="formLogin" class="user" method="POST" action="{{ route('login') }}">

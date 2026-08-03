@@ -221,7 +221,7 @@
                             </div>
 
                             <div class="ms-2">
-                                <i class="fas fa-file-alt fa-2x text-gray-200"></i>
+                                <i class="fas fa-file-alt fa-2x text-primary opacity-20"></i>
                             </div>
                         </div>
                     </div>
@@ -254,7 +254,7 @@
                             </div>
 
                             <div class="ms-2">
-                                <i class="fas fa-calendar-alt fa-2x text-gray-200"></i>
+                                <i class="fas fa-calendar-alt fa-2x text-secondary opacity-20"></i>
                             </div>
                         </div>
                     </div>
@@ -287,7 +287,7 @@
                             </div>
 
                             <div class="ms-2">
-                                <i class="fas fa-times-circle fa-2x text-gray-200"></i>
+                                <i class="fas fa-times-circle fa-2x text-danger opacity-20"></i>
                             </div>
                         </div>
                     </div>
@@ -319,7 +319,7 @@
                             </div>
 
                             <div class="ms-2">
-                                <i class="fas fa-check-circle fa-2x text-gray-200"></i>
+                                <i class="fas fa-check-circle fa-2x text-success opacity-20"></i>
                             </div>
                         </div>
                     </div>

@@ -886,7 +886,7 @@ $stepHeader = [
                     const foto = document.getElementById('detailFoto');
 
                     foto.src =
-                        `https://simpegdev.bllkom.info/pegawai/foto/${pegawai.nip}`;
+                        `https://simpegdev.bllkom.site/pegawai/foto/${pegawai.nip}`;
 
                     foto.onerror = function() {
                         this.src =
