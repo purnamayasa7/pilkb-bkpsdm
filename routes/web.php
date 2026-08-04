@@ -275,6 +275,14 @@ Route::prefix('adminBidang')
         Route::get('syarat/{id}', [SyaratController::class, 'editBidang'])->name('syarat.editBidang');
         Route::put('syarat/{id}', [SyaratController::class, 'updateBidang'])->name('syarat.updateBidang');
         Route::delete('syarat/{id}', [SyaratController::class, 'destroyBidang'])->name('syarat.destroyBidang');
+
+        // MASTER DATA STATUS
+        Route::get('status', [StatusController::class, 'indexStatus'])->name('status.indexStatus');
+        Route::get('status/create', [StatusController::class, 'createStatus'])->name('status.createStatus');
+        Route::post('status', [StatusController::class, 'storeStatus'])->name('status.storeStatus');
+        Route::get('status/{id}', [StatusController::class, 'editStatus'])->name('status.editStatus');
+        Route::put('status/{id}', [StatusController::class, 'updateStatus'])->name('status.updateStatus');
+        Route::delete('status/{id}', [StatusController::class, 'destroyStatus'])->name('status.destroyStatus');
     });
 
 Route::prefix('adminBawah')

@@ -27,6 +27,24 @@ class StatusController extends Controller
         return view('pages.admin.status.index', compact('status', 'bidang', 'bidangId'));
     }
 
+    // Menu Admin Bidang
+    public function indexBidang(Request $request)
+    {
+        $bidang = Bidang::all();
+
+        $bidangId = $request->bidang ?? $bidang->first()?->id;
+
+        $status = Status::with(['layanan.bidang'])
+            ->when($bidangId, function ($query) use ($bidangId) {
+                $query->whereHas('layanan', function ($query) use ($bidangId) {
+                    $query->where('kode_bidang', $bidangId);
+                });
+            })
+            ->get();
+
+        return view('pages.admin.status.index', compact('status', 'bidang', 'bidangId'));
+    }
+
     public function create()
     {
         $layanan = Layanan::all();
