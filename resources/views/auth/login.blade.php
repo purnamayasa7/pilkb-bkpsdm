@@ -259,7 +259,7 @@
                         <!-- LOGIN -->
                         <div class="form-slide">
                             <div class="form-content">
-                                <h4 class="text-primary fw-bold">Login PILKB</h4>
+                                <h4 class="form-title">Login PILKB</h4>
                                 <p class="text-muted mb-4">Masukkan akun anda</p>
 
                                 <form id="formLogin" class="user" method="POST" action="{{ route('login') }}">
@@ -286,16 +286,19 @@
                                         <i class="bi bi-eye toggle-password" onclick="togglePassword()"></i>
                                     </div>
 
-                                    <button type="submit" class="btn btn-primary w-100 btn-login mb-3">
-                                        <i data-feather="log-in" class="me-1"></i>
-                                        LOGIN
+                                    <button type="submit"
+                                        class="btn btn-login-primary w-100 mb-3">
+
+                                        <i data-feather="log-in"></i>
+                                        Login
                                     </button>
 
-                                    <button type="button" onclick="showRegister()"
-                                        class="btn btn-light border border-primary text-primary w-100 btn-login mb-3">
+                                    <button type="button"
+                                        onclick="showRegister()"
+                                        class="btn btn-login-outline w-100">
 
                                         <span>Cek Tiket & Lainnya</span>
-                                        <i class="bi bi-arrow-right"></i>
+                                        <i class="bi bi-arrow-right ms-2"></i>
 
                                     </button>
 
@@ -310,47 +313,69 @@
                         <!-- REGISTER -->
                         <div class="form-slide">
                             <div class="form-content">
-                                <h4 class="text-primary fw-bold">Cek Tiket</h4>
+
+                                <h4 class="form-title">Cek Tiket</h4>
+                                <p class="text-muted mb-3">
+                                    Masukkan nomor tiket anda
+                                </p>
 
                                 <form action="{{ route('tiket.cek') }}" method="POST">
                                     @csrf
 
-                                    <div class="form-floating mb-3">
-                                        <input type="text" name="no_tiket" class="form-control" placeholder="Nama">
-                                        <label>Masukkan No Tiket</label>
+                                    <div class="form-floating mb-2">
+                                        <input
+                                            type="text"
+                                            name="no_tiket"
+                                            class="form-control"
+                                            placeholder="Nomor Tiket"
+                                            required>
+
+                                        <label>Nomor Tiket</label>
                                     </div>
 
-                                    <button class="btn btn-primary w-100 btn-login mb-3">
-                                        <i data-feather="search" class="me-1"></i>
+                                    <button
+                                        type="submit"
+                                        class="btn btn-login-primary w-100 mb-2">
+
+                                        <i data-feather="search"></i>
                                         Cek Tiket
                                     </button>
 
                                     <button
                                         type="button"
-                                        class="btn btn-light border border-primary text-primary w-100 btn-login mb-3"
+                                        class="btn btn-login-outline w-100 mb-2"
                                         data-bs-toggle="modal"
                                         data-bs-target="#modalFaq">
 
-                                        <i data-feather="help-circle" class="me-1"></i>
+                                        <i data-feather="help-circle"></i>
                                         Tanya Jawab (FAQ)
+
                                     </button>
 
                                     <button
                                         type="button"
-                                        class="btn btn-light border border-primary text-primary w-100 btn-login mb-3"
+                                        class="btn btn-login-outline w-100"
                                         data-bs-toggle="modal"
                                         data-bs-target="#modalSyarat">
-                                        <i data-feather="file-text" class="me-1"></i>
 
+                                        <i data-feather="file-text"></i>
                                         Lihat Syarat Layanan
+
                                     </button>
 
-                                    <p class="text-center small">
-                                        <i class="bi bi-arrow-left"></i>
-                                        Kembali ke
-                                        <a href="javascript:void(0)" onclick="showLogin()">Login</a>
-                                    </p>
+                                    <div class="text-center mt-3">
+                                        <a href="javascript:void(0)"
+                                            onclick="showLogin()"
+                                            class="text-decoration-none">
+
+                                            <i class="bi bi-arrow-left"></i>
+                                            Kembali ke Login
+
+                                        </a>
+                                    </div>
+
                                 </form>
+
                             </div>
                         </div>
 
