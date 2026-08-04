@@ -269,13 +269,12 @@ Route::prefix('adminBidang')
         Route::put('layanan/{id}/toggle-aktif', [LayananController::class, 'toggleAktifBidang'])->name('layanan.toggle-aktifBidang');
 
         // MASTER DATA SYARAT
-        Route::get('syarat', [SyaratController::class, 'indexBidang'])->name('syaratBidang');
+        Route::get('syarat', [SyaratController::class, 'indexBidang'])->name('syarat.indexBidang');
         Route::get('syarat/create', [SyaratController::class, 'createBidang'])->name('syarat.createBidang');
         Route::post('syarat', [SyaratController::class, 'storeBidang'])->name('syarat.storeBidang');
-        Route::get('syarat/{id}', [SyaratController::class, 'edit'])->name('syarat.edit');
-        Route::put('syarat/{id}', [SyaratController::class, 'update'])->name('syarat.update');
-        Route::delete('syarat/{id}', [SyaratController::class, 'destroy'])->name('syarat.destroy');
-        Route::get('/get-layanan-syarat/{bidang}', [SyaratController::class, 'getLayanan'])->name('syarat.getLayanan');
+        Route::get('syarat/{id}', [SyaratController::class, 'editBidang'])->name('syarat.editBidang');
+        Route::put('syarat/{id}', [SyaratController::class, 'updateBidang'])->name('syarat.updateBidang');
+        Route::delete('syarat/{id}', [SyaratController::class, 'destroyBidang'])->name('syarat.destroyBidang');
     });
 
 Route::prefix('adminBawah')

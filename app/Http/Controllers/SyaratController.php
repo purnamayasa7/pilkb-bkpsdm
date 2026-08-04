@@ -9,6 +9,7 @@ use App\Services\ActivityLogService;
 use Illuminate\Support\Str;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class SyaratController extends Controller
 {
@@ -40,6 +41,37 @@ class SyaratController extends Controller
         ));
     }
 
+    // Menu Admin Bidang
+    public function indexBidang(Request $request)
+    {
+        $user = Auth::user();
+
+        $layanan = Layanan::where('kode_bidang', $user->bidang_id)
+            ->orderBy('nama_layanan')
+            ->get();
+
+        $layananId = $request->layanan;
+
+        $syarat = collect();
+
+        if ($layananId) {
+
+            $validLayanan = $layanan->contains('id', $layananId);
+
+            if ($validLayanan) {
+                $syarat = Syarat::with('layanan')
+                    ->where('kode_layanan', $layananId)
+                    ->get();
+            }
+        }
+
+        return view('pages.bidang.syarat.index', compact(
+            'layanan',
+            'layananId',
+            'syarat'
+        ));
+    }
+
     public function create(Request $request)
     {
         $bidang = Bidang::all();
@@ -55,7 +87,54 @@ class SyaratController extends Controller
         ));
     }
 
+    // Menu Admin Bidang
+    public function createBidang(Request $request)
+    {
+        $user = Auth::user();
+
+        $bidang = $user->bidang;
+
+        $layanan = Layanan::where('kode_bidang', $user->bidang_id)
+            ->orderBy('nama_layanan')
+            ->get();
+
+        return view('pages.bidang.syarat.create', compact(
+            'bidang',
+            'layanan'
+        ));
+    }
+
     public function store(Request $request)
+    {
+        $request->validate([
+            'kode_layanan' => 'required|exists:tb_layanan,id',
+            'syarat' => 'required',
+        ]);
+
+        $kode_layanan = $request->kode_layanan;
+
+        $syarat = Syarat::create([
+            'kode_layanan' => $kode_layanan,
+            'syarat' => $request->syarat,
+            'metode' => $request->metode,
+            'kode_efile' => $request->kode_efile,
+            'deskripsi' => $request->deskripsi,
+        ]);
+
+        ActivityLogService::log(
+            'Master Data Syarat',
+            'CREATE',
+            'Menambah Syarat Baru',
+            [],
+            $syarat->toArray()
+        );
+
+        return redirect()->route('root.syarat')
+            ->with('success', 'Syarat berhasil ditambahkan');
+    }
+
+    // Menu Admin Bidang
+    public function storeBidang(Request $request)
     {
         $request->validate([
             'kode_layanan' => 'required|exists:tb_layanan,id',
@@ -126,11 +205,70 @@ class SyaratController extends Controller
             ->with('success', 'Syarat berhasil diupdate');
     }
 
+    // Menu Admin Bidang
+    public function updateBidang(Request $request, $syaratId)
+    {
+        $syarat = Syarat::whereHas('layanan', function ($q) {
+            $q->where('kode_bidang', Auth::user()->bidang_id);
+        })
+            ->findOrFail($syaratId);
+
+        $request->validate([
+            'syarat' => 'required|string|max:255',
+            'metode' => 'required|in:simpeg,upload',
+        ]);
+
+        $olddata = [
+            'kode_layanan' => $syarat->kode_layanan,
+            'syarat' => $syarat->syarat,
+            'metode' => $syarat->metode,
+            'kode_efile' => $syarat->kode_efile,
+            'deskripsi' => $syarat->deskripsi,
+        ];
+
+        $syarat->update([
+            'syarat' => $request->syarat,
+            'metode' => $request->metode,
+        ]);
+
+        $newdata = [
+            'kode_layanan' => $syarat->fresh()->kode_layanan,
+            'syarat' => $syarat->fresh()->syarat,
+            'metode' => $syarat->fresh()->metode,
+            'kode_efile' => $syarat->fresh()->kode_efile,
+            'deskripsi' => $syarat->fresh()->deskripsi,
+        ];
+
+        ActivityLogService::log(
+            'Master Data Syarat',
+            'UPDATE',
+            'Mengubah Data Syarat',
+            $olddata,
+            $newdata
+        );
+
+        return redirect()
+            ->route('adminBidang.syarat.indexBidang')
+            ->with('success', 'Syarat berhasil diupdate.');
+    }
+
     public function edit($id)
     {
         $syarat = Syarat::with('layanan.bidang')->findOrFail($id);
 
         return view('pages.admin.syarat.edit', compact('syarat'));
+    }
+
+    // Menu Admin Bidang
+    public function editBidang($id)
+    {
+        $syarat = Syarat::whereHas('layanan', function ($q) {
+            $q->where('kode_bidang', Auth::user()->bidang_id);
+        })
+            ->with('layanan.bidang')
+            ->findOrFail($id);
+
+        return view('pages.bidang.syarat.edit', compact('syarat'));
     }
 
     public function destroy($id)
@@ -157,6 +295,38 @@ class SyaratController extends Controller
 
         return redirect()->route('root.syarat')
             ->with('success', 'Syarat berhasil dihapus');
+    }
+
+    // Menu Admin Bidang
+    public function destroyBidang($id)
+    {
+        $syarat = Syarat::whereHas('layanan', function ($query) {
+            $query->where('kode_bidang', Auth::user()->bidang_id);
+        })
+            ->with('layanan')
+            ->findOrFail($id);
+
+        $olddata = [
+            'kode_layanan' => $syarat->kode_layanan,
+            'syarat'        => $syarat->syarat,
+            'metode'        => $syarat->metode,
+            'kode_efile'    => $syarat->kode_efile,
+            'deskripsi'     => $syarat->deskripsi,
+        ];
+
+        $syarat->delete();
+
+        ActivityLogService::log(
+            'Master Data Syarat',
+            'DELETE',
+            'Menghapus Data Syarat',
+            $olddata,
+            []
+        );
+
+        return redirect()
+            ->route('adminBidang.syarat.indexBidang')
+            ->with('success', 'Syarat berhasil dihapus.');
     }
 
     public function getLayanan($bidangId)
