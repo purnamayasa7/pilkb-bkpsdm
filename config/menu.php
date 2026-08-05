@@ -393,7 +393,7 @@ return [
         [
             'type' => 'item',
             'title' => 'Status',
-            'path' => 'adminBidang/status',
+            'path' => 'adminBidang/statusBidang',
             'icon' => 'info',
             'active_key' => 'adminBidangstatus',
         ],

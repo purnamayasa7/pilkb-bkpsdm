@@ -277,12 +277,12 @@ Route::prefix('adminBidang')
         Route::delete('syarat/{id}', [SyaratController::class, 'destroyBidang'])->name('syarat.destroyBidang');
 
         // MASTER DATA STATUS
-        Route::get('status', [StatusController::class, 'indexStatus'])->name('status.indexStatus');
-        Route::get('status/create', [StatusController::class, 'createStatus'])->name('status.createStatus');
-        Route::post('status', [StatusController::class, 'storeStatus'])->name('status.storeStatus');
-        Route::get('status/{id}', [StatusController::class, 'editStatus'])->name('status.editStatus');
-        Route::put('status/{id}', [StatusController::class, 'updateStatus'])->name('status.updateStatus');
-        Route::delete('status/{id}', [StatusController::class, 'destroyStatus'])->name('status.destroyStatus');
+        Route::get('statusBidang', [StatusController::class, 'indexBidang'])->name('status.indexBidang');
+        Route::get('status/create', [StatusController::class, 'createBidang'])->name('status.createBidang');
+        Route::post('status', [StatusController::class, 'storeBidang'])->name('status.storeBidang');
+        Route::get('status/{id}', [StatusController::class, 'editBidang'])->name('status.editBidang');
+        Route::put('status/{id}', [StatusController::class, 'updateBidang'])->name('status.updateBidang');
+        Route::delete('status/{id}', [StatusController::class, 'destroyBidang'])->name('status.destroyBidang');
     });
 
 Route::prefix('adminBawah')

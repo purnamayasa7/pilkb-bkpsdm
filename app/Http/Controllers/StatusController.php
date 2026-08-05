@@ -7,6 +7,7 @@ use App\Models\Layanan;
 use App\Models\Status;
 use App\Services\ActivityLogService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class StatusController extends Controller
 {
@@ -30,19 +31,30 @@ class StatusController extends Controller
     // Menu Admin Bidang
     public function indexBidang(Request $request)
     {
-        $bidang = Bidang::all();
+        $user = Auth::user();
 
-        $bidangId = $request->bidang ?? $bidang->first()?->id;
+        $layanan = Layanan::where('kode_bidang', $user->bidang_id)
+            ->orderBy('nama_layanan')
+            ->get();
+
+        $layananId = $request->filled('layanan')
+            ? $request->layanan
+            : null;
 
         $status = Status::with(['layanan.bidang'])
-            ->when($bidangId, function ($query) use ($bidangId) {
-                $query->whereHas('layanan', function ($query) use ($bidangId) {
-                    $query->where('kode_bidang', $bidangId);
-                });
+            ->whereHas('layanan', function ($q) use ($user) {
+                $q->where('kode_bidang', $user->bidang_id);
+            })
+            ->when($layananId, function ($q) use ($layananId) {
+                $q->where('kode_layanan', $layananId);
             })
             ->get();
 
-        return view('pages.admin.status.index', compact('status', 'bidang', 'bidangId'));
+        return view('pages.bidang.status.index', compact(
+            'status',
+            'layanan',
+            'layananId'
+        ));
     }
 
     public function create()
@@ -51,6 +63,18 @@ class StatusController extends Controller
         $bidang = Bidang::all();
 
         return view('pages.admin.status.create', compact('layanan', 'bidang'));
+    }
+
+    // Menu Admin Bidang
+    public function createBidang()
+    {
+        $user = Auth::user();
+
+        $layanan = Layanan::where('kode_bidang', $user->bidang_id)
+            ->orderBy('nama_layanan')
+            ->get();
+
+        return view('pages.bidang.status.create', compact('layanan'));
     }
 
     public function store(Request $request)
@@ -77,6 +101,38 @@ class StatusController extends Controller
 
         return redirect()->route('root.status')
             ->with('success', 'Status berhasil ditambahkan');
+    }
+
+    // Menu Admin Bidang
+    public function storeBidang(Request $request)
+    {
+        $user = Auth::user();
+
+        $request->validate([
+            'kode_layanan' => 'required|exists:tb_layanan,id',
+            'status'       => 'required|string|max:255',
+        ]);
+
+        $layanan = Layanan::where('id', $request->kode_layanan)
+            ->where('kode_bidang', $user->bidang_id)
+            ->firstOrFail();
+
+        $status = Status::create([
+            'kode_layanan' => $layanan->id,
+            'status'       => $request->status,
+        ]);
+
+        ActivityLogService::log(
+            'Master Data Status',
+            'CREATE',
+            'Menambah Status Baru',
+            [],
+            $status->toArray()
+        );
+
+        return redirect()
+            ->route('adminBidang.status.indexStatus')
+            ->with('success', 'Status berhasil ditambahkan.');
     }
 
     public function update(Request $request, $statusId)
@@ -115,6 +171,55 @@ class StatusController extends Controller
             ->with('success', 'Status berhasil diupdate');
     }
 
+    // Menu Admin Bidang
+    public function updateBidang(Request $request, $statusId)
+    {
+        $user = Auth::user();
+
+        $status = Status::with('layanan')
+            ->whereHas('layanan', function ($q) use ($user) {
+                $q->where('kode_bidang', $user->bidang_id);
+            })
+            ->findOrFail($statusId);
+
+        $request->validate([
+            'kode_layanan' => 'required|exists:tb_layanan,id',
+            'status'        => 'required|string|max:255',
+        ]);
+
+        // Pastikan layanan memang milik bidang user
+        $layanan = Layanan::where('id', $request->kode_layanan)
+            ->where('kode_bidang', $user->bidang_id)
+            ->firstOrFail();
+
+        $olddata = [
+            'kode_layanan' => $status->kode_layanan,
+            'status'       => $status->status,
+        ];
+
+        $status->update([
+            'kode_layanan' => $layanan->id,
+            'status'       => $request->status,
+        ]);
+
+        $newdata = [
+            'kode_layanan' => $status->fresh()->kode_layanan,
+            'status'       => $status->fresh()->status,
+        ];
+
+        ActivityLogService::log(
+            'Master Data Status',
+            'UPDATE',
+            'Mengubah Data Status',
+            $olddata,
+            $newdata
+        );
+
+        return redirect()
+            ->route('adminBidang.status.indexStatus')
+            ->with('success', 'Status berhasil diupdate.');
+    }
+
     public function edit($id)
     {
         $status = Status::findOrFail($id);
@@ -122,6 +227,27 @@ class StatusController extends Controller
         $bidang = Bidang::all();
 
         return view('pages.admin.status.edit', compact('status', 'layanan', 'bidang'));
+    }
+
+    // Menu Admin Bidang
+    public function editBidang($id)
+    {
+        $user = Auth::user();
+
+        $status = Status::with('layanan.bidang')
+            ->whereHas('layanan', function ($q) use ($user) {
+                $q->where('kode_bidang', $user->bidang_id);
+            })
+            ->findOrFail($id);
+
+        $layanan = Layanan::where('kode_bidang', $user->bidang_id)
+            ->orderBy('nama_layanan')
+            ->get();
+
+        return view('pages.bidang.status.edit', compact(
+            'status',
+            'layanan'
+        ));
     }
 
     public function destroy($id)
