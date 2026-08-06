@@ -56,7 +56,7 @@
                      <!-- Profile picture image-->
                      <img id="fotoPreview"
                          class="img-account-profile rounded-circle mb-2 shadow"
-                         src="https://simpegdev.bllkom.info/pegawai/foto/{{ $user->username }}"
+                         src="https://simpegdev.bllkom.site/pegawai/foto/{{ $user->username }}"
                          alt="Foto Profil"
                          style="width: 180px; height: 180px; object-fit: cover;" />
                      <!-- Profile picture help block-->
