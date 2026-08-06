@@ -287,7 +287,7 @@
                      const foto = document.getElementById('fotoPreview');
 
                      foto.src =
-                         `https://simpegdev.bllkom.info/pegawai/foto/${nip}`;
+                         `https://simpegdev.bllkom.site/pegawai/foto/${nip}`;
 
                      foto.onerror = function() {
 
