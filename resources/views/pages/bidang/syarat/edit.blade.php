@@ -80,6 +80,31 @@
                              </select>
                          </div>
 
+                         <div class="mb-3" id="modeGroup">
+                             <label class="small mb-1">Pengambilan Dokumen</label>
+
+                             <select
+                                 name="mode_efile"
+                                 id="mode_efile"
+                                 class="form-select">
+
+                                 <option value="latest"
+                                     {{ old('mode_efile', $syarat->mode_efile) == 'latest' ? 'selected' : '' }}>
+                                     Dokumen Terbaru
+                                 </option>
+
+                                 <option value="all"
+                                     {{ old('mode_efile', $syarat->mode_efile) == 'all' ? 'selected' : '' }}>
+                                     Semua Dokumen
+                                 </option>
+
+                             </select>
+
+                             <div class="form-text">
+                                 Berlaku hanya untuk dokumen yang diambil dari SIMPEG.
+                             </div>
+                         </div>
+
                          <button class="btn btn-primary" type="button" id="btnUpdate">Update Syarat</button>
                      </form>
                  </div>
@@ -92,10 +117,36 @@
      document.addEventListener('DOMContentLoaded', function() {
 
          const form = document.getElementById('formUpdate');
-         const btnTambah = document.getElementById('btnUpdate');
+         const btnUpdate = document.getElementById('btnUpdate');
          const modalEl = document.getElementById('modalSimpan');
 
-         btnTambah.addEventListener('click', function() {
+         const metode = document.getElementById('metode');
+         const modeGroup = document.getElementById('modeGroup');
+         const modeEfile = document.getElementById('mode_efile');
+
+         function toggleMetode() {
+
+             if (metode.value === 'simpeg') {
+
+                 modeGroup.style.display = '';
+                 modeEfile.required = true;
+
+             } else {
+
+                 modeGroup.style.display = 'none';
+                 modeEfile.required = false;
+                 modeEfile.value = '';
+             }
+         }
+
+         // Saat halaman dibuka
+         toggleMetode();
+
+         // Saat metode berubah
+         metode.addEventListener('change', toggleMetode);
+
+         // Tombol Update
+         btnUpdate.addEventListener('click', function() {
 
              if (!form.checkValidity()) {
                  form.reportValidity();
@@ -106,9 +157,11 @@
              modal.show();
          });
 
-         document.getElementById('confirmSimpan').addEventListener('click', function() {
-             form.submit();
-         });
+         // Konfirmasi
+         document.getElementById('confirmSimpan')
+             .addEventListener('click', function() {
+                 form.submit();
+             });
 
      });
  </script>

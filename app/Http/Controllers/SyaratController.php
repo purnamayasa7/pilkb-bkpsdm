@@ -108,17 +108,21 @@ class SyaratController extends Controller
     {
         $request->validate([
             'kode_layanan' => 'required|exists:tb_layanan,id',
-            'syarat' => 'required',
+            'syarat'       => 'required|string',
+            'metode'       => 'required|in:simpeg,upload',
+            'mode_efile'   => 'nullable|in:latest,all|required_if:metode,simpeg',
+            'deskripsi'    => 'nullable|string',
         ]);
 
-        $kode_layanan = $request->kode_layanan;
-
         $syarat = Syarat::create([
-            'kode_layanan' => $kode_layanan,
-            'syarat' => $request->syarat,
-            'metode' => $request->metode,
-            'kode_efile' => $request->kode_efile,
-            'deskripsi' => $request->deskripsi,
+            'kode_layanan' => $request->kode_layanan,
+            'syarat'       => $request->syarat,
+            'metode'       => $request->metode,
+            'kode_efile'   => null,
+            'mode_efile'   => $request->metode === 'simpeg'
+                ? $request->mode_efile
+                : null,
+            'deskripsi'    => $request->deskripsi,
         ]);
 
         ActivityLogService::log(
@@ -129,7 +133,8 @@ class SyaratController extends Controller
             $syarat->toArray()
         );
 
-        return redirect()->route('root.syarat')
+        return redirect()
+            ->route('root.syarat')
             ->with('success', 'Syarat berhasil ditambahkan');
     }
 
@@ -138,8 +143,19 @@ class SyaratController extends Controller
     {
         $request->validate([
             'kode_layanan' => 'required|exists:tb_layanan,id',
-            'syarat' => 'required',
+            'syarat'       => 'required|string',
+            'metode'       => 'required|in:simpeg,upload',
+            'mode_efile'   => 'nullable|in:latest,all|required_if:metode,simpeg',
+            'deskripsi'    => 'nullable|string',
         ]);
+
+        // Jika upload, bersihkan field SIMPEG
+        if ($request->metode == 'upload') {
+            $request->merge([
+                'kode_efile' => null,
+                'mode_efile' => null,
+            ]);
+        }
 
         $kode_layanan = $request->kode_layanan;
 
@@ -147,7 +163,8 @@ class SyaratController extends Controller
             'kode_layanan' => $kode_layanan,
             'syarat' => $request->syarat,
             'metode' => $request->metode,
-            'kode_efile' => $request->kode_efile,
+            'kode_efile' => null,
+            'mode_efile' => $request->mode_efile,
             'deskripsi' => $request->deskripsi,
         ]);
 
@@ -159,7 +176,7 @@ class SyaratController extends Controller
             $syarat->toArray()
         );
 
-        return redirect()->route('root.syarat')
+        return redirect()->route('adminBidang.syarat.indexBidang')
             ->with('success', 'Syarat berhasil ditambahkan');
     }
 
@@ -168,40 +185,56 @@ class SyaratController extends Controller
         $syarat = Syarat::findOrFail($syaratId);
 
         $request->validate([
-            'syarat' => 'required',
-            'metode' => 'required|in:simpeg,upload',
+            'syarat'      => 'required|string|max:255',
+            'metode'      => 'required|in:simpeg,upload',
+            'mode_efile'  => 'nullable|in:latest,all|required_if:metode,simpeg',
+            'deskripsi'   => 'nullable|string',
         ]);
 
-        $olddata = [
-            'kode_layanan' => $syarat->kode_layanan,
-            'syarat' => $syarat->syarat,
-            'metode' => $syarat->metode,
-            'kode_efile' => $syarat->kode_efile,
-            'deskripsi' => $syarat->deskripsi,
-        ];
+        // Data sebelum diubah
+        $oldData = $syarat->only([
+            'kode_layanan',
+            'syarat',
+            'metode',
+            'kode_efile',
+            'mode_efile',
+            'deskripsi',
+        ]);
 
-        $syarat->syarat = $request->syarat;
-        $syarat->metode = $request->metode;
+        // Update data
+        $syarat->update([
+            'syarat'      => $request->syarat,
+            'metode'      => $request->metode,
+            'mode_efile'  => $request->metode === 'simpeg'
+                ? $request->mode_efile
+                : null,
+            // sementara belum digunakan
+            'kode_efile'  => null,
+            'deskripsi'   => $request->deskripsi,
+        ]);
 
-        $syarat->save();
+        $syarat->refresh();
 
-        $newdata = [
-            'kode_layanan' => $syarat->fresh()->kode_layanan,
-            'syarat' => $syarat->fresh()->syarat,
-            'metode' => $syarat->fresh()->metode,
-            'kode_efile' => $syarat->fresh()->kode_efile,
-            'deskripsi' => $syarat->fresh()->deskripsi,
-        ];
+        // Data sesudah diubah
+        $newData = $syarat->only([
+            'kode_layanan',
+            'syarat',
+            'metode',
+            'kode_efile',
+            'mode_efile',
+            'deskripsi',
+        ]);
 
         ActivityLogService::log(
             'Master Data Syarat',
             'UPDATE',
             'Mengubah Data Syarat',
-            $olddata,
-            $newdata
+            $oldData,
+            $newData
         );
 
-        return redirect()->route('root.syarat')
+        return redirect()
+            ->route('root.syarat')
             ->with('success', 'Syarat berhasil diupdate');
     }
 
@@ -210,41 +243,55 @@ class SyaratController extends Controller
     {
         $syarat = Syarat::whereHas('layanan', function ($q) {
             $q->where('kode_bidang', Auth::user()->bidang_id);
-        })
-            ->findOrFail($syaratId);
+        })->findOrFail($syaratId);
 
         $request->validate([
-            'syarat' => 'required|string|max:255',
-            'metode' => 'required|in:simpeg,upload',
+            'syarat'      => 'required|string|max:255',
+            'metode'      => 'required|in:simpeg,upload',
+            'mode_efile'  => 'nullable|in:latest,all|required_if:metode,simpeg',
+            'deskripsi'   => 'nullable|string',
         ]);
 
-        $olddata = [
-            'kode_layanan' => $syarat->kode_layanan,
-            'syarat' => $syarat->syarat,
-            'metode' => $syarat->metode,
-            'kode_efile' => $syarat->kode_efile,
-            'deskripsi' => $syarat->deskripsi,
-        ];
+        // Data sebelum diubah
+        $oldData = $syarat->only([
+            'kode_layanan',
+            'syarat',
+            'metode',
+            'kode_efile',
+            'mode_efile',
+            'deskripsi',
+        ]);
 
+        // Update data
         $syarat->update([
-            'syarat' => $request->syarat,
-            'metode' => $request->metode,
+            'syarat'      => $request->syarat,
+            'metode'      => $request->metode,
+            'mode_efile'  => $request->metode === 'simpeg'
+                ? $request->mode_efile
+                : null,
+            'kode_efile'  => null,
+            'deskripsi'   => $request->deskripsi,
         ]);
 
-        $newdata = [
-            'kode_layanan' => $syarat->fresh()->kode_layanan,
-            'syarat' => $syarat->fresh()->syarat,
-            'metode' => $syarat->fresh()->metode,
-            'kode_efile' => $syarat->fresh()->kode_efile,
-            'deskripsi' => $syarat->fresh()->deskripsi,
-        ];
+        // Reload model
+        $syarat->refresh();
+
+        // Data sesudah diubah
+        $newData = $syarat->only([
+            'kode_layanan',
+            'syarat',
+            'metode',
+            'kode_efile',
+            'mode_efile',
+            'deskripsi',
+        ]);
 
         ActivityLogService::log(
             'Master Data Syarat',
             'UPDATE',
             'Mengubah Data Syarat',
-            $olddata,
-            $newdata
+            $oldData,
+            $newData
         );
 
         return redirect()

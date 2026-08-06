@@ -88,6 +88,44 @@
                             <textarea name="syarat" class="form-control" rows="3" required></textarea>
                         </div>
 
+                        <div class="mb-3">
+                            <label class="small mb-1">Metode Dokumen</label>
+
+                            <select
+                                name="metode"
+                                id="metode"
+                                class="form-select"
+                                required>
+
+                                <option value="simpeg">SIMPEG</option>
+                                <option value="upload">Upload PILKB</option>
+
+                            </select>
+                        </div>
+
+                        <div class="mb-3" id="modeGroup">
+                            <label class="small mb-1">Pengambilan Dokumen</label>
+
+                            <select
+                                name="mode_efile"
+                                id="mode_efile"
+                                class="form-select">
+
+                                <option value="latest">
+                                    Dokumen Terkini
+                                </option>
+
+                                <option value="all">
+                                    Semua Dokumen
+                                </option>
+
+                            </select>
+
+                            <div class="form-text">
+                                Berlaku hanya untuk dokumen yang diambil dari SIMPEG.
+                            </div>
+                        </div>
+
                         <button class="btn btn-primary" type="button" id="btnTambah">
                             Simpan Syarat
                         </button>
@@ -107,6 +145,34 @@
         const btnTambah = document.getElementById('btnTambah');
         const modalEl = document.getElementById('modalSimpan');
 
+        // Metode Dokumen
+        const metode = document.getElementById('metode');
+        const modeGroup = document.getElementById('modeGroup');
+        const modeEfile = document.getElementById('mode_efile');
+
+        // Tampilkan/Sembunyikan Pengambilan Dokumen
+        function toggleMetode() {
+
+            if (metode.value === 'simpeg') {
+
+                modeGroup.style.display = '';
+                modeEfile.required = true;
+
+            } else {
+
+                modeGroup.style.display = 'none';
+                modeEfile.required = false;
+                modeEfile.value = '';
+            }
+        }
+
+        // Jalankan saat halaman pertama dibuka
+        toggleMetode();
+
+        // Jalankan saat metode berubah
+        metode.addEventListener('change', toggleMetode);
+
+        // Tombol Simpan
         btnTambah.addEventListener('click', function() {
 
             if (!form.checkValidity()) {
@@ -118,6 +184,7 @@
             modal.show();
         });
 
+        // Konfirmasi Simpan
         document.getElementById('confirmSimpan')
             .addEventListener('click', function() {
                 form.submit();
