@@ -17,13 +17,14 @@ return new class extends Migration
             $table->text('syarat');
             $table->enum('metode', ['simpeg', 'upload'])->default('simpeg');
             $table->string('kode_efile', 100)->nullable();
+            $table->enum('mode_efile', ['latest', 'all'])->default('latest');
             $table->text('deskripsi')->nullable();
             $table->timestamps();
 
             $table->foreign('kode_layanan')
-            ->references('id')
-            ->on('tb_layanan')
-            ->onDelete('cascade');
+                ->references('id')
+                ->on('tb_layanan')
+                ->onDelete('cascade');
         });
     }
 

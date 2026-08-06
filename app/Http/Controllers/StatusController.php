@@ -216,7 +216,7 @@ class StatusController extends Controller
         );
 
         return redirect()
-            ->route('adminBidang.status.indexStatus')
+            ->route('adminBidang.status.indexBidang')
             ->with('success', 'Status berhasil diupdate.');
     }
 
@@ -272,6 +272,38 @@ class StatusController extends Controller
 
         return redirect()->route('root.status')
             ->with('success', 'Status berhasil dihapus');
+    }
+
+    // Menu Admin Bidang
+    public function destroyBidang($id)
+    {
+        $user = Auth::user();
+
+        $status = Status::with('layanan')
+            ->whereHas('layanan', function ($q) use ($user) {
+                $q->where('kode_bidang', $user->bidang_id);
+            })
+            ->findOrFail($id);
+
+        $olddata = [
+            'id'            => $status->id,
+            'kode_layanan'  => $status->kode_layanan,
+            'status'        => $status->status,
+        ];
+
+        $status->delete();
+
+        ActivityLogService::log(
+            'Master Data Status',
+            'DELETE',
+            'Menghapus Data Status',
+            $olddata,
+            []
+        );
+
+        return redirect()
+            ->route('adminBidang.status.indexBidang')
+            ->with('success', 'Status berhasil dihapus.');
     }
 
     public function getLayanan($bidangId)

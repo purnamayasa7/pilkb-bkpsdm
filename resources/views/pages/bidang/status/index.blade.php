@@ -224,8 +224,12 @@
             document.getElementById('textDelete').innerHTML =
                 `Apakah anda yakin ingin menghapus status <b>${nama}</b> pada layanan <b>${layanan}</b>?`;
 
-            document.getElementById('formDelete').action =
-                `/adminBidang/status/${id}`;
+            let action = "{{ route('adminBidang.status.destroyBidang', ':id') }}";
+            action = action.replace(':id', id);
+
+            document.getElementById('formDelete').action = action;
+
+            modalDelete.show();
 
             modalDelete.show();
         });

@@ -14,11 +14,9 @@ return new class extends Migration
         Schema::create('tb_det_tiket', function (Blueprint $table) {
             $table->id();
             $table->string('no_tiket', 10);
-            $table->string('id_syarat', 5);
+            $table->string('id_syarat', 15);
             $table->string('status', 10);
             $table->text('comment')->nullable();
-            $table->enum('metode', ['simpeg', 'upload'])->nullable();
-            $table->string('kode_efile', 100)->nullable();
             $table->string('file_name')->nullable();
             $table->string('file_path')->nullable();
             $table->unsignedBigInteger('file_size')->nullable();

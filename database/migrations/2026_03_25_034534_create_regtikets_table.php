@@ -14,11 +14,11 @@ return new class extends Migration
         Schema::create('tb_regtiket', function (Blueprint $table) {
             $table->string('no_tiket', 15)->primary();
             $table->string('nip', 20);
-            $table->string('kode_layanan', 10);
+            $table->string('kode_layanan', 20);
             $table->date('tanggal');
             $table->string('kode_ukerja', 30)->nullable();
             $table->string('no_hp', 12)->nullable();
-            $table->string('email', 255);
+            $table->string('email', 255)->nullable();
             $table->string('nama_penerima', 100);
             $table->integer('archives');
             $table->string('operator_archives', 100)->nullable();

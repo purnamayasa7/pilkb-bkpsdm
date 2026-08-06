@@ -45,7 +45,9 @@
         <div class="card-header bg-gradient-primary-to-secondary text-white">Detail Status</div>
         <div class="card-body">
 
-            <form id="formRegister" method="POST" action="{{ route('adminBidang.status.updateStatus', $status->id) }}">
+            <form id="formRegister"
+                method="POST"
+                action="{{ route('adminBidang.status.updateBidang', $status->id) }}">
                 @csrf
                 @method('PUT')
 
@@ -90,30 +92,26 @@
 </div>
 
 <script>
-    const bidangSelect = document.getElementById('kode_bidang');
-    const layananSelect = document.getElementById('kode_layanan');
-
     document.addEventListener('DOMContentLoaded', function() {
-
-        if (selectedBidang) {
-            loadLayanan(selectedBidang, selectedLayanan);
-        }
 
         const form = document.getElementById('formRegister');
         const btnTambah = document.getElementById('btnTambah');
         const modal = new bootstrap.Modal(document.getElementById('modalSimpan'));
 
         btnTambah.addEventListener('click', function() {
+
             if (!form.checkValidity()) {
                 form.reportValidity();
                 return;
             }
+
             modal.show();
         });
 
         document.getElementById('confirmSimpan').addEventListener('click', function() {
             form.submit();
         });
+
     });
 </script>
 @endsection
