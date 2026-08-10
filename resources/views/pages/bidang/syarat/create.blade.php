@@ -103,6 +103,29 @@
                             </select>
                         </div>
 
+                        <div class="mb-3" id="efileGroup">
+                            <label class="small mb-1">Jenis E-File SIMPEG</label>
+
+                            <select
+                                name="kode_efile"
+                                id="kode_efile"
+                                class="form-select">
+
+                                <option value="">Pilih Jenis E-File</option>
+
+                                @foreach ($syaratEfile as $item)
+                                <option value="{{ $item->efile }}">
+                                    {{ $item->syarat }}
+                                </option>
+                                @endforeach
+
+                            </select>
+
+                            <div class="form-text">
+                                Pilih jenis dokumen yang sesuai dengan jenis e-file pada SIMPEG.
+                            </div>
+                        </div>
+
                         <div class="mb-3" id="modeGroup">
                             <label class="small mb-1">Pengambilan Dokumen</label>
 
@@ -145,34 +168,60 @@
         const btnTambah = document.getElementById('btnTambah');
         const modalEl = document.getElementById('modalSimpan');
 
-        // Metode Dokumen
+        // Metode dokumen
         const metode = document.getElementById('metode');
+
+        // Group SIMPEG
         const modeGroup = document.getElementById('modeGroup');
         const modeEfile = document.getElementById('mode_efile');
 
-        // Tampilkan/Sembunyikan Pengambilan Dokumen
+        const efileGroup = document.getElementById('efileGroup');
+        const kodeEfile = document.getElementById('kode_efile');
+
+        /**
+         * Tampilkan / sembunyikan field berdasarkan metode
+         */
         function toggleMetode() {
 
             if (metode.value === 'simpeg') {
 
+                // Tampilkan field SIMPEG
                 modeGroup.style.display = '';
+                efileGroup.style.display = '';
+
+                // Wajib diisi
                 modeEfile.required = true;
+                kodeEfile.required = true;
 
             } else {
 
+                // Sembunyikan field SIMPEG
                 modeGroup.style.display = 'none';
+                efileGroup.style.display = 'none';
+
+                // Tidak wajib
                 modeEfile.required = false;
+                kodeEfile.required = false;
+
+                // Kosongkan nilai
                 modeEfile.value = '';
+                kodeEfile.value = '';
             }
         }
 
-        // Jalankan saat halaman pertama dibuka
+        /**
+         * Jalankan saat halaman pertama dibuka
+         */
         toggleMetode();
 
-        // Jalankan saat metode berubah
+        /**
+         * Jalankan ketika metode berubah
+         */
         metode.addEventListener('change', toggleMetode);
 
-        // Tombol Simpan
+        /**
+         * Tombol Simpan
+         */
         btnTambah.addEventListener('click', function() {
 
             if (!form.checkValidity()) {
@@ -184,9 +233,18 @@
             modal.show();
         });
 
-        // Konfirmasi Simpan
+        /**
+         * Konfirmasi Simpan
+         */
         document.getElementById('confirmSimpan')
             .addEventListener('click', function() {
+
+                // Pastikan validasi tetap dilakukan
+                if (!form.checkValidity()) {
+                    form.reportValidity();
+                    return;
+                }
+
                 form.submit();
             });
 

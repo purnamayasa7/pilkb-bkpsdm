@@ -16,6 +16,8 @@ class Syarat extends Model
         'kode_layanan',
         'syarat',
         'metode',
+        'kode_efile',
+        'mode_efile',
         'deskripsi',
     ];
 

@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Bidang;
 use App\Models\Layanan;
 use App\Models\Syarat;
+use App\Models\SyaratEfile;
 use App\Services\ActivityLogService;
 use Illuminate\Support\Str;
 use Barryvdh\DomPDF\Facade\Pdf;
@@ -74,16 +75,24 @@ class SyaratController extends Controller
 
     public function create(Request $request)
     {
-        $bidang = Bidang::all();
+        $bidang = Bidang::orderBy('nama_bidang')->get();
 
         $bidangId = $request->bidang ?? $bidang->first()?->id;
 
-        $layanan = Layanan::where('kode_bidang', $bidangId)->get();
+        $layanan = $bidangId
+            ? Layanan::where('kode_bidang', $bidangId)
+            ->orderBy('nama_layanan')
+            ->get()
+            : collect();
+
+        // Master jenis e-file dari SIMPEG
+        $syaratEfile = SyaratEfile::orderBy('syarat')->get();
 
         return view('pages.admin.syarat.create', compact(
             'bidang',
             'bidangId',
-            'layanan'
+            'layanan',
+            'syaratEfile'
         ));
     }
 
@@ -98,9 +107,13 @@ class SyaratController extends Controller
             ->orderBy('nama_layanan')
             ->get();
 
+        // Master jenis e-file dari SIMPEG
+        $syaratEfile = SyaratEfile::orderBy('syarat')->get();
+
         return view('pages.bidang.syarat.create', compact(
             'bidang',
-            'layanan'
+            'layanan',
+            'syaratEfile'
         ));
     }
 
@@ -110,6 +123,7 @@ class SyaratController extends Controller
             'kode_layanan' => 'required|exists:tb_layanan,id',
             'syarat'       => 'required|string',
             'metode'       => 'required|in:simpeg,upload',
+            'kode_efile'   => 'nullable|exists:tb_syarat_efile,efile',
             'mode_efile'   => 'nullable|in:latest,all|required_if:metode,simpeg',
             'deskripsi'    => 'nullable|string',
         ]);
@@ -118,10 +132,17 @@ class SyaratController extends Controller
             'kode_layanan' => $request->kode_layanan,
             'syarat'       => $request->syarat,
             'metode'       => $request->metode,
-            'kode_efile'   => null,
+
+            // Hanya SIMPEG yang boleh memiliki kode e-file
+            'kode_efile'   => $request->metode === 'simpeg'
+                ? $request->kode_efile
+                : null,
+
+            // Hanya SIMPEG yang memiliki mode pengambilan
             'mode_efile'   => $request->metode === 'simpeg'
                 ? $request->mode_efile
                 : null,
+
             'deskripsi'    => $request->deskripsi,
         ]);
 
@@ -145,27 +166,32 @@ class SyaratController extends Controller
             'kode_layanan' => 'required|exists:tb_layanan,id',
             'syarat'       => 'required|string',
             'metode'       => 'required|in:simpeg,upload',
+            'kode_efile'   => 'nullable|exists:tb_syarat_efile,efile',
             'mode_efile'   => 'nullable|in:latest,all|required_if:metode,simpeg',
             'deskripsi'    => 'nullable|string',
         ]);
 
-        // Jika upload, bersihkan field SIMPEG
-        if ($request->metode == 'upload') {
-            $request->merge([
-                'kode_efile' => null,
-                'mode_efile' => null,
-            ]);
-        }
-
-        $kode_layanan = $request->kode_layanan;
+        // Pastikan layanan memang milik bidang user
+        $layanan = Layanan::where('id', $request->kode_layanan)
+            ->where('kode_bidang', Auth::user()->bidang_id)
+            ->firstOrFail();
 
         $syarat = Syarat::create([
-            'kode_layanan' => $kode_layanan,
-            'syarat' => $request->syarat,
-            'metode' => $request->metode,
-            'kode_efile' => null,
-            'mode_efile' => $request->mode_efile,
-            'deskripsi' => $request->deskripsi,
+            'kode_layanan' => $layanan->id,
+            'syarat'       => $request->syarat,
+            'metode'       => $request->metode,
+
+            // Hanya SIMPEG yang boleh memiliki kode e-file
+            'kode_efile'   => $request->metode === 'simpeg'
+                ? $request->kode_efile
+                : null,
+
+            // Hanya SIMPEG yang memiliki mode pengambilan
+            'mode_efile'   => $request->metode === 'simpeg'
+                ? $request->mode_efile
+                : null,
+
+            'deskripsi'    => $request->deskripsi,
         ]);
 
         ActivityLogService::log(
@@ -176,7 +202,8 @@ class SyaratController extends Controller
             $syarat->toArray()
         );
 
-        return redirect()->route('adminBidang.syarat.indexBidang')
+        return redirect()
+            ->route('adminBidang.syarat.indexBidang')
             ->with('success', 'Syarat berhasil ditambahkan');
     }
 
@@ -187,7 +214,18 @@ class SyaratController extends Controller
         $request->validate([
             'syarat'      => 'required|string|max:255',
             'metode'      => 'required|in:simpeg,upload',
-            'mode_efile'  => 'nullable|in:latest,all|required_if:metode,simpeg',
+            'kode_efile'  => [
+                'nullable',
+                'string',
+                'max:100',
+                'exists:tb_syarat_efile,efile',
+                'required_if:metode,simpeg',
+            ],
+            'mode_efile'  => [
+                'nullable',
+                'in:latest,all',
+                'required_if:metode,simpeg',
+            ],
             'deskripsi'   => 'nullable|string',
         ]);
 
@@ -201,15 +239,21 @@ class SyaratController extends Controller
             'deskripsi',
         ]);
 
-        // Update data
+        // Jika upload, field khusus SIMPEG harus dikosongkan
+        $kodeEfile = $request->metode === 'simpeg'
+            ? $request->kode_efile
+            : null;
+
+        $modeEfile = $request->metode === 'simpeg'
+            ? $request->mode_efile
+            : null;
+
+        // Update
         $syarat->update([
             'syarat'      => $request->syarat,
             'metode'      => $request->metode,
-            'mode_efile'  => $request->metode === 'simpeg'
-                ? $request->mode_efile
-                : null,
-            // sementara belum digunakan
-            'kode_efile'  => null,
+            'kode_efile'  => $kodeEfile,
+            'mode_efile'  => $modeEfile,
             'deskripsi'   => $request->deskripsi,
         ]);
 
@@ -243,12 +287,24 @@ class SyaratController extends Controller
     {
         $syarat = Syarat::whereHas('layanan', function ($q) {
             $q->where('kode_bidang', Auth::user()->bidang_id);
-        })->findOrFail($syaratId);
+        })
+            ->findOrFail($syaratId);
 
         $request->validate([
             'syarat'      => 'required|string|max:255',
             'metode'      => 'required|in:simpeg,upload',
-            'mode_efile'  => 'nullable|in:latest,all|required_if:metode,simpeg',
+            'kode_efile'  => [
+                'nullable',
+                'string',
+                'max:100',
+                'exists:tb_syarat_efile,efile',
+                'required_if:metode,simpeg',
+            ],
+            'mode_efile'  => [
+                'nullable',
+                'in:latest,all',
+                'required_if:metode,simpeg',
+            ],
             'deskripsi'   => 'nullable|string',
         ]);
 
@@ -262,18 +318,24 @@ class SyaratController extends Controller
             'deskripsi',
         ]);
 
-        // Update data
+        // Jika upload, field SIMPEG dikosongkan
+        $kodeEfile = $request->metode === 'simpeg'
+            ? $request->kode_efile
+            : null;
+
+        $modeEfile = $request->metode === 'simpeg'
+            ? $request->mode_efile
+            : null;
+
+        // Update
         $syarat->update([
             'syarat'      => $request->syarat,
             'metode'      => $request->metode,
-            'mode_efile'  => $request->metode === 'simpeg'
-                ? $request->mode_efile
-                : null,
-            'kode_efile'  => null,
+            'kode_efile'  => $kodeEfile,
+            'mode_efile'  => $modeEfile,
             'deskripsi'   => $request->deskripsi,
         ]);
 
-        // Reload model
         $syarat->refresh();
 
         // Data sesudah diubah
@@ -301,9 +363,16 @@ class SyaratController extends Controller
 
     public function edit($id)
     {
-        $syarat = Syarat::with('layanan.bidang')->findOrFail($id);
+        $syarat = Syarat::with('layanan.bidang')
+            ->findOrFail($id);
 
-        return view('pages.admin.syarat.edit', compact('syarat'));
+        $syaratEfile = SyaratEfile::orderBy('syarat')
+            ->get();
+
+        return view('pages.admin.syarat.edit', compact(
+            'syarat',
+            'syaratEfile'
+        ));
     }
 
     // Menu Admin Bidang
@@ -315,7 +384,13 @@ class SyaratController extends Controller
             ->with('layanan.bidang')
             ->findOrFail($id);
 
-        return view('pages.bidang.syarat.edit', compact('syarat'));
+        $syaratEfile = SyaratEfile::orderBy('syarat')
+            ->get();
+
+        return view('pages.bidang.syarat.edit', compact(
+            'syarat',
+            'syaratEfile'
+        ));
     }
 
     public function destroy($id)

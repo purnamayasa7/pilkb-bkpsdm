@@ -93,6 +93,29 @@
                             </select>
                         </div>
 
+                        <div class="mb-3" id="efileGroup">
+                            <label class="small mb-1">Jenis E-File SIMPEG</label>
+
+                            <select
+                                name="kode_efile"
+                                id="kode_efile"
+                                class="form-select">
+
+                                <option value="">Pilih Jenis E-File</option>
+
+                                @foreach ($syaratEfile as $item)
+                                <option value="{{ $item->efile }}">
+                                    {{ $item->syarat }}
+                                </option>
+                                @endforeach
+
+                            </select>
+
+                            <div class="form-text">
+                                Pilih jenis dokumen yang sesuai dengan jenis e-file pada SIMPEG.
+                            </div>
+                        </div>
+
                         <div class="mb-3" id="modeGroup">
                             <label class="small mb-1">Pengambilan Dokumen</label>
 
@@ -131,6 +154,9 @@
 <script>
     document.addEventListener('DOMContentLoaded', function() {
 
+        // ==========================
+        // ELEMENT
+        // ==========================
         const form = document.getElementById('formRegister');
         const btnTambah = document.getElementById('btnTambah');
         const modalEl = document.getElementById('modalSimpan');
@@ -139,36 +165,62 @@
         const layananSelect = document.getElementById('layananSelect');
 
         const metode = document.getElementById('metode');
+
+        const efileGroup = document.getElementById('efileGroup');
+        const kodeEfile = document.getElementById('kode_efile');
+
         const modeGroup = document.getElementById('modeGroup');
         const modeEfile = document.getElementById('mode_efile');
 
+        const confirmSimpan = document.getElementById('confirmSimpan');
+
+
         // ==========================
-        // Tampilkan/Sembunyikan Mode E-File
+        // TOGGLE METODE DOKUMEN
         // ==========================
         function toggleMetode() {
 
             if (metode.value === 'simpeg') {
 
+                // Tampilkan field SIMPEG
+                efileGroup.style.display = '';
                 modeGroup.style.display = '';
+
+                // Wajib diisi
+                kodeEfile.required = true;
                 modeEfile.required = true;
 
             } else {
 
+                // Sembunyikan field SIMPEG
+                efileGroup.style.display = 'none';
                 modeGroup.style.display = 'none';
+
+                // Tidak wajib
+                kodeEfile.required = false;
                 modeEfile.required = false;
+
+                // Kosongkan nilai
+                kodeEfile.value = '';
                 modeEfile.value = '';
             }
         }
 
+
+        // Jalankan saat halaman pertama kali dibuka
         toggleMetode();
 
+
+        // Jalankan ketika metode berubah
         metode.addEventListener('change', toggleMetode);
 
+
         // ==========================
-        // Modal Simpan
+        // MODAL SIMPAN
         // ==========================
         btnTambah.addEventListener('click', function() {
 
+            // Validasi HTML5
             if (!form.checkValidity()) {
                 form.reportValidity();
                 return;
@@ -178,64 +230,124 @@
             modal.show();
         });
 
-        document.getElementById('confirmSimpan')
-            .addEventListener('click', function() {
-                form.submit();
-            });
 
         // ==========================
-        // Load Layanan
+        // KONFIRMASI SIMPAN
         // ==========================
-        function loadLayanan(bidangId) {
+        confirmSimpan.addEventListener('click', function() {
 
-            if (!bidangId) {
-                layananSelect.innerHTML =
-                    '<option value="">Pilih Bidang terlebih dahulu</option>';
+            // Validasi sekali lagi
+            if (!form.checkValidity()) {
+                form.reportValidity();
                 return;
             }
 
+            // Submit form
+            form.submit();
+        });
+
+
+        // ==========================
+        // LOAD LAYANAN BERDASARKAN BIDANG
+        // ==========================
+        function loadLayanan(bidangId) {
+
+            // Jika bidang kosong
+            if (!bidangId) {
+
+                layananSelect.innerHTML =
+                    '<option value="">Pilih Bidang terlebih dahulu</option>';
+
+                return;
+            }
+
+
+            // Tampilkan loading
             layananSelect.innerHTML =
                 '<option value="">Loading...</option>';
 
+            // Disable sementara
+            layananSelect.disabled = true;
+
+
             fetch(`/root/get-layanan-syarat/${bidangId}`)
-                .then(res => res.json())
+                .then(response => {
+
+                    if (!response.ok) {
+                        throw new Error('Gagal mengambil data layanan');
+                    }
+
+                    return response.json();
+                })
+
                 .then(data => {
 
                     layananSelect.innerHTML =
                         '<option value="">Pilih Layanan</option>';
 
-                    if (data.length === 0) {
+                    // Tidak ada layanan
+                    if (!data || data.length === 0) {
+
                         layananSelect.innerHTML =
                             '<option value="">Tidak ada layanan</option>';
+
                         return;
                     }
 
+
+                    // Tambahkan layanan
                     data.forEach(item => {
 
-                        layananSelect.innerHTML += `
-                        <option value="${item.id}">
-                            ${item.nama_layanan}
-                        </option>
-                    `;
+                        const option = document.createElement('option');
+
+                        option.value = item.id;
+                        option.textContent = item.nama_layanan;
+
+                        layananSelect.appendChild(option);
 
                     });
 
                 })
-                .catch(() => {
+
+                .catch(error => {
+
+                    console.error(error);
 
                     layananSelect.innerHTML =
                         '<option value="">Gagal memuat layanan</option>';
 
-                });
+                })
 
+                .finally(() => {
+
+                    layananSelect.disabled = false;
+
+                });
         }
 
-        // Load pertama
-        loadLayanan(bidangSelect.value);
 
-        // Ganti bidang
+        // ==========================
+        // LOAD LAYANAN PERTAMA
+        // ==========================
+        if (bidangSelect.value) {
+            loadLayanan(bidangSelect.value);
+        }
+
+
+        // ==========================
+        // KETIKA BIDANG BERUBAH
+        // ==========================
         bidangSelect.addEventListener('change', function() {
-            loadLayanan(this.value);
+
+            const bidangId = this.value;
+
+            // Reset layanan
+            layananSelect.innerHTML =
+                '<option value="">Pilih Layanan</option>';
+
+            // Load layanan baru
+            loadLayanan(bidangId);
+
         });
 
     });

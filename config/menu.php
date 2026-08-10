@@ -371,37 +371,32 @@ return [
         //Heading
         [
             'type' => 'heading',
-            'title' => 'Master Data',
-        ],
-
-        [
-            'type' => 'item',
-            'title' => 'Layanan',
-            'path' => 'adminBidang/layanan',
-            'icon' => 'briefcase',
-            'active_key' => 'adminBidanglayanan',
-        ],
-
-        [
-            'type' => 'item',
-            'title' => 'Syarat',
-            'path' => 'adminBidang/syarat',
-            'icon' => 'check-square',
-            'active_key' => 'adminBidangsyarat',
-        ],
-
-        [
-            'type' => 'item',
-            'title' => 'Status',
-            'path' => 'adminBidang/statusBidang',
-            'icon' => 'info',
-            'active_key' => 'adminBidangstatus',
-        ],
-
-        //Heading
-        [
-            'type' => 'heading',
             'title' => 'Manajemen Layanan',
+        ],
+
+        [
+            'type' => 'collapse',
+            'title' => 'Master Data',
+            'icon' => 'database',
+            'target' => 'masterData',
+            'active_key' => 'masterData',
+            'children' => [
+                [
+                    'title' => 'Layanan',
+                    'path' => 'adminBidang/layanan',
+                    'active_key' => 'adminBidanglayanan',
+                ],
+                [
+                    'title' => 'Syarat',
+                    'path' => 'adminBidang/syarat',
+                    'active_key' => 'adminBidangsyarat',
+                ],
+                [
+                    'title' => 'Status',
+                    'path' => 'adminBidang/statusBidang',
+                    'active_key' => 'adminBidangstatus',
+                ],
+            ]
         ],
 
         [

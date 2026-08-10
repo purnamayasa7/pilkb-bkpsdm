@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('tb_syarat_efile', function (Blueprint $table) {
             $table->id();
             $table->string('syarat', 255);
-            $table->string('efile', 255);
+            $table->string('efile', 255)->nullable();
             $table->timestamps();
         });
     }

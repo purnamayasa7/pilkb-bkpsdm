@@ -80,6 +80,31 @@
                              </select>
                          </div>
 
+                         <!-- Jenis E-File -->
+                         <div class="mb-3" id="efileGroup">
+                             <label class="small mb-1">Jenis E-File</label>
+
+                             <select
+                                 name="kode_efile"
+                                 id="kode_efile"
+                                 class="form-select">
+
+                                 <option value="">Pilih Jenis E-File</option>
+
+                                 @foreach ($syaratEfile as $item)
+                                 <option value="{{ $item->efile }}"
+                                     {{ old('kode_efile', $syarat->kode_efile) == $item->efile ? 'selected' : '' }}>
+                                     {{ $item->syarat }}
+                                 </option>
+                                 @endforeach
+
+                             </select>
+
+                             <div class="form-text">
+                                 Pilih jenis dokumen yang sesuai dengan jenis e-file pada SIMPEG.
+                             </div>
+                         </div>
+
                          <div class="mb-3" id="modeGroup">
                              <label class="small mb-1">Pengambilan Dokumen</label>
 
@@ -116,55 +141,132 @@
  <script>
      document.addEventListener('DOMContentLoaded', function() {
 
+         // ==========================================
+         // Element
+         // ==========================================
+
          const form = document.getElementById('formUpdate');
          const btnUpdate = document.getElementById('btnUpdate');
          const modalEl = document.getElementById('modalSimpan');
+         const confirmSimpan = document.getElementById('confirmSimpan');
 
          const metode = document.getElementById('metode');
+
+         // Jenis E-File
+         const efileGroup = document.getElementById('efileGroup');
+         const kodeEfile = document.getElementById('kode_efile');
+
+         // Pengambilan Dokumen
          const modeGroup = document.getElementById('modeGroup');
          const modeEfile = document.getElementById('mode_efile');
 
-         // ==========================
-         // Tampilkan/Sembunyikan Pengambilan Dokumen
-         // ==========================
+
+         // ==========================================
+         // Tampilkan / Sembunyikan Field SIMPEG
+         // ==========================================
+
          function toggleMetode() {
 
              if (metode.value === 'simpeg') {
+
+                 // ----------------------------------
+                 // Jenis E-File
+                 // ----------------------------------
+
+                 efileGroup.style.display = '';
+                 kodeEfile.required = true;
+
+
+                 // ----------------------------------
+                 // Pengambilan Dokumen
+                 // ----------------------------------
 
                  modeGroup.style.display = '';
                  modeEfile.required = true;
 
              } else {
 
+                 // ----------------------------------
+                 // Sembunyikan Jenis E-File
+                 // ----------------------------------
+
+                 efileGroup.style.display = 'none';
+                 kodeEfile.required = false;
+                 kodeEfile.value = '';
+
+
+                 // ----------------------------------
+                 // Sembunyikan Pengambilan Dokumen
+                 // ----------------------------------
+
                  modeGroup.style.display = 'none';
                  modeEfile.required = false;
                  modeEfile.value = '';
+
              }
+
          }
 
-         // Saat halaman dibuka
+
+         // ==========================================
+         // Jalankan Saat Halaman Dibuka
+         // ==========================================
+
          toggleMetode();
 
-         // Saat metode berubah
-         metode.addEventListener('change', toggleMetode);
 
+         // ==========================================
+         // Jalankan Saat Metode Berubah
+         // ==========================================
+
+         metode.addEventListener('change', function() {
+
+             toggleMetode();
+
+         });
+
+
+         // ==========================================
          // Tombol Update
+         // ==========================================
+
          btnUpdate.addEventListener('click', function() {
 
+             // Validasi HTML5
              if (!form.checkValidity()) {
+
                  form.reportValidity();
+
                  return;
              }
 
+
+             // Tampilkan modal konfirmasi
              const modal = new bootstrap.Modal(modalEl);
+
              modal.show();
+
          });
 
-         // Konfirmasi Simpan
-         document.getElementById('confirmSimpan')
-             .addEventListener('click', function() {
-                 form.submit();
-             });
+
+         // ==========================================
+         // Konfirmasi Update
+         // ==========================================
+
+         confirmSimpan.addEventListener('click', function() {
+
+             // Cegah klik berkali-kali
+             confirmSimpan.disabled = true;
+
+             confirmSimpan.innerHTML =
+                 '<span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>' +
+                 'Menyimpan...';
+
+
+             // Submit form
+             form.submit();
+
+         });
 
      });
  </script>
