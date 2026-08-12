@@ -221,7 +221,7 @@ Route::prefix('adminOpd')
 
         // LAPORAN
         Route::get('laporan', [LayananController::class, 'indexLaporan'])->name('laporan.indexLaporan');
-        // EXPORT EXCEL
+        // EXPORT PDF
         Route::get('laporan/export', [LayananController::class, 'exportPdfOpd'])->name('laporan.exportPdfOpd');
 
         // CETAK SYARAT

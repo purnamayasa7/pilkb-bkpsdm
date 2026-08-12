@@ -61,7 +61,7 @@
                         <div class="row mb-2">
                             <div class="col-md-6">
                                 <label class="fw-semibold">Nama</label>
-                                <div>{{ $dataPegawai['nama'] ?? '-' }}</div>
+                                <div>{{ $tiket->nama ?? '-' }}</div>
                             </div>
                             <div class="col-md-6">
                                 <label class="fw-semibold">Layanan</label>
@@ -76,7 +76,7 @@
                             </div>
                             <div class="col-md-6">
                                 <label class="fw-semibold">Unit Kerja</label>
-                                <div>{{ $dataPegawai['unit'] ?? '-' }}</div>
+                                <div>{{ $tiket->nama_ukerja ?? '-' }}</div>
                             </div>
                         </div>
 

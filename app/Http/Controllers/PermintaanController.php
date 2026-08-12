@@ -32,16 +32,10 @@ class PermintaanController extends Controller
             'layanan.bidang',
             'tahapTerakhir.statusRel'
         ])
-            // ->where('archives', 0)
             ->whereMonth('tanggal', $month)
             ->whereYear('tanggal', $year)
             ->has('tahap', '>', 1)
             ->has('detail')
-
-            // semua detail status = 1
-            // ->whereDoesntHave('detail', function ($q) {
-            //     $q->where('status', '!=', 1);
-            // })
 
             // FILTER BIDANG USER LOGIN
             ->whereHas('layanan', function ($q) use ($user) {
@@ -49,21 +43,12 @@ class PermintaanController extends Controller
             })
 
             ->orderByDesc('tanggal')
-
             ->get();
-
-        $pegawaiList = $this->pegawaiService->getPegawaiByNips(
-            $tiket->pluck('nip')
-        );
-
-        $simpegAvailable = $this->pegawaiService->isSimpegAvailable();
 
         return view('pages.bidang.permintaan.index', compact(
             'tiket',
             'month',
-            'year',
-            'pegawaiList',
-            'simpegAvailable'
+            'year'
         ));
     }
 

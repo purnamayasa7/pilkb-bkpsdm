@@ -27,7 +27,6 @@ class UpdateStatusController extends Controller
         $user = Auth::user();
 
         $data = collect();
-        $pegawaiList = [];
 
         if ($keyword) {
 
@@ -45,18 +44,16 @@ class UpdateStatusController extends Controller
                 ->whereHas('layanan', function ($q) use ($user) {
                     $q->where('kode_bidang', $user->bidang_id);
                 })
-                ->where('archives', 0)
-                ->orderByDesc('tanggal')
-                ->get();
 
-            $pegawaiList = $this->pegawaiService->getPegawaiByNips(
-                $data->pluck('nip')
-            );
+                ->where('archives', 0)
+
+                ->orderByDesc('tanggal')
+
+                ->get();
         }
 
         return view('pages.bidang.update-status.index', compact(
-            'data',
-            'pegawaiList'
+            'data'
         ));
     }
 

@@ -40,10 +40,6 @@ class TiketController extends Controller
 
         $tiket = collect();
 
-        $pegawaiList = [];
-
-        $simpegAvailable = true;
-
         if ($bidangId && $start && $end) {
 
             $tiket = Regtiket::with([
@@ -53,15 +49,12 @@ class TiketController extends Controller
                 ->whereHas('layanan', function ($query) use ($bidangId) {
                     $query->where('kode_bidang', $bidangId);
                 })
-                ->whereBetween('tanggal', [$start, $end])
+                ->whereBetween('tanggal', [
+                    $start . ' 00:00:00',
+                    $end . ' 23:59:59'
+                ])
                 ->orderBy('tanggal', 'desc')
                 ->get();
-
-            $pegawaiList = $this->pegawaiService->getPegawaiByNips(
-                $tiket->pluck('nip')
-            );
-
-            $simpegAvailable = $this->pegawaiService->isSimpegAvailable();
         }
 
         return view('pages.all.layanan.index', compact(
@@ -69,9 +62,7 @@ class TiketController extends Controller
             'bidang',
             'bidangId',
             'start',
-            'end',
-            'pegawaiList',
-            'simpegAvailable'
+            'end'
         ));
     }
 
@@ -91,21 +82,10 @@ class TiketController extends Controller
             ->orderBy('tanggal', 'desc')
             ->get();
 
-        $pegawaiList = $this->pegawaiService->getPegawaiByNips(
-            $tiket->pluck('nip')
-                ->filter()
-                ->unique()
-                ->values()
-        );
-
-        $simpegAvailable = $this->pegawaiService->isSimpegAvailable();
-
         return view('pages.opd.layanan.index', compact(
             'tiket',
             'month',
-            'year',
-            'pegawaiList',
-            'simpegAvailable'
+            'year'
         ));
     }
 
@@ -121,30 +101,21 @@ class TiketController extends Controller
         ])
             ->whereYear('tanggal', $year);
 
+        // FILTER STATUS DIAMBIL
         if ($diambil !== null && $diambil !== '') {
             $query->where('diambil', $diambil);
         }
 
-        $tiket = $query->orderBy('tanggal', 'desc')->get();
-
-        $pegawaiList = $this->pegawaiService->getPegawaiByNips(
-            $tiket
-                ->pluck('nip')
-                ->filter()
-                ->unique()
-                ->values()
-        );
-
-        $simpegAvailable = $this->pegawaiService->isSimpegAvailable();
+        $tiket = $query
+            ->orderBy('tanggal', 'desc')
+            ->get();
 
         return view(
             'pages.admin-bawah.tiket.index',
             compact(
                 'tiket',
                 'year',
-                'diambil',
-                'pegawaiList',
-                'simpegAvailable'
+                'diambil'
             )
         );
     }
@@ -343,9 +314,11 @@ class TiketController extends Controller
                 $regTiket = Regtiket::create([
                     'no_tiket'      => $noTiket,
                     'nip'           => $data['nip'],
+                    'nama'          => $data['nama'] ?? null,
                     'kode_layanan'  => $data['layanan_id'],
                     'tanggal'       => now(),
                     'kode_ukerja'   => Auth::user()->kode_ukerja,
+                    'nama_ukerja'   => $data['unit'],
                     'no_hp'         => $request->no_hp ?? null,
                     'email'         => $data['email'] ?? null,
                     'nama_penerima' => Auth::user()->username,
@@ -526,22 +499,41 @@ class TiketController extends Controller
             ->where('no_tiket', $no_tiket)
             ->firstOrFail();
 
-        $syarat = Syarat::where('kode_layanan', $tiket->kode_layanan)->get();
+        $syarat = Syarat::where(
+            'kode_layanan',
+            $tiket->kode_layanan
+        )->get();
 
-        $pegawai = $this->pegawaiService->getPegawaiByNip($tiket->nip);
+        /*
+     * Nama dan unit kerja dari database.
+     */
+        $nama = $tiket->nama ?? '-';
+        $unit = $tiket->nama_ukerja ?? '-';
 
-        $data = session('pengajuan') ?? [
-            'nama'      => $pegawai['nama_lengkap'] ?? '-',
-            'ket_gol'   => $pegawai['ket_gol'] ?? '-',
-            'unit'      => $pegawai['ket_ukerja'] ?? '-',
+        /*
+     * Golongan tetap mengambil dari SIMPEG.
+     */
+        $pegawai = $this->pegawaiService->getPegawaiByNip(
+            $tiket->nip
+        );
+
+        $golongan = $pegawai['ket_gol'] ?? '-';
+
+        /*
+     * Data untuk Blade PDF.
+     */
+        $data = [
+            'nama'    => $nama,
+            'ket_gol' => $golongan,
+            'unit'    => $unit,
         ];
 
-        $url = route('tiket.public', $tiket->no_tiket);
-
-        // signed URL
-        // $url = URL::signedRoute('tiket.public', [
-        //     'no_tiket' => $tiket->no_tiket
-        // ]);
+        /*
+     * QR Code
+     */
+        $url = route('tiket.public', [
+            'no_tiket' => $tiket->no_tiket
+        ]);
 
         $renderer = new ImageRenderer(
             new RendererStyle(120),
@@ -554,14 +546,19 @@ class TiketController extends Controller
 
         $qr = base64_encode($qrString);
 
+        /*
+     * Generate PDF
+     */
         $pdf = Pdf::loadView('pages.opd.tiket.export.pdf', [
-            'tiket' => $tiket,
+            'tiket'  => $tiket,
             'syarat' => $syarat,
-            'data' => $data,
-            'qr' => $qr
+            'data'   => $data,
+            'qr'     => $qr
         ])->setPaper('A4', 'portrait');
 
-        return $pdf->stream('Tiket-' . $no_tiket . '.pdf');
+        return $pdf->stream(
+            'Tiket-' . $no_tiket . '.pdf'
+        );
     }
 
     public function getHistory($no_tiket)
@@ -643,26 +640,22 @@ class TiketController extends Controller
 
         $data = collect();
 
-        $pegawaiList = [];
-
         if ($keyword) {
+
             $data = Regtiket::with([
                 'layanan',
                 'tahapTerakhir.statusRel'
             ])
                 ->where('kode_ukerja', Auth::user()->kode_ukerja)
                 ->where(function ($q) use ($keyword) {
-                    $q->where('no_tiket', 'like', "%$keyword%")
-                        ->orWhere('nip', 'like', "%$keyword%");
+                    $q->where('no_tiket', 'like', "%{$keyword}%")
+                        ->orWhere('nip', 'like', "%{$keyword}%");
                 })
+                ->orderByDesc('tanggal')
                 ->get();
-
-            $pegawaiList = $this->pegawaiService->getPegawaiByNips(
-                $data->pluck('nip')
-            );
         }
 
-        return view('pages.opd.tiket.cetak', compact('data', 'pegawaiList'));
+        return view('pages.opd.tiket.cetak', compact('data'));
     }
 
     // CETAK ULANG TIKET ADMIN BAWAH
@@ -672,26 +665,24 @@ class TiketController extends Controller
 
         $data = collect();
 
-        $pegawaiList = [];
-
         if ($keyword) {
+
             $data = Regtiket::with([
                 'layanan',
                 'tahapTerakhir.statusRel'
             ])
-                ->where('kode_ukerja', Auth::user()->kode_ukerja)
                 ->where(function ($query) use ($keyword) {
-                    $query->where('no_tiket', 'like', "%$keyword%")
-                        ->orWhere('nip', 'like', "%$keyword%");
+                    $query->where('no_tiket', 'like', "%{$keyword}%")
+                        ->orWhere('nip', 'like', "%{$keyword}%");
                 })
+                ->orderByDesc('tanggal')
                 ->get();
-
-            $pegawaiList = $this->pegawaiService->getPegawaiByNips(
-                $data->pluck('nip')
-            );
         }
 
-        return view('pages.admin-bawah.tiket.cetak', compact('data', 'pegawaiList'));
+        return view(
+            'pages.admin-bawah.tiket.cetak',
+            compact('data')
+        );
     }
 
     // PINDAH DATA TIKET

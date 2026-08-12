@@ -24,19 +24,19 @@ class LaporanController extends Controller
         $bidangList = Bidang::orderBy('nama_bidang')->get();
 
         $layananList = collect();
-
         $data = collect();
-
-        $pegawaiList = [];
 
         /**
          * LOAD DROPDOWN LAYANAN
          */
         if ($request->filled('bidang')) {
+
             if ($request->bidang == 'all') {
+
                 $layananList = Layanan::orderBy('nama_layanan')
                     ->get();
             } else {
+
                 $layananList = Layanan::where(
                     'kode_bidang',
                     $request->bidang
@@ -91,17 +91,20 @@ class LaporanController extends Controller
                 $request->filled('tanggal_awal') &&
                 $request->filled('tanggal_akhir')
             ) {
+
                 $query->whereBetween('tanggal', [
                     $request->tanggal_awal . ' 00:00:00',
                     $request->tanggal_akhir . ' 23:59:59'
                 ]);
             } elseif ($request->filled('tanggal_awal')) {
+
                 $query->whereDate(
                     'tanggal',
                     '>=',
                     $request->tanggal_awal
                 );
             } elseif ($request->filled('tanggal_akhir')) {
+
                 $query->whereDate(
                     'tanggal',
                     '<=',
@@ -112,32 +115,28 @@ class LaporanController extends Controller
             $data = $query
                 ->latest('tanggal')
                 ->get();
-
-            $pegawaiList = $this->pegawaiService->getPegawaiByNips(
-                $data->pluck('nip')
-                    ->unique()
-                    ->values()
-            );
-
-            $simpegAvailable = $this->pegawaiService->isSimpegAvailable();
         }
 
+        /**
+         * TENTUKAN VIEW BERDASARKAN ROLE
+         */
         $user = Auth::user();
 
         if ($user->role->name == 'root') {
+
             $view = 'pages.admin.laporan.index';
         } elseif ($user->role->name == 'admin_bawah') {
+
             $view = 'pages.admin-bawah.laporan.index';
         } else {
+
             abort(403);
         }
 
         return view($view, compact(
             'bidangList',
             'layananList',
-            'data',
-            'pegawaiList',
-            'simpegAvailable'
+            'data'
         ));
     }
 
@@ -149,8 +148,6 @@ class LaporanController extends Controller
         $user = Auth::user();
 
         $tiket = collect();
-        $pegawaiList = [];
-        $simpegAvailable = false;
 
         if ($start && $end) {
 
@@ -165,23 +162,12 @@ class LaporanController extends Controller
                 ])
                 ->latest('tanggal')
                 ->get();
-
-            $pegawaiList = $this->pegawaiService->getPegawaiByNips(
-                $tiket->pluck('nip')
-                    ->filter()
-                    ->unique()
-                    ->values()
-            );
-
-            $simpegAvailable = $this->pegawaiService->isSimpegAvailable();
         }
 
         return view('pages.bidang.laporan.index', compact(
             'tiket',
             'start',
-            'end',
-            'pegawaiList',
-            'simpegAvailable'
+            'end'
         ));
     }
 
@@ -206,9 +192,7 @@ class LaporanController extends Controller
             $request->filled('bidang') &&
             $request->bidang != 'all'
         ) {
-
             $query->whereHas('layanan', function ($q) use ($request) {
-
                 $q->where(
                     'kode_bidang',
                     $request->bidang
@@ -221,7 +205,6 @@ class LaporanController extends Controller
             $request->filled('layanan') &&
             $request->layanan != 'all'
         ) {
-
             $query->where(
                 'kode_layanan',
                 $request->layanan
@@ -233,7 +216,6 @@ class LaporanController extends Controller
             $request->filled('tanggal_awal') &&
             $request->filled('tanggal_akhir')
         ) {
-
             $query->whereBetween('tanggal', [
                 $request->tanggal_awal . ' 00:00:00',
                 $request->tanggal_akhir . ' 23:59:59'
@@ -258,12 +240,6 @@ class LaporanController extends Controller
             ->latest('tanggal')
             ->get();
 
-        $pegawaiList = $this->pegawaiService->getPegawaiByNips(
-            $data->pluck('nip')
-                ->unique()
-                ->values()
-        );
-
         /** @var \App\Models\User $user */
         $user = Auth::user();
 
@@ -280,7 +256,7 @@ class LaporanController extends Controller
 
         $pdf = Pdf::loadView(
             $view,
-            compact('data', 'pegawaiList')
+            compact('data')
         );
 
         $pdf->setPaper('a4', 'landscape');
@@ -308,19 +284,14 @@ class LaporanController extends Controller
             ->latest('tanggal')
             ->get();
 
-        $pegawaiList = $this->pegawaiService->getPegawaiByNips(
-            $data->pluck('nip')
-                ->filter()
-                ->unique()
-                ->values()
-        );
-
-        $pdf = Pdf::loadView('pages.bidang.laporan.pdf', [
-            'data'        => $data,
-            'pegawaiList' => $pegawaiList,
-            'start'       => $start,
-            'end'         => $end,
-        ])->setPaper('A4', 'landscape');
+        $pdf = Pdf::loadView(
+            'pages.bidang.laporan.pdf',
+            [
+                'data' => $data,
+                'start' => $start,
+                'end' => $end,
+            ]
+        )->setPaper('A4', 'landscape');
 
         return $pdf->stream('laporan-layanan.pdf');
     }

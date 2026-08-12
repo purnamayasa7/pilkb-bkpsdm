@@ -70,10 +70,12 @@
                         <td>
                             {{ $item->nip }} <br>
                             <small class="text-muted">
-                                {{ $pegawaiList[$item->nip]['nama_lengkap'] ?? '-' }}
+                                {{ $item->nama ?? '-' }}
                             </small>
                         </td>
-                        <td> {{ $pegawaiList[$item->nip]['ket_ukerja'] ?? '-' }}</td>
+                        <td>
+                            {{ $item->nama_ukerja ?? '-' }}
+                        </td>
                         <td>{{ $item->layanan->nama_layanan ?? '-' }}</td>
                         <td>{{ $item->tanggal }}</td>
                         <td>

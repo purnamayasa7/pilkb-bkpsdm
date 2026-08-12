@@ -154,12 +154,10 @@
                             <td>
                                 @if ($item->diperbaiki == 0)
                                 <span class="badge bg-red-soft text-danger border d-inline-flex align-items-center">
-                                    <i data-feather="x" class="me-1"></i>
                                     Belum
                                 </span>
                                 @else
                                 <span class="badge bg-green-soft text-green d-inline-flex align-items-center">
-                                    <i data-feather="check" class="me-1"></i>
                                     Sudah
                                 </span>
                                 @endif
@@ -169,11 +167,13 @@
                             <td>
                                 {{ $item->nip }} <br>
                                 <small class="text-muted">
-                                    {{ $pegawaiList[$item->nip]['nama_lengkap'] ?? '-' }}
+                                    {{ $item->nama ?? '-' }}
                                 </small>
                             </td>
                             <td>{{ $item->layanan->nama_layanan ?? '-' }}</td>
-                            <td> {{ $pegawaiList[$item->nip]['ket_ukerja'] ?? '-' }}</td>
+                            <td>
+                                {{ $item->nama_ukerja ?? '-' }}
+                            </td>
                             <td>
                                 <div class="d-flex align-items-center justify-content-center">
                                     <span class="badge bg-light text-danger border d-inline-flex align-items-center">

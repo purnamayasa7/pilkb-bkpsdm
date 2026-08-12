@@ -28,25 +28,48 @@ class DetailTiketController extends Controller
         $query = Regtiket::with([
             'layanan',
             'tahap'
-        ])->whereHas('detail', function ($q) {
-            $q->where('status', 2);
-        });
+        ])
+            // Hanya tiket yang memiliki syarat BTL
+            ->whereHas('detail', function ($q) {
+                $q->where('status', 2);
+            });
 
-        // ADMIN OPD
+        /**
+         * ADMIN OPD
+         * Hanya melihat tiket milik OPD sendiri
+         */
         if (!$isAdminBawah) {
-            $query->where('kode_ukerja', Auth::user()->kode_ukerja);
+            $query->where(
+                'kode_ukerja',
+                Auth::user()->kode_ukerja
+            );
         }
 
-        // ADMIN BAWAH, TAHAP TIKET LEBIH DARI 1
+        /**
+         * ADMIN BAWAH
+         * Tiket harus sudah melewati tahap pertama
+         */
         if ($isAdminBawah) {
             $query->has('tahap', '>', 1);
         }
 
-        if ($request->layanan) {
-            $query->where('kode_layanan', $request->layanan);
+        /**
+         * FILTER LAYANAN
+         */
+        if ($request->filled('layanan') && $request->layanan !== 'all') {
+            $query->where(
+                'kode_layanan',
+                $request->layanan
+            );
         }
 
-        if ($request->btl) {
+        /**
+         * FILTER BTL
+         *
+         * Jika parameter btl digunakan,
+         * tetap hanya mengambil detail status = 2.
+         */
+        if ($request->filled('btl')) {
             $query->whereHas('detail', function ($q) {
                 $q->where('status', 2);
             });
@@ -74,36 +97,28 @@ class DetailTiketController extends Controller
     {
         $data = $this->getData($request);
 
-        $pegawaiList = $this->pegawaiService->getPegawaiByNips(
-            $data->pluck('nip')
-        );
-
         return view('pages.opd.perbaikan.index', [
             'data' => $data,
-            'pegawaiList' => $pegawaiList,
-            'layananList' => \App\Models\Layanan::where('aktif', 1)->get()
+
+            'layananList' => Layanan::where('aktif', 1)
+                ->orderBy('nama_layanan')
+                ->get(),
         ]);
     }
 
-    // Index Admin Bawah
+    // Index Admin Bawah - Sudah selesai
     public function indexAdminBawah(Request $request)
     {
         $data = $this->getData($request, true);
 
-        $pegawaiList = $this->pegawaiService->getPegawaiByNips(
-        $data->pluck('nip')
-            ->filter()
-            ->unique()
-            ->values()
-    );
-
         return view('pages.admin-bawah.perbaikan.index', [
             'data' => $data,
-            'pegawaiList' => $pegawaiList,
-            'layananList' => \App\Models\Layanan::where('aktif', 1)->get()
+
+            'layananList' => Layanan::where('aktif', 1)
+                ->orderBy('nama_layanan')
+                ->get(),
         ]);
     }
-
     // Index Daftar Penerimaan Layanan
     public function indexPermintaan(Request $request)
     {
@@ -149,9 +164,9 @@ class DetailTiketController extends Controller
         $pegawai = $this->pegawaiService->getPegawaiByNip($tiket->nip);
 
         $dataPegawai = [
-            'nama' => $pegawai['nama_lengkap'] ?? '-',
+            'nama'     => $tiket->nama ?? '-',
             'golongan' => $pegawai['ket_gol'] ?? '-',
-            'unit' => $pegawai['ket_ukerja'] ?? '-',
+            'unit'     => $tiket->nama_ukerja ?? '-',   
         ];
 
         return view('pages.admin-bawah.perbaikan.edit', [

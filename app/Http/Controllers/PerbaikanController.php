@@ -56,13 +56,8 @@ class PerbaikanController extends Controller
     {
         $data = $this->getData($request);
 
-        $pegawaiList = $this->pegawaiService->getPegawaiByNips(
-            $data->pluck('nip')
-        );
-
         return view('pages.bidang.perbaikan.index', [
             'data' => $data,
-            'pegawaiList' => $pegawaiList,
             'layananList' => Layanan::where('aktif', 1)->get()
         ]);
     }

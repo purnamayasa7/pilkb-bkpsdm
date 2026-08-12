@@ -163,7 +163,7 @@
                             <td>
                                 {{ $item->nip }} <br>
                                 <small class="text-muted">
-                                    {{ $pegawaiList[$item->nip]['nama_lengkap'] ?? '-' }}
+                                    {{ $item->nama ?? '-' }}
                                 </small>
                             </td>
                             <td>{{ $item->layanan->nama_layanan ?? '-' }}</td>

@@ -307,8 +307,6 @@ class LayananController extends Controller
 
         $tiket = collect();
 
-        $pegawaiList = [];
-
         if ($start && $end) {
 
             $tiket = Regtiket::with([
@@ -322,17 +320,12 @@ class LayananController extends Controller
                 ->where('kode_ukerja', $user->kode_ukerja)
                 ->orderByDesc('tanggal')
                 ->get();
-
-            $pegawaiList = $this->pegawaiService->getPegawaiByNips(
-                $tiket->pluck('nip')
-            );
         }
 
         return view('pages.opd.laporan.index', compact(
             'tiket',
             'start',
-            'end',
-            'pegawaiList'
+            'end'
         ));
     }
 

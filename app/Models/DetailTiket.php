@@ -13,6 +13,12 @@ class DetailTiket extends Model
         'id_syarat',
         'status',
         'comment',
+        'file_name',
+        'file_path',
+        'file_size',
+        'uploaded_at',
+        'retention_until',
+        'deleted_at',
     ];
 
     public function syarat()
