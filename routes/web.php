@@ -190,6 +190,10 @@ Route::prefix('adminOpd')
     ->name('adminOpd.')
     ->middleware(['auth', 'role:admin_opd'])
     ->group(function () {
+        // TEST SEMENTARA
+        Route::get('test-kelengkapan/{nip}', [TiketController::class, 'testKelengkapan'])->name('test.kelengkapan');
+        Route::get('/test-syarat-dokumen/{nip}/{syaratId}', [TiketController::class, 'testSyaratDokumen'])->name('test.syarat.dokumen');
+
         // REG TIKET
         Route::get('tiket', [TiketController::class, 'indexProses'])->name('tiket.indexProses');
         Route::get('tiket/create', [TiketController::class, 'create'])->name('tiket.create');

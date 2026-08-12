@@ -17,7 +17,7 @@ return new class extends Migration
             $table->text('syarat');
             $table->enum('metode', ['simpeg', 'upload'])->default('simpeg');
             $table->string('kode_efile', 100)->nullable();
-            $table->enum('mode_efile', ['latest', 'all'])->default('latest');
+            $table->enum('mode_efile', ['latest', 'all'])->nullable();
             $table->text('deskripsi')->nullable();
             $table->timestamps();
 

@@ -11,6 +11,7 @@ use App\Models\Tahap;
 use App\Models\User;
 use App\Notifications\TiketNotification;
 use App\Services\ActivityLogService;
+use App\Services\KelengkapanService;
 use App\Services\PegawaiService;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
@@ -27,8 +28,51 @@ use Illuminate\Support\Facades\Http;
 class TiketController extends Controller
 {
     public function __construct(
-        protected PegawaiService $pegawaiService
+        protected PegawaiService $pegawaiService,
+        protected KelengkapanService $kelengkapanService
     ) {}
+
+    // Test Sementara
+    public function testKelengkapan(
+        string $nip,
+        KelengkapanService $kelengkapanService
+    ) {
+        $data = $kelengkapanService->getKelengkapanByNip($nip);
+
+        return response()->json([
+            'success' => $data !== null,
+            'message' => $data
+                ? 'Data kelengkapan berhasil diambil.'
+                : 'Gagal mengambil data kelengkapan dari SIMPEG.',
+            'data' => $data,
+        ]);
+    }
+
+    // Test Sementara
+    public function testSyaratDokumen(
+        string $nip,
+        string $syaratId,
+        KelengkapanService $kelengkapanService
+    ) {
+        $syarat = \App\Models\Syarat::findOrFail($syaratId);
+
+        $data = $kelengkapanService->getSyaratDokumen(
+            $nip,
+            $syarat
+        );
+
+        return response()->json([
+            'success' => true,
+            'syarat' => [
+                'id' => $syarat->id,
+                'syarat' => $syarat->syarat,
+                'metode' => $syarat->metode,
+                'kode_efile' => $syarat->kode_efile,
+                'mode_efile' => $syarat->mode_efile,
+            ],
+            'hasil' => $data,
+        ]);
+    }
 
     public function index(Request $request)
     {
@@ -142,45 +186,117 @@ class TiketController extends Controller
     public function create(Request $request)
     {
         $step = $request->step ?? 1;
+
         $bidang = Bidang::where('aktif', 1)->get();
 
+        /*
+    |--------------------------------------------------------------------------
+    | STEP 1 = Mulai pengajuan baru
+    |--------------------------------------------------------------------------
+    */
         if ($step == 1) {
             session()->forget('pengajuan');
         }
 
-        // Expired check
+        /*
+    |--------------------------------------------------------------------------
+    | Cek session expired
+    |--------------------------------------------------------------------------
+    */
         if ($this->checkSessionExpired()) {
             return redirect()
                 ->route('adminOpd.tiket.create', ['step' => 1])
-                ->with('error', 'Sesi pengajuan sudah habis, silakan ulangi.');
+                ->with(
+                    'error',
+                    'Sesi pengajuan sudah habis, silakan ulangi.'
+                );
         }
 
-        $data = session('pengajuan');
+        /*
+    |--------------------------------------------------------------------------
+    | Ambil data pengajuan dari session
+    |--------------------------------------------------------------------------
+    */
+        $data = session('pengajuan', []);
 
-        $syarat = [];
+        /*
+    |--------------------------------------------------------------------------
+    | Default variable
+    |--------------------------------------------------------------------------
+    */
+        $syarat = collect();
         $nama_layanan = null;
         $tiket = null;
+        $qr = null;
 
-        if (isset($data['layanan_id'])) {
+        /*
+    |--------------------------------------------------------------------------
+    | Ambil layanan dan syarat
+    |--------------------------------------------------------------------------
+    */
+        if (!empty($data['layanan_id'])) {
 
             $layanan = Layanan::find($data['layanan_id']);
 
             if ($layanan) {
+
                 $nama_layanan = $layanan->nama_layanan;
 
-                $syarat = Syarat::where('kode_layanan', $layanan->id)->get();
+                $syaratList = Syarat::where(
+                    'kode_layanan',
+                    $layanan->id
+                )->get();
+
+                /*
+            |--------------------------------------------------------------------------
+            | STEP 3
+            |--------------------------------------------------------------------------
+            | Pada Step 3 kita cek ketersediaan dokumen
+            | dari SIMPEG.
+            */
+                if (
+                    $step == 3 &&
+                    !empty($data['nip'])
+                ) {
+
+                    $syarat = $this->prepareSyaratKelengkapan(
+                        $data['nip'],
+                        $syaratList
+                    );
+                } else {
+
+                    /*
+                | Step 1, 2, dan 4:
+                | cukup kirim daftar syarat biasa.
+                */
+                    $syarat = $syaratList;
+                }
             }
         }
 
-        $qr = null;
+        /*
+    |--------------------------------------------------------------------------
+    | STEP 4 - Ambil data tiket dan generate QR
+    |--------------------------------------------------------------------------
+    */
+        if (
+            $step == 4 &&
+            !empty($data['no_tiket'])
+        ) {
 
-        if ($step == 4 && isset($data['no_tiket'])) {
-
-            $tiket = Regtiket::with('layanan')->find($data['no_tiket']);
+            $tiket = Regtiket::with([
+                'layanan.bidang'
+            ])->where(
+                'no_tiket',
+                $data['no_tiket']
+            )->first();
 
             if ($tiket) {
 
-                $url = route('tiket.public', $tiket->no_tiket);
+                $url = route(
+                    'tiket.public',
+                    $tiket->no_tiket
+                );
 
                 $renderer = new ImageRenderer(
                     new RendererStyle(120),
@@ -195,15 +311,23 @@ class TiketController extends Controller
             }
         }
 
-        return view('pages.opd.tiket.create', compact(
-            'step',
-            'bidang',
-            'data',
-            'syarat',
-            'nama_layanan',
-            'tiket',
-            'qr'
-        ));
+        /*
+    |--------------------------------------------------------------------------
+    | Tampilkan halaman
+    |--------------------------------------------------------------------------
+    */
+        return view(
+            'pages.opd.tiket.create',
+            compact(
+                'step',
+                'bidang',
+                'data',
+                'syarat',
+                'nama_layanan',
+                'tiket',
+                'qr'
+            )
+        );
     }
 
     public function step(Request $request)
@@ -403,6 +527,41 @@ class TiketController extends Controller
                 return back()->with('error', 'Gagal simpan tiket: ' . $e->getMessage());
             }
         }
+    }
+
+    private function prepareSyaratKelengkapan(
+        string $nip,
+        $syaratList
+    ) {
+        return $syaratList->map(function ($syarat) use ($nip) {
+
+            // =========================
+            // SYARAT UPLOAD
+            // =========================
+            if ($syarat->metode !== 'simpeg') {
+                return [
+                    'syarat' => $syarat,
+                    'tersedia' => false,
+                    'jenis' => null,
+                    'mode' => null,
+                    'dokumen' => [],
+                ];
+            }
+
+            // =========================
+            // SYARAT SIMPEG
+            // =========================
+            $hasil = $this->kelengkapanService
+                ->getSyaratDokumen($nip, $syarat);
+
+            return [
+                'syarat' => $syarat,
+                'tersedia' => $hasil['tersedia'],
+                'jenis' => $hasil['jenis'],
+                'mode' => $hasil['mode'],
+                'dokumen' => $hasil['dokumen'],
+            ];
+        });
     }
 
     private function checkSessionExpired()

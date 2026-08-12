@@ -79,6 +79,68 @@ $stepHeader = [
             left: 130%;
         }
     }
+
+    /* ========================================
+   E-FILE TABLE
+======================================== */
+
+    .efile-cell {
+        vertical-align: middle !important;
+        text-align: center !important;
+    }
+
+    .efile-action {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        min-height: 60px;
+    }
+
+    .efile-action .btn,
+    .efile-action .badge {
+        margin: 0;
+    }
+
+    /* Nama file */
+    .efile-filename {
+        max-width: 220px;
+        word-break: break-word;
+        line-height: 1.4;
+    }
+
+    /* Status dokumen tersedia */
+    .efile-status {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 5px;
+    }
+
+    /* Tombol upload */
+    .btn-upload {
+        border-color: #f59e0b;
+        color: #f59e0b;
+        background-color: #fff;
+    }
+
+    .btn-upload:hover {
+        background-color: #f59e0b;
+        color: #fff;
+    }
+
+    /* Tombol ganti */
+    .btn-ganti {
+        border-color: #f59e0b;
+        color: #f59e0b;
+        background-color: #fff;
+    }
+
+    .btn-ganti:hover {
+        background-color: #f59e0b;
+        color: #fff;
+    }
 </style>
 
 {{-- Modal Cek Data --}}
@@ -319,6 +381,53 @@ $stepHeader = [
     </div>
 </div>
 
+{{-- Modal Dokumen SIMPEG --}}
+<div class="modal fade" id="modalDokumen" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered modal-lg modal-dialog-scrollable">
+        <div class="modal-content">
+
+            <div class="modal-header">
+                <div>
+                    <h5 class="modal-title mb-1" id="modalDokumenTitle">
+                        Dokumen SIMPEG
+                    </h5>
+
+                    <div class="small text-muted" id="modalDokumenSubtitle">
+                        -
+                    </div>
+                </div>
+
+                <button
+                    type="button"
+                    class="btn-close"
+                    data-bs-dismiss="modal">
+                </button>
+            </div>
+
+            <div class="modal-body">
+
+                <div id="dokumenList">
+                    {{-- Diisi melalui JavaScript --}}
+                </div>
+
+            </div>
+
+            <div class="modal-footer">
+                <button
+                    type="button"
+                    class="btn btn-light"
+                    data-bs-dismiss="modal">
+
+                    <i data-feather="x" class="me-1"></i>
+                    Tutup
+
+                </button>
+            </div>
+
+        </div>
+    </div>
+</div>
+
 {{-- Modal Konfirmasi --}}
 <div class="modal fade" id="modalKonfirmasi" tabindex="-1">
     <div class="modal-dialog modal-dialog-centered">
@@ -539,84 +648,348 @@ $stepHeader = [
 
                     {{-- STEP 3 --}}
                     @if ($step == 3)
-                    <form method="POST" action="{{ route('adminOpd.tiket.step') }}">
+
+                    <form
+                        method="POST"
+                        action="{{ route('adminOpd.tiket.step') }}"
+                        enctype="multipart/form-data">
+
                         @csrf
+
                         <input type="hidden" name="step" value="3">
 
-                        <div class="mb-2">
-                            <div class="small text-muted">Syarat Layanan</div>
-                            <strong>{{ $nama_layanan ?? '-' }}</strong>
+                        <div class="mb-3">
+                            <div class="small text-muted">
+                                Syarat Layanan
+                            </div>
+
+                            <strong>
+                                {{ $nama_layanan ?? '-' }}
+                            </strong>
                         </div>
 
-                        <table id="datatablesSimple">
-                            <thead>
-                                <tr>
-                                    <th>No</th>
-                                    <th>Syarat</th>
-                                    <th class="text-nowrap" style="width: 120px">E-File</th>
-                                    <th>Validasi</th>
-                                </tr>
-                            </thead>
-                            <tfoot>
-                                <tr>
-                                    <th>No</th>
-                                    <th>Syarat</th>
-                                    <th class="text-nowrap" style="width: 120px">E-File</th>
-                                    <th>Validasi</th>
-                                </tr>
-                            </tfoot>
-                            <tbody>
-                                @forelse ($syarat as $i => $s)
-                                <tr>
-                                    <td>{{ $i + 1 }}</td>
+                        <div class="table-responsive">
 
-                                    <td>{{ $s->syarat }}</td>
+                            <table id="datatablesSimple" class="table table-hover align-middle">
 
-                                    {{-- DUMMY --}}
-                                    <td class="text-center text-nowrap">
-                                        <span
-                                            class="badge bg-light text-danger border d-inline-flex align-items-center">
-                                            <i data-feather="x" class="me-1"></i>
-                                            Tidak ada
-                                        </span>
-                                    </td>
+                                <thead>
+                                    <tr>
+                                        <th>No</th>
+                                        <th>Syarat</th>
+                                        <th class="text-center text-nowrap" style="width: 180px">
+                                            E-File
+                                        </th>
+                                        <th class="text-center" style="width: 120px">
+                                            Validasi
+                                        </th>
+                                    </tr>
+                                </thead>
 
-                                    {{-- CHECKLIST --}}
-                                    <td>
-                                        <div class="d-flex justify-content-center align-items-center">
-                                            <input type="checkbox" name="syarat_id[]"
-                                                value="{{ $s->id }}">
-                                        </div>
-                                    </td>
-                                </tr>
-                                @empty
-                                <tr>
-                                    <td colspan="4" class="text-center text-muted">
-                                        Tidak ada syarat
-                                    </td>
-                                </tr>
-                                @endforelse
-                            </tbody>
-                        </table>
+                                <tfoot>
+                                    <tr>
+                                        <th>No</th>
+                                        <th>Syarat</th>
+                                        <th class="text-center text-nowrap">
+                                            E-File
+                                        </th>
+                                        <th class="text-center">
+                                            Validasi
+                                        </th>
+                                    </tr>
+                                </tfoot>
+
+                                <tbody>
+
+                                    @forelse ($syarat as $i => $item)
+
+                                    @php
+                                    /*
+                                    * Karena pada STEP 3 controller
+                                    * sudah menjalankan prepareSyaratKelengkapan(),
+                                    * maka struktur $item adalah array.
+                                    */
+                                    $s = $item['syarat'];
+
+                                    $tersedia = $item['tersedia'] ?? false;
+                                    $mode = $item['mode'] ?? null;
+                                    $dokumen = $item['dokumen'] ?? [];
+                                    @endphp
+
+                                    <tr>
+
+                                        {{-- NO --}}
+                                        <td>
+                                            {{ $i + 1 }}
+                                        </td>
+
+                                        {{-- SYARAT --}}
+                                        <td>
+
+                                            <div class="fw-semibold">
+                                                {{ $s->syarat }}
+                                            </div>
+
+                                            @if($s->deskripsi)
+                                            <div class="small text-muted mt-1">
+                                                {{ $s->deskripsi }}
+                                            </div>
+                                            @endif
+
+                                        </td>
+
+                                        {{-- E-FILE --}}
+                                        <td class="efile-cell">
+
+                                            {{-- ================================================== --}}
+                                            {{-- METODE UPLOAD --}}
+                                            {{-- ================================================== --}}
+                                            @if($s->metode === 'upload')
+
+                                            <div class="efile-action">
+
+                                                {{-- INPUT FILE --}}
+                                                <input
+                                                    type="file"
+                                                    name="dokumen[{{ $s->id }}]"
+                                                    id="dokumen_{{ $s->id }}"
+                                                    class="d-none upload-syarat"
+                                                    data-syarat-id="{{ $s->id }}"
+                                                    accept=".pdf,.jpg,.jpeg,.png">
+
+                                                {{-- BUTTON UPLOAD --}}
+                                                <label
+                                                    for="dokumen_{{ $s->id }}"
+                                                    class="btn btn-sm btn-outline-warning btn-upload d-inline-flex align-items-center"
+                                                    style="height: 31px;">
+
+                                                    <i
+                                                        data-feather="upload"
+                                                        class="me-1"
+                                                        style="width:14px; height:14px;">
+                                                    </i>
+
+                                                    <span class="upload-label-{{ $s->id }}">
+                                                        Upload
+                                                    </span>
+
+                                                </label>
+
+                                                {{-- NAMA FILE --}}
+                                                <div
+                                                    id="file-name-{{ $s->id }}"
+                                                    class="small text-muted efile-filename">
+                                                </div>
+
+                                            </div>
 
 
+                                            {{-- ================================================== --}}
+                                            {{-- SIMPEG TIDAK ADA --}}
+                                            {{-- SEKARANG BISA UPLOAD --}}
+                                            {{-- ================================================== --}}
+                                            @elseif(!$tersedia)
+
+                                            <div class="efile-action">
+
+                                                {{-- INPUT FILE --}}
+                                                <input
+                                                    type="file"
+                                                    name="dokumen[{{ $s->id }}]"
+                                                    id="dokumen_{{ $s->id }}"
+                                                    class="d-none upload-syarat"
+                                                    data-syarat-id="{{ $s->id }}"
+                                                    accept=".pdf,.jpg,.jpeg,.png">
+
+                                                {{-- BUTTON UPLOAD --}}
+                                                <label
+                                                    for="dokumen_{{ $s->id }}"
+                                                    class="btn btn-sm btn-outline-warning btn-upload d-inline-flex align-items-center"
+                                                    style="height: 31px;">
+
+                                                    <i
+                                                        data-feather="upload"
+                                                        class="me-1"
+                                                        style="width:14px; height:14px;">
+                                                    </i>
+
+                                                    <span class="upload-label-{{ $s->id }}">
+                                                        Upload
+                                                    </span>
+
+                                                </label>
+
+                                                {{-- NAMA FILE --}}
+                                                <div
+                                                    id="file-name-{{ $s->id }}"
+                                                    class="small text-muted efile-filename">
+                                                </div>
+
+                                            </div>
+
+
+                                            {{-- ================================================== --}}
+                                            {{-- SIMPEG ADA --}}
+                                            {{-- ================================================== --}}
+                                            @else
+
+                                            {{-- ========================= --}}
+                                            {{-- DOKUMEN TERBARU --}}
+                                            {{-- ========================= --}}
+                                            @if($mode === 'latest')
+
+                                            <div class="efile-action">
+
+                                                <button
+                                                    type="button"
+                                                    class="btn btn-sm btn-outline-primary btn-lihat-dokumen d-inline-flex align-items-center"
+                                                    style="height: 31px;"
+                                                    data-dokumen='@json($dokumen)'
+                                                    data-syarat="{{ $s->syarat }}">
+
+                                                    <i
+                                                        data-feather="file-text"
+                                                        class="me-1"
+                                                        style="width:14px; height:14px;">
+                                                    </i>
+
+                                                    Lihat
+
+                                                </button>
+
+                                            </div>
+
+
+                                            {{-- ========================= --}}
+                                            {{-- SEMUA DOKUMEN --}}
+                                            {{-- ========================= --}}
+                                            @elseif($mode === 'all')
+
+                                            <div class="efile-action">
+
+                                                <button
+                                                    type="button"
+                                                    class="btn btn-sm btn-outline-primary btn-lihat-dokumen d-inline-flex align-items-center"
+                                                    style="height: 31px;"
+                                                    data-dokumen='@json($dokumen)'
+                                                    data-syarat="{{ $s->syarat }}">
+
+                                                    <i
+                                                        data-feather="files"
+                                                        class="me-1"
+                                                        style="width:14px; height:14px;">
+                                                    </i>
+
+                                                    Lihat
+
+                                                    <span class="badge bg-primary ms-1">
+                                                        {{ count($dokumen) }}
+                                                    </span>
+
+                                                </button>
+
+                                            </div>
+
+                                            @endif
+
+                                            @endif
+
+                                        </td>
+
+                                        {{-- VALIDASI --}}
+                                        <td class="text-center">
+
+                                            <div class="d-flex justify-content-center align-items-center">
+
+                                                @if($s->metode === 'simpeg' && $tersedia)
+
+                                                {{-- ======================================== --}}
+                                                {{-- SIMPEG ADA --}}
+                                                {{-- CHECKLIST LANGSUNG AKTIF --}}
+                                                {{-- ======================================== --}}
+
+                                                <input
+                                                    type="checkbox"
+                                                    name="syarat_id[]"
+                                                    value="{{ $s->id }}"
+                                                    class="form-check-input checklist-syarat"
+                                                    style="width: 18px; height: 18px;"
+                                                    data-syarat-id="{{ $s->id }}">
+
+                                                @else
+
+                                                {{-- ======================================== --}}
+                                                {{-- UPLOAD / SIMPEG TIDAK ADA --}}
+                                                {{-- CHECKLIST AKTIF SETELAH FILE DIPILIH --}}
+                                                {{-- ======================================== --}}
+
+                                                <input
+                                                    type="checkbox"
+                                                    name="syarat_id[]"
+                                                    value="{{ $s->id }}"
+                                                    class="form-check-input checklist-syarat"
+                                                    style="width: 18px; height: 18px;"
+                                                    data-syarat-id="{{ $s->id }}"
+                                                    disabled>
+
+                                                @endif
+
+                                            </div>
+
+                                        </td>
+
+                                    </tr>
+
+                                    @empty
+
+                                    <tr>
+                                        <td colspan="4" class="text-center text-muted py-4">
+                                            Tidak ada syarat untuk layanan ini.
+                                        </td>
+                                    </tr>
+
+                                    @endforelse
+
+                                </tbody>
+
+                            </table>
+
+                        </div>
+
+
+                        {{-- BUTTON --}}
                         <div class="d-flex justify-content-between mt-3">
 
-                            <button type="button" id="btnNextStep3"
+                            <button
+                                type="button"
+                                id="btnNextStep3"
                                 class="btn btn-primary d-inline-flex align-items-center">
+
                                 Selanjutnya
-                                <i class="ms-2" data-feather="arrow-right"></i>
+
+                                <i
+                                    class="ms-2"
+                                    data-feather="arrow-right">
+                                </i>
+
                             </button>
 
-                            <a href="{{ route('adminOpd.tiket.create', ['step' => 2]) }}"
+                            <a
+                                href="{{ route('adminOpd.tiket.create', ['step' => 2]) }}"
                                 class="btn btn-light d-inline-flex align-items-center">
 
-                                <i class="me-2" data-feather="arrow-left"></i>
+                                <i
+                                    class="me-2"
+                                    data-feather="arrow-left">
+                                </i>
+
                                 Kembali
+
                             </a>
 
                         </div>
+
                     </form>
+
                     @endif
 
 
@@ -711,32 +1084,153 @@ $stepHeader = [
                                     </thead>
 
                                     <tbody>
-                                        @forelse ($syarat as $i => $s)
+                                        @forelse ($syarat as $i => $item)
+
+                                        @php
+                                        $s = $item['syarat'];
+                                        $tersedia = $item['tersedia'] ?? false;
+                                        $jenis = $item['jenis'] ?? null;
+                                        $mode = $item['mode'] ?? null;
+                                        $dokumen = $item['dokumen'] ?? [];
+                                        @endphp
+
                                         <tr>
-                                            <td>{{ $i + 1 }}</td>
-                                            <td>{{ $s->syarat }}</td>
-                                            {{-- DUMMY --}}
+
+                                            {{-- NO --}}
+                                            <td>
+                                                {{ $i + 1 }}
+                                            </td>
+
+                                            {{-- SYARAT --}}
+                                            <td>
+                                                {{ $s->syarat }}
+                                            </td>
+
+                                            {{-- E-FILE --}}
                                             <td class="text-center text-nowrap">
+
+                                                {{-- ========================= --}}
+                                                {{-- SYARAT UPLOAD --}}
+                                                {{-- ========================= --}}
+                                                @if ($s->metode !== 'simpeg')
+
+                                                <span
+                                                    class="badge bg-light text-warning border d-inline-flex align-items-center">
+
+                                                    <i data-feather="upload" class="me-1"></i>
+
+                                                    Upload Dokumen
+                                                </span>
+
+                                                {{-- ========================= --}}
+                                                {{-- SIMPEG TIDAK TERSEDIA --}}
+                                                {{-- ========================= --}}
+                                                @elseif (!$tersedia)
+
                                                 <span
                                                     class="badge bg-light text-danger border d-inline-flex align-items-center">
+
                                                     <i data-feather="x" class="me-1"></i>
-                                                    Tidak ada
+
+                                                    Tidak tersedia
                                                 </span>
-                                            </td>
-                                            <td class="text-center">
+
+                                                {{-- ========================= --}}
+                                                {{-- SIMPEG TERSEDIA --}}
+                                                {{-- ========================= --}}
+                                                @else
+
+                                                {{-- SINGLE --}}
+                                                @if ($mode === 'single')
+
+                                                <button
+                                                    type="button"
+                                                    class="btn btn-sm btn-outline-primary btn-lihat-dokumen"
+                                                    data-dokumen='@json($dokumen)'
+                                                    data-syarat="{{ $s->syarat }}">
+
+                                                    <i data-feather="file-text" class="me-1"></i>
+
+                                                    Lihat Dokumen
+                                                </button>
+
+                                                {{-- ALL --}}
+                                                @elseif ($mode === 'all')
+
+                                                <button
+                                                    type="button"
+                                                    class="btn btn-sm btn-outline-primary btn-lihat-dokumen"
+                                                    data-dokumen='@json($dokumen)'
+                                                    data-syarat="{{ $s->syarat }}">
+
+                                                    <i data-feather="files" class="me-1"></i>
+
+                                                    Lihat Semua
+
+                                                    <span class="badge bg-primary ms-1">
+                                                        {{ count($dokumen) }}
+                                                    </span>
+
+                                                </button>
+
+                                                {{-- FALLBACK --}}
+                                                @else
+
                                                 <span
                                                     class="badge bg-light text-success border d-inline-flex align-items-center">
+
                                                     <i data-feather="check-circle" class="me-1"></i>
-                                                    Sudah
+
+                                                    Tersedia
                                                 </span>
+
+                                                @endif
+
+                                                @endif
+
                                             </td>
+
+                                            {{-- VALIDASI --}}
+                                            <td class="text-center">
+
+                                                @if ($s->metode !== 'simpeg')
+
+                                                {{-- UPLOAD BELUM DIDUKUNG DI TAHAP INI --}}
+                                                <input
+                                                    type="checkbox"
+                                                    name="syarat_id[]"
+                                                    value="{{ $s->id }}">
+
+                                                @elseif ($tersedia)
+
+                                                {{-- DOKUMEN SIMPEG TERSEDIA --}}
+                                                <input
+                                                    type="checkbox"
+                                                    name="syarat_id[]"
+                                                    value="{{ $s->id }}">
+
+                                                @else
+
+                                                {{-- DOKUMEN SIMPEG TIDAK TERSEDIA --}}
+                                                <input
+                                                    type="checkbox"
+                                                    disabled
+                                                    title="Dokumen belum tersedia di SIMPEG">
+
+                                                @endif
+
+                                            </td>
+
                                         </tr>
+
                                         @empty
+
                                         <tr>
-                                            <td colspan="3" class="text-center text-muted">
+                                            <td colspan="4" class="text-center text-muted">
                                                 Tidak ada syarat
                                             </td>
                                         </tr>
+
                                         @endforelse
                                     </tbody>
                                 </table>
@@ -918,6 +1412,220 @@ $stepHeader = [
 
         }
 
+        // ========================================
+        // MODAL DOKUMEN SIMPEG
+        // ========================================
+
+        const modalDokumenEl = document.getElementById('modalDokumen');
+
+        let modalDokumen = null;
+
+        if (modalDokumenEl) {
+            modalDokumen = new bootstrap.Modal(modalDokumenEl);
+        }
+
+        const modalDokumenTitle =
+            document.getElementById('modalDokumenTitle');
+
+        const modalDokumenSubtitle =
+            document.getElementById('modalDokumenSubtitle');
+
+        const dokumenList =
+            document.getElementById('dokumenList');
+
+
+        document.querySelectorAll('.btn-lihat-dokumen')
+            .forEach(function(button) {
+
+                button.addEventListener('click', function() {
+
+                    let dokumen = [];
+
+                    try {
+
+                        dokumen = JSON.parse(
+                            this.dataset.dokumen || '[]'
+                        );
+
+                    } catch (error) {
+
+                        console.error(
+                            'Gagal membaca data dokumen:',
+                            error
+                        );
+
+                        dokumen = [];
+                    }
+
+                    const syarat =
+                        this.dataset.syarat || 'Dokumen SIMPEG';
+
+                    modalDokumenTitle.innerText =
+                        'Dokumen SIMPEG';
+
+                    modalDokumenSubtitle.innerText =
+                        syarat;
+
+                    dokumenList.innerHTML = '';
+
+                    if (!dokumen.length) {
+
+                        dokumenList.innerHTML = `
+                    <div class="text-center text-muted py-5">
+
+                        <i
+                            data-feather="file-x"
+                            style="width:40px;height:40px;">
+                        </i>
+
+                        <div class="mt-2">
+                            Tidak ada dokumen tersedia.
+                        </div>
+
+                    </div>
+                `;
+
+                        if (window.feather) {
+                            feather.replace();
+                        }
+
+                        modalDokumen.show();
+
+                        return;
+                    }
+
+
+                    dokumen.forEach(function(doc, index) {
+
+                        const nama =
+                            doc.nama_file ??
+                            doc.nama ??
+                            doc.file_name ??
+                            'Dokumen ' + (index + 1);
+
+                        const tanggal =
+                            doc.tanggal ??
+                            doc.created_at ??
+                            doc.tgl_dokumen ??
+                            null;
+
+                        const url =
+                            doc.preview_url ??
+                            doc.url ??
+                            null;
+
+                        const urutan =
+                            doc.urutan ?? '-';
+
+
+                        let tanggalHtml = '';
+
+                        if (tanggal) {
+
+                            tanggalHtml = `
+                        <div class="small text-muted mt-1">
+                            <i
+                                data-feather="calendar"
+                                class="me-1"
+                                style="width:14px;height:14px;">
+                            </i>
+                            ${tanggal}
+                        </div>
+                    `;
+                        }
+
+
+                        let buttonHtml = '';
+
+                        if (url) {
+
+                            buttonHtml = `
+                        <a
+                            href="${url}"
+                            target="_blank"
+                            class="btn btn-sm btn-outline-primary">
+
+                            <i
+                                data-feather="eye"
+                                class="me-1">
+                            </i>
+
+                            Lihat
+                        </a>
+                    `;
+                        }
+
+
+                        dokumenList.innerHTML += `
+
+                    <div class="card border mb-2">
+
+                        <div class="card-body py-3">
+
+                            <div class="d-flex
+                                justify-content-between
+                                align-items-center">
+
+                                <div class="d-flex
+                                    align-items-start">
+
+                                    <div class="me-3">
+
+                                        <div
+                                            class="bg-light
+                                            rounded p-2">
+
+                                            <i
+                                                data-feather="file-text"
+                                                class="text-primary">
+                                            </i>
+
+                                        </div>
+
+                                    </div>
+
+
+                                    <div>
+
+                                        <div class="fw-semibold">
+                                            ${nama}
+                                        </div>
+
+                                        <div class="small text-muted">
+                                            Urutan: ${urutan}
+                                        </div>
+
+                                        ${tanggalHtml}
+
+                                    </div>
+
+                                </div>
+
+
+                                <div>
+                                    ${buttonHtml}
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                `;
+                    });
+
+
+                    if (window.feather) {
+                        feather.replace();
+                    }
+
+                    modalDokumen.show();
+
+                });
+
+            });
+
         // Confirm
         if (confirmBtn) {
             confirmBtn.addEventListener('click', function() {
@@ -1001,26 +1709,72 @@ $stepHeader = [
         const btnSubmitFinal = document.getElementById('btnSubmitFinal');
 
         if (btnNextStep3) {
+
             btnNextStep3.addEventListener('click', function() {
 
-                const checkboxes = document.querySelectorAll('input[name="syarat_id[]"]');
-                let allChecked = true;
+                const checkboxes =
+                    document.querySelectorAll(
+                        'input[name="syarat_id[]"]'
+                    );
 
-                checkboxes.forEach(cb => {
+                let allChecked = true;
+                let hasDisabled = false;
+
+                checkboxes.forEach(function(cb) {
+
+                    // Ada syarat yang belum upload
+                    if (cb.disabled) {
+                        hasDisabled = true;
+                        allChecked = false;
+                        return;
+                    }
+
+                    // Ada syarat yang belum dicentang
                     if (!cb.checked) {
                         allChecked = false;
                     }
+
                 });
 
-                if (!allChecked) {
-                    alert('Semua syarat wajib divalidasi terlebih dahulu!');
+
+                // ========================================
+                // ADA FILE YANG BELUM DIUPLOAD
+                // ========================================
+
+                if (hasDisabled) {
+
+                    alert(
+                        'Silakan upload seluruh dokumen yang diperlukan terlebih dahulu.'
+                    );
+
                     return;
                 }
+
+
+                // ========================================
+                // ADA CHECKLIST YANG BELUM DICENTANG
+                // ========================================
+
+                if (!allChecked) {
+
+                    alert(
+                        'Semua syarat wajib divalidasi terlebih dahulu.'
+                    );
+
+                    return;
+                }
+
+
+                // ========================================
+                // SEMUA SUDAH LENGKAP
+                // ========================================
 
                 if (modalKonfirmasi) {
                     modalKonfirmasi.show();
                 }
+
             });
+
         }
 
         if (btnSubmitFinal && btnNextStep3) {
@@ -1029,6 +1783,134 @@ $stepHeader = [
                 if (form) form.submit();
             });
         }
+
+        // ========================================
+        // UPLOAD DOKUMEN SYARAT
+        // ========================================
+
+        const uploadInputs = document.querySelectorAll('.upload-syarat');
+
+        uploadInputs.forEach(function(input) {
+
+            input.addEventListener('change', function() {
+
+                const syaratId = this.dataset.syaratId;
+
+                const fileNameElement =
+                    document.getElementById('file-name-' + syaratId);
+
+                const labelElement =
+                    document.querySelector('.upload-label-' + syaratId);
+
+                const checklist =
+                    document.querySelector(
+                        '.checklist-syarat[data-syarat-id="' + syaratId + '"]'
+                    );
+
+                // ========================================
+                // TIDAK ADA FILE
+                // ========================================
+
+                if (!this.files || !this.files.length) {
+
+                    if (fileNameElement) {
+                        fileNameElement.innerHTML = '';
+                    }
+
+                    if (labelElement) {
+                        labelElement.innerText = 'Upload';
+                    }
+
+                    // Checklist kembali disabled
+                    if (checklist) {
+                        checklist.checked = false;
+                        checklist.disabled = true;
+                    }
+
+                    return;
+                }
+
+
+                const file = this.files[0];
+
+
+                // ========================================
+                // VALIDASI UKURAN FILE
+                // ========================================
+
+                const maxSize = 5 * 1024 * 1024;
+
+                if (file.size > maxSize) {
+
+                    alert('Ukuran file maksimal 5 MB.');
+
+                    this.value = '';
+
+                    if (fileNameElement) {
+                        fileNameElement.innerHTML = '';
+                    }
+
+                    if (labelElement) {
+                        labelElement.innerText = 'Upload';
+                    }
+
+                    // Checklist tetap disabled
+                    if (checklist) {
+                        checklist.checked = false;
+                        checklist.disabled = true;
+                    }
+
+                    return;
+                }
+
+
+                // ========================================
+                // TAMPILKAN NAMA FILE
+                // ========================================
+
+                if (fileNameElement) {
+
+                    fileNameElement.innerHTML = `
+                <span class="text-success">
+
+              
+
+                    ${file.name}
+
+                </span>
+            `;
+                }
+
+
+                // ========================================
+                // UBAH LABEL UPLOAD -> GANTI
+                // ========================================
+
+                if (labelElement) {
+                    labelElement.innerText = 'Ganti';
+                }
+
+
+                // ========================================
+                // AKTIFKAN CHECKLIST
+                // ========================================
+
+                if (checklist) {
+                    checklist.disabled = false;
+                }
+
+
+                // ========================================
+                // REFRESH FEATHER ICON
+                // ========================================
+
+                if (window.feather) {
+                    feather.replace();
+                }
+
+            });
+
+        });
 
         // Modal pengajuan sudah ada
         const showWarningModal = document.getElementById('showWarningModal');
