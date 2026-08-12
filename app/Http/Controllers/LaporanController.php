@@ -150,6 +150,7 @@ class LaporanController extends Controller
 
         $tiket = collect();
         $pegawaiList = [];
+        $simpegAvailable = false;
 
         if ($start && $end) {
 

@@ -8,7 +8,7 @@
 
         init() {
 
-            console.log("ChatWidgetLogin Init");
+            // console.log("ChatWidgetLogin Init");
 
             this.initGuestChat();
 

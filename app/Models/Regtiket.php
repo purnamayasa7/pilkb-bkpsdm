@@ -15,9 +15,11 @@ class Regtiket extends Model
     protected $fillable = [
         'no_tiket',
         'nip',
+        'nama',
         'kode_layanan',
         'tanggal',
         'kode_ukerja',
+        'nama_ukerja',
         'no_hp',
         'email',
         'nama_penerima',
