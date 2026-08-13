@@ -103,6 +103,34 @@ $stepHeader = [
         margin: 0;
     }
 
+    /* ========================================
+   BUTTON E-FILE
+   ======================================== */
+
+    .efile-btn {
+        width: 90px;
+        height: 31px;
+        padding: 0 8px;
+
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+
+        font-size: 0.8125rem;
+        font-weight: 600;
+        line-height: 1;
+
+        gap: 4px;
+        line-height: 1;
+        white-space: nowrap;
+    }
+
+    .efile-btn svg {
+        width: 14px;
+        height: 14px;
+        flex-shrink: 0;
+    }
+
     /* Nama file */
     .efile-filename {
         max-width: 220px;
@@ -118,7 +146,10 @@ $stepHeader = [
         gap: 5px;
     }
 
-    /* Tombol upload */
+    /* ========================================
+   TOMBOL UPLOAD
+   ======================================== */
+
     .btn-upload {
         border-color: #f59e0b;
         color: #f59e0b;
@@ -130,7 +161,10 @@ $stepHeader = [
         color: #fff;
     }
 
-    /* Tombol ganti */
+    /* ========================================
+   TOMBOL GANTI
+   ======================================== */
+
     .btn-ganti {
         border-color: #f59e0b;
         color: #f59e0b;
@@ -703,16 +737,11 @@ $stepHeader = [
                                     @forelse ($syarat as $i => $item)
 
                                     @php
-                                    /*
-                                    * Karena pada STEP 3 controller
-                                    * sudah menjalankan prepareSyaratKelengkapan(),
-                                    * maka struktur $item adalah array.
-                                    */
-                                    $s = $item['syarat'];
+                                    $s = $item->syarat;
 
-                                    $tersedia = $item['tersedia'] ?? false;
-                                    $mode = $item['mode'] ?? null;
-                                    $dokumen = $item['dokumen'] ?? [];
+                                    $tersedia = $item->tersedia ?? false;
+                                    $mode = $item->mode ?? null;
+                                    $dokumen = $item->dokumen ?? [];
                                     @endphp
 
                                     <tr>
@@ -754,19 +783,14 @@ $stepHeader = [
                                                     id="dokumen_{{ $s->id }}"
                                                     class="d-none upload-syarat"
                                                     data-syarat-id="{{ $s->id }}"
-                                                    accept=".pdf,.jpg,.jpeg,.png">
+                                                    accept=".pdf">
 
                                                 {{-- BUTTON UPLOAD --}}
                                                 <label
                                                     for="dokumen_{{ $s->id }}"
-                                                    class="btn btn-sm btn-outline-warning btn-upload d-inline-flex align-items-center"
-                                                    style="height: 31px;">
+                                                    class="btn btn-sm btn-outline-warning efile-btn">
 
-                                                    <i
-                                                        data-feather="upload"
-                                                        class="me-1"
-                                                        style="width:14px; height:14px;">
-                                                    </i>
+                                                    <i data-feather="upload"></i>
 
                                                     <span class="upload-label-{{ $s->id }}">
                                                         Upload
@@ -803,14 +827,9 @@ $stepHeader = [
                                                 {{-- BUTTON UPLOAD --}}
                                                 <label
                                                     for="dokumen_{{ $s->id }}"
-                                                    class="btn btn-sm btn-outline-warning btn-upload d-inline-flex align-items-center"
-                                                    style="height: 31px;">
+                                                    class="btn btn-sm btn-outline-warning btn-upload efile-btn">
 
-                                                    <i
-                                                        data-feather="upload"
-                                                        class="me-1"
-                                                        style="width:14px; height:14px;">
-                                                    </i>
+                                                    <i data-feather="upload"></i>
 
                                                     <span class="upload-label-{{ $s->id }}">
                                                         Upload
@@ -837,24 +856,43 @@ $stepHeader = [
                                             {{-- ========================= --}}
                                             @if($mode === 'latest')
 
+                                            @php
+                                            $dokumenLatest = $dokumen[0] ?? null;
+
+                                            $urlLatest =
+                                            $dokumenLatest['preview_url'] ??
+                                            $dokumenLatest['url'] ??
+                                            null;
+
+                                            $namaLatest =
+                                            $dokumenLatest['nama_file'] ??
+                                            $dokumenLatest['nama'] ??
+                                            $dokumenLatest['file_name'] ??
+                                            'Dokumen';
+                                            @endphp
+
                                             <div class="efile-action">
 
-                                                <button
-                                                    type="button"
-                                                    class="btn btn-sm btn-outline-primary btn-lihat-dokumen d-inline-flex align-items-center"
-                                                    style="height: 31px;"
-                                                    data-dokumen='@json($dokumen)'
-                                                    data-syarat="{{ $s->syarat }}">
+                                                @if($urlLatest)
 
-                                                    <i
-                                                        data-feather="file-text"
-                                                        class="me-1"
-                                                        style="width:14px; height:14px;">
-                                                    </i>
+                                                <a
+                                                    href="{{ $urlLatest }}"
+                                                    target="_blank"
+                                                    class="btn btn-sm btn-outline-primary efile-btn">
+
+                                                    <i data-feather="file-text"></i>
 
                                                     Lihat
 
-                                                </button>
+                                                </a>
+
+                                                @else
+
+                                                <span class="badge bg-light text-danger border">
+                                                    Dokumen tidak tersedia
+                                                </span>
+
+                                                @endif
 
                                             </div>
 
@@ -869,22 +907,16 @@ $stepHeader = [
                                                 <button
                                                     type="button"
                                                     class="btn btn-sm btn-outline-primary btn-lihat-dokumen d-inline-flex align-items-center"
-                                                    style="height: 31px;"
                                                     data-dokumen='@json($dokumen)'
                                                     data-syarat="{{ $s->syarat }}">
 
-                                                    <i
-                                                        data-feather="files"
-                                                        class="me-1"
-                                                        style="width:14px; height:14px;">
-                                                    </i>
+                                                    <i data-feather="file-text" class="me-1"></i>
 
                                                     Lihat
 
                                                     <span class="badge bg-primary ms-1">
                                                         {{ count($dokumen) }}
                                                     </span>
-
                                                 </button>
 
                                             </div>
@@ -1073,25 +1105,48 @@ $stepHeader = [
                     <div class="card shadow-none">
                         <div class="card-body p-0">
                             <div class="table-responsive">
-                                <table class="table table-hover mb-0">
+
+                                <table class="table table-hover mb-0 align-middle">
+
                                     <thead>
                                         <tr>
-                                            <th>No</th>
+                                            <th style="width: 60px;">No</th>
                                             <th>Syarat</th>
-                                            <th>E-file</th>
-                                            <th>Verifikasi</th>
+                                            <th class="text-center text-nowrap" style="width: 180px;">
+                                                E-File
+                                            </th>
+                                            <th class="text-center" style="width: 120px;">
+                                                Verifikasi
+                                            </th>
                                         </tr>
                                     </thead>
 
                                     <tbody>
-                                        @forelse ($syarat as $i => $item)
+
+                                        @forelse ($syarat as $i => $detail)
 
                                         @php
-                                        $s = $item['syarat'];
-                                        $tersedia = $item['tersedia'] ?? false;
-                                        $jenis = $item['jenis'] ?? null;
-                                        $mode = $item['mode'] ?? null;
-                                        $dokumen = $item['dokumen'] ?? [];
+                                        /*
+                                        |--------------------------------------------------------------------------
+                                        | DETAIL TIKET
+                                        |--------------------------------------------------------------------------
+                                        */
+                                        $syaratData = $detail->syarat;
+
+                                        /*
+                                        |--------------------------------------------------------------------------
+                                        | DATA FILE
+                                        |--------------------------------------------------------------------------
+                                        */
+                                        $fileName = $detail->file_name;
+                                        $filePath = $detail->file_path;
+
+                                        /*
+                                        |--------------------------------------------------------------------------
+                                        | STATUS VERIFIKASI
+                                        |--------------------------------------------------------------------------
+                                        */
+                                        $status = $detail->status;
                                         @endphp
 
                                         <tr>
@@ -1103,16 +1158,62 @@ $stepHeader = [
 
                                             {{-- SYARAT --}}
                                             <td>
-                                                {{ $s->syarat }}
+
+                                                @if($syaratData)
+
+                                                <div class="fw-semibold">
+                                                    {{ $syaratData->syarat }}
+                                                </div>
+
+                                                @if($syaratData->deskripsi)
+                                                <div class="small text-muted mt-1">
+                                                    {{ $syaratData->deskripsi }}
+                                                </div>
+                                                @endif
+
+                                                @else
+
+                                                <span class="text-muted">
+                                                    Syarat tidak ditemukan
+                                                </span>
+
+                                                @endif
+
                                             </td>
 
                                             {{-- E-FILE --}}
                                             <td class="text-center text-nowrap">
 
-                                                {{-- ========================= --}}
-                                                {{-- SYARAT UPLOAD --}}
-                                                {{-- ========================= --}}
-                                                @if ($s->metode !== 'simpeg')
+                                                {{-- ================================================= --}}
+                                                {{-- FILE UPLOAD DARI PENGAJU --}}
+                                                {{-- ================================================= --}}
+                                                @if($filePath)
+
+                                                <a
+                                                    href="{{ route('adminOpd.tiket.file', $detail->id) }}"
+                                                    target="_blank"
+                                                    class="btn btn-sm btn-outline-primary d-inline-flex align-items-center">
+
+                                                    <i data-feather="file-text" class="me-1"></i>
+
+                                                    Lihat
+
+                                                </a>
+
+                                                @if($fileName)
+                                                <div
+                                                    class="small text-muted mt-1"
+                                                    style="max-width: 180px; white-space: normal; word-break: break-word;">
+                                                    {{ $fileName }}
+                                                </div>
+                                                @endif
+
+                                                {{-- ================================================= --}}
+                                                {{-- TIDAK ADA FILE UPLOAD --}}
+                                                {{-- ================================================= --}}
+                                                @else
+
+                                                @if($syaratData && $syaratData->metode === 'upload')
 
                                                 <span
                                                     class="badge bg-light text-warning border d-inline-flex align-items-center">
@@ -1120,68 +1221,18 @@ $stepHeader = [
                                                     <i data-feather="upload" class="me-1"></i>
 
                                                     Upload Dokumen
+
                                                 </span>
 
-                                                {{-- ========================= --}}
-                                                {{-- SIMPEG TIDAK TERSEDIA --}}
-                                                {{-- ========================= --}}
-                                                @elseif (!$tersedia)
+                                                @else
 
                                                 <span
-                                                    class="badge bg-light text-danger border d-inline-flex align-items-center">
+                                                    class="badge bg-light text-muted border d-inline-flex align-items-center">
 
-                                                    <i data-feather="x" class="me-1"></i>
+                                                    <i data-feather="file" class="me-1"></i>
 
                                                     Tidak tersedia
-                                                </span>
 
-                                                {{-- ========================= --}}
-                                                {{-- SIMPEG TERSEDIA --}}
-                                                {{-- ========================= --}}
-                                                @else
-
-                                                {{-- SINGLE --}}
-                                                @if ($mode === 'single')
-
-                                                <button
-                                                    type="button"
-                                                    class="btn btn-sm btn-outline-primary btn-lihat-dokumen"
-                                                    data-dokumen='@json($dokumen)'
-                                                    data-syarat="{{ $s->syarat }}">
-
-                                                    <i data-feather="file-text" class="me-1"></i>
-
-                                                    Lihat Dokumen
-                                                </button>
-
-                                                {{-- ALL --}}
-                                                @elseif ($mode === 'all')
-
-                                                <button
-                                                    type="button"
-                                                    class="btn btn-sm btn-outline-primary btn-lihat-dokumen"
-                                                    data-dokumen='@json($dokumen)'
-                                                    data-syarat="{{ $s->syarat }}">
-
-                                                    <i data-feather="files" class="me-1"></i>
-
-                                                    Lihat Semua
-
-                                                    <span class="badge bg-primary ms-1">
-                                                        {{ count($dokumen) }}
-                                                    </span>
-
-                                                </button>
-
-                                                {{-- FALLBACK --}}
-                                                @else
-
-                                                <span
-                                                    class="badge bg-light text-success border d-inline-flex align-items-center">
-
-                                                    <i data-feather="check-circle" class="me-1"></i>
-
-                                                    Tersedia
                                                 </span>
 
                                                 @endif
@@ -1190,32 +1241,41 @@ $stepHeader = [
 
                                             </td>
 
-                                            {{-- VALIDASI --}}
+                                            {{-- VERIFIKASI --}}
                                             <td class="text-center">
 
-                                                @if ($s->metode !== 'simpeg')
+                                                @if($status == 1)
 
-                                                {{-- UPLOAD BELUM DIDUKUNG DI TAHAP INI --}}
-                                                <input
-                                                    type="checkbox"
-                                                    name="syarat_id[]"
-                                                    value="{{ $s->id }}">
+                                                <span
+                                                    class="badge bg-light text-success border d-inline-flex align-items-center">
 
-                                                @elseif ($tersedia)
+                                                    <i data-feather="check-circle" class="me-1"></i>
 
-                                                {{-- DOKUMEN SIMPEG TERSEDIA --}}
-                                                <input
-                                                    type="checkbox"
-                                                    name="syarat_id[]"
-                                                    value="{{ $s->id }}">
+                                                    Valid
+
+                                                </span>
+
+                                                @elseif($status == 2)
+
+                                                <span
+                                                    class="badge bg-light text-danger border d-inline-flex align-items-center">
+
+                                                    <i data-feather="x-circle" class="me-1"></i>
+
+                                                    Tidak Valid
+
+                                                </span>
 
                                                 @else
 
-                                                {{-- DOKUMEN SIMPEG TIDAK TERSEDIA --}}
-                                                <input
-                                                    type="checkbox"
-                                                    disabled
-                                                    title="Dokumen belum tersedia di SIMPEG">
+                                                <span
+                                                    class="badge bg-light text-warning border d-inline-flex align-items-center">
+
+                                                    <i data-feather="clock" class="me-1"></i>
+
+                                                    Menunggu
+
+                                                </span>
 
                                                 @endif
 
@@ -1226,14 +1286,21 @@ $stepHeader = [
                                         @empty
 
                                         <tr>
-                                            <td colspan="4" class="text-center text-muted">
-                                                Tidak ada syarat
+                                            <td
+                                                colspan="4"
+                                                class="text-center text-muted py-4">
+
+                                                Tidak ada syarat untuk tiket ini.
+
                                             </td>
                                         </tr>
 
                                         @endforelse
+
                                     </tbody>
+
                                 </table>
+
                             </div>
                         </div>
                     </div>
@@ -1266,6 +1333,10 @@ $stepHeader = [
 <script>
     document.addEventListener('DOMContentLoaded', function() {
 
+        // ========================================
+        // DATATABLE
+        // ========================================
+
         const table = document.querySelector("#datatablesSimple");
 
         if (table) {
@@ -1275,6 +1346,11 @@ $stepHeader = [
                 perPageSelect: false
             });
         }
+
+
+        // ========================================
+        // ELEMENT STEP 1
+        // ========================================
 
         const loadingSpinner = document.getElementById('loadingSpinner');
         const btnCekText = document.getElementById('btnCekText');
@@ -1292,11 +1368,19 @@ $stepHeader = [
         const layanan = document.getElementById('layanan');
 
         const modalEl = document.getElementById('modalDetail');
-        let modalDetail = modalEl ? new bootstrap.Modal(modalEl) : null;
+
+        let modalDetail =
+            modalEl ?
+            new bootstrap.Modal(modalEl) :
+            null;
 
         let nipValid = false;
 
-        // Cek Data
+
+        // ========================================
+        // CEK DATA PEGAWAI
+        // ========================================
+
         if (btnCek) {
 
             btnCek.addEventListener('click', async function() {
@@ -1305,45 +1389,75 @@ $stepHeader = [
 
                 // loading ON
                 btnCek.disabled = true;
-                loadingSpinner.classList.remove('d-none');
-                btnCekText.innerText = 'Memeriksa...';
+
+                if (loadingSpinner) {
+                    loadingSpinner.classList.remove('d-none');
+                }
+
+                if (btnCekText) {
+                    btnCekText.innerText = 'Memeriksa...';
+                }
 
                 // reset
-                nipError.classList.add('d-none');
-                nipError.innerText = '';
+                if (nipError) {
+                    nipError.classList.add('d-none');
+                    nipError.innerText = '';
+                }
 
                 if (nip === '') {
 
-                    nipError.innerText = 'NIP wajib diisi';
-                    nipError.classList.remove('d-none');
+                    if (nipError) {
+                        nipError.innerText = 'NIP wajib diisi';
+                        nipError.classList.remove('d-none');
+                    }
 
                     nipValid = false;
 
                     // loading OFF
                     btnCek.disabled = false;
-                    loadingSpinner.classList.add('d-none');
-                    btnCekText.innerText = 'Cek Data';
+
+                    if (loadingSpinner) {
+                        loadingSpinner.classList.add('d-none');
+                    }
+
+                    if (btnCekText) {
+                        btnCekText.innerText = 'Cek Data';
+                    }
 
                     return;
                 }
 
                 try {
 
-                    const response = await fetch('/adminOpd/get-pegawai/' + nip);
-                    const result = await response.json();
+                    const response =
+                        await fetch('/adminOpd/get-pegawai/' + nip);
+
+                    const result =
+                        await response.json();
 
                     console.log(result);
 
                     if (!result.success || !result.data) {
 
-                        nipError.innerText = result.message ?? 'NIP tidak ditemukan';
-                        nipError.classList.remove('d-none');
+                        if (nipError) {
+                            nipError.innerText =
+                                result.message ??
+                                'NIP tidak ditemukan';
+
+                            nipError.classList.remove('d-none');
+                        }
 
                         nipValid = false;
 
                         btnCek.disabled = false;
-                        loadingSpinner.classList.add('d-none');
-                        btnCekText.innerText = 'Cek Data';
+
+                        if (loadingSpinner) {
+                            loadingSpinner.classList.add('d-none');
+                        }
+
+                        if (btnCekText) {
+                            btnCekText.innerText = 'Cek Data';
+                        }
 
                         return;
                     }
@@ -1352,21 +1466,16 @@ $stepHeader = [
 
                     nipValid = true;
 
-                    // DETAIL
+
+                    // ========================================
+                    // DETAIL PEGAWAI
+                    // ========================================
+
                     document.getElementById('detailNip').innerText =
                         pegawai.nip ?? '-';
 
                     document.getElementById('detailNama').innerText =
                         pegawai.nama_lengkap ?? '-';
-
-                    // document.getElementById('detailTgl').innerText =
-                    //     pegawai.tgl_lahir ?
-                    //     new Date(pegawai.tgl_lahir).toLocaleDateString('id-ID', {
-                    //         day: 'numeric',
-                    //         month: 'long',
-                    //         year: 'numeric'
-                    //     }) :
-                    //     '-';
 
                     document.getElementById('detailGol').innerText =
                         pegawai.ket_gol ?? '-';
@@ -1377,17 +1486,32 @@ $stepHeader = [
                     document.getElementById('detailUkerja').innerText =
                         pegawai.ket_ukerja ?? '-';
 
-                    const foto = document.getElementById('detailFoto');
 
-                    foto.src =
-                        `https://simpegdev.bllkom.site/pegawai/foto/${pegawai.nip}`;
+                    // ========================================
+                    // FOTO PEGAWAI
+                    // ========================================
 
-                    foto.onerror = function() {
-                        this.src =
-                            '/templatepro/assets/img/demo/user-placeholder.svg';
-                    };
+                    const foto =
+                        document.getElementById('detailFoto');
 
-                    // tampil modal
+                    if (foto) {
+
+                        foto.src =
+                            `https://simpegdev.bllkom.site/pegawai/foto/${pegawai.nip}`;
+
+                        foto.onerror = function() {
+
+                            this.src =
+                                '/templatepro/assets/img/demo/user-placeholder.svg';
+
+                        };
+                    }
+
+
+                    // ========================================
+                    // TAMPIL MODAL DETAIL
+                    // ========================================
+
                     if (modalDetail) {
                         modalDetail.show();
                     }
@@ -1396,238 +1520,45 @@ $stepHeader = [
 
                     console.error(error);
 
-                    nipError.innerText = 'Terjadi kesalahan server';
-                    nipError.classList.remove('d-none');
+                    if (nipError) {
+                        nipError.innerText =
+                            'Terjadi kesalahan server';
+
+                        nipError.classList.remove('d-none');
+                    }
 
                     nipValid = false;
+
                 } finally {
 
                     // loading OFF
                     btnCek.disabled = false;
-                    loadingSpinner.classList.add('d-none');
-                    btnCekText.innerText = 'Cek Data';
+
+                    if (loadingSpinner) {
+                        loadingSpinner.classList.add('d-none');
+                    }
+
+                    if (btnCekText) {
+                        btnCekText.innerText = 'Cek Data';
+                    }
+
                 }
 
             });
 
         }
 
+
         // ========================================
-        // MODAL DOKUMEN SIMPEG
+        // PILIH PEGAWAI
+        // ========================================
+        //
+        // INI DIPERTAHANKAN DARI SCRIPT BACKUP ANDA.
+        // JANGAN DIUBAH LOGIKANYA.
         // ========================================
 
-        const modalDokumenEl = document.getElementById('modalDokumen');
-
-        let modalDokumen = null;
-
-        if (modalDokumenEl) {
-            modalDokumen = new bootstrap.Modal(modalDokumenEl);
-        }
-
-        const modalDokumenTitle =
-            document.getElementById('modalDokumenTitle');
-
-        const modalDokumenSubtitle =
-            document.getElementById('modalDokumenSubtitle');
-
-        const dokumenList =
-            document.getElementById('dokumenList');
-
-
-        document.querySelectorAll('.btn-lihat-dokumen')
-            .forEach(function(button) {
-
-                button.addEventListener('click', function() {
-
-                    let dokumen = [];
-
-                    try {
-
-                        dokumen = JSON.parse(
-                            this.dataset.dokumen || '[]'
-                        );
-
-                    } catch (error) {
-
-                        console.error(
-                            'Gagal membaca data dokumen:',
-                            error
-                        );
-
-                        dokumen = [];
-                    }
-
-                    const syarat =
-                        this.dataset.syarat || 'Dokumen SIMPEG';
-
-                    modalDokumenTitle.innerText =
-                        'Dokumen SIMPEG';
-
-                    modalDokumenSubtitle.innerText =
-                        syarat;
-
-                    dokumenList.innerHTML = '';
-
-                    if (!dokumen.length) {
-
-                        dokumenList.innerHTML = `
-                    <div class="text-center text-muted py-5">
-
-                        <i
-                            data-feather="file-x"
-                            style="width:40px;height:40px;">
-                        </i>
-
-                        <div class="mt-2">
-                            Tidak ada dokumen tersedia.
-                        </div>
-
-                    </div>
-                `;
-
-                        if (window.feather) {
-                            feather.replace();
-                        }
-
-                        modalDokumen.show();
-
-                        return;
-                    }
-
-
-                    dokumen.forEach(function(doc, index) {
-
-                        const nama =
-                            doc.nama_file ??
-                            doc.nama ??
-                            doc.file_name ??
-                            'Dokumen ' + (index + 1);
-
-                        const tanggal =
-                            doc.tanggal ??
-                            doc.created_at ??
-                            doc.tgl_dokumen ??
-                            null;
-
-                        const url =
-                            doc.preview_url ??
-                            doc.url ??
-                            null;
-
-                        const urutan =
-                            doc.urutan ?? '-';
-
-
-                        let tanggalHtml = '';
-
-                        if (tanggal) {
-
-                            tanggalHtml = `
-                        <div class="small text-muted mt-1">
-                            <i
-                                data-feather="calendar"
-                                class="me-1"
-                                style="width:14px;height:14px;">
-                            </i>
-                            ${tanggal}
-                        </div>
-                    `;
-                        }
-
-
-                        let buttonHtml = '';
-
-                        if (url) {
-
-                            buttonHtml = `
-                        <a
-                            href="${url}"
-                            target="_blank"
-                            class="btn btn-sm btn-outline-primary">
-
-                            <i
-                                data-feather="eye"
-                                class="me-1">
-                            </i>
-
-                            Lihat
-                        </a>
-                    `;
-                        }
-
-
-                        dokumenList.innerHTML += `
-
-                    <div class="card border mb-2">
-
-                        <div class="card-body py-3">
-
-                            <div class="d-flex
-                                justify-content-between
-                                align-items-center">
-
-                                <div class="d-flex
-                                    align-items-start">
-
-                                    <div class="me-3">
-
-                                        <div
-                                            class="bg-light
-                                            rounded p-2">
-
-                                            <i
-                                                data-feather="file-text"
-                                                class="text-primary">
-                                            </i>
-
-                                        </div>
-
-                                    </div>
-
-
-                                    <div>
-
-                                        <div class="fw-semibold">
-                                            ${nama}
-                                        </div>
-
-                                        <div class="small text-muted">
-                                            Urutan: ${urutan}
-                                        </div>
-
-                                        ${tanggalHtml}
-
-                                    </div>
-
-                                </div>
-
-
-                                <div>
-                                    ${buttonHtml}
-                                </div>
-
-                            </div>
-
-                        </div>
-
-                    </div>
-
-                `;
-                    });
-
-
-                    if (window.feather) {
-                        feather.replace();
-                    }
-
-                    modalDokumen.show();
-
-                });
-
-            });
-
-        // Confirm
         if (confirmBtn) {
+
             confirmBtn.addEventListener('click', function() {
 
                 if (!nipValid) return;
@@ -1637,22 +1568,37 @@ $stepHeader = [
                 }
 
                 btnCek.classList.add('d-none');
+
                 btnNext.classList.remove('d-none');
 
                 if (emailWrapper) {
                     emailWrapper.classList.remove('d-none');
                 }
+
             });
+
         }
 
-        // Reset
+
+        // ========================================
+        // RESET SAAT NIP DIUBAH
+        // ========================================
+
         if (nipInput) {
+
             nipInput.addEventListener('input', function() {
 
-                nipError.classList.add('d-none');
+                if (nipError) {
+                    nipError.classList.add('d-none');
+                }
 
-                btnCek.classList.remove('d-none');
-                btnNext.classList.add('d-none');
+                if (btnCek) {
+                    btnCek.classList.remove('d-none');
+                }
+
+                if (btnNext) {
+                    btnNext.classList.add('d-none');
+                }
 
                 nipValid = false;
 
@@ -1663,50 +1609,95 @@ $stepHeader = [
                 if (emailInput) {
                     emailInput.value = '';
                 }
+
             });
+
         }
+
+
+        // ========================================
+        // LOAD LAYANAN BERDASARKAN BIDANG
+        // ========================================
 
         function loadLayanan(bidangId) {
 
             if (!layanan) return;
 
             if (!bidangId) {
-                layanan.innerHTML = '<option value="">Pilih Bidang dahulu</option>';
+
+                layanan.innerHTML =
+                    '<option value="">Pilih Bidang dahulu</option>';
+
                 return;
             }
 
-            layanan.innerHTML = '<option value="">Loading...</option>';
+            layanan.innerHTML =
+                '<option value="">Loading...</option>';
 
             fetch('/adminOpd/get-layanan/' + bidangId)
                 .then(res => res.json())
                 .then(data => {
 
-                    let html = '<option value="">Pilih Layanan</option>';
+                    let html =
+                        '<option value="">Pilih Layanan</option>';
 
                     data.forEach(l => {
-                        html += `<option value="${l.id}">${l.nama_layanan}</option>`;
+
+                        html +=
+                            `<option value="${l.id}">${l.nama_layanan}</option>`;
+
                     });
 
                     layanan.innerHTML = html;
+
                 })
                 .catch(() => {
-                    layanan.innerHTML = '<option value="">Gagal load data</option>';
+
+                    layanan.innerHTML =
+                        '<option value="">Gagal load data</option>';
+
                 });
+
         }
+
+
+        // ========================================
+        // CHANGE BIDANG
+        // ========================================
 
         if (bidang) {
+
             bidang.addEventListener('change', function() {
+
                 loadLayanan(this.value);
+
             });
+
         }
 
 
-        // Confirm
-        const btnNextStep3 = document.getElementById('btnNextStep3');
-        const modalKonfirmasiEl = document.getElementById('modalKonfirmasi');
-        let modalKonfirmasi = modalKonfirmasiEl ? new bootstrap.Modal(modalKonfirmasiEl) : null;
+        // ========================================
+        // MODAL KONFIRMASI STEP 3
+        // ========================================
 
-        const btnSubmitFinal = document.getElementById('btnSubmitFinal');
+        const btnNextStep3 =
+            document.getElementById('btnNextStep3');
+
+        const modalKonfirmasiEl =
+            document.getElementById('modalKonfirmasi');
+
+        let modalKonfirmasi =
+            modalKonfirmasiEl ?
+            new bootstrap.Modal(modalKonfirmasiEl) :
+            null;
+
+        const btnSubmitFinal =
+            document.getElementById('btnSubmitFinal');
+
+
+        // ========================================
+        // NEXT STEP 3
+        // ========================================
 
         if (btnNextStep3) {
 
@@ -1718,18 +1709,9 @@ $stepHeader = [
                     );
 
                 let allChecked = true;
-                let hasDisabled = false;
 
                 checkboxes.forEach(function(cb) {
 
-                    // Ada syarat yang belum upload
-                    if (cb.disabled) {
-                        hasDisabled = true;
-                        allChecked = false;
-                        return;
-                    }
-
-                    // Ada syarat yang belum dicentang
                     if (!cb.checked) {
                         allChecked = false;
                     }
@@ -1737,37 +1719,15 @@ $stepHeader = [
                 });
 
 
-                // ========================================
-                // ADA FILE YANG BELUM DIUPLOAD
-                // ========================================
-
-                if (hasDisabled) {
-
-                    alert(
-                        'Silakan upload seluruh dokumen yang diperlukan terlebih dahulu.'
-                    );
-
-                    return;
-                }
-
-
-                // ========================================
-                // ADA CHECKLIST YANG BELUM DICENTANG
-                // ========================================
-
                 if (!allChecked) {
 
                     alert(
-                        'Semua syarat wajib divalidasi terlebih dahulu.'
+                        'Semua syarat wajib divalidasi terlebih dahulu!'
                     );
 
                     return;
                 }
 
-
-                // ========================================
-                // SEMUA SUDAH LENGKAP
-                // ========================================
 
                 if (modalKonfirmasi) {
                     modalKonfirmasi.show();
@@ -1777,153 +1737,525 @@ $stepHeader = [
 
         }
 
+
+        // ========================================
+        // SUBMIT FINAL STEP 3
+        // ========================================
+
         if (btnSubmitFinal && btnNextStep3) {
+
             btnSubmitFinal.addEventListener('click', function() {
-                const form = btnNextStep3.form;
-                if (form) form.submit();
+
+                const form =
+                    btnNextStep3.form;
+
+                if (form) {
+                    form.submit();
+                }
+
             });
+
         }
 
+
         // ========================================
-        // UPLOAD DOKUMEN SYARAT
+        // MODAL DOKUMEN SIMPEG
+        // KHUSUS MODE EFILE = ALL
         // ========================================
 
-        const uploadInputs = document.querySelectorAll('.upload-syarat');
+        const modalDokumenEl =
+            document.getElementById('modalDokumen');
 
-        uploadInputs.forEach(function(input) {
+        let modalDokumen = null;
 
-            input.addEventListener('change', function() {
+        if (modalDokumenEl) {
 
-                const syaratId = this.dataset.syaratId;
+            modalDokumen =
+                new bootstrap.Modal(modalDokumenEl);
 
-                const fileNameElement =
-                    document.getElementById('file-name-' + syaratId);
+        }
 
-                const labelElement =
-                    document.querySelector('.upload-label-' + syaratId);
 
-                const checklist =
-                    document.querySelector(
-                        '.checklist-syarat[data-syarat-id="' + syaratId + '"]'
-                    );
+        const modalDokumenTitle =
+            document.getElementById('modalDokumenTitle');
 
-                // ========================================
-                // TIDAK ADA FILE
-                // ========================================
+        const modalDokumenSubtitle =
+            document.getElementById('modalDokumenSubtitle');
 
-                if (!this.files || !this.files.length) {
+        const dokumenList =
+            document.getElementById('dokumenList');
 
-                    if (fileNameElement) {
-                        fileNameElement.innerHTML = '';
+
+        // ========================================
+        // TOMBOL LIHAT SEMUA DOKUMEN
+        // ========================================
+
+        document
+            .querySelectorAll('.btn-lihat-dokumen')
+            .forEach(function(button) {
+
+                button.addEventListener('click', function() {
+
+                    // Pastikan modal tersedia
+                    if (!modalDokumen || !dokumenList) {
+
+                        console.error(
+                            'Modal dokumen tidak ditemukan.'
+                        );
+
+                        return;
                     }
 
-                    if (labelElement) {
-                        labelElement.innerText = 'Upload';
+
+                    // ========================================
+                    // AMBIL DATA DOKUMEN
+                    // ========================================
+
+                    let dokumen = [];
+
+                    try {
+
+                        dokumen =
+                            JSON.parse(
+                                this.dataset.dokumen || '[]'
+                            );
+
+                    } catch (error) {
+
+                        console.error(
+                            'Gagal membaca data dokumen:',
+                            error
+                        );
+
+                        dokumen = [];
+
                     }
 
-                    // Checklist kembali disabled
-                    if (checklist) {
-                        checklist.checked = false;
-                        checklist.disabled = true;
+
+                    // ========================================
+                    // NAMA SYARAT
+                    // ========================================
+
+                    const syarat =
+                        this.dataset.syarat ||
+                        'Dokumen SIMPEG';
+
+
+                    // ========================================
+                    // SET HEADER MODAL
+                    // ========================================
+
+                    if (modalDokumenTitle) {
+
+                        modalDokumenTitle.innerText =
+                            'Dokumen SIMPEG';
+
                     }
 
-                    return;
-                }
+                    if (modalDokumenSubtitle) {
 
+                        modalDokumenSubtitle.innerText =
+                            syarat;
 
-                const file = this.files[0];
-
-
-                // ========================================
-                // VALIDASI UKURAN FILE
-                // ========================================
-
-                const maxSize = 5 * 1024 * 1024;
-
-                if (file.size > maxSize) {
-
-                    alert('Ukuran file maksimal 5 MB.');
-
-                    this.value = '';
-
-                    if (fileNameElement) {
-                        fileNameElement.innerHTML = '';
                     }
 
-                    if (labelElement) {
-                        labelElement.innerText = 'Upload';
+
+                    // ========================================
+                    // RESET LIST
+                    // ========================================
+
+                    dokumenList.innerHTML = '';
+
+
+                    // ========================================
+                    // JIKA TIDAK ADA DOKUMEN
+                    // ========================================
+
+                    if (
+                        !Array.isArray(dokumen) ||
+                        !dokumen.length
+                    ) {
+
+                        dokumenList.innerHTML = `
+                            <div class="text-center text-muted py-5">
+
+                                <i
+                                    data-feather="file"
+                                    style="width:40px;height:40px;">
+                                </i>
+
+                                <div class="mt-2">
+                                    Tidak ada dokumen tersedia.
+                                </div>
+
+                            </div>
+                        `;
+
+                        if (window.feather) {
+                            feather.replace();
+                        }
+
+                        modalDokumen.show();
+
+                        return;
                     }
 
-                    // Checklist tetap disabled
-                    if (checklist) {
-                        checklist.checked = false;
-                        checklist.disabled = true;
+
+                    // ========================================
+                    // TAMPILKAN DOKUMEN
+                    // ========================================
+
+                    dokumen.forEach(function(doc, index) {
+
+                        const nama =
+                            doc.nama_file ??
+                            doc.nama ??
+                            doc.file_name ??
+                            'Dokumen ' + (index + 1);
+
+
+                        const tanggal =
+                            doc.tanggal ??
+                            doc.created_at ??
+                            doc.tgl_dokumen ??
+                            null;
+
+
+                        const url =
+                            doc.preview_url ??
+                            doc.url ??
+                            null;
+
+
+                        const urutan =
+                            doc.urutan ??
+                            '-';
+
+
+                        // ========================================
+                        // TANGGAL
+                        // ========================================
+
+                        let tanggalHtml = '';
+
+                        if (tanggal) {
+
+                            tanggalHtml = `
+                                <div class="small text-muted mt-1">
+
+                                    <i
+                                        data-feather="calendar"
+                                        class="me-1"
+                                        style="width:14px;height:14px;">
+                                    </i>
+
+                                    ${tanggal}
+
+                                </div>
+                            `;
+
+                        }
+
+
+                        // ========================================
+                        // BUTTON LIHAT
+                        // ========================================
+
+                        let buttonHtml = '';
+
+                        if (url) {
+
+                            buttonHtml = `
+                                <a
+                                    href="${url}"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    class="btn btn-sm btn-outline-primary">
+
+                                    <i
+                                        data-feather="eye"
+                                        class="me-1">
+                                    </i>
+
+                                    Lihat
+
+                                </a>
+                            `;
+
+                        } else {
+
+                            buttonHtml = `
+                                <span
+                                    class="badge bg-light text-danger border">
+
+                                    Dokumen tidak tersedia
+
+                                </span>
+                            `;
+
+                        }
+
+
+                        // ========================================
+                        // CARD DOKUMEN
+                        // ========================================
+
+                        dokumenList.innerHTML += `
+
+                            <div class="card border mb-2">
+
+                                <div class="card-body py-3">
+
+                                    <div class="d-flex
+                                        justify-content-between
+                                        align-items-center">
+
+                                        <div class="d-flex
+                                            align-items-start">
+
+                                            <div class="me-3">
+
+                                                <div
+                                                    class="bg-light
+                                                    rounded p-2">
+
+                                                    <i
+                                                        data-feather="file-text"
+                                                        class="text-primary">
+                                                    </i>
+
+                                                </div>
+
+                                            </div>
+
+
+                                            <div>
+
+                                                <div class="fw-semibold">
+                                                    ${nama}
+                                                </div>
+
+                                                <div class="small text-muted">
+                                                    Urutan: ${urutan}
+                                                </div>
+
+                                                ${tanggalHtml}
+
+                                            </div>
+
+                                        </div>
+
+
+                                        <div>
+                                            ${buttonHtml}
+                                        </div>
+
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+                        `;
+
+                    });
+
+
+                    // ========================================
+                    // REFRESH FEATHER
+                    // ========================================
+
+                    if (window.feather) {
+                        feather.replace();
                     }
 
-                    return;
-                }
 
+                    // ========================================
+                    // TAMPILKAN MODAL
+                    // ========================================
 
-                // ========================================
-                // TAMPILKAN NAMA FILE
-                // ========================================
+                    modalDokumen.show();
 
-                if (fileNameElement) {
-
-                    fileNameElement.innerHTML = `
-                <span class="text-success">
-
-              
-
-                    ${file.name}
-
-                </span>
-            `;
-                }
-
-
-                // ========================================
-                // UBAH LABEL UPLOAD -> GANTI
-                // ========================================
-
-                if (labelElement) {
-                    labelElement.innerText = 'Ganti';
-                }
-
-
-                // ========================================
-                // AKTIFKAN CHECKLIST
-                // ========================================
-
-                if (checklist) {
-                    checklist.disabled = false;
-                }
-
-
-                // ========================================
-                // REFRESH FEATHER ICON
-                // ========================================
-
-                if (window.feather) {
-                    feather.replace();
-                }
+                });
 
             });
 
-        });
 
-        // Modal pengajuan sudah ada
-        const showWarningModal = document.getElementById('showWarningModal');
+        // ============================================================
+        // UPLOAD DOKUMEN SYARAT
+        // ============================================================
+        //
+        // BLOK INI KHUSUS UNTUK E-FILE.
+        //
+        // TIDAK MENGUBAH LOGIKA STEP 1.
+        // ============================================================
+
+        document
+            .querySelectorAll('.upload-syarat')
+            .forEach(function(input) {
+
+                input.addEventListener('change', function() {
+
+                    const syaratId =
+                        this.dataset.syaratId;
+
+
+                    // ========================================
+                    // ELEMENT NAMA FILE
+                    // ========================================
+
+                    const fileNameElement =
+                        document.getElementById(
+                            'file-name-' + syaratId
+                        );
+
+
+                    // ========================================
+                    // LABEL BUTTON
+                    // ========================================
+
+                    const uploadLabel =
+                        document.querySelector(
+                            '.upload-label-' + syaratId
+                        );
+
+
+                    // ========================================
+                    // CHECKBOX VALIDASI
+                    // ========================================
+
+                    const checkbox =
+                        document.querySelector(
+                            '.checklist-syarat[data-syarat-id="' +
+                            syaratId +
+                            '"]'
+                        );
+
+
+                    // ========================================
+                    // JIKA FILE DIPILIH
+                    // ========================================
+
+                    if (
+                        this.files &&
+                        this.files.length > 0
+                    ) {
+
+                        const file =
+                            this.files[0];
+
+
+                        // ========================================
+                        // TAMPILKAN NAMA FILE
+                        // ========================================
+
+                        if (fileNameElement) {
+
+                            fileNameElement.textContent =
+                                file.name;
+
+                            fileNameElement.classList.remove(
+                                'text-danger'
+                            );
+
+                            fileNameElement.classList.add(
+                                'text-muted'
+                            );
+
+                        }
+
+
+                        // ========================================
+                        // UBAH LABEL BUTTON
+                        // ========================================
+
+                        if (uploadLabel) {
+
+                            uploadLabel.textContent =
+                                'Ganti File';
+
+                        }
+
+
+                        // ========================================
+                        // AKTIFKAN CHECKBOX VALIDASI
+                        // ========================================
+
+                        if (checkbox) {
+
+                            checkbox.disabled = false;
+
+                        }
+
+                    } else {
+
+                        // ========================================
+                        // JIKA FILE DIHAPUS / TIDAK ADA
+                        // ========================================
+
+                        if (fileNameElement) {
+
+                            fileNameElement.textContent = '';
+
+                        }
+
+                        if (uploadLabel) {
+
+                            uploadLabel.textContent =
+                                'Upload';
+
+                        }
+
+                        if (checkbox) {
+
+                            checkbox.disabled = true;
+                            checkbox.checked = false;
+
+                        }
+
+                    }
+
+                });
+
+            });
+
+
+        // ========================================
+        // REFRESH FEATHER ICON
+        // ========================================
+
+        if (window.feather) {
+            feather.replace();
+        }
+
+
+        // ========================================
+        // MODAL PENGAJUAN SUDAH ADA
+        // ========================================
+
+        const showWarningModal =
+            document.getElementById('showWarningModal');
 
         if (showWarningModal) {
+
             const modalPengajuanAdaEl =
-                document.getElementById('modalPengajuanAda');
+                document.getElementById(
+                    'modalPengajuanAda'
+                );
+
             if (modalPengajuanAdaEl) {
+
                 const modalPengajuanAda =
-                    new bootstrap.Modal(modalPengajuanAdaEl);
+                    new bootstrap.Modal(
+                        modalPengajuanAdaEl
+                    );
+
                 modalPengajuanAda.show();
+
             }
+
         }
+
     });
 </script>
 @endsection

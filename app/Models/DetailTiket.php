@@ -18,7 +18,7 @@ class DetailTiket extends Model
         'file_size',
         'uploaded_at',
         'retention_until',
-        'deleted_at',
+        'deleted_file_at',
     ];
 
     public function syarat()

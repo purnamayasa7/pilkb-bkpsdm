@@ -53,6 +53,13 @@ return [
             'report' => false,
         ],
 
+        // e-File PILKB
+        'pilkb_efile' => [
+            'driver' => 'local',
+            'root' => env('PILKB_EFILE_PATH'),
+            'throw' => true,
+        ],
+
         's3' => [
             'driver' => 's3',
             'key' => env('AWS_ACCESS_KEY_ID'),

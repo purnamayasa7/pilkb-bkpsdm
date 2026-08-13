@@ -202,6 +202,7 @@ Route::prefix('adminOpd')
         Route::get('/tiket/history/{no_tiket}', [TiketController::class, 'getHistory'])->name('tiket.getHistory');
         Route::get('/get-layanan-syarat/{bidang}', [SyaratController::class, 'getLayanan'])->name('syarat.getLayanan');
         Route::get('/get-pegawai/{nip}', [TiketController::class, 'getPegawai'])->name('pegawai.getPegawai');
+        Route::get('tiket/file/{id}', [TiketController::class, 'viewFile'])->name('tiket.file');
         // Route::get('/pegawai/foto/{nip}', [TiketController::class, 'getFotoPegawai'])->name('pegawai.foto');
 
         // EXPORT EXCEL & PDF
