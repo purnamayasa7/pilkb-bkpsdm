@@ -12,8 +12,21 @@
                 Apakah anda yakin menyimpan perubahan status ini?
             </div>
             <div class="modal-footer">
-                <button class="btn btn-light" data-bs-dismiss="modal">Kembali</button>
-                <button class="btn btn-primary" type="button" id="confirmSimpan">Simpan</button>
+                <button class="btn btn-light" data-bs-dismiss="modal">
+                    <i data-feather="arrow-left" class="me-1"></i>
+                    Kembali
+                </button>
+                <button class="btn btn-primary" type="button" id="confirmSimpan">
+                    <span class="btn-text">
+                        <i data-feather="save" class="me-1"></i>
+                        Simpan
+                    </span>
+
+                    <span class="btn-loading d-none">
+                        <span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
+                        Menyimpan...
+                    </span>
+                </button>
             </div>
         </div>
     </div>
@@ -62,18 +75,11 @@
                 <div class="mb-3">
                     <label class="small mb-1">Layanan</label>
 
-                    <select name="kode_layanan"
-                        class="form-select"
-                        required>
-
-                        @foreach($layanan as $item)
-                        <option value="{{ $item->id }}"
-                            {{ old('kode_layanan',$status->kode_layanan)==$item->id ? 'selected':'' }}>
-                            {{ $item->nama_layanan }}
-                        </option>
-                        @endforeach
-
-                    </select>
+                    <input
+                        type="text"
+                        class="form-control"
+                        value="{{ $status->layanan->nama_layanan }}"
+                        disabled>
                 </div>
 
                 <div class="mb-3">
@@ -83,6 +89,7 @@
                 </div>
 
                 <button class="btn btn-primary" type="button" id="btnTambah">
+                    <i data-feather="save" class="me-1"></i>
                     Update Status
                 </button>
             </form>
@@ -97,6 +104,7 @@
         const form = document.getElementById('formRegister');
         const btnTambah = document.getElementById('btnTambah');
         const modal = new bootstrap.Modal(document.getElementById('modalSimpan'));
+        const btnSimpan = document.getElementById('confirmSimpan');
 
         btnTambah.addEventListener('click', function() {
 
@@ -108,10 +116,14 @@
             modal.show();
         });
 
-        document.getElementById('confirmSimpan').addEventListener('click', function() {
+        btnSimpan.addEventListener('click', function() {
+            btnSimpan.disabled = true;
+
+            btnSimpan.querySelector('.btn-text').classList.add('d-none');
+            btnSimpan.querySelector('.btn-loading').classList.remove('d-none');
+
             form.submit();
         });
-
     });
 </script>
 @endsection

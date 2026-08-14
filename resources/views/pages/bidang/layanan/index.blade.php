@@ -56,12 +56,35 @@
             </div>
 
             <div class="modal-footer">
-                <button class="btn btn-light" data-bs-dismiss="modal">Batal</button>
+                <button class="btn btn-light" data-bs-dismiss="modal">
+                    <i data-feather="arrow-left" class="me-1"></i>
+                    Batal
+                </button>
 
                 <form id="formToggle" method="POST">
                     @csrf
                     @method('PUT')
-                    <button class="btn btn-primary">Ya, Lanjutkan</button>
+
+                    <button
+                        class="btn btn-warning"
+                        type="submit"
+                        id="btnConfirmToggle">
+
+                        <span class="btn-toggle-text">
+                            <i data-feather="slash" class="me-1"></i>
+                            Ya, Nonaktifkan
+                        </span>
+
+                        <span class="btn-toggle-loading d-none">
+                            <span
+                                class="spinner-border spinner-border-sm me-1"
+                                role="status"
+                                aria-hidden="true">
+                            </span>
+                            Memproses...
+                        </span>
+
+                    </button>
                 </form>
             </div>
         </div>
@@ -203,16 +226,22 @@
 
         feather.replace();
 
-        //Modal Aktif
+        // Modal Aktif / Nonaktif
+
         const modalAktifEl = document.getElementById('modalAktif');
         const modalAktif = new bootstrap.Modal(modalAktifEl);
 
         const textModal = document.getElementById('textModal');
-        const form = document.getElementById('formToggle');
+        const formToggle = document.getElementById('formToggle');
+        const btnConfirmToggle = document.getElementById('btnConfirmToggle');
+
+        const toggleText = btnConfirmToggle.querySelector('.btn-toggle-text');
+        const toggleLoading = btnConfirmToggle.querySelector('.btn-toggle-loading');
 
         document.addEventListener('click', function(e) {
 
             const btn = e.target.closest('.btnToggle');
+
             if (!btn) return;
 
             e.preventDefault();
@@ -221,34 +250,101 @@
             const nama = btn.dataset.nama;
             const status = btn.dataset.status;
 
-            let actionText = status == 1 ? 'menonaktifkan' : 'mengaktifkan';
+            const isAktif = status == 1;
 
+            const actionText = isAktif ?
+                'menonaktifkan' :
+                'mengaktifkan';
+
+            // Teks konfirmasi modal
             textModal.innerHTML =
                 `Apakah anda yakin ingin <b>${actionText}</b> layanan <b>${nama}</b>?`;
 
-            form.action = `/adminBidang/layanan/${id}/toggle-aktif`;
+            // Action form
+            formToggle.action =
+                `/adminBidang/layanan/${id}/toggle-aktif`;
 
+            // Ubah tombol sesuai status
+            if (isAktif) {
+
+                toggleText.innerHTML = `
+                <i data-feather="slash" class="me-1"></i>
+                Ya, Nonaktifkan
+            `;
+
+                btnConfirmToggle.classList.remove('btn-primary');
+                btnConfirmToggle.classList.add('btn-warning');
+
+            } else {
+
+                toggleText.innerHTML = `
+                <i data-feather="check-circle" class="me-1"></i>
+                Ya, Aktifkan
+            `;
+
+                btnConfirmToggle.classList.remove('btn-warning');
+                btnConfirmToggle.classList.add('btn-primary');
+            }
+
+            // Render ulang icon Feather
+            feather.replace();
+
+            // Tampilkan modal
             modalAktif.show();
         });
 
-        //Modal Detail
-        const modalDetailEl = document.getElementById('modalDetail');
-        const modalDetail = new bootstrap.Modal(modalDetailEl);
+
+        // ==========================
+        // Submit Aktif / Nonaktif
+        // ==========================
+
+        formToggle.addEventListener('submit', function() {
+
+            btnConfirmToggle.disabled = true;
+
+            toggleText.classList.add('d-none');
+            toggleLoading.classList.remove('d-none');
+
+        });
+
+
+        // ==========================
+        // Modal Detail
+        // ==========================
+
+        const modalDetailEl =
+            document.getElementById('modalDetail');
+
+        const modalDetail =
+            new bootstrap.Modal(modalDetailEl);
 
         document.addEventListener('click', function(e) {
 
             const btn = e.target.closest('.btnDetail');
+
             if (!btn) return;
 
             e.preventDefault();
 
-            document.getElementById('detailBidang').innerText = btn.dataset.bidang;
-            document.getElementById('detailNama').innerText = btn.dataset.nama;
-            document.getElementById('detailRangkap').innerText = btn.dataset.rangkap;
-            document.getElementById('detailWaktu').innerText = btn.dataset.waktu;
+            document.getElementById('detailBidang').innerText =
+                btn.dataset.bidang;
 
-            let status = btn.dataset.status == 1 ? 'Aktif' : 'Nonaktif';
-            document.getElementById('detailStatus').innerText = status;
+            document.getElementById('detailNama').innerText =
+                btn.dataset.nama;
+
+            document.getElementById('detailRangkap').innerText =
+                btn.dataset.rangkap;
+
+            document.getElementById('detailWaktu').innerText =
+                btn.dataset.waktu;
+
+            const status =
+                btn.dataset.status == 1 ?
+                'Aktif' :
+                'Nonaktif';
+
+            document.getElementById('detailStatus').innerText =
+                status;
 
             modalDetail.show();
         });

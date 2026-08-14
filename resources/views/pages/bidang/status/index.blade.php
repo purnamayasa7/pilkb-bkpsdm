@@ -75,12 +75,30 @@
             </div>
 
             <div class="modal-footer">
-                <button class="btn btn-light" data-bs-dismiss="modal">Batal</button>
+                <button class="btn btn-light" data-bs-dismiss="modal">
+                    <i data-feather="arrow-left" class="me-1"></i>
+                    Batal
+                </button>
 
                 <form id="formDelete" method="POST">
                     @csrf
                     @method('DELETE')
-                    <button class="btn btn-danger">Ya, Hapus</button>
+
+                    <button class="btn btn-danger" type="submit" id="btnConfirmDelete">
+
+                        <span class="btn-delete-text">
+                            <i data-feather="trash-2" class="me-1"></i>
+                            Ya, Hapus
+                        </span>
+
+                        <span class="btn-delete-loading d-none">
+                            <span class="spinner-border spinner-border-sm me-1"
+                                role="status"
+                                aria-hidden="true"></span>
+                            Menghapus...
+                        </span>
+
+                    </button>
                 </form>
             </div>
         </div>
@@ -184,55 +202,225 @@
 <script>
     document.addEventListener('DOMContentLoaded', function() {
 
+        /*
+        |--------------------------------------------------------------------------
+        | Feather Icons
+        |--------------------------------------------------------------------------
+        */
+
         feather.replace();
 
+
+        /*
+        |--------------------------------------------------------------------------
+        | Loading Table
+        |--------------------------------------------------------------------------
+        */
+
         window.addEventListener('load', function() {
-            document.getElementById('tableLoading').classList.add('d-none');
+
+            const tableLoading = document.getElementById('tableLoading');
+
+            if (tableLoading) {
+                tableLoading.classList.add('d-none');
+            }
+
         });
 
-        //Modal Detail
-        const modalDetailEl = document.getElementById('modalDetail');
-        const modalDetail = new bootstrap.Modal(modalDetailEl);
+
+        /*
+        |--------------------------------------------------------------------------
+        | Modal Detail
+        |--------------------------------------------------------------------------
+        */
+
+        const modalDetailEl =
+            document.getElementById('modalDetail');
+
+        const modalDetail =
+            new bootstrap.Modal(modalDetailEl);
+
 
         document.addEventListener('click', function(e) {
 
             const btn = e.target.closest('.btnDetail');
+
             if (!btn) return;
 
             e.preventDefault();
 
-            document.getElementById('detailBidang').innerText = btn.dataset.bidang;
-            document.getElementById('detailLayanan').innerText = btn.dataset.layanan;
-            document.getElementById('detailNama').innerText = btn.dataset.status;
 
+            // Ambil data dari tombol
+            const bidang =
+                btn.dataset.bidang;
+
+            const layanan =
+                btn.dataset.layanan;
+
+            const status =
+                btn.dataset.status;
+
+
+            // Masukkan ke modal
+            document.getElementById('detailBidang').innerText =
+                bidang;
+
+            document.getElementById('detailLayanan').innerText =
+                layanan;
+
+            document.getElementById('detailNama').innerText =
+                status;
+
+
+            // Tampilkan modal
             modalDetail.show();
+
         });
 
-        //Delete Data
-        const modalDelete = new bootstrap.Modal(document.getElementById('modalDelete'));
+
+        /*
+        |--------------------------------------------------------------------------
+        | Modal Delete
+        |--------------------------------------------------------------------------
+        */
+
+        const modalDeleteEl =
+            document.getElementById('modalDelete');
+
+        const modalDelete =
+            new bootstrap.Modal(modalDeleteEl);
+
+
+        const formDelete =
+            document.getElementById('formDelete');
+
+        const btnConfirmDelete =
+            document.getElementById('btnConfirmDelete');
+
 
         document.addEventListener('click', function(e) {
-            const btn = e.target.closest('.btnDelete');
+
+            const btn =
+                e.target.closest('.btnDelete');
+
             if (!btn) return;
 
             e.preventDefault();
 
-            const id = btn.dataset.id;
-            const nama = btn.dataset.nama;
-            const layanan = btn.dataset.layanan;
+
+            /*
+            |--------------------------------------------------------------------------
+            | Ambil data
+            |--------------------------------------------------------------------------
+            */
+
+            const id =
+                btn.dataset.id;
+
+            const nama =
+                btn.dataset.nama;
+
+            const layanan =
+                btn.dataset.layanan;
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | Isi pesan konfirmasi
+            |--------------------------------------------------------------------------
+            */
 
             document.getElementById('textDelete').innerHTML =
-                `Apakah anda yakin ingin menghapus status <b>${nama}</b> pada layanan <b>${layanan}</b>?`;
+                `Apakah anda yakin ingin menghapus status
+                <b>${nama}</b>
+                pada layanan
+                <b>${layanan}</b>?`;
 
-            let action = "{{ route('adminBidang.status.destroyBidang', ':id') }}";
-            action = action.replace(':id', id);
 
-            document.getElementById('formDelete').action = action;
+            /*
+            |--------------------------------------------------------------------------
+            | Set Action Form
+            |--------------------------------------------------------------------------
+            */
+
+            let action =
+                "{{ route('adminBidang.status.destroyBidang', ':id') }}";
+
+            action =
+                action.replace(':id', id);
+
+            formDelete.action = action;
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | Reset tombol delete
+            |--------------------------------------------------------------------------
+            */
+
+            btnConfirmDelete.disabled = false;
+
+
+            btnConfirmDelete
+                .querySelector('.btn-delete-text')
+                .classList.remove('d-none');
+
+
+            btnConfirmDelete
+                .querySelector('.btn-delete-loading')
+                .classList.add('d-none');
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | Tampilkan modal
+            |--------------------------------------------------------------------------
+            */
 
             modalDelete.show();
 
-            modalDelete.show();
         });
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Konfirmasi Hapus
+        |--------------------------------------------------------------------------
+        */
+
+        formDelete.addEventListener('submit', function(e) {
+
+            /*
+            | Cegah double submit
+            */
+
+            btnConfirmDelete.disabled = true;
+
+
+            /*
+            | Sembunyikan tombol normal
+            */
+
+            btnConfirmDelete
+                .querySelector('.btn-delete-text')
+                .classList.add('d-none');
+
+
+            /*
+            | Tampilkan spinner
+            */
+
+            btnConfirmDelete
+                .querySelector('.btn-delete-loading')
+                .classList.remove('d-none');
+
+
+            /*
+            | Form tetap dilanjutkan
+            */
+
+        });
+
     });
 </script>
 @endsection

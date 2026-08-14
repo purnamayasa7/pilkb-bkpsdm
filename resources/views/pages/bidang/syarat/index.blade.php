@@ -75,12 +75,30 @@
             </div>
 
             <div class="modal-footer">
-                <button class="btn btn-light" data-bs-dismiss="modal">Batal</button>
+                <button class="btn btn-light" data-bs-dismiss="modal">
+                    <i data-feather="arrow-left" class="me-1"></i>
+                    Batal
+                </button>
 
                 <form id="formDelete" method="POST">
                     @csrf
                     @method('DELETE')
-                    <button class="btn btn-danger">Ya, Hapus</button>
+
+                    <button class="btn btn-danger" type="submit" id="btnConfirmDelete">
+
+                        <span class="btn-delete-text">
+                            <i data-feather="trash-2" class="me-1"></i>
+                            Ya, Hapus
+                        </span>
+
+                        <span class="btn-delete-loading d-none">
+                            <span class="spinner-border spinner-border-sm me-1"
+                                role="status"
+                                aria-hidden="true"></span>
+                            Menghapus...
+                        </span>
+
+                    </button>
                 </form>
             </div>
         </div>
@@ -192,59 +210,105 @@
 
         feather.replace();
 
-        // Loading Table
         window.addEventListener('load', function() {
-            document.getElementById('tableLoading').classList.add('d-none');
+
+            const tableLoading = document.getElementById('tableLoading');
+
+            if (tableLoading) {
+                tableLoading.classList.add('d-none');
+            }
+
         });
 
-        // FILTER LAYANAN
-        const layananSelect = document.getElementById('layananSelect');
+        const layananSelect =
+            document.getElementById('layananSelect');
 
         if (layananSelect) {
+
             layananSelect.addEventListener('change', function() {
+
                 document.getElementById('filterForm').submit();
+
             });
+
         }
 
-        // Modal Detail
-        const modalDetail = new bootstrap.Modal(document.getElementById('modalDetail'));
+        const modalDetailEl = document.getElementById('modalDetail');
 
-        document.addEventListener('click', function(e) {
+        if (modalDetailEl) {
 
-            const btn = e.target.closest('.btnDetail');
-            if (!btn) return;
+            const modalDetail = new bootstrap.Modal(modalDetailEl);
 
-            e.preventDefault();
+            document.addEventListener('click', function(e) {
 
-            document.getElementById('detailBidang').innerText = btn.dataset.bidang;
-            document.getElementById('detailLayanan').innerText = btn.dataset.layanan;
-            document.getElementById('detailSyarat').innerText = btn.dataset.syarat;
+                const btn = e.target.closest('.btnDetail');
 
-            modalDetail.show();
-        });
+                if (!btn) return;
 
-        // Modal Delete
-        const modalDelete = new bootstrap.Modal(document.getElementById('modalDelete'));
+                e.preventDefault();
 
-        document.addEventListener('click', function(e) {
+                document.getElementById('detailBidang').innerText = btn.dataset.bidang;
 
-            const btn = e.target.closest('.btnDelete');
-            if (!btn) return;
+                document.getElementById('detailLayanan').innerText = btn.dataset.layanan;
 
-            e.preventDefault();
+                document.getElementById('detailSyarat').innerText = btn.dataset.syarat;
 
-            const id = btn.dataset.id;
-            const layanan = btn.dataset.layanan;
+                modalDetail.show();
 
-            document.getElementById('textDelete').innerHTML =
-                `Apakah anda yakin ingin menghapus syarat pada layanan <b>${layanan}</b>?`;
+            });
 
-            document.getElementById('formDelete').action =
-                `/adminBidang/syarat/${id}`;
+        }
 
-            modalDelete.show();
-        });
+        const modalDeleteEl = document.getElementById('modalDelete');
 
+        if (modalDeleteEl) {
+
+            const modalDelete = new bootstrap.Modal(modalDeleteEl);
+
+            document.addEventListener('click', function(e) {
+
+                const btn = e.target.closest('.btnDelete');
+
+                if (!btn) return;
+
+                e.preventDefault();
+
+                const id = btn.dataset.id;
+
+                const layanan = btn.dataset.layanan;
+
+                document.getElementById('textDelete').innerHTML =
+                    `Apakah anda yakin ingin menghapus syarat pada layanan <b>${layanan}</b>?`;
+
+                document.getElementById('formDelete').action =
+                    `/adminBidang/syarat/${id}`;
+
+                modalDelete.show();
+
+            });
+
+        }
+
+        const formDelete = document.getElementById('formDelete');
+
+        const btnConfirmDelete = document.getElementById('btnConfirmDelete');
+
+        if (formDelete && btnConfirmDelete) {
+
+            formDelete.addEventListener('submit', function() {
+
+                btnConfirmDelete.disabled = true;
+
+                btnConfirmDelete
+                    .querySelector('.btn-delete-text')
+                    .classList.add('d-none');
+
+                btnConfirmDelete
+                    .querySelector('.btn-delete-loading')
+                    .classList.remove('d-none');
+
+            });
+        }
     });
 </script>
 @endsection

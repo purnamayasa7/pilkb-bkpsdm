@@ -12,8 +12,19 @@
              </div>
              <div class="modal-body">Apakah anda yakin menyimpan data layanan ini?</div>
              <div class="modal-footer"><button class="btn btn-light" type="button"
-                     data-bs-dismiss="modal">Kembali</button><button class="btn btn-primary" type="button"
-                     id="confirmSimpan">Simpan</button></div>
+                     data-bs-dismiss="modal">Kembali</button>
+                 <button class="btn btn-primary" type="button" id="confirmSimpan">
+                     <span class="btn-text">
+                         <i data-feather="save" class="me-1"></i>
+                         Simpan
+                     </span>
+
+                     <span class="btn-loading d-none">
+                         <span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
+                         Menyimpan...
+                     </span>
+                 </button>
+             </div>
          </div>
      </div>
  </div>
@@ -85,6 +96,7 @@
                          </div>
 
                          <button class="btn btn-primary" type="button" id="btnTambah">
+                             <i data-feather="save" class="me-1"></i>
                              Tambah Layanan
                          </button>
                      </form>
@@ -100,19 +112,33 @@
          const form = document.getElementById('formRegister');
          const btnTambah = document.getElementById('btnTambah');
          const modalEl = document.getElementById('modalSimpan');
+         const btnSimpan = document.getElementById('confirmSimpan');
 
+         // Klik Tambah Layanan
          btnTambah.addEventListener('click', function() {
 
+             // Validasi form
              if (!form.checkValidity()) {
                  form.reportValidity();
                  return;
              }
 
+             // Tampilkan modal konfirmasi
              const modal = new bootstrap.Modal(modalEl);
              modal.show();
          });
 
-         document.getElementById('confirmSimpan').addEventListener('click', function() {
+         // Klik Simpan pada modal
+         btnSimpan.addEventListener('click', function() {
+
+             // Cegah double submit
+             btnSimpan.disabled = true;
+
+             // Ubah tampilan tombol
+             btnSimpan.querySelector('.btn-text').classList.add('d-none');
+             btnSimpan.querySelector('.btn-loading').classList.remove('d-none');
+
+             // Submit form
              form.submit();
          });
 

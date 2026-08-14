@@ -1,154 +1,210 @@
 @extends('layouts.app')
 
 @section('content')
-    <div class="modal fade" id="modalSimpan" tabindex="-1">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Edit Data Status</h5>
-                    <button class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body">
-                    Apakah anda yakin menyimpan perubahan status ini?
-                </div>
-                <div class="modal-footer">
-                    <button class="btn btn-light" data-bs-dismiss="modal">Kembali</button>
-                    <button class="btn btn-primary" type="button" id="confirmSimpan">Simpan</button>
-                </div>
+<div class="modal fade" id="modalSimpan" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Edit Data Status</h5>
+                <button class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                Apakah anda yakin menyimpan perubahan status ini?
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-light" data-bs-dismiss="modal">
+                    <i data-feather="arrow-left" class="me-1"></i>
+                    Kembali
+                </button>
+                <button class="btn btn-primary" type="button" id="confirmSimpan">
+                    <span class="btn-text">
+                        <i data-feather="save" class="me-1"></i>
+                        Simpan
+                    </span>
+
+                    <span class="btn-loading d-none">
+                        <span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
+                        Menyimpan...
+                    </span>
+                </button>
             </div>
         </div>
     </div>
+</div>
 
-    <header class="page-header page-header-compact page-header-light border-bottom bg-white mb-4">
-        <div class="container-fluid px-4">
-            <div class="page-header-content">
-                <div class="row align-items-center justify-content-between pt-3">
-                    <div class="col-auto mb-3">
-                        <h1 class="page-header-title">
-                            <div class="page-header-icon"><i data-feather="edit"></i></div>
-                            Update Status
-                        </h1>
-                    </div>
-                    <div class="col-12 col-xl-auto mb-3">
-                        <a class="btn btn-sm btn-light text-primary" href="{{ url()->previous() }}">
-                            <i class="me-1" data-feather="arrow-left"></i>
-                            Kembali ke List Status
-                        </a>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </header>
-
-    <div class="container-fluid px-4 mt-4">
-        <div class="card mb-4">
-            <div class="card-header bg-gradient-primary-to-secondary text-white">Detail Status</div>
-            <div class="card-body">
-
-                <form id="formRegister" method="POST" action="{{ route('root.status.update', $status->id) }}">
-                    @csrf
-                    @method('PUT')
-
-                    <div class="mb-3">
-                        <label class="small mb-1">Bidang</label>
-                        <select name="kode_bidang" id="kode_bidang" class="form-select" required>
-                            <option value="" disabled>Pilih Bidang</option>
-                            @foreach ($bidang as $b)
-                                <option value="{{ $b->id }}"
-                                    {{ optional($status->layanan)->kode_bidang == $b->id ? 'selected' : '' }}>
-                                    {{ $b->nama_bidang }}
-                                </option>
-                            @endforeach
-                        </select>
-                    </div>
-
-                    <div class="mb-3">
-                        <label class="small mb-1">Layanan</label>
-                        <select name="kode_layanan" id="kode_layanan" class="form-select" required>
-                            <option disabled selected>Loading...</option>
-                        </select>
-                    </div>
-
-                    <div class="mb-3">
-                        <label class="small mb-1">Status</label>
-                        <input class="form-control" name="status" type="text"
-                            value="{{ old('status', $status->status) }}" required>
-                    </div>
-
-                    <button class="btn btn-primary" type="button" id="btnTambah">
+<header class="page-header page-header-compact page-header-light border-bottom bg-white mb-4">
+    <div class="container-fluid px-4">
+        <div class="page-header-content">
+            <div class="row align-items-center justify-content-between pt-3">
+                <div class="col-auto mb-3">
+                    <h1 class="page-header-title">
+                        <div class="page-header-icon"><i data-feather="edit"></i></div>
                         Update Status
-                    </button>
-                </form>
-
+                    </h1>
+                </div>
+                <div class="col-12 col-xl-auto mb-3">
+                    <a class="btn btn-sm btn-light text-primary" href="{{ url()->previous() }}">
+                        <i class="me-1" data-feather="arrow-left"></i>
+                        Kembali ke List Status
+                    </a>
+                </div>
             </div>
         </div>
     </div>
+</header>
 
-    <script>
-        const selectedBidang = "{{ optional($status->layanan)->kode_bidang }}";
-        const selectedLayanan = "{{ $status->kode_layanan }}";
-    </script>
+<div class="container-fluid px-4 mt-4">
+    <div class="card mb-4">
+        <div class="card-header bg-gradient-primary-to-secondary text-white">Detail Status</div>
+        <div class="card-body">
+            <form
+                id="formUpdate"
+                method="POST"
+                action="{{ route('root.status.update', $status->id) }}">
 
-    <script>
-        const bidangSelect = document.getElementById('kode_bidang');
-        const layananSelect = document.getElementById('kode_layanan');
+                @csrf
+                @method('PUT')
 
-        function loadLayanan(bidangId, selected = null) {
 
-            layananSelect.disabled = true;
-            layananSelect.innerHTML = '<option disabled selected>Loading...</option>';
+                <!-- Bidang -->
+                <div class="mb-3">
 
-            fetch(`/root/get-layanan-status/${bidangId}`)
-                .then(res => res.json())
-                .then(data => {
+                    <label class="small mb-1">
+                        Bidang
+                    </label>
 
-                    if (data.length === 0) {
-                        layananSelect.innerHTML =
-                            '<option disabled selected>Tidak ada layanan</option>';
-                        layananSelect.disabled = true;
-                        return;
-                    }
+                    <input
+                        type="text"
+                        class="form-control"
+                        value="{{ optional($status->layanan->bidang)->nama_bidang ?? '-' }}"
+                        disabled>
 
-                    layananSelect.disabled = false;
-                    layananSelect.innerHTML = '<option disabled>Pilih Layanan</option>';
+                </div>
 
-                    data.forEach(item => {
-                        let selectedAttr = (selected == item.id) ? 'selected' : '';
-                        layananSelect.innerHTML +=
-                            `<option value="${item.id}" ${selectedAttr}>${item.nama_layanan}</option>`;
-                    });
-                })
-                .catch(() => {
-                    layananSelect.innerHTML =
-                        '<option disabled selected>Error load data</option>';
-                });
-        }
 
-        document.addEventListener('DOMContentLoaded', function() {
+                <!-- Layanan -->
+                <div class="mb-3">
 
-            if (selectedBidang) {
-                loadLayanan(selectedBidang, selectedLayanan);
+                    <label class="small mb-1">
+                        Layanan
+                    </label>
+
+                    <input
+                        type="text"
+                        class="form-control"
+                        value="{{ optional($status->layanan)->nama_layanan ?? '-' }}"
+                        disabled>
+
+                </div>
+
+
+                <!-- Status -->
+                <div class="mb-3">
+
+                    <label
+                        class="small mb-1"
+                        for="status">
+
+                        Status
+
+                    </label>
+
+                    @error('status')
+                    <div class="text-danger mb-1">
+                        {{ $message }}
+                    </div>
+                    @enderror
+
+                    <input
+                        class="form-control @error('status') is-invalid @enderror"
+                        id="status"
+                        name="status"
+                        type="text"
+                        value="{{ old('status', $status->status) }}"
+                        placeholder="Masukkan status"
+                        required>
+
+                </div>
+
+
+                <!-- Button -->
+                <button
+                    class="btn btn-primary"
+                    type="button"
+                    id="btnUpdate">
+
+                    <i
+                        data-feather="save"
+                        class="me-1">
+                    </i>
+
+                    Update Status
+
+                </button>
+
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+
+        const form = document.getElementById('formUpdate');
+        const btnUpdate = document.getElementById('btnUpdate');
+        const modalEl = document.getElementById('modalSimpan');
+        const btnSimpan = document.getElementById('confirmSimpan');
+
+        /*
+        |--------------------------------------------------------------------------
+        | Tombol Update
+        |--------------------------------------------------------------------------
+        */
+
+        btnUpdate.addEventListener('click', function() {
+
+            // Validasi HTML5
+            if (!form.checkValidity()) {
+
+                form.reportValidity();
+
+                return;
             }
 
-            const form = document.getElementById('formRegister');
-            const btnTambah = document.getElementById('btnTambah');
-            const modal = new bootstrap.Modal(document.getElementById('modalSimpan'));
+            const modal = new bootstrap.Modal(modalEl);
 
-            btnTambah.addEventListener('click', function() {
-                if (!form.checkValidity()) {
-                    form.reportValidity();
-                    return;
-                }
-                modal.show();
-            });
+            modal.show();
 
-            document.getElementById('confirmSimpan').addEventListener('click', function() {
-                form.submit();
-            });
         });
 
-        bidangSelect.addEventListener('change', function() {
-            loadLayanan(this.value);
+
+        /*
+        |--------------------------------------------------------------------------
+        | Konfirmasi Simpan
+        |--------------------------------------------------------------------------
+        */
+
+        btnSimpan.addEventListener('click', function() {
+
+            // Cegah double submit
+            btnSimpan.disabled = true;
+
+            // Tampilkan loading
+            btnSimpan
+                .querySelector('.btn-text')
+                .classList.add('d-none');
+
+            btnSimpan
+                .querySelector('.btn-loading')
+                .classList.remove('d-none');
+
+            // Submit form
+            form.submit();
+
         });
-    </script>
+
+    });
+</script>
+
+
 @endsection

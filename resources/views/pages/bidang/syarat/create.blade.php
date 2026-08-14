@@ -11,9 +11,24 @@
                 <button class="btn-close" type="button" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">Apakah anda yakin menyimpan data syarat ini?</div>
-            <div class="modal-footer"><button class="btn btn-light" type="button"
-                    data-bs-dismiss="modal">Batal</button><button class="btn btn-primary" type="button"
-                    id="confirmSimpan">Simpan</button></div>
+            <div class="modal-footer">
+                <button class="btn btn-light" type="button"
+                    data-bs-dismiss="modal">
+                    <i data-feather="x" class="me-1"></i>
+                    Batal
+                </button>
+                <button class="btn btn-primary" type="button" id="confirmSimpan">
+                    <span class="btn-text">
+                        <i data-feather="save" class="me-1"></i>
+                        Simpan
+                    </span>
+
+                    <span class="btn-loading d-none">
+                        <span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
+                        Menyimpan...
+                    </span>
+                </button>
+            </div>
         </div>
     </div>
 </div>
@@ -150,6 +165,7 @@
                         </div>
 
                         <button class="btn btn-primary" type="button" id="btnTambah">
+                            <i data-feather="save" class="me-1"></i>
                             Simpan Syarat
                         </button>
 
@@ -167,6 +183,7 @@
         const form = document.getElementById('formRegister');
         const btnTambah = document.getElementById('btnTambah');
         const modalEl = document.getElementById('modalSimpan');
+        const btnSimpan = document.getElementById('confirmSimpan');
 
         // Metode dokumen
         const metode = document.getElementById('metode');
@@ -236,17 +253,16 @@
         /**
          * Konfirmasi Simpan
          */
-        document.getElementById('confirmSimpan')
-            .addEventListener('click', function() {
+        btnSimpan.addEventListener('click', function() {
 
-                // Pastikan validasi tetap dilakukan
-                if (!form.checkValidity()) {
-                    form.reportValidity();
-                    return;
-                }
+            btnSimpan.disabled = true;
 
-                form.submit();
-            });
+            btnSimpan.querySelector('.btn-text').classList.add('d-none');
+            btnSimpan.querySelector('.btn-loading').classList.remove('d-none');
+
+            form.submit();
+        });
+
 
     });
 </script>

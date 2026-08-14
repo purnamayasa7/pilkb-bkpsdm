@@ -131,44 +131,44 @@ class StatusController extends Controller
         );
 
         return redirect()
-            ->route('adminBidang.status.indexStatus')
+            ->route('adminBidang.status.indexBidang')
             ->with('success', 'Status berhasil ditambahkan.');
     }
 
     public function update(Request $request, $statusId)
     {
-        $status = Status::findOrFail($statusId);
+        $status = Status::with('layanan.bidang')
+            ->findOrFail($statusId);
 
         $request->validate([
-            'kode_layanan' => 'nullable|exists:tb_layanan,id',
-            'status' => 'required',
+            'status' => 'required|string|max:255',
         ]);
 
         $olddata = [
             'kode_layanan' => $status->kode_layanan,
-            'status' => $status->status,
+            'status'       => $status->status,
         ];
 
-        $status->kode_layanan = $request->kode_layanan;
-        $status->status = $request->status;
-
-        $status->save();
+        $status->update([
+            'status' => $request->status,
+        ]);
 
         $newdata = [
-            'kode_layanan' => $status->fresh()->kode_layanan,
-            'status' => $status->fresh()->status,
+            'kode_layanan' => $status->kode_layanan,
+            'status'       => $status->status,
         ];
 
         ActivityLogService::log(
             'Master Data Status',
             'UPDATE',
-            'Mengubah Data status',
+            'Mengubah Data Status',
             $olddata,
             $newdata
         );
 
-        return redirect()->route('root.status')
-            ->with('success', 'Status berhasil diupdate');
+        return redirect()
+            ->route('root.status')
+            ->with('success', 'Status berhasil diupdate.');
     }
 
     // Menu Admin Bidang
@@ -183,28 +183,22 @@ class StatusController extends Controller
             ->findOrFail($statusId);
 
         $request->validate([
-            'kode_layanan' => 'required|exists:tb_layanan,id',
-            'status'        => 'required|string|max:255',
+            'status' => 'required|string|max:255',
         ]);
-
-        // Pastikan layanan memang milik bidang user
-        $layanan = Layanan::where('id', $request->kode_layanan)
-            ->where('kode_bidang', $user->bidang_id)
-            ->firstOrFail();
 
         $olddata = [
             'kode_layanan' => $status->kode_layanan,
             'status'       => $status->status,
         ];
 
+        // Hanya update status
         $status->update([
-            'kode_layanan' => $layanan->id,
-            'status'       => $request->status,
+            'status' => $request->status,
         ]);
 
         $newdata = [
-            'kode_layanan' => $status->fresh()->kode_layanan,
-            'status'       => $status->fresh()->status,
+            'kode_layanan' => $status->kode_layanan,
+            'status'       => $status->status,
         ];
 
         ActivityLogService::log(

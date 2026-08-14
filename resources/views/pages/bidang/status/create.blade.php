@@ -11,9 +11,24 @@
                  <button class="btn-close" type="button" data-bs-dismiss="modal" aria-label="Close"></button>
              </div>
              <div class="modal-body">Apakah anda yakin menyimpan data status ini?</div>
-             <div class="modal-footer"><button class="btn btn-light" type="button"
-                     data-bs-dismiss="modal">Close</button><button class="btn btn-primary" type="button"
-                     id="confirmSimpan">Simpan</button></div>
+             <div class="modal-footer">
+                 <button class="btn btn-light" type="button"
+                     data-bs-dismiss="modal">
+                     <i data-feather="arrow-left" class="me-1"></i>
+                     Batal
+                 </button>
+                 <button class="btn btn-primary" type="button" id="confirmSimpan">
+                     <span class="btn-text">
+                         <i data-feather="save" class="me-1"></i>
+                         Simpan
+                     </span>
+
+                     <span class="btn-loading d-none">
+                         <span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
+                         Menyimpan...
+                     </span>
+                 </button>
+             </div>
          </div>
      </div>
  </div>
@@ -44,7 +59,7 @@
              <div class="card mb-4">
                  <div class="card-header bg-gradient-primary-to-secondary text-white">Detail Status</div>
                  <div class="card-body">
-                     <form id="formRegister" method="POST" action="{{ route('adminBidang.status.storeStatus') }}">
+                     <form id="formRegister" method="POST" action="{{ route('adminBidang.status.storeBidang') }}">
                          @csrf
 
                          <div class="mb-3">
@@ -81,6 +96,7 @@
                          </div>
 
                          <button class="btn btn-primary" type="button" id="btnTambah">
+                             <i data-feather="save" class="me-1"></i>
                              Tambah Status
                          </button>
                      </form>
@@ -96,6 +112,7 @@
          const form = document.getElementById('formRegister');
          const btnTambah = document.getElementById('btnTambah');
          const modal = new bootstrap.Modal(document.getElementById('modalSimpan'));
+         const btnSimpan = document.getElementById('confirmSimpan');
 
          btnTambah.addEventListener('click', function() {
 
@@ -107,7 +124,13 @@
              modal.show();
          });
 
-         document.getElementById('confirmSimpan').addEventListener('click', function() {
+         btnSimpan.addEventListener('click', function() {
+
+             btnSimpan.disabled = true;
+
+             btnSimpan.querySelector('.btn-text').classList.add('d-none');
+             btnSimpan.querySelector('.btn-loading').classList.remove('d-none');
+
              form.submit();
          });
 

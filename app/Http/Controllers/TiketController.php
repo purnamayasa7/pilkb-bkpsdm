@@ -27,6 +27,7 @@ use Carbon\Carbon;
 use Illuminate\Http\File;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Validator;
 
 class TiketController extends Controller
 {
@@ -275,8 +276,13 @@ class TiketController extends Controller
 
         /*
 |--------------------------------------------------------------------------
-| STEP 4 - Ambil data tiket, detail syarat dan generate QR
+| STEP 4 - Ambil data tiket dan generate QR
 |--------------------------------------------------------------------------
+|
+| Step 4 hanya menampilkan ringkasan tiket.
+| Tidak perlu memanggil kembali dokumen SIMPEG.
+| Tidak perlu memuat file fisik.
+|
 */
         if (
             $step == 4 &&
@@ -287,31 +293,25 @@ class TiketController extends Controller
                 'layanan.bidang',
                 'detail.syarat',
             ])
-                ->where(
-                    'no_tiket',
-                    $data['no_tiket']
-                )
+                ->where('no_tiket', $data['no_tiket'])
                 ->first();
 
             if ($tiket) {
 
                 /*
         |--------------------------------------------------------------------------
-        | Ambil detail syarat tiket
+        | DETAIL TIKET
         |--------------------------------------------------------------------------
         |
-        | Setiap DetailTiket mempunyai relasi:
-        |
-        | DetailTiket
-        |      ↓
-        |    syarat
+        | Tidak perlu transform/map lagi.
+        | Ambil langsung DetailTiket dari database.
         |
         */
                 $syarat = $tiket->detail;
 
                 /*
         |--------------------------------------------------------------------------
-        | Generate QR
+        | GENERATE QR
         |--------------------------------------------------------------------------
         */
 
@@ -332,6 +332,7 @@ class TiketController extends Controller
                 $qr = base64_encode($qrString);
             }
         }
+
 
         /*
     |--------------------------------------------------------------------------
@@ -551,14 +552,41 @@ class TiketController extends Controller
     |--------------------------------------------------------------------------
     */
 
-            $request->validate([
-                'dokumen' => 'nullable|array',
-                'dokumen.*' => [
-                    'file',
-                    'mimes:pdf,jpg,jpeg,png',
-                    'max:10240',
+            $validator = Validator::make(
+                $request->all(),
+                [
+                    'dokumen' => 'nullable|array',
+                    'dokumen.*' => [
+                        'file',
+                        'mimes:pdf',
+                        'mimetypes:application/pdf',
+                        'max:1024',
+                    ],
                 ],
-            ]);
+                [
+                    'dokumen.*.mimes' =>
+                    'Dokumen yang diupload harus berformat PDF.',
+
+                    'dokumen.*.mimetypes' =>
+                    'Dokumen yang diupload harus berupa file PDF.',
+
+                    'dokumen.*.max' =>
+                    'Ukuran dokumen maksimal 1 MB.',
+
+                    'dokumen.*.file' =>
+                    'File yang diupload tidak valid.',
+                ]
+            );
+
+            if ($validator->fails()) {
+
+                return back()
+                    ->withInput()
+                    ->with(
+                        'error',
+                        $validator->errors()->first()
+                    );
+            }
 
             /*
     |--------------------------------------------------------------------------
@@ -796,20 +824,13 @@ class TiketController extends Controller
                 |
                 */
 
-                        $extension = strtolower(
-                            $file->getClientOriginalExtension()
-                        );
-
                         /*
                 |--------------------------------------------------------------------------
                 | GENERATE NAMA FILE FISIK ACAK
                 |--------------------------------------------------------------------------
                 */
-
                         $physicalFileName =
-                            Str::lower(Str::random(32))
-                            . '.'
-                            . $extension;
+                            Str::lower(Str::random(32)) . '.pdf';
 
                         /*
                 |--------------------------------------------------------------------------
@@ -887,13 +908,13 @@ class TiketController extends Controller
             |--------------------------------------------------------------------------
             */
 
-                    ActivityLogService::log(
-                        'Manajemen Data Tiket',
-                        'CREATE',
-                        'Menambah Detail Tiket ID: ' . $detailTiket->id,
-                        [],
-                        $detailTiket->toArray()
-                    );
+                    // ActivityLogService::log(
+                    //     'Manajemen Data Tiket',
+                    //     'CREATE',
+                    //     'Menambah Detail Tiket ID: ' . $detailTiket->id,
+                    //     [],
+                    //     $detailTiket->toArray()
+                    // );
                 }
 
                 /*
@@ -1536,13 +1557,13 @@ class TiketController extends Controller
                     'comment' => null
                 ]);
 
-                ActivityLogService::log(
-                    'Manajemen Data Tiket',
-                    'CREATE',
-                    'Menambah Detail Tiket ID: ' . $detailTiket->no_tiket,
-                    [],
-                    $detailTiket->toArray()
-                );
+                // ActivityLogService::log(
+                //     'Manajemen Data Tiket',
+                //     'CREATE',
+                //     'Menambah Detail Tiket ID: ' . $detailTiket->no_tiket,
+                //     [],
+                //     $detailTiket->toArray()
+                // );
             }
 
             $tahap = Tahap::create([

@@ -11,9 +11,28 @@
                  <button class="btn-close" type="button" data-bs-dismiss="modal" aria-label="Close"></button>
              </div>
              <div class="modal-body">Apakah anda yakin menyimpan perubahan syarat ini?</div>
-             <div class="modal-footer"><button class="btn btn-light" type="button"
-                     data-bs-dismiss="modal">Kembali</button><button class="btn btn-primary" type="button"
-                     id="confirmSimpan">Simpan</button></div>
+             <div class="modal-footer">
+                 <button class="btn btn-light" type="button"
+                     data-bs-dismiss="modal">
+                     <i data-feather="arrow-left" class="me-1"></i>
+                     Kembali
+                 </button>
+                 <button class="btn btn-primary" type="button" id="confirmSimpan">
+
+                     <span class="btn-text">
+                         <i data-feather="save" class="me-1"></i>
+                         Simpan
+                     </span>
+
+                     <span class="btn-loading d-none">
+                         <span class="spinner-border spinner-border-sm me-1"
+                             role="status"
+                             aria-hidden="true"></span>
+                         Menyimpan...
+                     </span>
+
+                 </button>
+             </div>
          </div>
      </div>
  </div>
@@ -130,60 +149,36 @@
                              </div>
                          </div>
 
-                         <button class="btn btn-primary" type="button" id="btnUpdate">Update Syarat</button>
+                         <button class="btn btn-primary" type="button" id="btnUpdate">
+                             <i data-feather="save" class="me-1"></i>
+                             Update Syarat
+                         </button>
                      </form>
                  </div>
              </div>
          </div>
      </div>
  </div>
-
  <script>
      document.addEventListener('DOMContentLoaded', function() {
 
          const form = document.getElementById('formUpdate');
-
          const btnUpdate = document.getElementById('btnUpdate');
-
          const modalEl = document.getElementById('modalSimpan');
+         const btnSimpan = document.getElementById('confirmSimpan');
 
-         const confirmSimpan =
-             document.getElementById('confirmSimpan');
-
-
-         // ==========================
-         // Element Metode
-         // ==========================
-
-         const metode =
-             document.getElementById('metode');
-
-         const efileGroup =
-             document.getElementById('efileGroup');
-
-         const kodeEfile =
-             document.getElementById('kode_efile');
-
-         const modeGroup =
-             document.getElementById('modeGroup');
-
-         const modeEfile =
-             document.getElementById('mode_efile');
-
-
-         // ==========================
-         // Tampilkan / Sembunyikan
-         // field berdasarkan metode
-         // ==========================
+         const metode = document.getElementById('metode');
+         const efileGroup = document.getElementById('efileGroup');
+         const kodeEfile = document.getElementById('kode_efile');
+         const modeGroup = document.getElementById('modeGroup');
+         const modeEfile = document.getElementById('mode_efile');
 
          function toggleMetode() {
 
              if (metode.value === 'simpeg') {
 
-                 // Tampilkan jenis e-file
+                 // Tampilkan field e-file
                  efileGroup.style.display = '';
-
-                 // Tampilkan mode e-file
                  modeGroup.style.display = '';
 
                  // Wajib diisi
@@ -192,7 +187,7 @@
 
              } else {
 
-                 // Sembunyikan field SIMPEG
+                 // Sembunyikan field e-file
                  efileGroup.style.display = 'none';
                  modeGroup.style.display = 'none';
 
@@ -200,65 +195,38 @@
                  kodeEfile.required = false;
                  modeEfile.required = false;
 
-                 // Bersihkan nilainya
+                 // Bersihkan nilai
                  kodeEfile.value = '';
                  modeEfile.value = '';
-
              }
-
          }
 
-
-         // Jalankan saat halaman pertama dibuka
          toggleMetode();
 
-
-         // Jalankan ketika metode berubah
-         metode.addEventListener(
-             'change',
-             toggleMetode
-         );
+         metode.addEventListener('change', toggleMetode);
 
 
-         // ==========================
-         // Tombol Update
-         // ==========================
+         btnUpdate.addEventListener('click', function() {
 
-         btnUpdate.addEventListener(
-             'click',
-             function() {
-
-                 // Validasi HTML5
-                 if (!form.checkValidity()) {
-
-                     form.reportValidity();
-
-                     return;
-                 }
-
-
-                 // Tampilkan modal
-                 const modal =
-                     new bootstrap.Modal(modalEl);
-
-                 modal.show();
-
+             // Validasi HTML5
+             if (!form.checkValidity()) {
+                 form.reportValidity();
+                 return;
              }
-         );
 
+             const modal = new bootstrap.Modal(modalEl);
+             modal.show();
+         });
 
-         // ==========================
-         // Konfirmasi Update
-         // ==========================
+         btnSimpan.addEventListener('click', function() {
 
-         confirmSimpan.addEventListener(
-             'click',
-             function() {
+             btnSimpan.disabled = true;
 
-                 form.submit();
+             btnSimpan.querySelector('.btn-text').classList.add('d-none');
+             btnSimpan.querySelector('.btn-loading').classList.remove('d-none');
 
-             }
-         );
+             form.submit();
+         });
 
      });
  </script>
