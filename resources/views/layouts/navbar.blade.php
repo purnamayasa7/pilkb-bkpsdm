@@ -112,7 +112,7 @@
                 role="button"
                 data-bs-toggle="dropdown">
 
-                <i data-feather="bell"></i>
+                <i data-feather="bell" class="text-warning"></i>
 
                 <!-- @if($unreadCount > 0)
                 <span class="badge bg-danger notification-badge">
