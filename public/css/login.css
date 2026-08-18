@@ -133,7 +133,8 @@ body {
 
     box-sizing: border-box;
 
-    padding: 6px;
+    padding: 0;
+    position: relative;
 }
 
 .form-slider {
@@ -349,14 +350,18 @@ body {
 }
 
 .footer {
-
     position: fixed;
+    bottom: 10px;
 
-    bottom: 25px;
+    width: min(950px, 95%);
+    left: 50%;
+    transform: translateX(-50%);
+
+    text-align: center;
 
     color: #64748b;
-
     font-size: 14px;
+    z-index: 10;
 }
 
 #modalFaq .accordion-button {
