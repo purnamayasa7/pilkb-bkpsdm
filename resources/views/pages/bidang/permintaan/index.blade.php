@@ -26,11 +26,24 @@
 
             <div class="modal-footer">
                 <button class="btn btn-light" data-bs-dismiss="modal">
+                    <i data-feather="arrow-left" class="me-1"></i>
                     Batal
                 </button>
 
-                <button class="btn btn-primary" id="btnSubmitFinal">
-                    Ya, Lanjutkan
+                <button class="btn btn-primary" type="button" id="btnSubmitFinal">
+
+                    <span class="btn-submit-text">
+                        <i data-feather="check" class="me-1"></i>
+                        Ya, Lanjutkan
+                    </span>
+
+                    <span class="btn-submit-loading d-none">
+                        <span class="spinner-border spinner-border-sm me-1"
+                            role="status"
+                            aria-hidden="true"></span>
+                        Mengarsipkan...
+                    </span>
+
                 </button>
             </div>
 
@@ -111,9 +124,20 @@
                         {{-- Tombol --}}
                         <div class="col-md-4">
                             <label class="form-label d-block">&nbsp;</label>
-                            <button type="submit" class="btn btn-primary">
-                                <i data-feather="search" class="me-1"></i>
-                                Tampilkan
+                            <button type="submit" class="btn btn-primary" id="btnTampilkan">
+
+                                <span class="btn-tampilkan-text">
+                                    <i data-feather="search" class="me-1"></i>
+                                    Tampilkan
+                                </span>
+
+                                <span class="btn-tampilkan-loading d-none">
+                                    <span class="spinner-border spinner-border-sm me-1"
+                                        role="status"
+                                        aria-hidden="true"></span>
+                                    Memuat...
+                                </span>
+
                             </button>
                         </div>
                     </div>
@@ -212,46 +236,111 @@
 <script>
     document.addEventListener('DOMContentLoaded', function() {
 
+        feather.replace();
+
         window.addEventListener('load', function() {
-            document.getElementById('tableLoading').classList.add('d-none');
+
+            const tableLoading = document.getElementById('tableLoading');
+
+            if (tableLoading) {
+                tableLoading.classList.add('d-none');
+            }
+
         });
 
-        const modalKonfirmasi = new bootstrap.Modal(
-            document.getElementById('modalKonfirmasi')
-        );
+        const modalKonfirmasiEl =
+            document.getElementById('modalKonfirmasi');
 
-        const btnSubmitFinal = document.getElementById('btnSubmitFinal');
+        const btnSubmitFinal =
+            document.getElementById('btnSubmitFinal');
 
-        const formSelesai = document.getElementById('formSelesai');
+        const formSelesai =
+            document.getElementById('formSelesai');
+
+        const btnSubmitText =
+            btnSubmitFinal.querySelector('.btn-submit-text');
+
+        const btnSubmitLoading =
+            btnSubmitFinal.querySelector('.btn-submit-loading');
+
+        // =====================================================
+        // Button Tampilkan
+        // =====================================================
+
+        const filterForm =
+            document.getElementById('filterForm');
+
+        const btnTampilkan =
+            document.getElementById('btnTampilkan');
+
+        const btnTampilkanText =
+            btnTampilkan.querySelector('.btn-tampilkan-text');
+
+        const btnTampilkanLoading =
+            btnTampilkan.querySelector('.btn-tampilkan-loading');
+
+        filterForm.addEventListener('submit', function() {
+
+            // Cegah double submit
+            btnTampilkan.disabled = true;
+
+            // Sembunyikan tombol normal
+            btnTampilkanText.classList.add('d-none');
+
+            // Tampilkan spinner
+            btnTampilkanLoading.classList.remove('d-none');
+
+        });
+
+        const modalKonfirmasi =
+            new bootstrap.Modal(modalKonfirmasiEl);
 
         let selectedNoTiket = null;
 
-        // klik tombol checklist
         document.addEventListener('click', function(e) {
 
             const btn = e.target.closest('.btnSelesai');
 
-            if (!btn) return;
+            if (!btn) {
+                return;
+            }
 
             e.preventDefault();
 
+            // Ambil nomor tiket
             selectedNoTiket = btn.dataset.notiket;
 
-            // set action form dinamis
+            // Pastikan nomor tiket tersedia
+            if (!selectedNoTiket) {
+                return;
+            }
+
             formSelesai.action =
                 `/adminBidang/permintaan/${selectedNoTiket}/selesai`;
+
+            btnSubmitFinal.disabled = false;
+
+            btnSubmitText.classList.remove('d-none');
+
+            btnSubmitLoading.classList.add('d-none');
 
             modalKonfirmasi.show();
 
         });
 
-        // klik ya lanjutkan
         btnSubmitFinal.addEventListener('click', function() {
 
+            // Cegah double submit
+            btnSubmitFinal.disabled = true;
+
+            // Sembunyikan text normal
+            btnSubmitText.classList.add('d-none');
+
+            // Tampilkan spinner
+            btnSubmitLoading.classList.remove('d-none');
+
             formSelesai.submit();
-
         });
-
     });
 </script>
 @endsection

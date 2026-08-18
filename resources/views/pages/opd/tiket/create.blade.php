@@ -169,6 +169,16 @@ $stepHeader = [
         background-color: #f59e0b;
         color: #fff;
     }
+
+    .btn-loading {
+        min-width: 130px;
+        justify-content: center;
+    }
+
+    .btn-loading .spinner-border {
+        width: 1rem;
+        height: 1rem;
+    }
 </style>
 
 {{-- Modal Cek Data --}}
@@ -468,8 +478,12 @@ $stepHeader = [
                 Apakah Anda yakin semua syarat sudah divalidasi dan ingin melanjutkan pembuatan tiket?
             </div>
             <div class="modal-footer">
-                <button class="btn btn-light" data-bs-dismiss="modal">Batal</button>
+                <button class="btn btn-light" data-bs-dismiss="modal">
+                    <i data-feather="arrow-left" class="me-1"></i>
+                    Batal
+                </button>
                 <button class="btn btn-primary" id="btnSubmitFinal">
+                    <i data-feather="check" class="me-1"></i>
                     Ya, Lanjutkan
                 </button>
             </div>
@@ -657,9 +671,26 @@ $stepHeader = [
 
                         <div class="d-flex justify-content-between mt-3">
 
-                            <button class="btn btn-primary d-inline-flex align-items-center">
-                                Selanjutnya
-                                <i class="ms-2" data-feather="arrow-right"></i>
+                            <button
+                                type="submit"
+                                id="btnNextStep2"
+                                class="btn btn-primary d-inline-flex align-items-center btn-loading">
+
+                                <span class="btn-text">
+                                    Selanjutnya
+                                </span>
+
+                                <span
+                                    class="spinner-border spinner-border-sm ms-2 d-none"
+                                    role="status"
+                                    aria-hidden="true">
+                                </span>
+
+                                <i
+                                    class="ms-2 btn-arrow"
+                                    data-feather="arrow-right">
+                                </i>
+
                             </button>
 
                             <a href="{{ route('adminOpd.tiket.create', ['step' => 1]) }}"
@@ -1723,6 +1754,38 @@ $stepHeader = [
             bidang.addEventListener('change', function() {
                 loadLayanan(this.value);
             });
+        }
+
+        // =====================================================
+        // LOADING BUTTON STEP 2
+        // =====================================================
+
+        const btnNextStep2 = document.getElementById('btnNextStep2');
+
+        if (btnNextStep2) {
+
+            btnNextStep2.form.addEventListener('submit', function() {
+
+                btnNextStep2.disabled = true;
+
+                const text = btnNextStep2.querySelector('.btn-text');
+                const spinner = btnNextStep2.querySelector('.spinner-border');
+                const arrow = btnNextStep2.querySelector('.btn-arrow');
+
+                if (text) {
+                    text.innerText = 'Memproses...';
+                }
+
+                if (spinner) {
+                    spinner.classList.remove('d-none');
+                }
+
+                if (arrow) {
+                    arrow.classList.add('d-none');
+                }
+
+            });
+
         }
 
         // MODAL KONFIRMASI STEP 3

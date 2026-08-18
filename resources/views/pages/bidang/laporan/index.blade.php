@@ -49,9 +49,18 @@
                         <div class="col-md-2">
                             <label class="form-label d-block">&nbsp;</label>
 
-                            <button type="submit" class="btn btn-primary">
-                                <i data-feather="search" class="me-1"></i>
-                                Tampilkan
+                            <button type="submit" class="btn btn-primary" id="btnTampilkan">
+                                <span class="btn-tampilkan-text">
+                                    <i data-feather="search" class="me-1"></i>
+                                    Tampilkan
+                                </span>
+
+                                <span class="btn-tampilkan-loading d-none">
+                                    <span class="spinner-border spinner-border-sm me-1"
+                                        role="status"
+                                        aria-hidden="true"></span>
+                                    Memuat...
+                                </span>
                             </button>
                         </div>
                     </div>
@@ -123,29 +132,91 @@
 <script>
     document.addEventListener('DOMContentLoaded', function() {
 
+        feather.replace();
+        
         window.addEventListener('load', function() {
-            document.getElementById('tableLoading').classList.add('d-none');
-        });
 
-        const startInput = document.getElementById('startDate');
-        const endInput = document.getElementById('endDate');
+            const tableLoading =
+                document.getElementById('tableLoading');
 
-        const picker = new Litepicker({
-            element: document.getElementById('myCustomDateRange'),
-            singleMode: false,
-            format: 'YYYY-MM-DD',
-            autoApply: true,
-
-            setup: (picker) => {
-                picker.on('selected', (startDate, endDate) => {
-
-                    if (!startDate || !endDate) return;
-
-                    startInput.value = startDate.format('YYYY-MM-DD');
-                    endInput.value = endDate.format('YYYY-MM-DD');
-                });
+            if (tableLoading) {
+                tableLoading.classList.add('d-none');
             }
+
         });
+
+        const filterForm =
+            document.getElementById('filterForm');
+
+        const btnTampilkan =
+            document.getElementById('btnTampilkan');
+
+        if (filterForm && btnTampilkan) {
+
+            filterForm.addEventListener('submit', function() {
+
+                btnTampilkan.disabled = true;
+
+                const btnText =
+                    btnTampilkan.querySelector('.btn-tampilkan-text');
+
+                const btnLoading =
+                    btnTampilkan.querySelector('.btn-tampilkan-loading');
+
+                if (btnText) {
+                    btnText.classList.add('d-none');
+                }
+
+                if (btnLoading) {
+                    btnLoading.classList.remove('d-none');
+                }
+
+            });
+
+        }
+
+        const startInput =
+            document.getElementById('startDate');
+
+        const endInput =
+            document.getElementById('endDate');
+
+        const dateRange =
+            document.getElementById('myCustomDateRange');
+
+
+        if (dateRange) {
+
+            const picker = new Litepicker({
+
+                element: dateRange,
+
+                singleMode: false,
+
+                format: 'YYYY-MM-DD',
+
+                autoApply: true,
+
+                setup: (picker) => {
+
+                    picker.on(
+                        'selected',
+                        (startDate, endDate) => {
+
+                            if (!startDate || !endDate) {
+                                return;
+                            }
+
+                            startInput.value =
+                                startDate.format('YYYY-MM-DD');
+
+                            endInput.value =
+                                endDate.format('YYYY-MM-DD');
+                        }
+                    );
+                }
+            });
+        }
     });
 </script>
 @endsection

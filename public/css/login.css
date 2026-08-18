@@ -3,15 +3,6 @@ body {
     height: 100%;
 }
 
-/* body {
-    margin: 0;
-    background: linear-gradient(135deg, #eef2f7, #dde6f3);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-family: 'Segoe UI', sans-serif;
-} */
-
 body {
     margin: 0;
     min-height: 100vh;
@@ -23,13 +14,25 @@ body {
 }
 
 .login-card {
-    width: 950px;
-    max-width: 95%;
-    height: 500px;
-    border-radius: 12px;
+    width: min(950px, 95vw);
+    max-width: 950px;
+
+    height: min(500px, 90vh);
+
+    border-radius: 14px;
     overflow: hidden;
-    box-shadow: 0 30px 60px rgba(0, 0, 0, 0.15);
+
+    background: #fff;
+
+    border: 1px solid rgba(31, 91, 153, 0.08);
+
+    box-shadow:
+        0 25px 60px rgba(15, 23, 42, 0.12),
+        0 8px 20px rgba(15, 23, 42, 0.05);
+
     animation: fadeSlide 0.8s ease;
+
+    box-sizing: border-box;
 }
 
 .login-card .row {
@@ -47,7 +50,9 @@ body {
 
     display: flex;
     align-items: center;
+
     padding: 50px;
+
     color: white;
 
     background: linear-gradient(135deg,
@@ -55,16 +60,9 @@ body {
             #19558f 35%,
             #266eb5 70%,
             #3d82cb 100%);
-}
 
-/* .left-box {
-    position: relative;
-    background: url('/images/BoxLogin.jpg') center center / cover no-repeat;
-    display: flex;
-    align-items: center;
-    padding: 50px;
-    color: white;
-} */
+    box-sizing: border-box;
+}
 
 .left-box::before {
     content: "";
@@ -105,16 +103,6 @@ body {
     opacity: .35;
 }
 
-/* .left-box::before {
-    content: "";
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(rgba(13, 110, 253, 0.5),
-            rgba(0, 0, 0, 0.7));
-    background-size: 300% 300%;
-    animation: gradientMove 8s ease infinite;
-} */
-
 .left-content {
     position: relative;
     z-index: 2;
@@ -125,21 +113,37 @@ body {
     align-items: center;
     justify-content: center;
 
-    background: rgba(255, 255, 255, .92);
-    padding: 50px;
+    background: #ffffff;
+
+    padding: clamp(20px, 4vw, 50px);
+
+    box-sizing: border-box;
+    min-width: 0;
+
+    border-left: 1px solid #e5edf6;
+
+    box-shadow: inset 8px 0 20px rgba(31, 91, 153, 0.025);
 }
 
 .slider-wrapper {
     width: 100%;
     height: 100%;
+
     overflow: hidden;
+
+    box-sizing: border-box;
+
+    padding: 6px;
 }
 
 .form-slider {
     display: flex;
     width: 200%;
     height: 100%;
+
     transition: transform 0.6s cubic-bezier(0.77, 0, 0.175, 1);
+
+    box-sizing: border-box;
 }
 
 .form-title {
@@ -148,23 +152,31 @@ body {
     letter-spacing: .3px;
 }
 
-/* EACH PAGE */
 .form-slide {
     width: 50%;
     height: 100%;
     flex-shrink: 0;
+
     display: flex;
     align-items: center;
     justify-content: center;
+
+    padding: 0 6px;
+
+    box-sizing: border-box;
 }
 
 .form-content {
     width: 100%;
+
     max-width: 360px;
+    min-width: 0;
+
+    box-sizing: border-box;
 }
 
 .form-floating>.form-control {
-
+    width: 100%;
     height: 58px;
 
     border-radius: 14px;
@@ -174,12 +186,9 @@ body {
     background: #fafafa;
 
     transition: .25s;
-}
 
-/* .form-floating>.form-control {
-    border-radius: 8px;
-    height: 55px;
-} */
+    box-sizing: border-box;
+}
 
 .btn-login {
     border-radius: 12px;
@@ -277,16 +286,6 @@ body {
         margin: 0 auto;
     }
 
-    /* .form-floating>.form-control {
-        border-radius: 8px;
-        height: 55px;
-    } */
-
-    /* .form-floating>.form-control:focus {
-        border-color: #2563eb;
-        box-shadow: 0 0 0 3px rgba(37, 99, 235, .15);
-    } */
-
     h4,
     p {
         text-align: center;
@@ -296,13 +295,6 @@ body {
         display: none;
     }
 }
-
-/* .logo {
-    width: 50px;
-    height: auto;
-    border-radius: 12px;
-    filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.25));
-} */
 
 .logo {
 
@@ -355,15 +347,6 @@ body {
 .toggle-password:hover {
     color: #0d6efd;
 }
-
-/* .footer {
-    position: fixed;
-    bottom: 10px;
-    width: 100%;
-    text-align: center;
-    font-size: 14px;
-    color: #6c757d;
-} */
 
 .footer {
 
@@ -431,7 +414,6 @@ body::after {
     opacity: .18;
 }
 
-/* Button Login Modern */
 .btn-login-primary {
     height: 48px;
     border: none;
