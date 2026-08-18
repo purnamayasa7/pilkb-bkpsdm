@@ -287,10 +287,23 @@
                                     </div>
 
                                     <button type="submit"
+                                        id="btnLogin"
                                         class="btn btn-login-primary w-100 mb-3">
 
-                                        <i data-feather="log-in"></i>
-                                        Login
+                                        <span class="login-normal">
+                                            <i data-feather="log-in"></i>
+                                            Login
+                                        </span>
+
+                                        <span class="login-loading d-none">
+                                            <span
+                                                class="spinner-border spinner-border-sm me-2"
+                                                role="status"
+                                                aria-hidden="true">
+                                            </span>
+                                            Memproses...
+                                        </span>
+
                                     </button>
 
                                     <button type="button"
@@ -782,6 +795,32 @@
         document.addEventListener('DOMContentLoaded', function() {
 
             feather.replace();
+
+            // Spinner Login
+            const formLogin = document.getElementById('formLogin');
+            const btnLogin = document.getElementById('btnLogin');
+
+            if (formLogin && btnLogin) {
+
+                formLogin.addEventListener('submit', function() {
+
+                    // Cegah double submit
+                    if (btnLogin.disabled) {
+                        return;
+                    }
+
+                    // Disable tombol
+                    btnLogin.disabled = true;
+
+                    // Ganti tampilan tombol
+                    btnLogin.querySelector('.login-normal')
+                        .classList.add('d-none');
+
+                    btnLogin.querySelector('.login-loading')
+                        .classList.remove('d-none');
+                });
+
+            }
 
             // FAQ Search
             const search = document.getElementById('faqSearch');
