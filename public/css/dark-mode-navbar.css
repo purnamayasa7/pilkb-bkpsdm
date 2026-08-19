@@ -266,6 +266,40 @@ body.dark-mode .user-info-card {
     border-color: #253247;
 }
 
+body.dark-mode .user-info-card .icon-box,
+body.dark-mode .user-info-card .icon-box-sm {
+    border: 1px solid transparent;
+}
+
+body.dark-mode .user-info-card .icon-box {
+    background-color: #243a63 !important;
+    border-color: #385b91;
+    color: #8db4ff !important;
+}
+
+body.dark-mode .user-info-card .icon-box-sm.bg-light-primary {
+    background-color: #243a63 !important;
+    border-color: #385b91;
+    color: #8db4ff !important;
+}
+
+body.dark-mode .user-info-card .icon-box-sm.bg-light-success {
+    background-color: #164438 !important;
+    border-color: #23735a;
+    color: #6ee7b7 !important;
+}
+
+body.dark-mode .user-info-card .icon-box-sm.bg-light-info {
+    background-color: #164653 !important;
+    border-color: #25758a;
+    color: #67e8f9 !important;
+}
+
+body.dark-mode .user-info-card .icon-box svg,
+body.dark-mode .user-info-card .icon-box-sm svg {
+    stroke: currentColor !important;
+}
+
 body.dark-mode #layoutSidenav_content #filterBulanForm .input-group,
 body.dark-mode #layoutSidenav_content #monthPicker,
 body.dark-mode #layoutSidenav_content #filterBulanForm .input-group-text {
@@ -334,8 +368,8 @@ body.dark-mode #layoutSidenav_content .card.border-start-lg .small.fw-bold {
 
 body.dark-mode #layoutSidenav_content .card.border-start-lg .h5 {
     color: #f8fafc !important;
-    font-size: 1.35rem;
-    font-weight: 700;
+    font-size: 1.25rem;
+    font-weight: 500;
 }
 
 body.dark-mode #layoutSidenav_content .card.border-start-lg .text-xs {
@@ -344,6 +378,46 @@ body.dark-mode #layoutSidenav_content .card.border-start-lg .text-xs {
 
 body.dark-mode #layoutSidenav_content .card.border-start-lg .text-muted {
     color: #94a3b8 !important;
+}
+
+body.dark-mode #layoutSidenav_content .card.border-start-lg.border-start-primary {
+    background: linear-gradient(135deg, #182b4b 0%, #182235 72%) !important;
+    border-left-color: #4f8cff !important;
+}
+
+body.dark-mode #layoutSidenav_content .card.border-start-lg.border-start-secondary {
+    background: linear-gradient(135deg, #282346 0%, #182235 72%) !important;
+    border-left-color: #a78bfa !important;
+}
+
+body.dark-mode #layoutSidenav_content .card.border-start-lg.border-start-danger {
+    background: linear-gradient(135deg, #422332 0%, #182235 72%) !important;
+    border-left-color: #fb7185 !important;
+}
+
+body.dark-mode #layoutSidenav_content .card.border-start-lg.border-start-success {
+    background: linear-gradient(135deg, #173c38 0%, #182235 72%) !important;
+    border-left-color: #34d399 !important;
+}
+
+body.dark-mode #layoutSidenav_content .card.border-start-lg > .card-body > .d-flex > .ms-2 .fas {
+    opacity: .75 !important;
+}
+
+body.dark-mode #layoutSidenav_content .card.border-start-lg.border-start-primary > .card-body > .d-flex > .ms-2 .fas {
+    color: #69a3ff !important;
+}
+
+body.dark-mode #layoutSidenav_content .card.border-start-lg.border-start-secondary > .card-body > .d-flex > .ms-2 .fas {
+    color: #c4b5fd !important;
+}
+
+body.dark-mode #layoutSidenav_content .card.border-start-lg.border-start-danger > .card-body > .d-flex > .ms-2 .fas {
+    color: #fb7185 !important;
+}
+
+body.dark-mode #layoutSidenav_content .card.border-start-lg.border-start-success > .card-body > .d-flex > .ms-2 .fas {
+    color: #6ee7b7 !important;
 }
 
 body.dark-mode .page-header .btn-light,

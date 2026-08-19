@@ -58,3 +58,23 @@
 
     padding: 14px 16px;
 }
+
+.card.border-start-lg > .card-body > .d-flex > .flex-grow-1 {
+    min-width: 0;
+}
+
+.card.border-start-lg > .card-body > .d-flex > .ms-2 {
+    flex: 0 0 48px;
+    width: 48px;
+    max-width: 48px;
+    min-width: 48px;
+    text-align: center;
+    overflow: hidden;
+}
+
+.card.border-start-lg > .card-body > .d-flex > .ms-2 .fas {
+    display: block;
+    max-width: 100%;
+    font-size: 2rem;
+    line-height: 1;
+}
