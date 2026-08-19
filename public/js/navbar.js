@@ -1,16 +1,24 @@
 document.addEventListener("DOMContentLoaded", function () {
 
-    const searchInput = document.getElementById('ticketSearch');
-    const dropdown = document.getElementById('ticketSearchDropdown');
+    const searchFields = [
+        {
+            input: document.getElementById('ticketSearch'),
+            dropdown: document.getElementById('ticketSearchDropdown')
+        },
+        {
+            input: document.getElementById('ticketSearchMobile'),
+            dropdown: document.getElementById('ticketSearchDropdownMobile')
+        }
+    ].filter(field => field.input && field.dropdown);
 
-    let timer = null;
+    let timers = new WeakMap();
     let ticketCache = {};
 
-    if (!searchInput || !dropdown) {
+    if (searchFields.length === 0) {
         return;
     }
 
-    async function searchTicket(keyword) {
+    async function searchTicket(keyword, dropdown) {
 
         if (keyword.length < 3) {
             dropdown.innerHTML = '';
@@ -35,7 +43,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 `/search-ticket?q=${encodeURIComponent(keyword)}`
             );
             const data = await response.json();
-            renderDropdown(data);
+            renderDropdown(data, dropdown);
         } catch (error) {
 
             console.error(error);
@@ -51,7 +59,7 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     }
 
-    function renderDropdown(data) {
+    function renderDropdown(data, dropdown) {
 
         dropdown.innerHTML = '';
 
@@ -107,42 +115,33 @@ document.addEventListener("DOMContentLoaded", function () {
 
     }
 
-    searchInput.addEventListener('input', function () {
+    searchFields.forEach(({ input, dropdown }) => {
+        input.addEventListener('input', function () {
+            clearTimeout(timers.get(input));
 
-        clearTimeout(timer);
+            timers.set(input, setTimeout(() => {
+                searchTicket(this.value.trim(), dropdown);
+            }, 300));
+        });
 
-        timer = setTimeout(() => {
+        dropdown.addEventListener('click', function (e) {
+            const item = e.target.closest('.ticket-search-item');
 
-            searchTicket(this.value.trim());
+            if (!item || !item.dataset.ticket) {
+                return;
+            }
 
-        }, 300);
-
+            input.value = item.dataset.ticket;
+            dropdown.classList.add('d-none');
+        });
     });
 
     document.addEventListener('click', function (e) {
-        if (!e.target.closest('.form-inline')) {
-
-            dropdown.classList.add('d-none');
-
-        }
-    });
-
-    dropdown.addEventListener('click', function (e) {
-
-        const item = e.target.closest('.ticket-search-item');
-
-        if (!item || !item.dataset.ticket) {
-            return;
-        }
-
-        const noTiket = item.dataset.ticket;
-
-        searchInput.value = noTiket;
-
-        dropdown.classList.add('d-none');
-
-        console.log(noTiket);
-
+        searchFields.forEach(({ input, dropdown }) => {
+            if (!e.target.closest('.form-inline') && e.target !== input) {
+                dropdown.classList.add('d-none');
+            }
+        });
     });
 
     async function loadTicketDetail(noTiket) {

@@ -96,10 +96,12 @@
                 aria-labelledby="searchDropdown">
                 <form class="form-inline me-auto w-100">
                     <div class="input-group input-group-joined input-group-solid">
-                        <input class="form-control pe-0" type="text" placeholder="Search for..." aria-label="Search"
+                        <input id="ticketSearchMobile" class="form-control pe-0" type="search"
+                            placeholder="Cari No Tiket atau NIP" aria-label="Cari Tiket"
                             aria-describedby="basic-addon2" />
                         <div class="input-group-text"><i data-feather="search"></i></div>
                     </div>
+                    <div id="ticketSearchDropdownMobile" class="ticket-search-dropdown d-none"></div>
                 </form>
             </div>
         </li>

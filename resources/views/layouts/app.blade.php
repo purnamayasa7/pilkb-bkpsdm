@@ -28,6 +28,32 @@
             }
         })();
     </script>
+    <style>
+        html.dark-mode,
+        html.dark-mode body {
+            background-color: #0f172a !important;
+        }
+
+        html.dark-mode #layoutSidenav_content,
+        html.dark-mode main {
+            background-color: #0f172a !important;
+        }
+
+        html.dark-mode #sidenavAccordion {
+            background-color: #162238 !important;
+        }
+
+        html.dark-mode #layoutSidenav_nav,
+        html.dark-mode .sidenav {
+            background-color: #111c2f !important;
+        }
+
+        html.dark-mode .card,
+        html.dark-mode .modal-content,
+        html.dark-mode .dropdown-menu {
+            background-color: #182235 !important;
+        }
+    </style>
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>

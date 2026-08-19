@@ -1,4 +1,10 @@
 :root {
+    --pilkb-dark-content: #0f172a;
+    --pilkb-dark-sidebar: #111c2f;
+    --pilkb-dark-navbar: #162238;
+    --pilkb-dark-panel: #182235;
+    --pilkb-dark-hover: #202d42;
+    --pilkb-dark-border: #253247;
     --bs-body-bg: #0f172a;
     --bs-body-color: #d6deeb;
     --bs-light: #1b2638;
@@ -19,13 +25,13 @@
 body,
 body.bg-white,
 body.bg-light {
-    background-color: #0f172a !important;
+    background-color: var(--pilkb-dark-content) !important;
     color: #d6deeb;
 }
 
 #layoutSidenav_content,
 main {
-    background-color: #0f172a !important;
+    background-color: var(--pilkb-dark-content) !important;
     color: #d6deeb;
 }
 
@@ -38,7 +44,7 @@ main {
 .input-group-solid,
 .form-control,
 .form-select {
-    background-color: #182235 !important;
+    background-color: var(--pilkb-dark-panel) !important;
     color: #d6deeb;
 }
 
@@ -53,7 +59,7 @@ main {
 .border-end,
 .border-bottom,
 .border-start {
-    border-color: #253247 !important;
+    border-color: var(--pilkb-dark-border) !important;
 }
 
 .text-dark,
@@ -75,19 +81,19 @@ main {
 }
 
 .table > :not(caption) > * > * {
-    background-color: #182235;
+    background-color: var(--pilkb-dark-panel);
     color: #d6deeb;
-    border-bottom-color: #253247;
+    border-bottom-color: var(--pilkb-dark-border);
 }
 
 .table-hover > tbody > tr:hover > * {
-    background-color: #202d42;
+    background-color: var(--pilkb-dark-hover);
     color: #f1f5f9;
 }
 
 .dropdown-item:hover,
 .dropdown-item:focus {
-    background-color: #202d42;
+    background-color: var(--pilkb-dark-hover);
     color: #fff;
 }
 
