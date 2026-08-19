@@ -29,6 +29,10 @@ html.page-loading #layoutSidenav_content {
     stroke: var(--bs-primary, #0061f2) !important;
 }
 
+body.dark-mode .theme-new-badge {
+    background: #ef4444;
+}
+
 body.dark-mode #sidenavAccordion {
     background-color: var(--pilkb-dark-navbar) !important;
     border-color: var(--pilkb-dark-border);

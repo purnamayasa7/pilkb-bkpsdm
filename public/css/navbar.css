@@ -34,6 +34,24 @@
     border-radius: 999px;
 }
 
+#darkModeToggle {
+    position: relative;
+}
+
+.theme-new-badge {
+    position: absolute;
+    top: -0.35rem;
+    right: -0.65rem;
+    padding: 0.12rem 0.32rem;
+    border-radius: 0.3rem;
+    background: #e81500;
+    color: #fff;
+    font-size: 0.55rem;
+    font-weight: 700;
+    line-height: 1.2;
+    pointer-events: none;
+}
+
 @keyframes notification-ripple {
     0% {
         transform: scale(1);

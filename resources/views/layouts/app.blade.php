@@ -132,8 +132,15 @@
                     </div>
                     <div class="modal-body">Apakah anda yakin keluar dari aplikasi?</div>
                     <div class="modal-footer"><button class="btn btn-light" type="button"
-                            data-bs-dismiss="modal">Kembali</button><button type="submit"
-                            class="btn btn-primary">Logout</button>
+                            data-bs-dismiss="modal">
+                            <i class="me-1" data-feather="arrow-left"></i>
+                            Kembali
+                        </button>
+                        <button type="submit"
+                            class="btn btn-danger">
+                            <i class="me-1" data-feather="log-out"></i>
+                            Logout
+                        </button>
                     </div>
                 </div>
             </form>

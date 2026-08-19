@@ -90,7 +90,7 @@
                     @elseif (auth()->user()->role->name === 'admin_opd')
                         <span>Admin OPD</span>
                     @elseif (auth()->user()->role->name === 'bidang')
-                        <span>Bidang</span>
+                        <span>Admin Bidang</span>
                     @else
                         <span>Pimpinan</span>
                     @endif

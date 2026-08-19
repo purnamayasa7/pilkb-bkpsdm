@@ -2,11 +2,13 @@
     'use strict';
 
     const storageKey = 'pilkb-dark-mode';
+    const newBadgeId = 'darkModeNewBadge';
     const transitionClass = 'theme-transitioning';
 
     function setTheme(isDark, persist, animate) {
         const darkStylesheet = document.getElementById('appDarkThemeStylesheet');
         const toggle = document.getElementById('darkModeToggle');
+        const newBadge = document.getElementById(newBadgeId);
 
         if (animate) {
             document.documentElement.classList.add(transitionClass);
@@ -30,6 +32,9 @@
 
         if (persist) {
             localStorage.setItem(storageKey, isDark ? 'dark' : 'light');
+            if (newBadge) {
+                newBadge.remove();
+            }
         }
 
         if (animate) {
@@ -42,6 +47,13 @@
     function initialize() {
         const savedTheme = localStorage.getItem(storageKey);
         const useDarkMode = savedTheme === 'dark';
+
+        if (savedTheme) {
+            const newBadge = document.getElementById(newBadgeId);
+            if (newBadge) {
+                newBadge.remove();
+            }
+        }
 
         setTheme(useDarkMode, false, false);
 
