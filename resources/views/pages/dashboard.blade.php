@@ -188,10 +188,6 @@
                         </div>
 
                     </div>
-                    {{-- <div class="col-12 col-lg-5 col-xl-4 text-end d-none d-lg-block">
-                        <img class="img-fluid" src="{{ asset('images/statistics.svg') }}" style="max-width: 320px">
-                    </div> --}}
-
                 </div>
             </div>
         </div>

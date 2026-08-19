@@ -103,6 +103,13 @@
                 </form>
             </div>
         </li>
+        <!-- Dark Mode -->
+        <li class="nav-item me-3">
+            <button class="btn btn-icon btn-transparent-dark" id="darkModeToggle" type="button"
+                aria-label="Aktifkan dark mode" title="Aktifkan dark mode">
+                <i data-feather="moon"></i>
+            </button>
+        </li>
         <!-- Alerts Dropdown-->
         <li class="nav-item dropdown no-caret d-none d-sm-block me-3 dropdown-notifications">
 
@@ -305,6 +312,7 @@
             </div>
         </li> -->
         <!-- User Dropdown-->
+        
         @auth
         @php
         $namaParts = explode(' ', trim(auth()->user()->nama));

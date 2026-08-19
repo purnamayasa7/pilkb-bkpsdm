@@ -11,8 +11,24 @@
     <title>PILKB</title>
     <link href="https://cdn.jsdelivr.net/npm/litepicker/dist/css/litepicker.css" rel="stylesheet" />
     <link href="https://cdn.jsdelivr.net/npm/simple-datatables@7.1.2/dist/style.min.css" rel="stylesheet" />
-    <link href="{{ asset('templatepro/css/styles.css') }}" rel="stylesheet" />
-    
+    <link id="appThemeStylesheet" href="{{ asset('templatepro/css/styles.css') }}" rel="stylesheet" />
+    <link id="appDarkThemeStylesheet" href="{{ asset('templatepro/css/styles-dark.css') }}" rel="stylesheet" media="not all" />
+    <link rel="stylesheet" href="{{ asset('css/dark-mode-navbar.css') }}">
+    <script>
+        document.documentElement.classList.add('page-loading');
+
+        (function () {
+            const savedTheme = localStorage.getItem('pilkb-dark-mode');
+            const useDarkMode = savedTheme === 'dark';
+            const darkStylesheet = document.getElementById('appDarkThemeStylesheet');
+
+            if (useDarkMode) {
+                document.documentElement.classList.add('dark-mode');
+                darkStylesheet.media = 'all';
+            }
+        })();
+    </script>
+
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 
@@ -31,6 +47,11 @@
 </head>
 
 <body class="nav-fixed">
+    <script>
+        if (document.documentElement.classList.contains('dark-mode')) {
+            document.body.classList.add('dark-mode');
+        }
+    </script>
     {{-- Navbar --}}
     @include('layouts.navbar')
 
@@ -157,6 +178,7 @@
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap-datepicker@1.10.0/dist/js/bootstrap-datepicker.min.js"></script>
     <script src="{{ asset('js/chat/chat-widget-app.js') }}"></script>
+    <script src="{{ asset('js/dark-mode.js') }}"></script>
     @stack('scripts')
     <script>
         $(document).ready(function() {

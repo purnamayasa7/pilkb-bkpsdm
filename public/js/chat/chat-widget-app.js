@@ -449,19 +449,28 @@
 
         // Function Unread Badge
         loadUnreadBadge() {
-            $.get('/chat/unread-count', (res) => {
-                const badge = $('#chatUnreadBadge');
+            const badge = $('#chatUnreadBadge');
 
-                if (res.count > 0) {
+            if (!badge.hasClass('chat-badge-ready')) {
+                badge.addClass('d-none');
+            }
+
+            $.get('/chat/unread-count', (res) => {
+                const count = Number(res.count) || 0;
+                badge.addClass('chat-badge-ready');
+
+                if (count > 0) {
                     badge
                         .text(
-                            res.count > 99
+                            count > 99
                                 ? '99+'
-                                : res.count
+                                : count
                         ).removeClass('d-none');
                 } else {
                     badge.addClass('d-none');
                 }
+            }).fail(() => {
+                badge.addClass('chat-badge-ready d-none');
             });
         },
 

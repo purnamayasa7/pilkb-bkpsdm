@@ -934,6 +934,156 @@ h1,h2,h3,h4,h5,h6{
     cursor: not-allowed;
 }
 
+/* Dark mode */
+body.dark-mode #chatDrawer {
+    background: #182235;
+    border: 1px solid #253247;
+    box-shadow: 0 15px 45px rgba(2, 6, 23, .45);
+}
+
+body.dark-mode .chat-body,
+body.dark-mode .chat-page {
+    background: #0f172a;
+    color: #d6deeb;
+}
+
+body.dark-mode .chat-header {
+    background: linear-gradient(135deg, #315ee8 0%, #2148bc 100%);
+}
+
+body.dark-mode .help-card,
+body.dark-mode .chat-item,
+body.dark-mode .chat-page .card {
+    background: #182235;
+    border-color: #253247;
+    color: #d6deeb;
+    box-shadow: none;
+}
+
+body.dark-mode .help-card:hover,
+body.dark-mode .chat-item:hover {
+    background: #202d42;
+    border-color: #4f6fff;
+    box-shadow: 0 8px 18px rgba(2, 6, 23, .25);
+}
+
+body.dark-mode .chat-name,
+body.dark-mode .ticket-result-number,
+body.dark-mode .chat-welcome-card h6 {
+    color: #f1f5f9;
+}
+
+body.dark-mode .chat-preview,
+body.dark-mode .chat-empty,
+body.dark-mode .chat-welcome-card p,
+body.dark-mode .chat-meta,
+body.dark-mode .message-info {
+    color: #94a3b8;
+}
+
+body.dark-mode .chat-welcome-card,
+body.dark-mode .ticket-result-card {
+    background: linear-gradient(135deg, rgba(49, 94, 232, .16), rgba(24, 34, 53, .9));
+    border-color: #253d72;
+}
+
+body.dark-mode .chat-welcome-icon {
+    background: #202d42;
+    box-shadow: 0 8px 24px rgba(2, 6, 23, .3);
+}
+
+body.dark-mode #chatInput,
+body.dark-mode .chat-page .form-control,
+body.dark-mode .chat-page .form-select {
+    background: #101a2c;
+    border-color: #34445b;
+    color: #f1f5f9;
+}
+
+body.dark-mode #chatInput::placeholder,
+body.dark-mode .chat-page .form-control::placeholder {
+    color: #64748b;
+}
+
+body.dark-mode #chatInput:focus,
+body.dark-mode .chat-page .form-control:focus,
+body.dark-mode .chat-page .form-select:focus {
+    background: #101a2c;
+    border-color: #4f6fff;
+    color: #f1f5f9;
+    box-shadow: 0 0 0 .2rem rgba(79, 111, 255, .18);
+}
+
+body.dark-mode .chat-ticket-box,
+body.dark-mode .ticket-info {
+    background: #182235;
+    border-color: #253247;
+    color: #d6deeb;
+}
+
+body.dark-mode .copy-ticket-btn {
+    background: #202d42;
+    color: #8db4ff;
+}
+
+body.dark-mode .copy-ticket-btn:hover {
+    background: #2b3d5a;
+}
+
+body.dark-mode .message-bubble.other {
+    background: #182235;
+    border-color: #253247;
+    color: #d6deeb;
+}
+
+body.dark-mode .message-bubble.system {
+    background: #33291d;
+    border-color: #6b4b25;
+    color: #f5c987;
+}
+
+body.dark-mode .chat-menu-btn:hover {
+    background: #202d42;
+}
+
+body.dark-mode .chat-menu-btn,
+body.dark-mode .chat-menu-btn svg,
+body.dark-mode .chat-menu-btn .feather {
+    color: #f1f5f9 !important;
+    stroke: #f1f5f9 !important;
+}
+
+body.dark-mode .chat-menu-btn {
+    border: 1px solid transparent;
+}
+
+body.dark-mode .chat-menu-btn:hover,
+body.dark-mode .chat-menu-btn:focus {
+    border-color: #34445b;
+}
+
+#chatUnreadBadge:not(.chat-badge-ready) {
+    display: none !important;
+}
+
+body.dark-mode .chat-page .text-muted,
+body.dark-mode .chat-page small {
+    color: #94a3b8 !important;
+}
+
+body.dark-mode #chatDrawer ::-webkit-scrollbar {
+    width: 7px;
+}
+
+body.dark-mode #chatDrawer ::-webkit-scrollbar-track {
+    background: #0f172a;
+}
+
+body.dark-mode #chatDrawer ::-webkit-scrollbar-thumb {
+    background: #34445b;
+    border-radius: 4px;
+}
+
 /* .input-group #chatInput {
     border-radius: 20px 0 0 20px;
     padding-left: 16px;
