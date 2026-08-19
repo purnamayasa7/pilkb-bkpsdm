@@ -262,8 +262,11 @@ body.dark-mode #layoutSidenav_content .card-body > .row > div > p.text-gray-700 
 }
 
 body.dark-mode .user-info-card {
-    background: #182235;
-    border-color: #253247;
+    background: rgba(24, 34, 53, 0.72);
+    -webkit-backdrop-filter: blur(10px);
+    backdrop-filter: blur(10px);
+    border-color: rgba(79, 111, 255, 0.28);
+    box-shadow: 0 8px 24px rgba(2, 6, 23, 0.18);
 }
 
 body.dark-mode .user-info-card .icon-box,
@@ -368,8 +371,6 @@ body.dark-mode #layoutSidenav_content .card.border-start-lg .small.fw-bold {
 
 body.dark-mode #layoutSidenav_content .card.border-start-lg .h5 {
     color: #f8fafc !important;
-    font-size: 1.25rem;
-    font-weight: 500;
 }
 
 body.dark-mode #layoutSidenav_content .card.border-start-lg .text-xs {
