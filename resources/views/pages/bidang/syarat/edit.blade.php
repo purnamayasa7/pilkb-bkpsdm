@@ -124,31 +124,6 @@
                              </div>
                          </div>
 
-                         <div class="mb-3" id="modeGroup">
-                             <label class="small mb-1">Pengambilan Dokumen</label>
-
-                             <select
-                                 name="mode_efile"
-                                 id="mode_efile"
-                                 class="form-select">
-
-                                 <option value="latest"
-                                     {{ old('mode_efile', $syarat->mode_efile) == 'latest' ? 'selected' : '' }}>
-                                     Dokumen Terbaru
-                                 </option>
-
-                                 <option value="all"
-                                     {{ old('mode_efile', $syarat->mode_efile) == 'all' ? 'selected' : '' }}>
-                                     Semua Dokumen
-                                 </option>
-
-                             </select>
-
-                             <div class="form-text">
-                                 Berlaku hanya untuk dokumen yang diambil dari SIMPEG.
-                             </div>
-                         </div>
-
                          <button class="btn btn-primary" type="button" id="btnUpdate">
                              <i data-feather="save" class="me-1"></i>
                              Update Syarat
@@ -170,34 +145,27 @@
          const metode = document.getElementById('metode');
          const efileGroup = document.getElementById('efileGroup');
          const kodeEfile = document.getElementById('kode_efile');
-         const modeGroup = document.getElementById('modeGroup');
-         const modeEfile = document.getElementById('mode_efile');
 
          function toggleMetode() {
 
              if (metode.value === 'simpeg') {
 
-                 // Tampilkan field e-file
+                 // Tampilkan E-File SIMPEG
                  efileGroup.style.display = '';
-                 modeGroup.style.display = '';
 
                  // Wajib diisi
                  kodeEfile.required = true;
-                 modeEfile.required = true;
 
              } else {
 
-                 // Sembunyikan field e-file
+                 // Sembunyikan E-File SIMPEG
                  efileGroup.style.display = 'none';
-                 modeGroup.style.display = 'none';
 
                  // Tidak wajib
                  kodeEfile.required = false;
-                 modeEfile.required = false;
 
                  // Bersihkan nilai
                  kodeEfile.value = '';
-                 modeEfile.value = '';
              }
          }
 

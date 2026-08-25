@@ -17,7 +17,6 @@ class Syarat extends Model
         'syarat',
         'metode',
         'kode_efile',
-        'mode_efile',
         'deskripsi',
     ];
 

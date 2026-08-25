@@ -228,6 +228,13 @@
 
                                     <i data-feather="upload" class="text-success"></i>
                                 </a>
+                                {{-- EDIT / PERBAIKI --}}
+                                <a class="btn btn-datatable btn-icon btn-transparent-dark btnEditPerbaikan"
+                                    href="{{ route('adminOpd.perbaikan.edit', $item->no_tiket) }}"
+                                    title="Perbaiki Dokumen">
+
+                                    <i data-feather="edit" class="text-warning"></i>
+                                </a>
                                 {{-- DETAIL --}}
                                 <a class="btn btn-datatable btn-icon btn-transparent-dark me-1 btnDetail"
                                     href="#"

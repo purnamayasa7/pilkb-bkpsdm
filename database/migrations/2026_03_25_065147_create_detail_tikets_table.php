@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->string('no_tiket', 10);
             $table->string('id_syarat', 15);
-            $table->string('status', 10);
+            $table->string('status', 10)->nullable();
             $table->text('comment')->nullable();
             $table->string('file_name')->nullable();
             $table->string('file_path')->nullable();

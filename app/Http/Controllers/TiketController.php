@@ -58,7 +58,7 @@ class TiketController extends Controller
         string $syaratId,
         KelengkapanService $kelengkapanService
     ) {
-        $syarat = \App\Models\Syarat::findOrFail($syaratId);
+        $syarat = Syarat::findOrFail($syaratId);
 
         $data = $kelengkapanService->getSyaratDokumen(
             $nip,
@@ -67,13 +67,14 @@ class TiketController extends Controller
 
         return response()->json([
             'success' => true,
+
             'syarat' => [
                 'id' => $syarat->id,
                 'syarat' => $syarat->syarat,
                 'metode' => $syarat->metode,
                 'kode_efile' => $syarat->kode_efile,
-                'mode_efile' => $syarat->mode_efile,
             ],
+
             'hasil' => $data,
         ]);
     }
@@ -437,67 +438,177 @@ class TiketController extends Controller
     {
         $step = $request->step;
 
-        // STEP 1
+        /*
+    |--------------------------------------------------------------------------
+    | STEP 1
+    |--------------------------------------------------------------------------
+    | Validasi NIP dan email.
+    | Ambil data pegawai dari SIMPEG.
+    | Simpan data pengajuan ke session.
+    |--------------------------------------------------------------------------
+    */
         if ($step == 1) {
 
             $request->validate([
-                'nip' => 'required',
-                'email' => 'required|email'
+                'nip'   => 'required',
+                'email' => 'required|email',
             ]);
 
-            // GET API
-            $pegawaiService = app(PegawaiService::class);
-
-            $pegawai = $pegawaiService->getPegawaiByNip($request->nip);
+            /*
+        |--------------------------------------------------------------------------
+        | AMBIL DATA PEGAWAI
+        |--------------------------------------------------------------------------
+        */
+            $pegawai = $this->pegawaiService->getPegawaiByNip(
+                $request->nip
+            );
 
             if (!$pegawai) {
-                return back()->with(
-                    'error',
-                    'Data pegawai tidak ditemukan.'
-                );
+                return back()
+                    ->withInput()
+                    ->with(
+                        'error',
+                        'Data pegawai tidak ditemukan.'
+                    );
             }
 
-            if (($pegawai['kode_opd'] ?? null) != Auth::user()->kode_ukerja) {
-
-                return back()->with(
-                    'error',
-                    'Pegawai yang dipilih bukan berasal dari OPD Anda.'
-                );
+            /*
+        |--------------------------------------------------------------------------
+        | VALIDASI OPD
+        |--------------------------------------------------------------------------
+        */
+            if (
+                ($pegawai['kode_opd'] ?? null)
+                != Auth::user()->kode_ukerja
+            ) {
+                return back()
+                    ->withInput()
+                    ->with(
+                        'error',
+                        'Pegawai yang dipilih bukan berasal dari OPD Anda.'
+                    );
             }
 
+            /*
+        |--------------------------------------------------------------------------
+        | SIMPAN DATA KE SESSION
+        |--------------------------------------------------------------------------
+        */
             session([
-                'pengajuan.nip' => $request->nip,
-                'pengajuan.email' => $request->email,
-                'pengajuan.started_at' => now(),
+                'pengajuan.nip'          => $request->nip,
+                'pengajuan.email'        => $request->email,
+                'pengajuan.started_at'   => now(),
 
-                // DATA API
-                'pengajuan.nama' => $pegawai['nama_lengkap'] ?? null,
-                'pengajuan.kode_opd' => $pegawai['kode_opd'] ?? null,
-                'pengajuan.foto' => $pegawai['foto_url'] ?? null,
-                'pengajuan.ket_gol' => $pegawai['ket_gol'] ?? null,
-                'pengajuan.unit' => $pegawai['ket_ukerja'] ?? null,
+                // DATA DARI SIMPEG
+                'pengajuan.nama'         => $pegawai['nama_lengkap'] ?? null,
+                'pengajuan.kode_opd'     => $pegawai['kode_opd'] ?? null,
+                'pengajuan.foto'         => $pegawai['foto_url'] ?? null,
+                'pengajuan.ket_gol'      => $pegawai['ket_gol'] ?? null,
+                'pengajuan.unit'         => $pegawai['ket_ukerja'] ?? null,
             ]);
 
-            return redirect()->route('adminOpd.tiket.create', ['step' => 2]);
+            return redirect()->route(
+                'adminOpd.tiket.create',
+                ['step' => 2]
+            );
         }
 
-        // STEP 2
+
+        /*
+    |--------------------------------------------------------------------------
+    | STEP 2
+    |--------------------------------------------------------------------------
+    | Pilih bidang dan layanan.
+    |--------------------------------------------------------------------------
+    */
         if ($step == 2) {
+
+            /*
+        |--------------------------------------------------------------------------
+        | CEK SESSION
+        |--------------------------------------------------------------------------
+        */
             if ($this->checkSessionExpired()) {
-                return redirect()->route('adminOpd.tiket.create', ['step' => 1])
-                    ->with('error', 'Sesi habis.');
+
+                return redirect()
+                    ->route(
+                        'adminOpd.tiket.create',
+                        ['step' => 1]
+                    )
+                    ->with(
+                        'error',
+                        'Sesi pengajuan sudah habis, silakan ulangi.'
+                    );
             }
 
+            /*
+        |--------------------------------------------------------------------------
+        | VALIDASI
+        |--------------------------------------------------------------------------
+        */
             $request->validate([
-                'bidang_id' => 'required',
-                'layanan_id' => 'required'
+                'bidang_id'  => 'required',
+                'layanan_id' => 'required',
             ]);
 
             $dataSession = session('pengajuan');
 
-            $existing = Regtiket::where('nip', $dataSession['nip'])
-                ->where('kode_layanan', $request->layanan_id)
-                ->where('archives', 0)
+            if (
+                !$dataSession ||
+                empty($dataSession['nip'])
+            ) {
+                return redirect()
+                    ->route(
+                        'adminOpd.tiket.create',
+                        ['step' => 1]
+                    )
+                    ->with(
+                        'error',
+                        'Data pengajuan tidak ditemukan. Silakan ulangi.'
+                    );
+            }
+
+            /*
+        |--------------------------------------------------------------------------
+        | VALIDASI LAYANAN
+        |--------------------------------------------------------------------------
+        |
+        | Pastikan layanan benar-benar berasal dari bidang
+        | yang dipilih.
+        |--------------------------------------------------------------------------
+        */
+            $layanan = Layanan::where('id', $request->layanan_id)
+                ->where('kode_bidang', $request->bidang_id)
+                ->where('aktif', 1)
+                ->first();
+
+            if (!$layanan) {
+
+                return back()
+                    ->withInput()
+                    ->with(
+                        'error',
+                        'Layanan yang dipilih tidak valid.'
+                    );
+            }
+
+            /*
+        |--------------------------------------------------------------------------
+        | CEK PENGAJUAN AKTIF YANG SAMA
+        |--------------------------------------------------------------------------
+        */
+            $existing = Regtiket::where(
+                'nip',
+                $dataSession['nip']
+            )
+                ->where(
+                    'kode_layanan',
+                    $request->layanan_id
+                )
+                ->where(
+                    'archives',
+                    0
+                )
                 ->exists();
 
             if ($existing) {
@@ -510,24 +621,55 @@ class TiketController extends Controller
                     );
             }
 
+            /*
+        |--------------------------------------------------------------------------
+        | SIMPAN BIDANG DAN LAYANAN KE SESSION
+        |--------------------------------------------------------------------------
+        */
             session([
-                'pengajuan.bidang_id' => $request->bidang_id,
+                'pengajuan.bidang_id'  => $request->bidang_id,
                 'pengajuan.layanan_id' => $request->layanan_id,
             ]);
 
-            return redirect()->route('adminOpd.tiket.create', ['step' => 3]);
+            return redirect()->route(
+                'adminOpd.tiket.create',
+                ['step' => 3]
+            );
         }
 
-        // STEP 3
-        // STEP 3
+
+        /*
+    |--------------------------------------------------------------------------
+    | STEP 3
+    |--------------------------------------------------------------------------
+    | Validasi dokumen dan membuat tiket.
+    |--------------------------------------------------------------------------
+    */
         if ($step == 3) {
 
+            /*
+        |--------------------------------------------------------------------------
+        | CEK SESSION EXPIRED
+        |--------------------------------------------------------------------------
+        */
             if ($this->checkSessionExpired()) {
+
                 return redirect()
-                    ->route('adminOpd.tiket.create', ['step' => 1])
-                    ->with('error', 'Sesi habis.');
+                    ->route(
+                        'adminOpd.tiket.create',
+                        ['step' => 1]
+                    )
+                    ->with(
+                        'error',
+                        'Sesi pengajuan sudah habis, silakan ulangi.'
+                    );
             }
 
+            /*
+        |--------------------------------------------------------------------------
+        | AMBIL DATA SESSION
+        |--------------------------------------------------------------------------
+        */
             $data = session('pengajuan');
 
             if (
@@ -539,23 +681,31 @@ class TiketController extends Controller
                 )
             ) {
                 return redirect()
-                    ->route('adminOpd.tiket.create', ['step' => 1])
+                    ->route(
+                        'adminOpd.tiket.create',
+                        ['step' => 1]
+                    )
                     ->with(
                         'error',
-                        'Data tidak lengkap, silakan ulangi.'
+                        'Data pengajuan tidak lengkap, silakan ulangi.'
                     );
             }
 
-            /*
-    |--------------------------------------------------------------------------
-    | VALIDASI FILE UPLOAD
-    |--------------------------------------------------------------------------
-    */
 
+            /*
+        |--------------------------------------------------------------------------
+        | VALIDASI FILE UPLOAD
+        |--------------------------------------------------------------------------
+        |
+        | Hanya PDF.
+        | Maksimal 1 MB.
+        |--------------------------------------------------------------------------
+        */
             $validator = Validator::make(
                 $request->all(),
                 [
                     'dokumen' => 'nullable|array',
+
                     'dokumen.*' => [
                         'file',
                         'mimes:pdf',
@@ -588,35 +738,43 @@ class TiketController extends Controller
                     );
             }
 
-            /*
-    |--------------------------------------------------------------------------
-    | AMBIL FILE UPLOAD
-    |--------------------------------------------------------------------------
-    */
-
-            $dokumenUpload = $request->file('dokumen', []);
 
             /*
-    |--------------------------------------------------------------------------
-    | AMBIL DAFTAR SYARAT LAYANAN
-    |--------------------------------------------------------------------------
-    */
+        |--------------------------------------------------------------------------
+        | FILE UPLOAD
+        |--------------------------------------------------------------------------
+        */
+            $dokumenUpload = $request->file(
+                'dokumen',
+                []
+            );
 
+
+            /*
+        |--------------------------------------------------------------------------
+        | AMBIL SELURUH SYARAT LAYANAN
+        |--------------------------------------------------------------------------
+        |
+        | metode dan kode_efile berasal dari tb_syarat.
+        |--------------------------------------------------------------------------
+        */
             $syaratList = Syarat::where(
                 'kode_layanan',
                 $data['layanan_id']
-            )->get()->keyBy('id');
+            )
+                ->get()
+                ->keyBy('id');
+
 
             /*
-    |--------------------------------------------------------------------------
-    | VALIDASI ID SYARAT YANG MENGIRIM FILE
-    |--------------------------------------------------------------------------
-    |
-    | Jangan percaya id_syarat yang dikirim browser.
-    | Kita cek kembali ke database.
-    |
-    */
-
+        |--------------------------------------------------------------------------
+        | VALIDASI FILE YANG DIKIRIM
+        |--------------------------------------------------------------------------
+        |
+        | Kita tidak percaya id_syarat dari browser.
+        | Pastikan id tersebut memang milik layanan yang dipilih.
+        |--------------------------------------------------------------------------
+        */
             foreach ($dokumenUpload as $idSyarat => $file) {
 
                 if (!$file || !$file->isValid()) {
@@ -624,11 +782,10 @@ class TiketController extends Controller
                 }
 
                 /*
-        |--------------------------------------------------------------------------
-        | CEK SYARAT ADA
-        |--------------------------------------------------------------------------
-        */
-
+            |--------------------------------------------------------------------------
+            | CEK SYARAT
+            |--------------------------------------------------------------------------
+            */
                 if (!$syaratList->has($idSyarat)) {
 
                     return back()
@@ -641,30 +798,47 @@ class TiketController extends Controller
 
                 $syarat = $syaratList->get($idSyarat);
 
-                /*
-        |--------------------------------------------------------------------------
-        | CEK APAKAH SYARAT BOLEH UPLOAD
-        |--------------------------------------------------------------------------
-        |
-        | Upload diperbolehkan jika:
-        |
-        | 1. metode = upload
-        |
-        | ATAU
-        |
-        | 2. metode = simpeg tetapi dokumen SIMPEG tidak tersedia.
-        |
-        | Untuk kondisi nomor 2 kita cek melalui service yang sama
-        | dengan prepareSyaratKelengkapan().
-        |
-        */
 
+                /*
+            |--------------------------------------------------------------------------
+            | TENTUKAN APAKAH BOLEH UPLOAD
+            |--------------------------------------------------------------------------
+            |
+            | METODE berasal dari tb_syarat.
+            |
+            | 1. upload
+            |    -> selalu boleh upload.
+            |
+            | 2. simpeg
+            |    -> cek dokumen SIMPEG.
+            |    -> jika tidak tersedia, boleh upload manual.
+            |
+            | Tidak ada lagi pemeriksaan mode_efile.
+            |--------------------------------------------------------------------------
+            */
                 $bolehUpload = false;
 
+
+                /*
+            |--------------------------------------------------------------------------
+            | METODE = UPLOAD
+            |--------------------------------------------------------------------------
+            */
                 if ($syarat->metode === 'upload') {
 
                     $bolehUpload = true;
-                } else {
+                }
+
+
+                /*
+            |--------------------------------------------------------------------------
+            | METODE = SIMPEG
+            |--------------------------------------------------------------------------
+            |
+            | Jika dokumen SIMPEG tidak tersedia,
+            | maka user diperbolehkan upload manual.
+            |--------------------------------------------------------------------------
+            */ elseif ($syarat->metode === 'simpeg') {
 
                     $hasilSimpeg = $this->kelengkapanService
                         ->getSyaratDokumen(
@@ -673,58 +847,74 @@ class TiketController extends Controller
                         );
 
                     if (!($hasilSimpeg['tersedia'] ?? false)) {
+
                         $bolehUpload = true;
                     }
                 }
 
+
+                /*
+            |--------------------------------------------------------------------------
+            | METODE TIDAK VALID
+            |--------------------------------------------------------------------------
+            */ else {
+
+                    $bolehUpload = false;
+                }
+
+
+                /*
+            |--------------------------------------------------------------------------
+            | TOLAK FILE YANG TIDAK DIPERBOLEHKAN
+            |--------------------------------------------------------------------------
+            */
                 if (!$bolehUpload) {
 
                     return back()
                         ->withInput()
                         ->with(
                             'error',
-                            'Dokumen "' . $syarat->syarat .
+                            'Dokumen "' .
+                                $syarat->syarat .
                                 '" tidak diperbolehkan untuk di-upload.'
                         );
                 }
             }
 
-            /*
-    |--------------------------------------------------------------------------
-    | TRANSACTION
-    |--------------------------------------------------------------------------
-    */
 
+            /*
+        |--------------------------------------------------------------------------
+        | TRANSACTION
+        |--------------------------------------------------------------------------
+        */
             DB::beginTransaction();
 
             /*
-    |--------------------------------------------------------------------------
-    | TRACK FILE YANG SUDAH DISIMPAN
-    |--------------------------------------------------------------------------
-    |
-    | Digunakan untuk menghapus file jika terjadi error
-    | sebelum transaction berhasil di-commit.
-    |
-    */
-
+        |--------------------------------------------------------------------------
+        | TRACK FILE
+        |--------------------------------------------------------------------------
+        |
+        | Jika database gagal disimpan,
+        | file yang sudah terlanjur tersimpan akan dihapus.
+        |--------------------------------------------------------------------------
+        */
             $uploadedFiles = [];
 
             try {
 
                 /*
-        |--------------------------------------------------------------------------
-        | GENERATE NO TIKET
-        |--------------------------------------------------------------------------
-        */
-
+            |--------------------------------------------------------------------------
+            | GENERATE NOMOR TIKET
+            |--------------------------------------------------------------------------
+            */
                 $noTiket = $this->generateNoTiket();
 
-                /*
-        |--------------------------------------------------------------------------
-        | SIMPAN REG TIKET
-        |--------------------------------------------------------------------------
-        */
 
+                /*
+            |--------------------------------------------------------------------------
+            | SIMPAN REG TIKET
+            |--------------------------------------------------------------------------
+            */
                 $regTiket = Regtiket::create([
                     'no_tiket'      => $noTiket,
                     'nip'           => $data['nip'],
@@ -743,12 +933,12 @@ class TiketController extends Controller
                     'dihapus'       => 0,
                 ]);
 
-                /*
-        |--------------------------------------------------------------------------
-        | ACTIVITY LOG REG TIKET
-        |--------------------------------------------------------------------------
-        */
 
+                /*
+            |--------------------------------------------------------------------------
+            | ACTIVITY LOG REG TIKET
+            |--------------------------------------------------------------------------
+            */
                 ActivityLogService::log(
                     'Manajemen Data Tiket',
                     'CREATE',
@@ -757,200 +947,189 @@ class TiketController extends Controller
                     $regTiket->toArray()
                 );
 
-                /*
-        |--------------------------------------------------------------------------
-        | FOLDER E-FILE
-        |--------------------------------------------------------------------------
-        |
-        | Hasil:
-        |
-        | D:/efile-pilkb/TKT26081300001/
-        |
-        */
 
+                /*
+            |--------------------------------------------------------------------------
+            | FOLDER E-FILE TIKET
+            |--------------------------------------------------------------------------
+            |
+            | Contoh:
+            |
+            | D:/efile-pilkb/TKT26081300001/
+            |--------------------------------------------------------------------------
+            */
                 $folderTiket = $noTiket;
 
-                /*
-        |--------------------------------------------------------------------------
-        | SIMPAN DETAIL TIKET + FILE
-        |--------------------------------------------------------------------------
-        */
 
+                /*
+            |--------------------------------------------------------------------------
+            | SIMPAN DETAIL TIKET
+            |--------------------------------------------------------------------------
+            */
                 foreach ($syaratList as $s) {
 
                     /*
-            |--------------------------------------------------------------------------
-            | DEFAULT DETAIL
-            |--------------------------------------------------------------------------
-            */
-
+                |--------------------------------------------------------------------------
+                | DEFAULT DETAIL
+                |--------------------------------------------------------------------------
+                */
                     $detailData = [
-                        'no_tiket' => $noTiket,
-                        'id_syarat' => $s->id,
-                        'status' => 1,
-                        'comment' => null,
-                        'file_name' => null,
-                        'file_path' => null,
-                        'file_size' => null,
-                        'uploaded_at' => null,
+                        'no_tiket'        => $noTiket,
+                        'id_syarat'       => $s->id,
+                        'status'          => 1,
+                        'comment'         => null,
+
+                        'file_name'       => null,
+                        'file_path'       => null,
+                        'file_size'       => null,
+                        'uploaded_at'     => null,
                         'retention_until' => null,
-                        'deleted_at' => null,
+                        'deleted_file_at' => null,
                     ];
 
-                    /*
-            |--------------------------------------------------------------------------
-            | CEK APAKAH ADA FILE UNTUK SYARAT INI
-            |--------------------------------------------------------------------------
-            */
 
+                    /*
+                |--------------------------------------------------------------------------
+                | CEK FILE MANUAL
+                |--------------------------------------------------------------------------
+                */
                     $file = $dokumenUpload[$s->id] ?? null;
 
                     if ($file && $file->isValid()) {
 
                         /*
-                |--------------------------------------------------------------------------
-                | NAMA FILE ASLI
-                |--------------------------------------------------------------------------
-                */
+                    |--------------------------------------------------------------------------
+                    | NAMA FILE ASLI
+                    |--------------------------------------------------------------------------
+                    */
+                        $originalName =
+                            $file->getClientOriginalName();
 
-                        $originalName = $file->getClientOriginalName();
-
-                        /*
-                |--------------------------------------------------------------------------
-                | EXTENSION
-                |--------------------------------------------------------------------------
-                |
-                | Gunakan extension hasil validasi Laravel.
-                |
-                */
 
                         /*
-                |--------------------------------------------------------------------------
-                | GENERATE NAMA FILE FISIK ACAK
-                |--------------------------------------------------------------------------
-                */
+                    |--------------------------------------------------------------------------
+                    | NAMA FILE FISIK
+                    |--------------------------------------------------------------------------
+                    |
+                    | Nama fisik dibuat acak.
+                    | Ekstensi tetap PDF.
+                    |--------------------------------------------------------------------------
+                    */
                         $physicalFileName =
-                            Str::lower(Str::random(32)) . '.pdf';
+                            Str::lower(
+                                Str::random(32)
+                            ) . '.pdf';
+
 
                         /*
-                |--------------------------------------------------------------------------
-                | PATH RELATIF
-                |--------------------------------------------------------------------------
-                */
-
+                    |--------------------------------------------------------------------------
+                    | PATH FILE
+                    |--------------------------------------------------------------------------
+                    */
                         $filePath =
                             $folderTiket .
                             '/' .
                             $physicalFileName;
 
-                        /*
-                |--------------------------------------------------------------------------
-                | SIMPAN FILE
-                |--------------------------------------------------------------------------
-                */
-
-                        Storage::disk('pilkb_efile')->putFileAs(
-                            $folderTiket,
-                            $file,
-                            $physicalFileName
-                        );
 
                         /*
-                |--------------------------------------------------------------------------
-                | TRACK FILE
-                |--------------------------------------------------------------------------
-                |
-                | Jika nanti terjadi exception, file ini akan dihapus.
-                |
-                */
+                    |--------------------------------------------------------------------------
+                    | SIMPAN FILE
+                    |--------------------------------------------------------------------------
+                    */
+                        Storage::disk('pilkb_efile')
+                            ->putFileAs(
+                                $folderTiket,
+                                $file,
+                                $physicalFileName
+                            );
 
+
+                        /*
+                    |--------------------------------------------------------------------------
+                    | TRACK FILE
+                    |--------------------------------------------------------------------------
+                    */
                         $uploadedFiles[] = $filePath;
 
-                        /*
-                |--------------------------------------------------------------------------
-                | METADATA FILE
-                |--------------------------------------------------------------------------
-                */
-
-                        $detailData['file_name'] = $originalName;
-                        $detailData['file_path'] = $filePath;
-                        $detailData['file_size'] = $file->getSize();
-                        $detailData['uploaded_at'] = now();
 
                         /*
-                |--------------------------------------------------------------------------
-                | RETENTION
-                |--------------------------------------------------------------------------
-                |
-                | Untuk sementara kita belum menentukan berapa lama
-                | dokumen disimpan.
-                |
-                | Jadi NULL terlebih dahulu.
-                |
-                */
+                    |--------------------------------------------------------------------------
+                    | SIMPAN METADATA FILE
+                    |--------------------------------------------------------------------------
+                    |
+                    | Metadata ini hanya untuk file upload manual.
+                    |--------------------------------------------------------------------------
+                    */
+                        $detailData['file_name'] =
+                            $originalName;
 
+                        $detailData['file_path'] =
+                            $filePath;
+
+                        $detailData['file_size'] =
+                            $file->getSize();
+
+                        $detailData['uploaded_at'] =
+                            now();
+
+                        /*
+                    |--------------------------------------------------------------------------
+                    | RETENTION
+                    |--------------------------------------------------------------------------
+                    |
+                    | Untuk saat ini masih NULL.
+                    |--------------------------------------------------------------------------
+                    */
                         $detailData['retention_until'] = null;
                     }
 
-                    /*
-            |--------------------------------------------------------------------------
-            | SIMPAN DETAIL
-            |--------------------------------------------------------------------------
-            */
 
-                    $detailTiket = DetailTiket::create(
+                    /*
+                |--------------------------------------------------------------------------
+                | CREATE DETAIL TIKET
+                |--------------------------------------------------------------------------
+                */
+                    DetailTiket::create(
                         $detailData
                     );
-
-                    /*
-            |--------------------------------------------------------------------------
-            | ACTIVITY LOG DETAIL
-            |--------------------------------------------------------------------------
-            */
-
-                    // ActivityLogService::log(
-                    //     'Manajemen Data Tiket',
-                    //     'CREATE',
-                    //     'Menambah Detail Tiket ID: ' . $detailTiket->id,
-                    //     [],
-                    //     $detailTiket->toArray()
-                    // );
                 }
 
-                /*
-        |--------------------------------------------------------------------------
-        | TAHAP PERTAMA
-        |--------------------------------------------------------------------------
-        */
 
+                /*
+            |--------------------------------------------------------------------------
+            | TAHAP PERTAMA
+            |--------------------------------------------------------------------------
+            */
                 $tahap = Tahap::create([
                     'no_tiket' => $noTiket,
-                    'tanggal' => now(),
-                    'status' => 20000,
-                    'operator' => Auth::user()->username,
-                    'comment' => '-'
+                    'tanggal'   => now(),
+                    'status'    => 20000,
+                    'operator'  => Auth::user()->username,
+                    'comment'   => '-',
                 ]);
 
-                /*
-        |--------------------------------------------------------------------------
-        | ACTIVITY LOG TAHAP
-        |--------------------------------------------------------------------------
-        */
 
+                /*
+            |--------------------------------------------------------------------------
+            | ACTIVITY LOG TAHAP
+            |--------------------------------------------------------------------------
+            */
                 ActivityLogService::log(
                     'Manajemen Data Tiket',
                     'CREATE',
-                    'Menambah Tahap Pertama Tiket ID: ' . $tahap->no_tiket,
+                    'Menambah Tahap Pertama Tiket ID: ' .
+                        $tahap->no_tiket,
                     [],
                     $tahap->toArray()
                 );
 
-                /*
-        |--------------------------------------------------------------------------
-        | NOTIFIKASI ADMIN BAWAH
-        |--------------------------------------------------------------------------
-        */
 
+                /*
+            |--------------------------------------------------------------------------
+            | NOTIFIKASI ADMIN BAWAH
+            |--------------------------------------------------------------------------
+            */
                 $adminBawah = User::where(
                     'role_id',
                     2
@@ -961,12 +1140,14 @@ class TiketController extends Controller
                     $user->notify(
                         new TiketNotification(
                             'Usulan Baru',
-                            'No Tiket: ' . $regTiket->no_tiket .
+                            'No Tiket: ' .
+                                $regTiket->no_tiket .
                                 ' usulan perlu diverifikasi.',
                             route(
                                 'adminBawah.permintaan.reviewPermintaan',
                                 [
-                                    'no_tiket' => $regTiket->no_tiket
+                                    'no_tiket' =>
+                                    $regTiket->no_tiket
                                 ]
                             ),
                             $regTiket->no_tiket,
@@ -975,102 +1156,113 @@ class TiketController extends Controller
                     );
                 }
 
-                /*
-        |--------------------------------------------------------------------------
-        | COMMIT
-        |--------------------------------------------------------------------------
-        */
 
+                /*
+            |--------------------------------------------------------------------------
+            | COMMIT
+            |--------------------------------------------------------------------------
+            */
                 DB::commit();
 
-                /*
-        |--------------------------------------------------------------------------
-        | SIMPAN NO TIKET KE SESSION
-        |--------------------------------------------------------------------------
-        */
 
+                /*
+            |--------------------------------------------------------------------------
+            | SIMPAN NO TIKET KE SESSION
+            |--------------------------------------------------------------------------
+            */
                 session([
-                    'pengajuan.no_tiket' => $noTiket
+                    'pengajuan.no_tiket' => $noTiket,
                 ]);
 
-                /*
-        |--------------------------------------------------------------------------
-        | REDIRECT STEP 4
-        |--------------------------------------------------------------------------
-        */
 
+                /*
+            |--------------------------------------------------------------------------
+            | REDIRECT STEP 4
+            |--------------------------------------------------------------------------
+            */
                 return redirect()
                     ->route(
                         'adminOpd.tiket.create',
                         [
-                            'step' => 4,
-                            'no_tiket' => $noTiket
+                            'step'     => 4,
+                            'no_tiket' => $noTiket,
                         ]
                     )
                     ->with(
                         'success',
-                        'Tiket berhasil dibuat dengan No: ' . $noTiket
+                        'Tiket berhasil dibuat dengan No: ' .
+                            $noTiket
                     );
             } catch (\Throwable $e) {
 
                 /*
-        |--------------------------------------------------------------------------
-        | ROLLBACK DATABASE
-        |--------------------------------------------------------------------------
-        */
-
+            |--------------------------------------------------------------------------
+            | ROLLBACK DATABASE
+            |--------------------------------------------------------------------------
+            */
                 DB::rollBack();
 
-                /*
-        |--------------------------------------------------------------------------
-        | HAPUS FILE YANG SUDAH TERUPLOAD
-        |--------------------------------------------------------------------------
-        */
 
+                /*
+            |--------------------------------------------------------------------------
+            | HAPUS FILE YANG SUDAH TERSIMPAN
+            |--------------------------------------------------------------------------
+            */
                 foreach ($uploadedFiles as $filePath) {
 
                     try {
 
-                        if (
-                            Storage::disk('pilkb_efile')
-                            ->exists($filePath)
-                        ) {
-                            Storage::disk('pilkb_efile')
-                                ->delete($filePath);
+                        $disk = Storage::disk(
+                            'pilkb_efile'
+                        );
+
+                        if ($disk->exists($filePath)) {
+
+                            $disk->delete(
+                                $filePath
+                            );
                         }
                     } catch (\Throwable $fileException) {
 
                         Log::error(
                             'Gagal menghapus file setelah rollback.',
                             [
-                                'file_path' => $filePath,
-                                'error' => $fileException->getMessage(),
+                                'file_path' =>
+                                $filePath,
+
+                                'error' =>
+                                $fileException->getMessage(),
                             ]
                         );
                     }
                 }
 
-                /*
-        |--------------------------------------------------------------------------
-        | LOG ERROR
-        |--------------------------------------------------------------------------
-        */
 
+                /*
+            |--------------------------------------------------------------------------
+            | LOG ERROR
+            |--------------------------------------------------------------------------
+            */
                 Log::error(
                     'Gagal membuat tiket.',
                     [
-                        'error' => $e->getMessage(),
-                        'trace' => $e->getTraceAsString(),
-                        'nip' => $data['nip'] ?? null,
+                        'error' =>
+                        $e->getMessage(),
+
+                        'trace' =>
+                        $e->getTraceAsString(),
+
+                        'nip' =>
+                        $data['nip'] ?? null,
                     ]
                 );
 
-                /*
-        |--------------------------------------------------------------------------
-        | KEMBALI KE STEP 3
-        |--------------------------------------------------------------------------
-        */
 
+                /*
+            |--------------------------------------------------------------------------
+            | KEMBALI KE STEP 3
+            |--------------------------------------------------------------------------
+            */
                 return back()
                     ->withInput()
                     ->with(
@@ -1087,23 +1279,32 @@ class TiketController extends Controller
     ) {
         return $syaratList->map(function ($syarat) use ($nip) {
 
-            // =========================
-            // SYARAT UPLOAD
-            // =========================
+            /*
+         * =====================================================
+         * SYARAT UPLOAD
+         * =====================================================
+         *
+         * Jika metode = upload:
+         *
+         * - Tidak mengambil data dari SIMPEG
+         * - Tidak memiliki dokumen SIMPEG
+         * - File dapat diupload pada Step 3
+         */
             if ($syarat->metode !== 'simpeg') {
 
                 return (object) [
                     'syarat' => $syarat,
                     'tersedia' => false,
                     'jenis' => null,
-                    'mode' => null,
                     'dokumen' => [],
                 ];
             }
 
-            // =========================
-            // SYARAT SIMPEG
-            // =========================
+            /*
+         * =====================================================
+         * SYARAT SIMPEG
+         * =====================================================
+         */
             $hasil = $this->kelengkapanService
                 ->getSyaratDokumen(
                     $nip,
@@ -1114,7 +1315,6 @@ class TiketController extends Controller
                 'syarat' => $syarat,
                 'tersedia' => $hasil['tersedia'] ?? false,
                 'jenis' => $hasil['jenis'] ?? null,
-                'mode' => $hasil['mode'] ?? null,
                 'dokumen' => $hasil['dokumen'] ?? [],
             ];
         });

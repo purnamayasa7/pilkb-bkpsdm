@@ -138,6 +138,7 @@
                         <th>No</th>
                         <th>Nama Layanan</th>
                         <th>Syarat</th>
+                        <th>Metode e-File</th>
                         <th>Aksi</th>
                     </tr>
                 </thead>
@@ -146,6 +147,7 @@
                         <th>No</th>
                         <th>Nama Layanan</th>
                         <th>Syarat</th>
+                        <th>Metode e-File</th>
                         <th>Aksi</th>
                     </tr>
                 </tfoot>
@@ -157,6 +159,20 @@
                             {{ $item->layanan->nama_layanan ?? '-' }}
                         </td>
                         <td>{{ $item->syarat }}</td>
+                        <td>
+                            @switch($item->metode)
+                            @case('simpeg')
+                            SIMPEG
+                            @break
+
+                            @case('upload')
+                            Upload
+                            @break
+
+                            @default
+                            -
+                            @endswitch
+                        </td>
                         <td>
                             <div class="d-flex align-items-center">
                                 <a class="btn btn-datatable btn-icon btn-transparent-dark me-1 btnDetail"

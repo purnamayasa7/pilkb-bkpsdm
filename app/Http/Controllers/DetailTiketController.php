@@ -10,17 +10,25 @@ use App\Models\Tahap;
 use App\Models\User;
 use App\Notifications\TiketNotification;
 use App\Services\ActivityLogService;
+use App\Services\KelengkapanService;
 use App\Services\PegawaiService;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Maatwebsite\Excel\Facades\Excel;
+use BaconQrCode\Renderer\ImageRenderer;
+use BaconQrCode\Renderer\RendererStyle\RendererStyle;
+use BaconQrCode\Renderer\Image\SvgImageBackEnd;
+use BaconQrCode\Writer;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
 
 class DetailTiketController extends Controller
 {
     public function __construct(
-        protected PegawaiService $pegawaiService
+        protected PegawaiService $pegawaiService,
+        protected KelengkapanService $kelengkapanService
     ) {}
 
     private function getData($request, $isAdminBawah = false)
@@ -29,15 +37,19 @@ class DetailTiketController extends Controller
             'layanan',
             'tahap'
         ])
-            // Hanya tiket yang memiliki syarat BTL
-            ->whereHas('detail', function ($q) {
-                $q->where('status', 2);
+            ->where(function ($query) {
+
+                $query->whereHas('detail', function ($q) {
+                    $q->where('status', 2);
+                })
+                    ->orWhere(function ($q) {
+                        $q->where('diperbaiki', 1)
+                            ->whereHas('detail', function ($q) {
+                                $q->whereNull('status');
+                            });
+                    });
             });
 
-        /**
-         * ADMIN OPD
-         * Hanya melihat tiket milik OPD sendiri
-         */
         if (!$isAdminBawah) {
             $query->where(
                 'kode_ukerja',
@@ -45,17 +57,10 @@ class DetailTiketController extends Controller
             );
         }
 
-        /**
-         * ADMIN BAWAH
-         * Tiket harus sudah melewati tahap pertama
-         */
         if ($isAdminBawah) {
             $query->has('tahap', '>', 1);
         }
 
-        /**
-         * FILTER LAYANAN
-         */
         if ($request->filled('layanan') && $request->layanan !== 'all') {
             $query->where(
                 'kode_layanan',
@@ -63,12 +68,6 @@ class DetailTiketController extends Controller
             );
         }
 
-        /**
-         * FILTER BTL
-         *
-         * Jika parameter btl digunakan,
-         * tetap hanya mengambil detail status = 2.
-         */
         if ($request->filled('btl')) {
             $query->whereHas('detail', function ($q) {
                 $q->where('status', 2);
@@ -119,6 +118,22 @@ class DetailTiketController extends Controller
                 ->get(),
         ]);
     }
+
+    // Generate QR
+    private function generateQr($url)
+    {
+        $renderer = new ImageRenderer(
+            new RendererStyle(120),
+            new SvgImageBackEnd()
+        );
+
+        $writer = new Writer($renderer);
+
+        $qrString = $writer->writeString($url);
+
+        return base64_encode($qrString);
+    }
+
     // Index Daftar Penerimaan Layanan
     public function indexPermintaan(Request $request)
     {
@@ -129,51 +144,473 @@ class DetailTiketController extends Controller
             // HANYA TAHAP 1
             ->has('tahap', '=', 1);
 
-        if ($request->layanan) {
-            $query->where('kode_layanan', $request->layanan);
+        // FILTER LAYANAN
+        if ($request->filled('layanan')) {
+            $query->where(
+                'kode_layanan',
+                $request->layanan
+            );
         }
 
         $tiket = $query
             ->orderByDesc('tanggal')
             ->get();
 
-        $pegawaiList = $this->pegawaiService->getPegawaiByNips(
-            $tiket->pluck('nip')
-                ->unique()
-                ->values()
-        );
-
         return view('pages.admin-bawah.registrasi.index', [
             'tiket' => $tiket,
-            'pegawaiList' => $pegawaiList,
-            'layananList' => Layanan::where('aktif', 1)->get()
+            'layananList' => Layanan::where('aktif', 1)->get(),
         ]);
     }
 
     // Tampil Review
+    // public function review($no_tiket)
+    // {
+    //     $tiket = Regtiket::with(['layanan.bidang'])
+    //         ->where('no_tiket', $no_tiket)
+    //         ->firstOrFail();
+
+    //     $detail = DetailTiket::with('syarat')
+    //         ->where('no_tiket', $no_tiket)
+    //         ->get();
+
+    //     $pegawai = $this->pegawaiService->getPegawaiByNip($tiket->nip);
+
+    //     $dataPegawai = [
+    //         'nama'     => $tiket->nama ?? '-',
+    //         'golongan' => $pegawai['ket_gol'] ?? '-',
+    //         'unit'     => $tiket->nama_ukerja ?? '-',
+    //     ];
+
+    //     return view('pages.admin-bawah.perbaikan.edit', [
+    //         'tiket' => $tiket,
+    //         'detail' => $detail,
+    //         'dataPegawai' => $dataPegawai
+    //     ]);
+    // }
+
+    // Tampil Review Perbaikan Admin Bawah
     public function review($no_tiket)
     {
-        $tiket = Regtiket::with(['layanan.bidang'])
+        /*
+    |--------------------------------------------------------------------------
+    | DATA TIKET
+    |--------------------------------------------------------------------------
+    */
+
+        $tiket = Regtiket::with([
+            'layanan.bidang'
+        ])
             ->where('no_tiket', $no_tiket)
             ->firstOrFail();
+
+
+        /*
+    |--------------------------------------------------------------------------
+    | DETAIL SYARAT
+    |--------------------------------------------------------------------------
+    */
 
         $detail = DetailTiket::with('syarat')
             ->where('no_tiket', $no_tiket)
             ->get();
 
-        $pegawai = $this->pegawaiService->getPegawaiByNip($tiket->nip);
+
+        /*
+    |--------------------------------------------------------------------------
+    | DATA PEGAWAI
+    |--------------------------------------------------------------------------
+    */
+
+        $pegawai = $this->pegawaiService
+            ->getPegawaiByNip($tiket->nip);
 
         $dataPegawai = [
             'nama'     => $tiket->nama ?? '-',
             'golongan' => $pegawai['ket_gol'] ?? '-',
-            'unit'     => $tiket->nama_ukerja ?? '-',   
+            'unit'     => $tiket->nama_ukerja ?? '-',
         ];
 
-        return view('pages.admin-bawah.perbaikan.edit', [
-            'tiket' => $tiket,
-            'detail' => $detail,
-            'dataPegawai' => $dataPegawai
-        ]);
+
+        /*
+    |--------------------------------------------------------------------------
+    | DATA DOKUMEN REVIEW
+    |--------------------------------------------------------------------------
+    |
+    | Tidak menggunakan mode_efile.
+    |
+    | upload :
+    |   mengambil file dari tb_det_tiket
+    |
+    | simpeg :
+    |   mengambil seluruh riwayat e-file dari SIMPEG
+    |
+    */
+
+        foreach ($detail as $d) {
+
+            $syarat = $d->syarat;
+
+
+            /*
+        |--------------------------------------------------------------------------
+        | SYARAT TIDAK DITEMUKAN
+        |--------------------------------------------------------------------------
+        */
+
+            if (!$syarat) {
+
+                $d->dokumen_review = [
+                    'metode'     => null,
+                    'kode_efile' => null,
+                    'tersedia'   => false,
+                    'nama'       => null,
+                    'url'        => null,
+                    'dokumen'    => [],
+                ];
+
+                continue;
+            }
+
+
+            /*
+        |--------------------------------------------------------------------------
+        | METODE UPLOAD
+        |--------------------------------------------------------------------------
+        */
+
+            if ($syarat->metode === 'upload') {
+
+                $tersedia = !empty($d->file_path);
+
+                $d->dokumen_review = [
+
+                    'metode' =>
+                    'upload',
+
+                    'kode_efile' =>
+                    null,
+
+                    'tersedia' =>
+                    $tersedia,
+
+                    'nama' =>
+                    $tersedia
+                        ? ($d->file_name ?? 'Dokumen')
+                        : null,
+
+                    'url' =>
+                    $tersedia
+                        ? route(
+                            'adminBawah.permintaan.dokumen',
+                            ['id' => $d->id]
+                        )
+                        : null,
+
+                    'dokumen' =>
+                    $tersedia
+                        ? [
+                            [
+                                'nama' =>
+                                $d->file_name
+                                    ?? 'Dokumen',
+
+                                'url' =>
+                                route(
+                                    'adminBawah.permintaan.dokumen',
+                                    ['id' => $d->id]
+                                ),
+
+                                'tanggal' =>
+                                $d->uploaded_at
+                                    ? $d->uploaded_at
+                                    ->format('d/m/Y H:i')
+                                    : null,
+
+                                'urutan' =>
+                                null,
+
+                                'status' =>
+                                'upload',
+
+                                'ref_table' =>
+                                null,
+
+                                'sumber' =>
+                                'upload',
+
+                                'raw' =>
+                                null,
+                            ]
+                        ]
+                        : [],
+                ];
+
+                continue;
+            }
+
+
+            /*
+        |--------------------------------------------------------------------------
+        | METODE SIMPEG
+        |--------------------------------------------------------------------------
+        */
+
+            if ($syarat->metode === 'simpeg') {
+
+                /*
+            |--------------------------------------------------------------------------
+            | CEK FILE MANUAL
+            |--------------------------------------------------------------------------
+            |
+            | Jika metode simpeg tetapi ternyata ada file manual
+            | yang tersimpan pada tiket, gunakan file manual tersebut.
+            |
+            */
+
+                $fileManualTersedia =
+                    !empty($d->file_path);
+
+
+                if ($fileManualTersedia) {
+
+                    $urlManual = route(
+                        'adminBawah.permintaan.dokumen',
+                        ['id' => $d->id]
+                    );
+
+                    $namaManual =
+                        $d->file_name ?? 'Dokumen';
+
+
+                    $d->dokumen_review = [
+
+                        'metode' =>
+                        'upload',
+
+                        'kode_efile' =>
+                        $syarat->kode_efile,
+
+                        'tersedia' =>
+                        true,
+
+                        'nama' =>
+                        $namaManual,
+
+                        'url' =>
+                        $urlManual,
+
+                        'dokumen' =>
+                        [
+                            [
+                                'nama' =>
+                                $namaManual,
+
+                                'url' =>
+                                $urlManual,
+
+                                'tanggal' =>
+                                $d->uploaded_at
+                                    ? $d->uploaded_at
+                                    ->format('d/m/Y H:i')
+                                    : null,
+
+                                'urutan' =>
+                                null,
+
+                                'status' =>
+                                'upload',
+
+                                'ref_table' =>
+                                null,
+
+                                'sumber' =>
+                                'upload',
+
+                                'raw' =>
+                                null,
+                            ]
+                        ],
+                    ];
+
+                    continue;
+                }
+
+
+                /*
+            |--------------------------------------------------------------------------
+            | AMBIL E-FILE DARI SIMPEG
+            |--------------------------------------------------------------------------
+            */
+
+                $hasil = $this->kelengkapanService
+                    ->getSyaratDokumen(
+                        $tiket->nip,
+                        $syarat
+                    );
+
+                $dokumen =
+                    $hasil['dokumen'] ?? [];
+
+
+                /*
+            |--------------------------------------------------------------------------
+            | FORMAT DOKUMEN SIMPEG
+            |--------------------------------------------------------------------------
+            */
+
+                $dokumenTerformat = collect($dokumen)
+                    ->map(function ($item) {
+
+                        return [
+
+                            'nama' =>
+                            $item['nama_file']
+                                ?? $item['nama']
+                                ?? $item['file_name']
+                                ?? $item['nama_dokumen']
+                                ?? 'Dokumen',
+
+                            'url' =>
+                            $item['preview_url']
+                                ?? $item['url']
+                                ?? null,
+
+                            'tanggal' =>
+                            $item['tanggal']
+                                ?? $item['created_at']
+                                ?? $item['tgl_dokumen']
+                                ?? null,
+
+                            'urutan' =>
+                            $item['urutan']
+                                ?? null,
+
+                            'status' =>
+                            $item['status']
+                                ?? null,
+
+                            'ref_table' =>
+                            $item['ref_table']
+                                ?? null,
+
+                            'sumber' =>
+                            'simpeg',
+
+                            'raw' =>
+                            $item,
+                        ];
+                    })
+                    ->sortByDesc(function ($item) {
+
+                        return (int) (
+                            $item['urutan'] ?? 0
+                        );
+                    })
+                    ->values()
+                    ->all();
+
+
+                /*
+            |--------------------------------------------------------------------------
+            | SIMPAN KE OBJECT DETAIL
+            |--------------------------------------------------------------------------
+            */
+
+                $d->dokumen_review = [
+
+                    'metode' =>
+                    'simpeg',
+
+                    'kode_efile' =>
+                    $syarat->kode_efile,
+
+                    'tersedia' =>
+                    count($dokumenTerformat) > 0,
+
+                    'nama' =>
+                    $dokumenTerformat[0]['nama']
+                        ?? null,
+
+                    'url' =>
+                    $dokumenTerformat[0]['url']
+                        ?? null,
+
+                    'dokumen' =>
+                    $dokumenTerformat,
+                ];
+
+                continue;
+            }
+
+
+            /*
+        |--------------------------------------------------------------------------
+        | METODE TIDAK DIKENAL
+        |--------------------------------------------------------------------------
+        */
+
+            $d->dokumen_review = [
+
+                'metode' =>
+                $syarat->metode,
+
+                'kode_efile' =>
+                $syarat->kode_efile,
+
+                'tersedia' =>
+                false,
+
+                'nama' =>
+                null,
+
+                'url' =>
+                null,
+
+                'dokumen' =>
+                [],
+            ];
+        }
+
+
+        /*
+    |--------------------------------------------------------------------------
+    | QR TIKET
+    |--------------------------------------------------------------------------
+    */
+
+        $url = route(
+            'tiket.public',
+            [
+                'no_tiket' =>
+                $tiket->no_tiket
+            ]
+        );
+
+        $qr = $this->generateQr($url);
+
+
+        /*
+    |--------------------------------------------------------------------------
+    | VIEW
+    |--------------------------------------------------------------------------
+    */
+
+        return view(
+            'pages.admin-bawah.perbaikan.edit',
+            [
+                'tiket' =>
+                $tiket,
+
+                'detail' =>
+                $detail,
+
+                'dataPegawai' =>
+                $dataPegawai,
+
+                'qr' =>
+                $qr,
+            ]
+        );
     }
 
     // Tampil Review Permintaan Admin Bawah
@@ -187,19 +624,448 @@ class DetailTiketController extends Controller
             ->where('no_tiket', $no_tiket)
             ->get();
 
-        $pegawai = $this->pegawaiService->getPegawaiByNip($tiket->nip);
+        /*
+    |--------------------------------------------------------------------------
+    | DATA PEGAWAI
+    |--------------------------------------------------------------------------
+    */
+
+        $pegawai = $this->pegawaiService
+            ->getPegawaiByNip($tiket->nip);
 
         $dataPegawai = [
-            'nama' => $pegawai['nama_lengkap'] ?? '-',
+            'nama'     => $tiket->nama ?? '-',
             'golongan' => $pegawai['ket_gol'] ?? '-',
-            'unit' => $pegawai['ket_ukerja'] ?? '-',
+            'unit'     => $tiket->nama_ukerja ?? '-',
         ];
 
-        return view('pages.admin-bawah.registrasi.edit', [
-            'tiket' => $tiket,
-            'detail' => $detail,
-            'dataPegawai' => $dataPegawai
+        /*
+    |--------------------------------------------------------------------------
+    | DATA DOKUMEN REVIEW
+    |--------------------------------------------------------------------------
+    |
+    | Tidak menggunakan mode_efile.
+    |
+    | upload :
+    |   mengambil file dari tb_det_tiket
+    |
+    | simpeg :
+    |   mengambil seluruh riwayat e-file dari SIMPEG
+    |
+    */
+
+        foreach ($detail as $d) {
+
+            $syarat = $d->syarat;
+
+            /*
+    |--------------------------------------------------------------------------
+    | SYARAT TIDAK DITEMUKAN
+    |--------------------------------------------------------------------------
+    */
+
+            if (!$syarat) {
+
+                $d->dokumen_review = [
+                    'metode'     => null,
+                    'kode_efile' => null,
+                    'tersedia'   => false,
+                    'nama'       => null,
+                    'url'        => null,
+                    'dokumen'    => [],
+                ];
+
+                continue;
+            }
+
+
+            /*
+    |--------------------------------------------------------------------------
+    | METODE UPLOAD
+    |--------------------------------------------------------------------------
+    */
+
+            if ($syarat->metode === 'upload') {
+
+                $tersedia = !empty($d->file_path);
+
+                $d->dokumen_review = [
+                    'metode'     => 'upload',
+                    'kode_efile' => null,
+                    'tersedia'   => $tersedia,
+
+                    'nama' => $tersedia
+                        ? ($d->file_name ?? 'Dokumen')
+                        : null,
+
+                    'url' => $tersedia
+                        ? route(
+                            'adminBawah.permintaan.dokumen',
+                            ['id' => $d->id]
+                        )
+                        : null,
+
+                    'dokumen' => $tersedia
+                        ? [
+                            [
+                                'nama' => $d->file_name ?? 'Dokumen',
+
+                                'url' => route(
+                                    'adminBawah.permintaan.dokumen',
+                                    ['id' => $d->id]
+                                ),
+
+                                'tanggal' => $d->uploaded_at
+                                    ? $d->uploaded_at->format('d/m/Y H:i')
+                                    : null,
+
+                                'urutan' => null,
+
+                                'raw' => null,
+                            ]
+                        ]
+                        : [],
+                ];
+
+                continue;
+            }
+
+
+            /*
+|--------------------------------------------------------------------------
+| METODE SIMPEG
+|--------------------------------------------------------------------------
+|
+| Sumber dokumen:
+|
+| 1. Jika file manual sudah di-upload ke tb_det_tiket
+|    -> gunakan file manual tersebut.
+|
+| 2. Jika belum ada file manual
+|    -> ambil seluruh riwayat e-file dari SIMPEG.
+|
+| Tidak menggunakan mode_efile.
+|--------------------------------------------------------------------------
+*/
+
+            if ($syarat->metode === 'simpeg') {
+
+                /*
+    |--------------------------------------------------------------------------
+    | CEK FILE MANUAL PADA TIKET
+    |--------------------------------------------------------------------------
+    |
+    | Syarat metode simpeg tetap dapat memiliki file manual
+    | apabila e-file SIMPEG tidak tersedia.
+    |
+    */
+
+                $fileManualTersedia = !empty($d->file_path);
+
+
+                /*
+    |--------------------------------------------------------------------------
+    | JIKA FILE MANUAL SUDAH ADA
+    |--------------------------------------------------------------------------
+    |
+    | File yang di-upload pada tiket adalah dokumen yang digunakan
+    | untuk proses review.
+    |
+    */
+
+                if ($fileManualTersedia) {
+
+                    $urlManual = route(
+                        'adminBawah.permintaan.dokumen',
+                        ['id' => $d->id]
+                    );
+
+                    $namaManual = $d->file_name
+                        ?? 'Dokumen';
+
+                    $d->dokumen_review = [
+
+                        'metode' => 'upload',
+
+                        'kode_efile' =>
+                        $syarat->kode_efile,
+
+                        'tersedia' => true,
+
+                        'nama' =>
+                        $namaManual,
+
+                        'url' =>
+                        $urlManual,
+
+                        'dokumen' => [
+                            [
+                                'nama' =>
+                                $namaManual,
+
+                                'url' =>
+                                $urlManual,
+
+                                'tanggal' =>
+                                $d->uploaded_at
+                                    ? $d->uploaded_at->format('d/m/Y H:i')
+                                    : null,
+
+                                'urutan' => null,
+
+                                'status' => 'upload',
+
+                                'ref_table' => null,
+
+                                'sumber' => 'upload',
+
+                                'raw' => null,
+                            ]
+                        ],
+                    ];
+
+                    continue;
+                }
+
+
+                /*
+    |--------------------------------------------------------------------------
+    | BELUM ADA FILE MANUAL
+    |--------------------------------------------------------------------------
+    |
+    | Baru kemudian mengambil dokumen dari SIMPEG.
+    |
+    */
+
+                $hasil = $this->kelengkapanService
+                    ->getSyaratDokumen(
+                        $tiket->nip,
+                        $syarat
+                    );
+
+                $dokumen = $hasil['dokumen'] ?? [];
+
+
+                /*
+    |--------------------------------------------------------------------------
+    | FORMAT DATA SIMPEG
+    |--------------------------------------------------------------------------
+    */
+
+                $dokumenTerformat = collect($dokumen)
+                    ->map(function ($item) {
+
+                        return [
+                            'nama' =>
+                            $item['nama_file']
+                                ?? $item['nama']
+                                ?? $item['file_name']
+                                ?? $item['nama_dokumen']
+                                ?? 'Dokumen',
+
+                            'url' =>
+                            $item['preview_url']
+                                ?? $item['url']
+                                ?? null,
+
+                            'tanggal' =>
+                            $item['tanggal']
+                                ?? $item['created_at']
+                                ?? $item['tgl_dokumen']
+                                ?? null,
+
+                            'urutan' =>
+                            $item['urutan']
+                                ?? null,
+
+                            'status' =>
+                            $item['status']
+                                ?? null,
+
+                            'ref_table' =>
+                            $item['ref_table']
+                                ?? null,
+
+                            'sumber' =>
+                            'simpeg',
+
+                            'raw' =>
+                            $item,
+                        ];
+                    })
+                    ->sortByDesc(function ($item) {
+
+                        return (int) (
+                            $item['urutan'] ?? 0
+                        );
+                    })
+                    ->values()
+                    ->all();
+
+
+                /*
+    |--------------------------------------------------------------------------
+    | DATA UNTUK BLADE
+    |--------------------------------------------------------------------------
+    */
+
+                $d->dokumen_review = [
+
+                    'metode' =>
+                    'simpeg',
+
+                    'kode_efile' =>
+                    $syarat->kode_efile,
+
+                    'tersedia' =>
+                    count($dokumenTerformat) > 0,
+
+                    'nama' =>
+                    $dokumenTerformat[0]['nama']
+                        ?? null,
+
+                    'url' =>
+                    $dokumenTerformat[0]['url']
+                        ?? null,
+
+                    'dokumen' =>
+                    $dokumenTerformat,
+                ];
+
+                continue;
+            }
+
+
+            /*
+    |--------------------------------------------------------------------------
+    | METODE TIDAK DIKENAL
+    |--------------------------------------------------------------------------
+    */
+
+            $d->dokumen_review = [
+                'metode'     => $syarat->metode,
+                'kode_efile' => $syarat->kode_efile,
+                'tersedia'   => false,
+                'nama'       => null,
+                'url'        => null,
+                'dokumen'    => [],
+            ];
+        }
+
+        /*
+    |--------------------------------------------------------------------------
+    | QR TIKET
+    |--------------------------------------------------------------------------
+    */
+
+        $url = route('tiket.public', [
+            'no_tiket' => $tiket->no_tiket
         ]);
+
+        $qr = $this->generateQr($url);
+
+        return view('pages.admin-bawah.registrasi.edit', [
+            'tiket'       => $tiket,
+            'detail'      => $detail,
+            'dataPegawai' => $dataPegawai,
+            'qr'          => $qr,
+        ]);
+    }
+
+    public function viewDokumen($id)
+    {
+        $detail = DetailTiket::with('regtiket')
+            ->where('id', $id)
+            ->firstOrFail();
+
+        /*
+    |--------------------------------------------------------------------------
+    | CEK HAK AKSES ADMIN OPD
+    |--------------------------------------------------------------------------
+    */
+
+        if (
+            Auth::user()->role_id == 3 &&
+            $detail->regtiket?->kode_ukerja !== Auth::user()->kode_ukerja
+        ) {
+            abort(403);
+        }
+
+        /*
+    |--------------------------------------------------------------------------
+    | PASTIKAN FILE TERSEDIA DI DATABASE
+    |--------------------------------------------------------------------------
+    */
+
+        if (empty($detail->file_path)) {
+            abort(404, 'Dokumen belum tersedia.');
+        }
+
+        /*
+    |--------------------------------------------------------------------------
+    | LOKASI FISIK E-FILE
+    |--------------------------------------------------------------------------
+    |
+    | File disimpan langsung:
+    |
+    | D:\efile-pilkb\{no_tiket}\{file}
+    |
+    */
+
+        $basePath = 'D:\\efile-pilkb';
+
+        $path = $basePath . DIRECTORY_SEPARATOR .
+            str_replace(
+                ['/', '\\'],
+                DIRECTORY_SEPARATOR,
+                $detail->file_path
+            );
+
+        /*
+    |--------------------------------------------------------------------------
+    | CEK FILE FISIK
+    |--------------------------------------------------------------------------
+    */
+
+        if (!is_file($path)) {
+            abort(
+                404,
+                'File dokumen tidak ditemukan: ' . $path
+            );
+        }
+
+        /*
+    |--------------------------------------------------------------------------
+    | TAMPILKAN PDF
+    |--------------------------------------------------------------------------
+    |
+    | PENTING:
+    | Jangan izinkan browser/PDF viewer menggunakan cache
+    | karena URL dokumen berdasarkan ID detail tetap sama
+    | walaupun file fisiknya sudah diganti.
+    |
+    */
+
+        return response()->file(
+            $path,
+            [
+                'Content-Type' => 'application/pdf',
+
+                'Content-Disposition' =>
+                'inline; filename="' .
+                    ($detail->file_name ?? 'dokumen.pdf') .
+                    '"',
+
+                'Cache-Control' =>
+                'no-store, no-cache, must-revalidate, max-age=0',
+
+                'Pragma' =>
+                'no-cache',
+
+                'Expires' =>
+                '0',
+            ]
+        );
     }
 
     // Simpan review
@@ -415,6 +1281,12 @@ class DetailTiketController extends Controller
                     );
                 }
             } else {
+
+                // Jika BTL, tandai tiket belum diperbaiki
+                $tiket->update([
+                    'diperbaiki' => 0
+                ]);
+
                 // Notifikasi BTL ke Admin OPD
                 $adminOpd = User::where('role_id', 3)
                     ->where('kode_ukerja', $tiket->kode_ukerja)
@@ -451,7 +1323,8 @@ class DetailTiketController extends Controller
             }
 
             return redirect()
-                ->route('adminBawah.permintaan.indexPermintaan');
+                ->route('adminBawah.permintaan.indexPermintaan')
+                ->with('success', 'Verifikasi berhasil disimpan.');
         } catch (\Exception $e) {
 
             DB::rollBack();
@@ -588,32 +1461,796 @@ class DetailTiketController extends Controller
             'layanan',
             'tahapTerakhir.statusRel'
         ])
-            // HANYA TAHAP 1
             ->has('tahap', '=', 1);
 
         // FILTER LAYANAN
-        if ($request->layanan) {
-            $query->where('kode_layanan', $request->layanan);
+        if ($request->filled('layanan')) {
+            $query->where(
+                'kode_layanan',
+                $request->layanan
+            );
         }
 
         $tiket = $query
             ->orderByDesc('tanggal')
             ->get();
 
-        $pegawaiList = $this->pegawaiService->getPegawaiByNips(
-            $tiket->pluck('nip')
-                ->filter()
-                ->unique()
-                ->values()
-        );
-
         $pdf = Pdf::loadView(
             'pages.admin-bawah.registrasi.pdf',
-            compact('tiket', 'pegawaiList')
+            compact('tiket')
         );
 
         $pdf->setPaper('a4', 'landscape');
 
         return $pdf->stream('laporan-permintaan.pdf');
+    }
+
+    // Edit Perbaikan Admin OPD
+    public function editPerbaikan($no_tiket)
+    {
+        // AMBIL TIKET
+
+        $tiket = Regtiket::with([
+            'layanan.bidang'
+        ])
+            ->where('no_tiket', $no_tiket)
+            ->where(
+                'kode_ukerja',
+                Auth::user()->kode_ukerja
+            )
+            ->firstOrFail();
+
+        $detail = DetailTiket::with('syarat')
+            ->where('no_tiket', $no_tiket)
+            ->get();
+
+        // DATA PEGAWAI
+        $pegawai = $this->pegawaiService
+            ->getPegawaiByNip($tiket->nip);
+
+        $dataPegawai = [
+            'nama'     => $tiket->nama ?? '-',
+            'golongan' => $pegawai['ket_gol'] ?? '-',
+            'unit'     => $tiket->nama_ukerja ?? '-',
+        ];
+
+        //  DATA DOKUMEN UNTUK TAMPILAN
+
+        foreach ($detail as $d) {
+
+            $syarat = $d->syarat;
+
+            // SYARAT TIDAK DITEMUKAN
+
+            if (!$syarat) {
+
+                $d->dokumen_review = [
+                    'metode'     => null,
+                    'kode_efile' => null,
+                    'tersedia'   => false,
+                    'nama'       => null,
+                    'url'        => null,
+                    'dokumen'    => [],
+                ];
+
+                continue;
+            }
+
+            $disk = Storage::disk('pilkb_efile');
+
+            $fileManualTersedia =
+                !empty($d->file_path) &&
+                $disk->exists($d->file_path);
+
+            if ($fileManualTersedia) {
+
+                $urlManual = route(
+                    'adminOpd.perbaikan.dokumen',
+                    ['id' => $d->id]
+                );
+
+                $namaManual = $d->file_name
+                    ?? 'Dokumen';
+
+                $d->dokumen_review = [
+                    'metode' => 'upload',
+                    'kode_efile' => $syarat->kode_efile,
+                    'tersedia' => true,
+                    'nama' => $namaManual,
+                    'url' => $urlManual,
+
+                    'dokumen' => [
+                        [
+                            'nama' => $namaManual,
+                            'url' => $urlManual,
+                            'tanggal' =>
+                            $d->uploaded_at
+                                ? $d->uploaded_at->format('d/m/Y H:i')
+                                : null,
+                            'urutan' => null,
+                            'status' => 'upload',
+                            'sumber' => 'upload',
+                            'raw' => null,
+                        ]
+                    ],
+                ];
+
+                continue;
+            }
+
+            //  METODE SIMPEG
+
+            if ($syarat->metode === 'simpeg') {
+
+                $hasil = $this->kelengkapanService
+                    ->getSyaratDokumen(
+                        $tiket->nip,
+                        $syarat
+                    );
+
+                $dokumen = $hasil['dokumen'] ?? [];
+
+
+                $dokumenTerformat = collect($dokumen)
+                    ->map(function ($item) {
+
+                        return [
+                            'nama' =>
+                            $item['nama_file']
+                                ?? $item['nama']
+                                ?? $item['file_name']
+                                ?? $item['nama_dokumen']
+                                ?? 'Dokumen',
+
+                            'url' =>
+                            $item['preview_url']
+                                ?? $item['url']
+                                ?? null,
+
+                            'tanggal' =>
+                            $item['tanggal']
+                                ?? $item['created_at']
+                                ?? $item['tgl_dokumen']
+                                ?? null,
+                            'urutan' => $item['urutan'] ?? null,
+                            'status' => $item['status'] ?? null,
+                            'ref_table' => $item['ref_table'] ?? null,
+                            'sumber' => 'simpeg',
+                            'raw' => $item,
+                        ];
+                    })
+                    ->sortByDesc(function ($item) {
+                        return (int) (
+                            $item['urutan'] ?? 0
+                        );
+                    })
+                    ->values()
+                    ->all();
+
+                $d->dokumen_review = [
+                    'metode' => 'simpeg',
+                    'kode_efile' => $syarat->kode_efile,
+                    'tersedia' => count($dokumenTerformat) > 0,
+                    'nama' => $dokumenTerformat[0]['nama'] ?? null,
+                    'url' => $dokumenTerformat[0]['url'] ?? null,
+                    'dokumen' => $dokumenTerformat,
+                ];
+                continue;
+            }
+
+            // METODE UPLOAD
+            if ($syarat->metode === 'upload') {
+                $d->dokumen_review = [
+                    'metode' => 'upload',
+                    'kode_efile' => null,
+                    'tersedia' => false,
+                    'nama' => null,
+                    'url' => null,
+                    'dokumen' => [],
+                ];
+                continue;
+            }
+
+            //  METODE TIDAK DIKENAL
+            $d->dokumen_review = [
+                'metode' => $syarat->metode,
+                'kode_efile' => $syarat->kode_efile,
+                'tersedia' => false,
+                'nama' => null,
+                'url' => null,
+                'dokumen' => [],
+            ];
+        }
+
+        //  QR TIKET
+        $url = route(
+            'tiket.public',
+            [
+                'no_tiket' =>
+                $tiket->no_tiket
+            ]
+        );
+
+        $qr = $this->generateQr($url);
+
+        //  VIEWs
+        return view(
+            'pages.opd.perbaikan.edit',
+            [
+                'tiket' => $tiket,
+                'detail' => $detail,
+                'dataPegawai' => $dataPegawai,
+                'qr' => $qr,
+            ]
+        );
+    }
+
+    // Update Perbaikan Admin OPD
+    public function updatePerbaikan(Request $request, $no_tiket)
+    {
+        /*
+    |--------------------------------------------------------------------------
+    | VALIDASI FILE
+    |--------------------------------------------------------------------------
+    */
+
+        $request->validate(
+            [
+                'dokumen' => 'nullable|array',
+
+                'dokumen.*' =>
+                'nullable|file|mimes:pdf|max:1024',
+            ],
+            [
+                'dokumen.*.file' =>
+                'File dokumen tidak valid.',
+
+                'dokumen.*.mimes' =>
+                'Dokumen harus berupa PDF.',
+
+                'dokumen.*.max' =>
+                'Ukuran file maksimal 1 MB.',
+            ]
+        );
+
+
+        /*
+    |--------------------------------------------------------------------------
+    | PASTIKAN TIKET MILIK ADMIN OPD
+    |--------------------------------------------------------------------------
+    */
+
+        $tiket = Regtiket::where(
+            'no_tiket',
+            $no_tiket
+        )
+            ->where(
+                'kode_ukerja',
+                Auth::user()->kode_ukerja
+            )
+            ->firstOrFail();
+
+
+        /*
+    |--------------------------------------------------------------------------
+    | AMBIL FILE YANG DIUPLOAD
+    |--------------------------------------------------------------------------
+    */
+
+        $dokumenUpload = $request->file('dokumen', []);
+
+
+        if (empty($dokumenUpload)) {
+
+            return back()
+                ->with(
+                    'error',
+                    'Silakan upload minimal satu dokumen yang diperbaiki.'
+                );
+        }
+
+
+        /*
+    |--------------------------------------------------------------------------
+    | KONFIGURASI DISK E-FILE
+    |--------------------------------------------------------------------------
+    |
+    | Menggunakan:
+    |
+    | config/filesystems.php
+    |
+    | 'pilkb_efile'
+    |
+    | root berasal dari:
+    |
+    | PILKB_EFILE_PATH
+    |
+    */
+
+        $efileRoot = config(
+            'filesystems.disks.pilkb_efile.root'
+        );
+
+
+        if (empty($efileRoot)) {
+
+            return back()
+                ->with(
+                    'error',
+                    'Konfigurasi PILKB_EFILE_PATH belum tersedia.'
+                );
+        }
+
+
+        /*
+    |--------------------------------------------------------------------------
+    | DISK E-FILE
+    |--------------------------------------------------------------------------
+    */
+
+        $disk = Storage::disk('pilkb_efile');
+
+        $ticketFolder = $no_tiket;
+
+
+        /*
+    |--------------------------------------------------------------------------
+    | BUAT FOLDER TIKET
+    |--------------------------------------------------------------------------
+    */
+
+        if (!$disk->exists($ticketFolder)) {
+
+            $disk->makeDirectory($ticketFolder);
+        }
+
+
+        /*
+    |--------------------------------------------------------------------------
+    | MULAI TRANSAKSI DATABASE
+    |--------------------------------------------------------------------------
+    */
+
+        DB::beginTransaction();
+
+
+        /*
+    |--------------------------------------------------------------------------
+    | TRACK FILE BARU
+    |--------------------------------------------------------------------------
+    */
+
+        $newFiles = [];
+
+        /*
+    |--------------------------------------------------------------------------
+    | FILE LAMA YANG AKAN DIHAPUS SETELAH DATABASE COMMIT
+    |--------------------------------------------------------------------------
+    */
+
+        $oldFiles = [];
+
+
+        try {
+
+            /*
+        |--------------------------------------------------------------------------
+        | AMBIL DETAIL MILIK TIKET
+        |--------------------------------------------------------------------------
+        */
+
+            $detailList = DetailTiket::where(
+                'no_tiket',
+                $no_tiket
+            )
+                ->get()
+                ->keyBy('id');
+
+
+            /*
+        |--------------------------------------------------------------------------
+        | PROSES SETIAP FILE
+        |--------------------------------------------------------------------------
+        */
+
+            foreach ($dokumenUpload as $detailId => $file) {
+
+                /*
+            |--------------------------------------------------------------------------
+            | PASTIKAN DETAIL ADA
+            |--------------------------------------------------------------------------
+            */
+
+                $detail = $detailList->get($detailId);
+
+
+                if (!$detail) {
+                    continue;
+                }
+
+
+                /*
+            |--------------------------------------------------------------------------
+            | PASTIKAN FILE VALID
+            |--------------------------------------------------------------------------
+            */
+
+                if (!$file || !$file->isValid()) {
+                    continue;
+                }
+
+
+                /*
+            |--------------------------------------------------------------------------
+            | AMBIL INFORMASI FILE SEBELUM MOVE
+            |--------------------------------------------------------------------------
+            |
+            | INI PENTING.
+            |
+            | Jangan memanggil:
+            |
+            | $file->getSize()
+            |
+            | setelah $file->move().
+            |
+            | Karena file temporary PHP sudah dipindahkan.
+            |
+            */
+
+                $originalName =
+                    $file->getClientOriginalName();
+
+                $fileSize =
+                    $file->getSize();
+
+
+                /*
+            |--------------------------------------------------------------------------
+            | NAMA FILE FISIK
+            |--------------------------------------------------------------------------
+            |
+            | Nama asli tetap disimpan di database.
+            |
+            | File fisik dibuat unik agar tidak bentrok.
+            |
+            */
+
+                $safeOriginalName = preg_replace(
+                    '/[^A-Za-z0-9._-]/',
+                    '_',
+                    $originalName
+                );
+
+
+                $fileName =
+                    bin2hex(random_bytes(8)) .
+                    '_' .
+                    $safeOriginalName;
+
+
+                /*
+            |--------------------------------------------------------------------------
+            | PATH FILE BARU
+            |--------------------------------------------------------------------------
+            |
+            | Contoh:
+            |
+            | 220826ROJ1/7f3a8b2c1d_SK.pdf
+            |
+            */
+
+                $filePath =
+                    $ticketFolder .
+                    '/' .
+                    $fileName;
+
+
+                /*
+            |--------------------------------------------------------------------------
+            | SIMPAN FILE LAMA
+            |--------------------------------------------------------------------------
+            */
+
+                if (!empty($detail->file_path)) {
+
+                    $oldFiles[] =
+                        $detail->file_path;
+                }
+
+
+                /*
+            |--------------------------------------------------------------------------
+            | SIMPAN FILE BARU
+            |--------------------------------------------------------------------------
+            */
+
+                $file->storeAs(
+                    $ticketFolder,
+                    $fileName,
+                    'pilkb_efile'
+                );
+
+
+                /*
+            |--------------------------------------------------------------------------
+            | CATAT FILE BARU
+            |--------------------------------------------------------------------------
+            */
+
+                $newFiles[] =
+                    $filePath;
+
+
+                /*
+            |--------------------------------------------------------------------------
+            | PASTIKAN FILE BERHASIL DISIMPAN
+            |--------------------------------------------------------------------------
+            */
+
+                if (!$disk->exists($filePath)) {
+
+                    throw new \RuntimeException(
+                        'File gagal disimpan: ' .
+                            $filePath
+                    );
+                }
+
+
+                /*
+            |--------------------------------------------------------------------------
+            | UPDATE DETAIL TIKET
+            |--------------------------------------------------------------------------
+            */
+
+                $detail->update([
+
+                    'file_name' =>
+                    $originalName,
+
+                    'file_path' =>
+                    $filePath,
+
+                    'file_size' =>
+                    $fileSize,
+
+                    'uploaded_at' =>
+                    now(),
+
+                    'retention_until' =>
+                    now()->addMonths(3),
+
+                    'deleted_file_at' =>
+                    null,
+
+                    'status' =>
+                    null,
+
+                    'comment' =>
+                    null,
+                ]);
+            }
+
+
+            /*
+        |--------------------------------------------------------------------------
+        | PASTIKAN MINIMAL ADA FILE YANG BERHASIL DIPROSES
+        |--------------------------------------------------------------------------
+        */
+
+            if (empty($newFiles)) {
+
+                throw new \RuntimeException(
+                    'Tidak ada dokumen valid yang berhasil diproses.'
+                );
+            }
+
+
+            /*
+        |--------------------------------------------------------------------------
+        | DATA LAMA UNTUK ACTIVITY LOG
+        |--------------------------------------------------------------------------
+        */
+
+            $oldData = [
+
+                'diperbaiki' =>
+                $tiket->diperbaiki,
+
+                'diperbaiki_tgl' =>
+                $tiket->diperbaiki_tgl,
+            ];
+
+
+            /*
+        |--------------------------------------------------------------------------
+        | UPDATE STATUS PERBAIKAN
+        |--------------------------------------------------------------------------
+        */
+
+            $tiket->update([
+
+                'diperbaiki' =>
+                1,
+
+                'diperbaiki_tgl' =>
+                now(),
+            ]);
+
+
+            /*
+        |--------------------------------------------------------------------------
+        | DATA BARU UNTUK ACTIVITY LOG
+        |--------------------------------------------------------------------------
+        */
+
+            $freshTiket =
+                $tiket->fresh();
+
+
+            $newData = [
+
+                'diperbaiki' =>
+                $freshTiket->diperbaiki,
+
+                'diperbaiki_tgl' =>
+                $freshTiket->diperbaiki_tgl,
+            ];
+
+
+            /*
+        |--------------------------------------------------------------------------
+        | COMMIT DATABASE
+        |--------------------------------------------------------------------------
+        */
+
+            DB::commit();
+
+
+            /*
+        |--------------------------------------------------------------------------
+        | HAPUS FILE LAMA
+        |--------------------------------------------------------------------------
+        |
+        | Dilakukan setelah database berhasil commit.
+        |
+        */
+
+            foreach ($oldFiles as $oldFile) {
+
+                /*
+            |--------------------------------------------------------------------------
+            | Jangan hapus jika path lama sama dengan file baru
+            |--------------------------------------------------------------------------
+            */
+
+                if (
+                    !empty($oldFile) &&
+                    !in_array($oldFile, $newFiles, true) &&
+                    $disk->exists($oldFile)
+                ) {
+
+                    $disk->delete($oldFile);
+                }
+            }
+
+
+            /*
+        |--------------------------------------------------------------------------
+        | ACTIVITY LOG
+        |--------------------------------------------------------------------------
+        */
+
+            ActivityLogService::log(
+                'Manajemen Data Tiket',
+                'UPDATE',
+                'Perbaikan Dokumen Tiket: ' .
+                    $tiket->no_tiket,
+                $oldData,
+                $newData
+            );
+
+
+            /*
+        |--------------------------------------------------------------------------
+        | REDIRECT
+        |--------------------------------------------------------------------------
+        */
+
+            return redirect()
+                ->route(
+                    'adminOpd.perbaikan.index'
+                )
+                ->with(
+                    'success',
+                    'Perbaikan dokumen berhasil disimpan.'
+                );
+        } catch (\Throwable $e) {
+
+            /*
+        |--------------------------------------------------------------------------
+        | ROLLBACK DATABASE
+        |--------------------------------------------------------------------------
+        */
+
+            DB::rollBack();
+
+
+            /*
+        |--------------------------------------------------------------------------
+        | HAPUS FILE BARU JIKA TERJADI ERROR
+        |--------------------------------------------------------------------------
+        */
+
+            foreach ($newFiles as $newFile) {
+
+                if ($disk->exists($newFile)) {
+
+                    $disk->delete($newFile);
+                }
+            }
+
+
+            /*
+        |--------------------------------------------------------------------------
+        | LOG ERROR DETAIL
+        |--------------------------------------------------------------------------
+        |
+        | Sangat membantu untuk debugging.
+        |
+        */
+
+            Log::error(
+                'Gagal menyimpan perbaikan dokumen PILKB',
+                [
+                    'no_tiket' =>
+                    $no_tiket,
+
+                    'user_id' =>
+                    Auth::id(),
+
+                    'efile_root' =>
+                    $efileRoot,
+
+                    'ticket_folder' =>
+                    $ticketFolder,
+
+                    'new_files' =>
+                    $newFiles,
+
+                    'old_files' =>
+                    $oldFiles,
+
+                    'exception' =>
+                    get_class($e),
+
+                    'message' =>
+                    $e->getMessage(),
+
+                    'file' =>
+                    $e->getFile(),
+
+                    'line' =>
+                    $e->getLine(),
+
+                    'trace' =>
+                    $e->getTraceAsString(),
+                ]
+            );
+
+
+            /*
+        |--------------------------------------------------------------------------
+        | KEMBALI DENGAN PESAN ERROR
+        |--------------------------------------------------------------------------
+        */
+
+            return back()
+                ->withInput()
+                ->with(
+                    'error',
+                    'Gagal menyimpan perbaikan dokumen: ' .
+                        $e->getMessage()
+                );
+        }
     }
 }

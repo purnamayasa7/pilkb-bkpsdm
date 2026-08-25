@@ -212,7 +212,11 @@ Route::prefix('adminOpd')
         // PERBAIKAN USULAN
         Route::get('perbaikan', [DetailTiketController::class, 'index'])->name('perbaikan.index');
         Route::get('perbaikan/detail/{no_tiket}', [DetailTiketController::class, 'detailPerbaikan'])->name('perbaikan.detailPerbaikan');
+        Route::get('perbaikan/{no_tiket}/edit', [DetailTiketController::class, 'editPerbaikan'])->name('perbaikan.edit');
+        Route::post('perbaikan/{no_tiket}/update', [DetailTiketController::class, 'updatePerbaikan'])->name('perbaikan.update');
+        Route::get('perbaikan/dokumen/{id}', [DetailTiketController::class, 'viewDokumen'])->name('perbaikan.dokumen');
         Route::post('perbaikan/{no_tiket}/konfirmasi', [DetailTiketController::class, 'konfirmasiPerbaikan'])->name('perbaikan.konfirmasi');
+
         // EXPORT EXCEL & PDF
         Route::get('perbaikan/export-excel', [DetailTiketController::class, 'exportExcel'])->name('perbaikan.exportExcel');
         Route::get('perbaikan/export-pdf', [DetailTiketController::class, 'exportPdf'])->name('perbaikan.exportPdf');
@@ -245,6 +249,7 @@ Route::prefix('adminBidang')
         Route::get('permintaan/{no_tiket}/edit', [PermintaanController::class, 'editPermintaan'])->name('permintaan.editPermintaan');
         Route::post('permintaan/{no_tiket}/update', [PermintaanController::class, 'updatePermintaan'])->name('permintaan.updatePermintaan');
         Route::post('permintaan/{no_tiket}/selesai', [PermintaanController::class, 'selesaiPermintaan'])->name('permintaan.selesaiPermintaan');
+        Route::get('/permintaan/dokumen/{id}', [PermintaanController::class, 'viewDokumen'])->name('permintaan.dokumen');
 
         // UPDATE STATUS
         Route::get('status', [UpdateStatusController::class, 'index'])->name('status.index');
@@ -315,6 +320,7 @@ Route::prefix('adminBawah')
         // PERMINTAAN USULAN
         Route::get('permintaan', [DetailTiketController::class, 'indexPermintaan'])->name('permintaan.indexPermintaan');
         Route::get('permintaan/{no_tiket}/review', [DetailTiketController::class, 'reviewPermintaan'])->name('permintaan.reviewPermintaan');
+        Route::get('permintaan/dokumen/{id}', [TiketController::class, 'viewFile'])->name('permintaan.dokumen');
         Route::post('permintaan/{no_tiket}/submit', [DetailTiketController::class, 'submitPermintaan'])->name('permintaan.submitPermintaan');
         Route::get('permintaan/export-pdf', [DetailTiketController::class, 'exportPermintaanPdf'])->name('permintaan.exportPermintaanPdf');
 

@@ -119,12 +119,12 @@
                 <td>
                     {{ $item->nip }}<br>
                     <small>
-                        {{ $pegawaiList[$item->nip]['nama_lengkap'] ?? '-' }}
+                        {{ $item->nama ?? '-' }}
                     </small>
                 </td>
 
                 <td>
-                    {{ $pegawaiList[$item->nip]['ket_ukerja'] ?? '-' }}
+                    {{ $item->nama_ukerja ?? '-' }}
                 </td>
                 <td>{{ $item->layanan->nama_layanan ?? '-' }}</td>
                 <td>{{ \Carbon\Carbon::parse($item->tanggal)->translatedFormat('d F Y H:i') }}</td>

@@ -179,6 +179,66 @@ $stepHeader = [
         width: 1rem;
         height: 1rem;
     }
+
+    /* MODAL DOKUMEN SIMPEG */
+
+    .dokumen-item {
+        border: 1px solid #e5e7eb;
+        border-radius: 8px;
+        transition: all .2s ease;
+    }
+
+    .dokumen-item:hover {
+        border-color: #cbd5e1;
+        background-color: #f8fafc;
+    }
+
+    .dokumen-icon {
+        width: 40px;
+        height: 40px;
+
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        background-color: #f1f5f9;
+        border-radius: 8px;
+
+        flex-shrink: 0;
+    }
+
+    .dokumen-icon svg {
+        width: 20px;
+        height: 20px;
+    }
+
+    .dokumen-nama {
+        font-weight: 600;
+        line-height: 1.4;
+        word-break: break-word;
+    }
+
+    .dokumen-meta {
+        font-size: .8125rem;
+        color: #6b7280;
+    }
+
+    .dokumen-lihat {
+        min-width: 75px;
+        white-space: nowrap;
+    }
+
+    .dokumen-empty {
+        padding: 40px 20px;
+        text-align: center;
+        color: #6b7280;
+    }
+
+    .dokumen-empty svg {
+        width: 40px;
+        height: 40px;
+        margin-bottom: 10px;
+    }
 </style>
 
 {{-- Modal Cek Data --}}
@@ -422,15 +482,20 @@ $stepHeader = [
 {{-- Modal Dokumen SIMPEG --}}
 <div class="modal fade" id="modalDokumen" tabindex="-1">
     <div class="modal-dialog modal-dialog-centered modal-lg modal-dialog-scrollable">
+
         <div class="modal-content">
 
+            {{-- HEADER --}}
             <div class="modal-header">
+
                 <div>
                     <h5 class="modal-title mb-1" id="modalDokumenTitle">
                         Dokumen SIMPEG
                     </h5>
 
-                    <div class="small text-muted" id="modalDokumenSubtitle">
+                    <div
+                        class="small text-muted"
+                        id="modalDokumenSubtitle">
                         -
                     </div>
                 </div>
@@ -438,31 +503,75 @@ $stepHeader = [
                 <button
                     type="button"
                     class="btn-close"
-                    data-bs-dismiss="modal">
+                    data-bs-dismiss="modal"
+                    aria-label="Close">
                 </button>
+
             </div>
 
+
+            {{-- BODY --}}
             <div class="modal-body">
 
+                {{-- FILTER DOKUMEN --}}
+                <div class="mb-4">
+
+                    <label
+                        for="filterDokumen"
+                        class="small fw-semibold mb-1">
+
+                        Tampilkan Dokumen
+
+                    </label>
+
+                    <select
+                        id="filterDokumen"
+                        class="form-select">
+
+                        <option value="all">
+                            Semua
+                        </option>
+
+                        <option value="latest">
+                            Terbaru
+                        </option>
+
+                    </select>
+
+                </div>
+
+
+                {{-- LIST DOKUMEN --}}
                 <div id="dokumenList">
+
                     {{-- Diisi melalui JavaScript --}}
+
                 </div>
 
             </div>
 
+
+            {{-- FOOTER --}}
             <div class="modal-footer">
+
                 <button
                     type="button"
                     class="btn btn-light"
                     data-bs-dismiss="modal">
 
-                    <i data-feather="x" class="me-1"></i>
+                    <i
+                        data-feather="x"
+                        class="me-1">
+                    </i>
+
                     Tutup
 
                 </button>
+
             </div>
 
         </div>
+
     </div>
 </div>
 
@@ -482,9 +591,23 @@ $stepHeader = [
                     <i data-feather="arrow-left" class="me-1"></i>
                     Batal
                 </button>
-                <button class="btn btn-primary" id="btnSubmitFinal">
-                    <i data-feather="check" class="me-1"></i>
-                    Ya, Lanjutkan
+                <button class="btn btn-primary" id="btnSubmitFinal" type="button">
+                    <span
+                        class="spinner-border spinner-border-sm me-1 d-none"
+                        id="submitFinalSpinner"
+                        role="status"
+                        aria-hidden="true">
+                    </span>
+
+                    <i
+                        data-feather="check"
+                        class="me-1"
+                        id="submitFinalIcon">
+                    </i>
+
+                    <span id="submitFinalText">
+                        Ya, Lanjutkan
+                    </span>
                 </button>
             </div>
         </div>
@@ -765,7 +888,6 @@ $stepHeader = [
                                     $s = $item->syarat;
 
                                     $tersedia = $item->tersedia ?? false;
-                                    $mode = $item->mode ?? null;
                                     $dokumen = $item->dokumen ?? [];
                                     @endphp
 
@@ -795,12 +917,10 @@ $stepHeader = [
                                         <td class="efile-cell">
 
                                             {{-- METODE UPLOAD --}}
-
                                             @if($s->metode === 'upload')
 
                                             <div class="efile-action">
 
-                                                {{-- INPUT FILE --}}
                                                 <input
                                                     type="file"
                                                     name="dokumen[{{ $s->id }}]"
@@ -809,7 +929,6 @@ $stepHeader = [
                                                     data-syarat-id="{{ $s->id }}"
                                                     accept=".pdf,application/pdf">
 
-                                                {{-- BUTTON UPLOAD --}}
                                                 <label
                                                     for="dokumen_{{ $s->id }}"
                                                     class="btn btn-sm btn-outline-warning efile-btn">
@@ -822,7 +941,6 @@ $stepHeader = [
 
                                                 </label>
 
-                                                {{-- NAMA FILE --}}
                                                 <div
                                                     id="file-name-{{ $s->id }}"
                                                     class="small text-muted efile-filename">
@@ -832,12 +950,10 @@ $stepHeader = [
 
 
                                             {{-- SIMPEG TIDAK ADA --}}
-
                                             @elseif(!$tersedia)
 
                                             <div class="efile-action">
 
-                                                {{-- INPUT FILE --}}
                                                 <input
                                                     type="file"
                                                     name="dokumen[{{ $s->id }}]"
@@ -846,7 +962,6 @@ $stepHeader = [
                                                     data-syarat-id="{{ $s->id }}"
                                                     accept=".pdf,application/pdf">
 
-                                                {{-- BUTTON UPLOAD --}}
                                                 <label
                                                     for="dokumen_{{ $s->id }}"
                                                     class="btn btn-sm btn-outline-warning btn-upload efile-btn">
@@ -859,7 +974,6 @@ $stepHeader = [
 
                                                 </label>
 
-                                                {{-- NAMA FILE --}}
                                                 <div
                                                     id="file-name-{{ $s->id }}"
                                                     class="small text-muted efile-filename">
@@ -867,36 +981,30 @@ $stepHeader = [
 
                                             </div>
 
-                                            {{-- SIMPEG ADA --}}
 
+                                            {{-- SIMPEG ADA --}}
                                             @else
 
-                                            {{-- DOKUMEN TERBARU --}}
+                                            @if(count($dokumen) === 1)
 
-                                            @if($mode === 'latest')
-
+                                            {{-- SATU DOKUMEN --}}
                                             @php
-                                            $dokumenLatest = $dokumen[0] ?? null;
+                                            $dokumenSingle = $dokumen[0] ?? null;
 
-                                            $urlLatest =
-                                            $dokumenLatest['preview_url'] ??
-                                            $dokumenLatest['url'] ??
+                                            $urlSingle =
+                                            $dokumenSingle['preview_url'] ??
+                                            $dokumenSingle['url'] ??
                                             null;
-
-                                            $namaLatest =
-                                            $dokumenLatest['nama_file'] ??
-                                            $dokumenLatest['nama'] ??
-                                            $dokumenLatest['file_name'] ??
-                                            'Dokumen';
                                             @endphp
 
                                             <div class="efile-action">
 
-                                                @if($urlLatest)
+                                                @if($urlSingle)
 
                                                 <a
-                                                    href="{{ $urlLatest }}"
+                                                    href="{{ $urlSingle }}"
                                                     target="_blank"
+                                                    rel="noopener noreferrer"
                                                     class="btn btn-sm btn-outline-primary efile-btn">
 
                                                     <i data-feather="file-text"></i>
@@ -915,10 +1023,9 @@ $stepHeader = [
 
                                             </div>
 
-                                            {{-- SEMUA DOKUMEN --}}
+                                            @elseif(count($dokumen) > 1)
 
-                                            @elseif($mode === 'all')
-
+                                            {{-- BEBERAPA DOKUMEN --}}
                                             <div class="efile-action">
 
                                                 <button
@@ -934,14 +1041,23 @@ $stepHeader = [
                                                     <span class="badge bg-primary ms-1">
                                                         {{ count($dokumen) }}
                                                     </span>
+
                                                 </button>
 
                                             </div>
 
-                                            @endif
+                                            @else
+
+                                            <div class="efile-action">
+
+                                                <span class="badge bg-light text-danger border">
+                                                    Dokumen tidak tersedia
+                                                </span>
+
+                                            </div>
 
                                             @endif
-
+                                            @endif
                                         </td>
 
                                         {{-- VALIDASI --}}
@@ -1875,7 +1991,9 @@ $stepHeader = [
             });
         }
 
+        // =========================================================
         // SUBMIT FINAL STEP 3
+        // =========================================================
 
         if (btnSubmitFinal && btnNextStep3) {
 
@@ -1883,282 +2001,501 @@ $stepHeader = [
 
                 const form = btnNextStep3.form;
 
-                if (form) {
-                    form.submit();
+                if (!form) {
+                    return;
                 }
+
+                // =========================================
+                // CEGAH DOUBLE SUBMIT
+                // =========================================
+
+                btnSubmitFinal.disabled = true;
+
+
+                // =========================================
+                // ELEMENT BUTTON
+                // =========================================
+
+                const submitFinalSpinner =
+                    document.getElementById('submitFinalSpinner');
+
+                const submitFinalIcon =
+                    document.getElementById('submitFinalIcon');
+
+                const submitFinalText =
+                    document.getElementById('submitFinalText');
+
+
+                // =========================================
+                // TAMPILKAN LOADING
+                // =========================================
+
+                if (submitFinalSpinner) {
+
+                    submitFinalSpinner.classList.remove('d-none');
+
+                }
+
+                if (submitFinalIcon) {
+
+                    submitFinalIcon.classList.add('d-none');
+
+                }
+
+                if (submitFinalText) {
+
+                    submitFinalText.innerText =
+                        'Memproses...';
+
+                }
+
+
+                // =========================================
+                // SUBMIT FORM
+                // =========================================
+
+                form.submit();
+
             });
 
         }
 
-        // MODAL DOKUMEN SIMPEG
-        // KHUSUS MODE EFILE = ALL
 
-        const modalDokumenEl = document.getElementById('modalDokumen');
+        // =========================================================
+        // MODAL DOKUMEN SIMPEG
+        // MENAMPILKAN RIWAYAT DOKUMEN
+        // =========================================================
+
+        const modalDokumenEl =
+            document.getElementById('modalDokumen');
 
         let modalDokumen = null;
 
         if (modalDokumenEl) {
 
-            modalDokumen = new bootstrap.Modal(modalDokumenEl);
+            modalDokumen =
+                new bootstrap.Modal(modalDokumenEl);
+
+        }
+
+        const modalDokumenTitle =
+            document.getElementById('modalDokumenTitle');
+
+        const modalDokumenSubtitle =
+            document.getElementById('modalDokumenSubtitle');
+
+        const dokumenList =
+            document.getElementById('dokumenList');
+
+        const filterDokumen =
+            document.getElementById('filterDokumen');
+
+
+        // =========================================================
+        // DATA DOKUMEN AKTIF
+        // =========================================================
+
+        let currentDokumen = [];
+
+
+        // =========================================================
+        // RENDER DOKUMEN
+        // =========================================================
+
+        function renderDokumen(dokumen) {
+
+            if (!dokumenList) {
+                return;
+            }
+
+            dokumenList.innerHTML = '';
+
+
+            // =====================================================
+            // TIDAK ADA DOKUMEN
+            // =====================================================
+
+            if (
+                !Array.isArray(dokumen) ||
+                dokumen.length === 0
+            ) {
+
+                dokumenList.innerHTML = `
+            <div class="dokumen-empty">
+
+                <i
+                    data-feather="file"
+                    class="text-muted">
+                </i>
+
+                <div>
+                    Tidak ada dokumen tersedia.
+                </div>
+
+            </div>
+        `;
+
+                if (window.feather) {
+                    feather.replace();
+                }
+
+                return;
+            }
+
+
+            // =====================================================
+            // RENDER SETIAP DOKUMEN
+            // =====================================================
+
+            dokumen.forEach(function(doc, index) {
+
+                const nama =
+                    doc.nama_file ??
+                    doc.nama ??
+                    doc.file_name ??
+                    'Dokumen ' + (index + 1);
+
+
+                const url =
+                    doc.preview_url ??
+                    doc.url ??
+                    null;
+
+
+                const urutan =
+                    doc.urutan ??
+                    '-';
+
+
+                // =================================================
+                // TOMBOL LIHAT
+                // =================================================
+
+                let buttonHtml = '';
+
+                if (url) {
+
+                    buttonHtml = `
+                <a
+                    href="${url}"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="btn btn-sm btn-outline-primary dokumen-lihat">
+
+                    <i
+                        data-feather="eye"
+                        class="me-1">
+                    </i>
+
+                    Lihat
+
+                </a>
+            `;
+
+                } else {
+
+                    buttonHtml = `
+                <span
+                    class="badge bg-light text-danger border">
+
+                    Tidak tersedia
+
+                </span>
+            `;
+
+                }
+
+
+                // =================================================
+                // CARD DOKUMEN
+                // =================================================
+
+                dokumenList.innerHTML += `
+
+            <div class="dokumen-item mb-2">
+
+                <div class="p-3">
+
+                    <div class="
+                        d-flex
+                        justify-content-between
+                        align-items-center
+                        gap-3
+                    ">
+
+                        {{-- INFORMASI DOKUMEN --}}
+                        <div class="
+                            d-flex
+                            align-items-center
+                            flex-grow-1
+                            min-width-0
+                        ">
+
+                            <div class="dokumen-icon me-3">
+
+                                <i
+                                    data-feather="file-text"
+                                    class="text-primary">
+                                </i>
+
+                            </div>
+
+
+                            <div class="min-width-0">
+
+                                <div class="dokumen-nama">
+
+                                    ${nama}
+
+                                </div>
+
+                                <div class="dokumen-meta mt-1">
+
+                                    Urutan: ${urutan}
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+
+                        {{-- ACTION --}}
+                        <div class="flex-shrink-0">
+
+                            ${buttonHtml}
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        `;
+
+            });
+
+
+            // =====================================================
+            // REFRESH FEATHER
+            // =====================================================
+
+            if (window.feather) {
+
+                feather.replace();
+
+            }
 
         }
 
 
-        const modalDokumenTitle = document.getElementById('modalDokumenTitle');
+        // =========================================================
+        // FILTER DOKUMEN
+        // =========================================================
 
-        const modalDokumenSubtitle = document.getElementById('modalDokumenSubtitle');
+        function applyDokumenFilter() {
 
-        const dokumenList = document.getElementById('dokumenList');
+            if (!Array.isArray(currentDokumen)) {
+                return;
+            }
 
-        // TOMBOL LIHAT SEMUA DOKUMEN
+
+            // =====================================================
+            // SEMUA
+            // =====================================================
+
+            if (
+                !filterDokumen ||
+                filterDokumen.value === 'all'
+            ) {
+
+                renderDokumen(currentDokumen);
+
+                return;
+            }
+
+
+            // =====================================================
+            // TERBARU
+            //
+            // Urutan terbesar = dokumen terbaru
+            // =====================================================
+
+            if (filterDokumen.value === 'latest') {
+
+                if (currentDokumen.length === 0) {
+
+                    renderDokumen([]);
+
+                    return;
+                }
+
+
+                const dokumenTerbaru = [...currentDokumen]
+                    .sort(function(a, b) {
+
+                        const urutanA =
+                            Number(a.urutan ?? 0);
+
+                        const urutanB =
+                            Number(b.urutan ?? 0);
+
+                        return urutanB - urutanA;
+
+                    })
+                    .slice(0, 1);
+
+
+                renderDokumen(
+                    dokumenTerbaru
+                );
+
+            }
+
+        }
+
+
+        // =========================================================
+        // CHANGE FILTER
+        // =========================================================
+
+        if (filterDokumen) {
+
+            filterDokumen.addEventListener(
+                'change',
+                function() {
+
+                    applyDokumenFilter();
+
+                }
+            );
+
+        }
+
+
+        // =========================================================
+        // TOMBOL LIHAT DOKUMEN
+        // =========================================================
 
         document
             .querySelectorAll('.btn-lihat-dokumen')
             .forEach(function(button) {
 
-                button.addEventListener('click', function() {
+                button.addEventListener(
+                    'click',
+                    function() {
 
-                    // Pastikan modal tersedia
-                    if (!modalDokumen || !dokumenList) {
+                        // =========================================
+                        // PASTIKAN MODAL TERSEDIA
+                        // =========================================
 
-                        console.error(
-                            'Modal dokumen tidak ditemukan.'
-                        );
+                        if (
+                            !modalDokumen ||
+                            !dokumenList
+                        ) {
 
-                        return;
-                    }
-
-                    // AMBIL DATA DOKUMEN
-
-                    let dokumen = [];
-
-                    try {
-
-                        dokumen =
-                            JSON.parse(
-                                this.dataset.dokumen || '[]'
+                            console.error(
+                                'Modal dokumen tidak ditemukan.'
                             );
 
-                    } catch (error) {
+                            return;
+                        }
 
-                        console.error(
-                            'Gagal membaca data dokumen:',
-                            error
+
+                        // =========================================
+                        // AMBIL DATA DOKUMEN
+                        // =========================================
+
+                        let dokumen = [];
+
+                        try {
+
+                            dokumen =
+                                JSON.parse(
+                                    this.dataset.dokumen || '[]'
+                                );
+
+                        } catch (error) {
+
+                            console.error(
+                                'Gagal membaca data dokumen:',
+                                error
+                            );
+
+                            dokumen = [];
+
+                        }
+
+
+                        // =========================================
+                        // SIMPAN DATA AKTIF
+                        // =========================================
+
+                        currentDokumen =
+                            Array.isArray(dokumen) ?
+                            dokumen : [];
+
+
+                        // =========================================
+                        // NAMA SYARAT
+                        // =========================================
+
+                        const syarat =
+                            this.dataset.syarat ||
+                            'Dokumen SIMPEG';
+
+
+                        // =========================================
+                        // HEADER MODAL
+                        // =========================================
+
+                        if (modalDokumenTitle) {
+
+                            modalDokumenTitle.innerText =
+                                'Dokumen SIMPEG';
+
+                        }
+
+
+                        if (modalDokumenSubtitle) {
+
+                            modalDokumenSubtitle.innerText =
+                                syarat;
+
+                        }
+
+
+                        // =========================================
+                        // RESET FILTER
+                        // =========================================
+
+                        if (filterDokumen) {
+
+                            filterDokumen.value =
+                                'all';
+
+                        }
+
+
+                        // =========================================
+                        // TAMPILKAN SEMUA DOKUMEN
+                        // =========================================
+
+                        renderDokumen(
+                            currentDokumen
                         );
 
-                        dokumen = [];
 
-                    }
-
-                    // NAMA SYARAT
-
-                    const syarat = this.dataset.syarat ||
-                        'Dokumen SIMPEG';
-
-                    // SET HEADER MODAL
-
-                    if (modalDokumenTitle) {
-                        modalDokumenTitle.innerText =
-                            'Dokumen SIMPEG';
-                    }
-
-                    if (modalDokumenSubtitle) {
-                        modalDokumenSubtitle.innerText =
-                            syarat;
-                    }
-
-                    // RESET LIST
-
-                    dokumenList.innerHTML = '';
-
-                    // JIKA TIDAK ADA DOKUMEN
-
-                    if (
-                        !Array.isArray(dokumen) ||
-                        !dokumen.length
-                    ) {
-
-                        dokumenList.innerHTML = `
-                            <div class="text-center text-muted py-5">
-
-                                <i
-                                    data-feather="file"
-                                    style="width:40px;height:40px;">
-                                </i>
-
-                                <div class="mt-2">
-                                    Tidak ada dokumen tersedia.
-                                </div>
-
-                            </div>
-                        `;
-
-                        if (window.feather) {
-                            feather.replace();
-                        }
+                        // =========================================
+                        // TAMPILKAN MODAL
+                        // =========================================
 
                         modalDokumen.show();
 
-                        return;
                     }
-
-                    // TAMPILKAN DOKUMEN
-
-                    dokumen.forEach(function(doc, index) {
-
-                        const nama =
-                            doc.nama_file ??
-                            doc.nama ??
-                            doc.file_name ??
-                            'Dokumen ' + (index + 1);
-
-
-                        const tanggal =
-                            doc.tanggal ??
-                            doc.created_at ??
-                            doc.tgl_dokumen ??
-                            null;
-
-
-                        const url =
-                            doc.preview_url ??
-                            doc.url ??
-                            null;
-
-
-                        const urutan =
-                            doc.urutan ??
-                            '-';
-
-                        // TANGGAL
-
-                        let tanggalHtml = '';
-
-                        if (tanggal) {
-
-                            tanggalHtml = `
-                                <div class="small text-muted mt-1">
-
-                                    <i
-                                        data-feather="calendar"
-                                        class="me-1"
-                                        style="width:14px;height:14px;">
-                                    </i>
-
-                                    ${tanggal}
-
-                                </div>
-                            `;
-
-                        }
-
-                        // BUTTON LIHAT
-
-                        let buttonHtml = '';
-
-                        if (url) {
-
-                            buttonHtml = `
-                                <a
-                                    href="${url}"
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    class="btn btn-sm btn-outline-primary">
-
-                                    <i
-                                        data-feather="eye"
-                                        class="me-1">
-                                    </i>
-
-                                    Lihat
-
-                                </a>
-                            `;
-
-                        } else {
-
-                            buttonHtml = `
-                                <span
-                                    class="badge bg-light text-danger border">
-
-                                    Dokumen tidak tersedia
-
-                                </span>
-                            `;
-
-                        }
-
-                        // CARD DOKUMEN
-
-                        dokumenList.innerHTML += `
-
-                            <div class="card border mb-2">
-
-                                <div class="card-body py-3">
-
-                                    <div class="d-flex
-                                        justify-content-between
-                                        align-items-center">
-
-                                        <div class="d-flex
-                                            align-items-start">
-
-                                            <div class="me-3">
-
-                                                <div
-                                                    class="bg-light
-                                                    rounded p-2">
-
-                                                    <i
-                                                        data-feather="file-text"
-                                                        class="text-primary">
-                                                    </i>
-
-                                                </div>
-
-                                            </div>
-
-
-                                            <div>
-
-                                                <div class="fw-semibold">
-                                                    ${nama}
-                                                </div>
-
-                                                <div class="small text-muted">
-                                                    Urutan: ${urutan}
-                                                </div>
-
-                                                ${tanggalHtml}
-
-                                            </div>
-
-                                        </div>
-
-
-                                        <div>
-                                            ${buttonHtml}
-                                        </div>
-
-                                    </div>
-
-                                </div>
-
-                            </div>
-
-                        `;
-
-                    });
-
-                    // REFRESH FEATHER
-
-                    if (window.feather) {
-                        feather.replace();
-                    }
-
-                    modalDokumen.show();
-
-                });
+                );
 
             });
 
@@ -2302,6 +2639,7 @@ $stepHeader = [
                             '"]'
                         );
 
+
                     // =================================================
                     // TIDAK ADA FILE
                     // =================================================
@@ -2319,7 +2657,6 @@ $stepHeader = [
                                 'text-danger',
                                 'text-success'
                             );
-
                         }
 
                         if (uploadLabel) {
@@ -2347,7 +2684,7 @@ $stepHeader = [
 
 
                     // =================================================
-                    // VALIDASI PDF DI FRONTEND
+                    // VALIDASI PDF
                     // =================================================
 
                     const extension =
@@ -2409,7 +2746,54 @@ $stepHeader = [
 
 
                     // =================================================
-                    // FILE PDF VALID
+                    // VALIDASI UKURAN FILE
+                    // MAKSIMAL 1 MB
+                    // =================================================
+
+                    const maxFileSize = 1024 * 1024;
+
+                    if (file.size > maxFileSize) {
+
+                        // Kosongkan input
+                        this.value = '';
+
+                        // Tampilkan pesan error
+                        if (fileNameElement) {
+
+                            fileNameElement.textContent =
+                                'Ukuran file maksimal 1 MB.';
+
+                            fileNameElement.classList.remove(
+                                'text-success'
+                            );
+
+                            fileNameElement.classList.add(
+                                'text-danger'
+                            );
+                        }
+
+                        // Reset tombol
+                        if (uploadLabel) {
+
+                            uploadLabel.textContent =
+                                'Upload';
+
+                        }
+
+                        // Checkbox tetap tidak aktif
+                        if (checkbox) {
+
+                            checkbox.checked = false;
+                            checkbox.disabled = true;
+
+                        }
+
+                        return;
+                    }
+
+
+                    // =================================================
+                    // FILE PDF + UKURAN VALID
                     // =================================================
 
                     if (fileNameElement) {
@@ -2424,7 +2808,6 @@ $stepHeader = [
                         fileNameElement.classList.add(
                             'text-success'
                         );
-
                     }
 
 
@@ -2448,7 +2831,6 @@ $stepHeader = [
 
                         checkbox.disabled = false;
 
-                        // LANGSUNG CENTANG
                         checkbox.checked = true;
 
                     }

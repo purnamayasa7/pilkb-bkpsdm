@@ -78,12 +78,6 @@
                          </div>
 
                          <div class="mb-3">
-                             <label class="small mb-1" for="rangkap">Rangkap</label>
-                             <input class="form-control" id="rangkap" name="rangkap" type="number"
-                                 placeholder="Masukkan rangkap" value="{{ old('rangkap') }}">
-                         </div>
-
-                         <div class="mb-3">
                              <label class="small mb-1" for="waktu_penyelesaian">Waktu Penyelesaian</label>
                              <input class="form-control" id="waktu_penyelesaian" name="waktu_penyelesaian" type="text"
                                  placeholder="Masukkan Waktu Penyelesaian" value="{{ old('waktu_penyelesaian') }}" required />

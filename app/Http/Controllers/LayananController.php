@@ -82,7 +82,6 @@ class LayananController extends Controller
         $layanan = Layanan::create([
             'kode_bidang' => $kode_bidang,
             'nama_layanan' => $request->nama_layanan,
-            'rangkap' => $request->rangkap,
             'waktu_penyelesaian' => $request->waktu_penyelesaian,
             'aktif' => true,
             'deskripsi' => $request->deskripsi,
@@ -113,7 +112,6 @@ class LayananController extends Controller
         $layanan = Layanan::create([
             'kode_bidang' => $kode_bidang,
             'nama_layanan' => $request->nama_layanan,
-            'rangkap' => $request->rangkap,
             'waktu_penyelesaian' => $request->waktu_penyelesaian,
             'aktif' => true,
             'deskripsi' => $request->deskripsi,
@@ -143,7 +141,6 @@ class LayananController extends Controller
 
         $oldData = [
             'nama_layanan' => $layanan->nama_layanan,
-            'rangkap' => $layanan->rangkap,
             'waktu_penyelesaian' => $layanan->waktu_penyelesaian,
             'deskripsi' => $layanan->deskripsi,
             'aktif' => $layanan->aktif,
@@ -152,7 +149,6 @@ class LayananController extends Controller
         $layanan->update([
             'kode_bidang' => $request->kode_bidang,
             'nama_layanan' => $request->nama_layanan,
-            'rangkap' => $request->rangkap,
             'waktu_penyelesaian' => $request->waktu_penyelesaian,
             'deskripsi' => $request->deskripsi,
             'aktif' => $request->aktif,
@@ -160,7 +156,6 @@ class LayananController extends Controller
 
         $newData = [
             'nama_layanan' => $layanan->fresh()->nama_layanan,
-            'rangkap' => $layanan->fresh()->rangkap,
             'waktu_penyelesaian' => $layanan->fresh()->waktu_penyelesaian,
             'deskripsi' => $layanan->fresh()->deskripsi,
             'aktif' => $layanan->fresh()->aktif,
@@ -189,7 +184,6 @@ class LayananController extends Controller
 
         $oldData = [
             'nama_layanan' => $layanan->nama_layanan,
-            'rangkap' => $layanan->rangkap,
             'waktu_penyelesaian' => $layanan->waktu_penyelesaian,
             'deskripsi' => $layanan->deskripsi,
             'aktif' => $layanan->aktif,
@@ -197,7 +191,6 @@ class LayananController extends Controller
 
         $layanan->update([
             'nama_layanan' => $request->nama_layanan,
-            'rangkap' => $request->rangkap,
             'waktu_penyelesaian' => $request->waktu_penyelesaian,
             'deskripsi' => $request->deskripsi,
             'aktif' => $request->aktif,
@@ -205,7 +198,6 @@ class LayananController extends Controller
 
         $newData = [
             'nama_layanan' => $layanan->fresh()->nama_layanan,
-            'rangkap' => $layanan->fresh()->rangkap,
             'waktu_penyelesaian' => $layanan->fresh()->waktu_penyelesaian,
             'deskripsi' => $layanan->fresh()->deskripsi,
             'aktif' => $layanan->fresh()->aktif,

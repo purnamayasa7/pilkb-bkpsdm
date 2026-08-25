@@ -54,9 +54,12 @@ class KelengkapanService
          */
         if (blank($url) || blank($token)) {
 
-            Log::error('Konfigurasi SIMPEG belum lengkap.', [
-                'url' => $url,
-            ]);
+            Log::error(
+                'Konfigurasi SIMPEG belum lengkap.',
+                [
+                    'url' => $url,
+                ]
+            );
 
             return null;
         }
@@ -128,8 +131,10 @@ class KelengkapanService
             }
 
             /*
-             * Pastikan API mengembalikan success = true
-             * dan data tersedia.
+             * Pastikan API mengembalikan:
+             *
+             * success = true
+             * data    = array
              */
             if (
                 ! isset($json['success']) ||
@@ -149,9 +154,7 @@ class KelengkapanService
                 return null;
             }
 
-            $data = $json['data'];
-
-            return $data;
+            return $json['data'];
         } catch (\Throwable $e) {
 
             Log::error(
@@ -222,14 +225,26 @@ class KelengkapanService
      *
      * - metode
      * - kode_efile
+     *
+     * Yang TIDAK digunakan lagi:
+     *
      * - mode_efile
      *
-     * Yang sengaja DIABAIKAN:
+     * =========================================================
      *
-     * - kewajiban dari API
-     * - ada
-     * - belum_ada
-     * - total
+     * Untuk metode = simpeg:
+     *
+     * 1. Cari jenis dokumen berdasarkan kode_efile.
+     * 2. Ambil riwayat dengan status = ada.
+     * 3. Urutkan berdasarkan urutan.
+     *
+     * Semua dokumen yang berstatus "ada" dikembalikan.
+     *
+     * Jika tidak ada dokumen "ada", maka:
+     *
+     * tersedia = false
+     *
+     * sehingga pada Step 3 dokumen dapat di-upload manual.
      */
     public function getSyaratDokumen(
         string $nip,
@@ -237,39 +252,45 @@ class KelengkapanService
     ): array {
 
         /*
-         * Jika metode bukan SIMPEG,
-         * service ini tidak memprosesnya.
+         * =====================================================
+         * SYARAT UPLOAD
+         * =====================================================
          *
-         * Contoh:
-         *
-         * metode = upload
+         * Jika metode bukan simpeg,
+         * service ini tidak mengambil data dari SIMPEG.
          */
         if ($syarat->metode !== 'simpeg') {
 
             return [
                 'tersedia' => false,
                 'jenis' => null,
-                'mode' => null,
                 'dokumen' => [],
             ];
         }
 
         /*
-         * kode_efile wajib tersedia
-         * untuk mapping ke SIMPEG.
+         * =====================================================
+         * KODE E-FILE
+         * =====================================================
+         *
+         * kode_efile masih digunakan sebagai mapping
+         * sementara antara tb_syarat dengan:
+         *
+         * data.dokumen[].jenis
          */
         if (blank($syarat->kode_efile)) {
 
             return [
                 'tersedia' => false,
                 'jenis' => null,
-                'mode' => $syarat->mode_efile,
                 'dokumen' => [],
             ];
         }
 
         /*
-         * Cari jenis dokumen di SIMPEG.
+         * =====================================================
+         * CARI JENIS DOKUMEN DI SIMPEG
+         * =====================================================
          */
         $dokumen = $this->getDokumenByJenis(
             $nip,
@@ -285,14 +306,13 @@ class KelengkapanService
             return [
                 'tersedia' => false,
                 'jenis' => $syarat->kode_efile,
-                'mode' => $syarat->mode_efile,
                 'dokumen' => [],
             ];
         }
 
         /*
          * =====================================================
-         * AMBIL HANYA RIWAYAT DENGAN STATUS "ADA"
+         * AMBIL RIWAYAT DENGAN STATUS "ADA"
          * =====================================================
          *
          * Contoh:
@@ -302,7 +322,7 @@ class KelengkapanService
          * urutan 3 -> ada
          * urutan 4 -> ada
          *
-         * Yang kita proses hanya:
+         * Yang diproses:
          *
          * urutan 3
          * urutan 4
@@ -314,131 +334,48 @@ class KelengkapanService
 
                 return ($item['status'] ?? null) === 'ada';
             })
+            ->sortBy(function ($item) {
+
+                return (int) (
+                    $item['urutan'] ?? 0
+                );
+            })
             ->values();
 
         /*
-         * Tidak ada dokumen yang tersedia.
+         * =====================================================
+         * TIDAK ADA DOKUMEN
+         * =====================================================
          */
         if ($dokumenAda->isEmpty()) {
 
             return [
                 'tersedia' => false,
-                'jenis' => $dokumen['jenis'] ?? $syarat->kode_efile,
-                'mode' => $syarat->mode_efile,
+                'jenis' => $dokumen['jenis']
+                    ?? $syarat->kode_efile,
                 'dokumen' => [],
             ];
         }
 
-
-        /**
+        /*
          * =====================================================
-         * MODE LATEST
+         * DOKUMEN TERSEDIA
          * =====================================================
          *
-         * Ambil dokumen dengan:
+         * Semua riwayat dengan status "ada"
+         * dikembalikan berdasarkan urutan terkecil
+         * sampai terbesar.
          *
-         * status = ada
-         * DAN
-         * urutan terbesar.
+         * Tidak ada lagi mode:
          *
-         * Contoh:
-         *
-         * urutan 1 -> ada
-         * urutan 2 -> ada
-         * urutan 3 -> ada
-         * urutan 4 -> ada
-         * urutan 5 -> ada
-         * urutan 6 -> ada
-         *
-         * Yang dipilih:
-         *
-         * urutan 6
+         * latest
+         * all
          */
-        if ($syarat->mode_efile === 'latest') {
-
-            $terbaru = $dokumenAda
-                ->sortByDesc(function ($item) {
-
-                    return (int) (
-                        $item['urutan'] ?? 0
-                    );
-                })
-                ->first();
-
-            return [
-                'tersedia' => true,
-                'jenis' => $dokumen['jenis'],
-                'mode' => 'latest',
-                'dokumen' => [
-                    $terbaru
-                ],
-            ];
-        }
-
-
-        /**
-         * =====================================================
-         * MODE ALL
-         * =====================================================
-         *
-         * Ambil semua dokumen dengan:
-         *
-         * status = ada
-         *
-         * Dokumen yang:
-         *
-         * status = belum_ada
-         *
-         * tidak ikut ditampilkan.
-         *
-         * Kita urutkan berdasarkan urutan terkecil
-         * ke terbesar agar tampilannya rapi.
-         */
-        if ($syarat->mode_efile === 'all') {
-
-            $semuaDokumen = $dokumenAda
-                ->sortBy(function ($item) {
-
-                    return (int) (
-                        $item['urutan'] ?? 0
-                    );
-                })
-                ->values()
-                ->all();
-
-            return [
-                'tersedia' => true,
-                'jenis' => $dokumen['jenis'],
-                'mode' => 'all',
-                'dokumen' => $semuaDokumen,
-            ];
-        }
-
-
-        /**
-         * =====================================================
-         * MODE TIDAK DIKENAL
-         * =====================================================
-         *
-         * Untuk keamanan, jangan menampilkan semua dokumen
-         * jika mode_efile tidak sesuai konfigurasi.
-         */
-        Log::warning(
-            'Mode e-file tidak dikenali.',
-            [
-                'nip' => $nip,
-                'syarat_id' => $syarat->id ?? null,
-                'kode_efile' => $syarat->kode_efile,
-                'mode_efile' => $syarat->mode_efile,
-            ]
-        );
-
         return [
-            'tersedia' => false,
-            'jenis' => $dokumen['jenis'],
-            'mode' => $syarat->mode_efile,
-            'dokumen' => [],
+            'tersedia' => true,
+            'jenis' => $dokumen['jenis']
+                ?? $syarat->kode_efile,
+            'dokumen' => $dokumenAda->all(),
         ];
     }
-
 }

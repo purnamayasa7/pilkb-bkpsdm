@@ -21,6 +21,12 @@ class DetailTiket extends Model
         'deleted_file_at',
     ];
 
+    protected $casts = [
+        'uploaded_at'     => 'datetime',
+        'retention_until' => 'datetime',
+        'deleted_file_at' => 'datetime',
+    ];
+
     public function syarat()
     {
         return $this->belongsTo(Syarat::class, 'id_syarat', 'id');

@@ -135,7 +135,6 @@
                             <th>No</th>
                             <th>Nama Bidang</th>
                             <th>Nama Layanan</th>
-                            <th>Rangkap</th>
                             <th>Waktu Penyelesaian</th>
                             <th>Status</th>
                             <th>Aksi</th>
@@ -146,7 +145,6 @@
                             <th>No</th>
                             <th>Nama Bidang</th>
                             <th>Nama Layanan</th>
-                            <th>Rangkap</th>
                             <th>Waktu Penyelesaian</th>
                             <th>Status</th>
                             <th>Aksi</th>
@@ -158,7 +156,6 @@
                             <td>{{ $loop->iteration }}</td>
                             <td>{{ $item->bidang->nama_bidang }}</td>
                             <td>{{ $item->nama_layanan }}</td>
-                            <td>{{ $item->rangkap }}</td>
                             <td>{{ $item->waktu_penyelesaian }}</td>
                             <td>
                                 @if ($item->aktif === 1)
@@ -172,7 +169,7 @@
                                     <a class="btn btn-datatable btn-icon btn-transparent-dark me-1 btnDetail"
                                         href="#" data-id="{{ $item->id }}"
                                         data-bidang="{{ $item->bidang->nama_bidang }}"
-                                        data-nama="{{ $item->nama_layanan }}" data-rangkap="{{ $item->rangkap }}"
+                                        data-nama="{{ $item->nama_layanan }}"
                                         data-waktu="{{ $item->waktu_penyelesaian }}"
                                         data-deksripsi="{{ $item->deskripsi }}" data-status="{{ $item->aktif }}"
                                         title="Lihat layanan">
@@ -250,7 +247,6 @@
 
             document.getElementById('detailBidang').innerText = btn.dataset.bidang;
             document.getElementById('detailNama').innerText = btn.dataset.nama;
-            document.getElementById('detailRangkap').innerText = btn.dataset.rangkap;
             document.getElementById('detailWaktu').innerText = btn.dataset.waktu;
 
             let status = btn.dataset.status == 1 ? 'Aktif' : 'Nonaktif';

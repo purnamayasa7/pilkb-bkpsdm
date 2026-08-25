@@ -124,7 +124,7 @@ class SyaratController extends Controller
             'syarat'       => 'required|string',
             'metode'       => 'required|in:simpeg,upload',
             'kode_efile'   => 'nullable|exists:tb_syarat_efile,efile',
-            'mode_efile'   => 'nullable|in:latest,all|required_if:metode,simpeg',
+            // 'mode_efile'   => 'nullable|in:latest,all|required_if:metode,simpeg',
             'deskripsi'    => 'nullable|string',
         ]);
 
@@ -139,9 +139,9 @@ class SyaratController extends Controller
                 : null,
 
             // Hanya SIMPEG yang memiliki mode pengambilan
-            'mode_efile'   => $request->metode === 'simpeg'
-                ? $request->mode_efile
-                : null,
+            // 'mode_efile'   => $request->metode === 'simpeg'
+            //     ? $request->mode_efile
+            //     : null,
 
             'deskripsi'    => $request->deskripsi,
         ]);
@@ -167,7 +167,7 @@ class SyaratController extends Controller
             'syarat'       => 'required|string',
             'metode'       => 'required|in:simpeg,upload',
             'kode_efile'   => 'nullable|exists:tb_syarat_efile,efile',
-            'mode_efile'   => 'nullable|in:latest,all|required_if:metode,simpeg',
+            // 'mode_efile'   => 'nullable|in:latest,all|required_if:metode,simpeg',
             'deskripsi'    => 'nullable|string',
         ]);
 
@@ -187,9 +187,9 @@ class SyaratController extends Controller
                 : null,
 
             // Hanya SIMPEG yang memiliki mode pengambilan
-            'mode_efile'   => $request->metode === 'simpeg'
-                ? $request->mode_efile
-                : null,
+            // 'mode_efile'   => $request->metode === 'simpeg'
+            //     ? $request->mode_efile
+            //     : null,
 
             'deskripsi'    => $request->deskripsi,
         ]);
@@ -221,11 +221,11 @@ class SyaratController extends Controller
                 'exists:tb_syarat_efile,efile',
                 'required_if:metode,simpeg',
             ],
-            'mode_efile'  => [
-                'nullable',
-                'in:latest,all',
-                'required_if:metode,simpeg',
-            ],
+            // 'mode_efile'  => [
+            //     'nullable',
+            //     'in:latest,all',
+            //     'required_if:metode,simpeg',
+            // ],
             'deskripsi'   => 'nullable|string',
         ]);
 
@@ -235,7 +235,7 @@ class SyaratController extends Controller
             'syarat',
             'metode',
             'kode_efile',
-            'mode_efile',
+            // 'mode_efile',
             'deskripsi',
         ]);
 
@@ -244,16 +244,16 @@ class SyaratController extends Controller
             ? $request->kode_efile
             : null;
 
-        $modeEfile = $request->metode === 'simpeg'
-            ? $request->mode_efile
-            : null;
+        // $modeEfile = $request->metode === 'simpeg'
+        //     ? $request->mode_efile
+        //     : null;
 
         // Update
         $syarat->update([
             'syarat'      => $request->syarat,
             'metode'      => $request->metode,
             'kode_efile'  => $kodeEfile,
-            'mode_efile'  => $modeEfile,
+            // 'mode_efile'  => $modeEfile,
             'deskripsi'   => $request->deskripsi,
         ]);
 
@@ -265,7 +265,7 @@ class SyaratController extends Controller
             'syarat',
             'metode',
             'kode_efile',
-            'mode_efile',
+            // 'mode_efile',
             'deskripsi',
         ]);
 
@@ -300,11 +300,11 @@ class SyaratController extends Controller
                 'exists:tb_syarat_efile,efile',
                 'required_if:metode,simpeg',
             ],
-            'mode_efile'  => [
-                'nullable',
-                'in:latest,all',
-                'required_if:metode,simpeg',
-            ],
+            // 'mode_efile'  => [
+            //     'nullable',
+            //     'in:latest,all',
+            //     'required_if:metode,simpeg',
+            // ],
             'deskripsi'   => 'nullable|string',
         ]);
 
@@ -314,7 +314,7 @@ class SyaratController extends Controller
             'syarat',
             'metode',
             'kode_efile',
-            'mode_efile',
+            // 'mode_efile',
             'deskripsi',
         ]);
 
@@ -323,16 +323,16 @@ class SyaratController extends Controller
             ? $request->kode_efile
             : null;
 
-        $modeEfile = $request->metode === 'simpeg'
-            ? $request->mode_efile
-            : null;
+        // $modeEfile = $request->metode === 'simpeg'
+        //     ? $request->mode_efile
+        //     : null;
 
         // Update
         $syarat->update([
             'syarat'      => $request->syarat,
             'metode'      => $request->metode,
             'kode_efile'  => $kodeEfile,
-            'mode_efile'  => $modeEfile,
+            // 'mode_efile'  => $modeEfile,
             'deskripsi'   => $request->deskripsi,
         ]);
 
@@ -344,7 +344,7 @@ class SyaratController extends Controller
             'syarat',
             'metode',
             'kode_efile',
-            'mode_efile',
+            // 'mode_efile',
             'deskripsi',
         ]);
 

@@ -112,11 +112,6 @@
                                 </div>
 
                                 <div class="d-flex justify-content-between align-items-center mb-2">
-                                    <span><i data-feather="copy" class="me-1"></i> Rangkap</span>
-                                    <span id="detailRangkap" class="text-end"></span>
-                                </div>
-
-                                <div class="d-flex justify-content-between align-items-center mb-2">
                                     <span><i data-feather="clock" class="me-1"></i> Waktu Penyelesaian</span>
                                     <span id="detailWaktu" class="text-end"></span>
                                 </div>
@@ -151,7 +146,6 @@
                         <tr>
                             <th>No</th>
                             <th>Nama Layanan</th>
-                            <th>Rangkap</th>
                             <th>Waktu Penyelesaian</th>
                             <th>Status</th>
                             <th>Aksi</th>
@@ -161,7 +155,6 @@
                         <tr>
                             <th>No</th>
                             <th>Nama Layanan</th>
-                            <th>Rangkap</th>
                             <th>Waktu Penyelesaian</th>
                             <th>Status</th>
                             <th>Aksi</th>
@@ -172,7 +165,6 @@
                         <tr>
                             <td>{{ $loop->iteration }}</td>
                             <td>{{ $item->nama_layanan }}</td>
-                            <td>{{ $item->rangkap }}</td>
                             <td>{{ $item->waktu_penyelesaian }}</td>
                             <td>
                                 @if ($item->aktif === 1)
@@ -185,7 +177,7 @@
                                 <div class="d-flex align-items-center">
                                     <a class="btn btn-datatable btn-icon btn-transparent-dark me-1 btnDetail"
                                         href="#" data-id="{{ $item->id }}"
-                                        data-nama="{{ $item->nama_layanan }}" data-rangkap="{{ $item->rangkap }}"
+                                        data-nama="{{ $item->nama_layanan }}"
                                         data-waktu="{{ $item->waktu_penyelesaian }}"
                                         data-deksripsi="{{ $item->deskripsi }}" data-status="{{ $item->aktif }}"
                                         title="Lihat layanan">
@@ -331,9 +323,6 @@
 
             document.getElementById('detailNama').innerText =
                 btn.dataset.nama;
-
-            document.getElementById('detailRangkap').innerText =
-                btn.dataset.rangkap;
 
             document.getElementById('detailWaktu').innerText =
                 btn.dataset.waktu;

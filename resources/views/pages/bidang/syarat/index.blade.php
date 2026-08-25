@@ -130,77 +130,85 @@
                                 @endforeach
                             </select>
                         </div>
-
-                        <!-- TOMBOL RESET -->
-                        {{-- <div class="col-md-4 d-flex gap-2">
-                            <a href="{{ route('root.syarat') }}" class="btn btn-secondary w-50">
-                        Reset
-                        </a>
-                    </div> --}}
-
-                </div>
-        </div>
-        </form>
-        <div class="position-relative">
-            <div id="tableLoading" class="table-loading">
-                <div class="loading-content">
-                    <div class="spinner-border text-primary" role="status">
-                        <span class="visually-hidden">Loading...</span>
                     </div>
                 </div>
-            </div>
-            <table id="datatablesSimple">
-                <thead>
-                    <tr>
-                        <th>No</th>
-                        <th>Nama Layanan</th>
-                        <th>Syarat</th>
-                        <th>Aksi</th>
-                    </tr>
-                </thead>
-                <tfoot>
-                    <tr>
-                        <th>No</th>
-                        <th>Nama Layanan</th>
-                        <th>Syarat</th>
-                        <th>Aksi</th>
-                    </tr>
-                </tfoot>
-                <tbody>
-                    @foreach ($syarat as $item)
-                    <tr>
-                        <td>{{ $loop->iteration }}</td>
-                        <td>
-                            {{ $item->layanan->nama_layanan ?? '-' }}
-                        </td>
-                        <td>{{ $item->syarat }}</td>
-                        <td>
-                            <div class="d-flex align-items-center">
-                                <a class="btn btn-datatable btn-icon btn-transparent-dark me-1 btnDetail"
-                                    href="#" data-layanan="{{ $item->layanan->nama_layanan ?? '-' }}"
-                                    data-bidang="{{ $item->layanan->bidang->nama_bidang ?? '-' }}"
-                                    data-syarat="{{ $item->syarat }}" title="Lihat layanan">
-                                    <i data-feather="eye" class="text-primary"></i>
-                                </a>
-                                <a class="btn btn-datatable btn-icon btn-transparent-dark me-1"
-                                    href="{{ route('adminBidang.syarat.editBidang', $item->id) }}" data-bs-toggle="tooltip"
-                                    title="Edit Syarat"><i data-feather="edit" class="text-warning"></i></a>
-                                <a class="btn btn-datatable btn-icon btn-transparent-dark me-1 btnDelete"
-                                    href="#" data-id="{{ $item->id }}"
-                                    data-nama="{{ $item->syarat }}"
-                                    data-layanan="{{ $item->layanan->nama_layanan }}" title="Hapus Status">
-                                    <i data-feather="trash" class="text-danger"></i>
-                                </a>
-                            </div>
+            </form>
+            <div class="position-relative">
+                <div id="tableLoading" class="table-loading">
+                    <div class="loading-content">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                    </div>
+                </div>
+                <table id="datatablesSimple">
+                    <thead>
+                        <tr>
+                            <th>No</th>
+                            <th>Nama Layanan</th>
+                            <th>Syarat</th>
+                            <th>Metode e-File</th>
+                            <th>Aksi</th>
+                        </tr>
+                    </thead>
+                    <tfoot>
+                        <tr>
+                            <th>No</th>
+                            <th>Nama Layanan</th>
+                            <th>Syarat</th>
+                            <th>Metode e-File</th>
+                            <th>Aksi</th>
+                        </tr>
+                    </tfoot>
+                    <tbody>
+                        @foreach ($syarat as $item)
+                        <tr>
+                            <td>{{ $loop->iteration }}</td>
+                            <td>
+                                {{ $item->layanan->nama_layanan ?? '-' }}
+                            </td>
+                            <td>{{ $item->syarat }}</td>
+                            <td>
+                                @switch($item->metode)
+                                @case('simpeg')
+                                SIMPEG
+                                @break
 
-                        </td>
-                    </tr>
-                    @endforeach
-                </tbody>
-            </table>
+                                @case('upload')
+                                Upload
+                                @break
+
+                                @default
+                                -
+                                @endswitch
+                            </td>
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    <a class="btn btn-datatable btn-icon btn-transparent-dark me-1 btnDetail"
+                                        href="#" data-layanan="{{ $item->layanan->nama_layanan ?? '-' }}"
+                                        data-bidang="{{ $item->layanan->bidang->nama_bidang ?? '-' }}"
+                                        data-syarat="{{ $item->syarat }}" title="Lihat layanan">
+                                        <i data-feather="eye" class="text-primary"></i>
+                                    </a>
+                                    <a class="btn btn-datatable btn-icon btn-transparent-dark me-1"
+                                        href="{{ route('adminBidang.syarat.editBidang', $item->id) }}" data-bs-toggle="tooltip"
+                                        title="Edit Syarat"><i data-feather="edit" class="text-warning"></i></a>
+                                    <a class="btn btn-datatable btn-icon btn-transparent-dark me-1 btnDelete"
+                                        href="#" data-id="{{ $item->id }}"
+                                        data-nama="{{ $item->syarat }}"
+                                        data-layanan="{{ $item->layanan->nama_layanan }}" title="Hapus Status">
+                                        <i data-feather="trash" class="text-danger"></i>
+                                    </a>
+                                </div>
+
+                            </td>
+                        </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
-</div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/simple-datatables@7.1.2/dist/umd/simple-datatables.min.js"></script>

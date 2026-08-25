@@ -116,29 +116,6 @@
                             </div>
                         </div>
 
-                        <div class="mb-3" id="modeGroup">
-                            <label class="small mb-1">Pengambilan Dokumen</label>
-
-                            <select
-                                name="mode_efile"
-                                id="mode_efile"
-                                class="form-select">
-
-                                <option value="latest">
-                                    Dokumen Terbaru
-                                </option>
-
-                                <option value="all">
-                                    Semua Dokumen
-                                </option>
-
-                            </select>
-
-                            <div class="form-text">
-                                Berlaku hanya untuk dokumen yang diambil dari SIMPEG.
-                            </div>
-                        </div>
-
                         <button class="btn btn-primary" type="button" id="btnTambah">
                             Simpan Syarat
                         </button>
@@ -169,9 +146,6 @@
         const efileGroup = document.getElementById('efileGroup');
         const kodeEfile = document.getElementById('kode_efile');
 
-        const modeGroup = document.getElementById('modeGroup');
-        const modeEfile = document.getElementById('mode_efile');
-
         const confirmSimpan = document.getElementById('confirmSimpan');
 
 
@@ -182,27 +156,22 @@
 
             if (metode.value === 'simpeg') {
 
-                // Tampilkan field SIMPEG
+                // Tampilkan field E-File SIMPEG
                 efileGroup.style.display = '';
-                modeGroup.style.display = '';
 
                 // Wajib diisi
                 kodeEfile.required = true;
-                modeEfile.required = true;
 
             } else {
 
-                // Sembunyikan field SIMPEG
+                // Sembunyikan field E-File SIMPEG
                 efileGroup.style.display = 'none';
-                modeGroup.style.display = 'none';
 
                 // Tidak wajib
                 kodeEfile.required = false;
-                modeEfile.required = false;
 
                 // Kosongkan nilai
                 kodeEfile.value = '';
-                modeEfile.value = '';
             }
         }
 
