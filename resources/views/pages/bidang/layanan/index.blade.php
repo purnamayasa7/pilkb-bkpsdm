@@ -130,6 +130,42 @@
     </div>
 </div>
 
+{{-- Modal Deskripsi Layanan --}}
+<div class="modal fade" id="modalDeskripsi" tabindex="-1" aria-labelledby="modalDeskripsiLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content">
+
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalDeskripsiLabel">
+                    <i data-feather="file-text" class="me-1"></i>
+                    Deskripsi Layanan
+                </h5>
+
+                <button type="button" class="btn-close" data-bs-dismiss="modal"
+                    aria-label="Close"></button>
+            </div>
+
+            <div class="modal-body">
+                <div class="card shadow-sm border-0">
+                    <div class="card-body">
+                        <h6 class="fw-bold mb-3" id="deskripsiNamaLayanan"></h6>
+                        <div id="deskripsiContent"
+                            style="white-space: pre-line; line-height: 1.7;">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-light" data-bs-dismiss="modal">
+                    Tutup
+                </button>
+            </div>
+
+        </div>
+    </div>
+</div>
+
 <div class="container-fluid px-4 mt-4">
     <div class="card">
         <div class="card-body">
@@ -147,6 +183,7 @@
                             <th>No</th>
                             <th>Nama Layanan</th>
                             <th>Waktu Penyelesaian</th>
+                            <th>Deskripsi</th>
                             <th>Status</th>
                             <th>Aksi</th>
                         </tr>
@@ -156,6 +193,7 @@
                             <th>No</th>
                             <th>Nama Layanan</th>
                             <th>Waktu Penyelesaian</th>
+                            <th>Deskripsi</th>
                             <th>Status</th>
                             <th>Aksi</th>
                         </tr>
@@ -167,6 +205,19 @@
                             <td>{{ $item->nama_layanan }}</td>
                             <td>{{ $item->waktu_penyelesaian }}</td>
                             <td>
+                                <div class="d-flex align-items-center justify-content-center">
+                                    <a class="btn btn-datatable btn-icon btn-transparent-dark me-1 btnDeskripsi"
+                                        href="#"
+                                        data-nama="{{ $item->nama_layanan }}"
+                                        data-deskripsi="{{ $item->deskripsi }}"
+                                        data-bs-toggle="tooltip"
+                                        title="Lihat deskripsi">
+
+                                        <i data-feather="eye" class="text-primary"></i>
+                                    </a>
+                                </div>
+                            </td>
+                            <td>
                                 @if ($item->aktif === 1)
                                 <span class="badge bg-green-soft text-green">Aktif</span>
                                 @elseif ($item->aktif === 0)
@@ -175,7 +226,7 @@
                             </td>
                             <td>
                                 <div class="d-flex align-items-center">
-                                    <a class="btn btn-datatable btn-icon btn-transparent-dark me-1 btnDetail"
+                                    <!-- <a class="btn btn-datatable btn-icon btn-transparent-dark me-1 btnDetail"
                                         href="#" data-id="{{ $item->id }}"
                                         data-nama="{{ $item->nama_layanan }}"
                                         data-waktu="{{ $item->waktu_penyelesaian }}"
@@ -183,7 +234,7 @@
                                         title="Lihat layanan">
 
                                         <i data-feather="eye" class="text-primary"></i>
-                                    </a>
+                                    </a> -->
                                     <a class="btn btn-datatable btn-icon btn-transparent-dark me-1"
                                         href="{{ route('adminBidang.layanan.editBidang', $item->id) }}" data-bs-toggle="tooltip"
                                         title="Edit layanan"><i data-feather="edit" class="text-warning"></i></a>
@@ -336,6 +387,26 @@
                 status;
 
             modalDetail.show();
+        });
+
+        // Modal Deskripsi
+        const modalDeskripsiEl = document.getElementById('modalDeskripsi');
+        const modalDeskripsi = new bootstrap.Modal(modalDeskripsiEl);
+
+        document.addEventListener('click', function(e) {
+
+            const btn = e.target.closest('.btnDeskripsi');
+            if (!btn) return;
+
+            e.preventDefault();
+
+            const nama = btn.dataset.nama || '-';
+            const deskripsi = btn.dataset.deskripsi || 'Deskripsi belum tersedia.';
+
+            document.getElementById('deskripsiNamaLayanan').innerText = nama;
+            document.getElementById('deskripsiContent').innerText = deskripsi;
+
+            modalDeskripsi.show();
         });
 
     });

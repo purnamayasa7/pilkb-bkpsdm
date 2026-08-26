@@ -79,7 +79,7 @@
                              <div class="mb-3">
                                  <label class="small mb-1" for="deskripsi">Deskripsi</label>
                                  <textarea class="form-control" id="deskripsi" name="deskripsi" rows="4"
-                                     placeholder="Masukkan Deskripsi">{{ old('deskripsi') }}</textarea>
+                                     placeholder="Masukkan Deskripsi" required>{{ old('deskripsi') }}</textarea>
                              </div>
 
                              <button class="btn btn-primary" type="button" id="btnTambah">
