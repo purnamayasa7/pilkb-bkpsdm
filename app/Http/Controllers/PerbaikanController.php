@@ -23,14 +23,30 @@ class PerbaikanController extends Controller
             'tahapTerakhir.statusRel'
         ])
 
-            // HANYA YANG ADA BTL
-            ->whereHas('detail', function ($q) {
-                $q->where('status', 2);
+            ->where(function ($query) {
+                $query->whereHas('detail', function ($q) {
+                    $q->where('status', 2);
+                })
+                    ->orWhere(function ($q) {
+                        $q->where('diperbaiki', 1)
+                            ->whereHas('detail', function ($q) {
+                                $q->whereNull('status');
+                            });
+                    });
             });
 
-        // FILTER LAYANAN
-        if ($request->layanan) {
-            $query->where('kode_layanan', $request->layanan);
+        if ($request->filled('layanan') && $request->layanan !== 'all') {
+
+            $query->where(
+                'kode_layanan',
+                $request->layanan
+            );
+        }
+
+        if ($request->filled('btl')) {
+            $query->whereHas('detail', function ($q) {
+                $q->where('status', 2);
+            });
         }
 
         return $query
@@ -38,7 +54,6 @@ class PerbaikanController extends Controller
                 'detail as jumlah_btl' => function ($q) {
                     $q->where('status', 2);
                 },
-
                 'tahap as jumlah_tahap'
             ])
 

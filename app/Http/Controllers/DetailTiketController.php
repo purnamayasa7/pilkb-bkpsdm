@@ -162,7 +162,7 @@ class DetailTiketController extends Controller
         ]);
     }
 
-    // Tampil Review
+    // Tampil Review - Backup
     // public function review($no_tiket)
     // {
     //     $tiket = Regtiket::with(['layanan.bidang'])
@@ -1068,6 +1068,135 @@ class DetailTiketController extends Controller
         );
     }
 
+    // Simpan review - Backup
+    // public function submitReview(Request $request, $no_tiket)
+    // {
+    //     DB::beginTransaction();
+
+    //     try {
+
+    //         $detailList = DetailTiket::where('no_tiket', $no_tiket)->get();
+
+    //         // DATA TIKET UNTUK NOTIFIKASI
+    //         $tiket = Regtiket::with('layanan')
+    //             ->where('no_tiket', $no_tiket)
+    //             ->firstOrFail();
+
+    //         $semuaValid = true;
+
+    //         foreach ($detailList as $detail) {
+    //             // if checkbox checked
+    //             $checked = isset($request->status[$detail->id]);
+
+    //             if ($checked) {
+
+    //                 $detail->update([
+    //                     'status' => 1,
+    //                     'comment' => null
+    //                 ]);
+    //             } else {
+
+    //                 $semuaValid = false;
+
+    //                 $detail->update([
+    //                     'status' => 2,
+    //                     'comment' => $request->comment[$detail->id] ?? null
+    //                 ]);
+    //             }
+    //         }
+
+    //         if ($semuaValid) {
+
+    //             $tahap = Tahap::create([
+    //                 'no_tiket' => $no_tiket,
+    //                 'tanggal' => now(),
+    //                 'status' => 20000,
+    //                 'operator' => Auth::user()->username,
+    //                 'comment' => 'Berkas Sudah Diterima BKPSDM'
+    //             ]);
+
+    //             // Notifikasi ke Admin OPD
+    //             $adminOpd = User::where('role_id', 3)
+    //                 ->where('kode_ukerja', $tiket->kode_ukerja)
+    //                 ->get();
+
+    //             foreach ($adminOpd as $user) {
+
+    //                 $user->notify(
+    //                     new TiketNotification(
+    //                         'Berkas Diterima BKPSDM',
+    //                         'No Tiket ' . $tiket->no_tiket .
+    //                             ' usulan telah diterima BKPSDM dan sedang diproses.',
+    //                         route('adminOpd.tiket.indexProses'),
+    //                         $tiket->no_tiket,
+    //                         'berkas_diterima'
+    //                     )
+    //                 );
+    //             }
+
+    //             // Notifikasi ke Admin Bidang
+    //             $adminBidang = User::where('role_id', 4)
+    //                 ->where('bidang_id', $tiket->layanan->kode_bidang)
+    //                 ->get();
+
+    //             foreach ($adminBidang as $user) {
+
+    //                 $user->notify(
+    //                     new TiketNotification(
+    //                         'Usulan Baru',
+    //                         'No Tiket: ' . $tiket->no_tiket .
+    //                             ' usulan perlu ditindaklanjuti.',
+    //                         route(
+    //                             'adminBidang.permintaan.editPermintaan',
+    //                             ['no_tiket' => $tiket->no_tiket]
+    //                         ),
+    //                         $tiket->no_tiket,
+    //                         'usulan_baru'
+    //                     )
+    //                 );
+    //             }
+    //         } else {
+
+    //             // Notifikasi BTL ke Admin OPD
+    //             $adminOpd = User::where('role_id', 3)
+    //                 ->where('kode_ukerja', $tiket->kode_ukerja)
+    //                 ->get();
+
+    //             foreach ($adminOpd as $user) {
+    //                 $user->notify(
+    //                     new TiketNotification(
+    //                         'Berkas Tidak Lengkap',
+    //                         'No Tiket: ' . $tiket->no_tiket .
+    //                             ' memerlukan perbaikan dokumen.',
+    //                         route('adminOpd.tiket.indexProses'),
+    //                         $tiket->no_tiket,
+    //                         'berkas_tidak_lengkap'
+    //                     )
+    //                 );
+    //             }
+    //         }
+
+    //         DB::commit();
+
+    //         ActivityLogService::log(
+    //             'Manajemen Data Tiket',
+    //             'CREATE',
+    //             'Submit Review Tiket',
+    //             [],
+    //             $tahap->toArray()
+    //         );
+
+    //         return redirect()
+    //             ->route('adminBawah.perbaikan.indexAdminBawah')
+    //             ->with('success', 'Review berhasil disimpan.');
+    //     } catch (\Exception $e) {
+
+    //         DB::rollBack();
+
+    //         return back()->with('error', $e->getMessage());
+    //     }
+    // }
+
     // Simpan review
     public function submitReview(Request $request, $no_tiket)
     {
@@ -1075,50 +1204,111 @@ class DetailTiketController extends Controller
 
         try {
 
-            $detailList = DetailTiket::where('no_tiket', $no_tiket)->get();
+            /*
+        |--------------------------------------------------------------------------
+        | DETAIL TIKET
+        |--------------------------------------------------------------------------
+        */
 
-            // DATA TIKET UNTUK NOTIFIKASI
+            $detailList = DetailTiket::where('no_tiket', $no_tiket)
+                ->get();
+
+
+            /*
+        |--------------------------------------------------------------------------
+        | DATA TIKET
+        |--------------------------------------------------------------------------
+        */
+
             $tiket = Regtiket::with('layanan')
                 ->where('no_tiket', $no_tiket)
                 ->firstOrFail();
 
+
+            /*
+        |--------------------------------------------------------------------------
+        | CEK SEMUA SYARAT
+        |--------------------------------------------------------------------------
+        */
+
             $semuaValid = true;
 
+
             foreach ($detailList as $detail) {
-                // if checkbox checked
-                $checked = isset($request->status[$detail->id]);
+
+                /*
+            |--------------------------------------------------------------------------
+            | CHECKBOX DICENTANG = VALID
+            |--------------------------------------------------------------------------
+            */
+
+                $checked = isset(
+                    $request->status[$detail->id]
+                );
+
 
                 if ($checked) {
 
                     $detail->update([
                         'status' => 1,
-                        'comment' => null
+                        'comment' => null,
                     ]);
                 } else {
+
+                    /*
+                |--------------------------------------------------------------------------
+                | TIDAK DICENTANG = BTL
+                |--------------------------------------------------------------------------
+                */
 
                     $semuaValid = false;
 
                     $detail->update([
                         'status' => 2,
-                        'comment' => $request->comment[$detail->id] ?? null
+                        'comment' =>
+                        $request->comment[$detail->id]
+                            ?? null,
                     ]);
                 }
             }
 
+
+            /*
+        |--------------------------------------------------------------------------
+        | SEMUA SYARAT VALID
+        |--------------------------------------------------------------------------
+        */
+
             if ($semuaValid) {
+
+                /*
+            |--------------------------------------------------------------------------
+            | BUAT TAHAP
+            |--------------------------------------------------------------------------
+            */
 
                 $tahap = Tahap::create([
                     'no_tiket' => $no_tiket,
                     'tanggal' => now(),
                     'status' => 20000,
                     'operator' => Auth::user()->username,
-                    'comment' => 'Berkas Sudah Diterima BKPSDM'
+                    'comment' => 'Berkas Sudah Diterima BKPSDM',
                 ]);
 
-                // Notifikasi ke Admin OPD
+
+                /*
+            |--------------------------------------------------------------------------
+            | NOTIFIKASI ADMIN OPD
+            |--------------------------------------------------------------------------
+            */
+
                 $adminOpd = User::where('role_id', 3)
-                    ->where('kode_ukerja', $tiket->kode_ukerja)
+                    ->where(
+                        'kode_ukerja',
+                        $tiket->kode_ukerja
+                    )
                     ->get();
+
 
                 foreach ($adminOpd as $user) {
 
@@ -1134,10 +1324,20 @@ class DetailTiketController extends Controller
                     );
                 }
 
-                // Notifikasi ke Admin Bidang
+
+                /*
+            |--------------------------------------------------------------------------
+            | NOTIFIKASI ADMIN BIDANG
+            |--------------------------------------------------------------------------
+            */
+
                 $adminBidang = User::where('role_id', 4)
-                    ->where('bidang_id', $tiket->layanan->kode_bidang)
+                    ->where(
+                        'bidang_id',
+                        $tiket->layanan->kode_bidang
+                    )
                     ->get();
+
 
                 foreach ($adminBidang as $user) {
 
@@ -1148,21 +1348,64 @@ class DetailTiketController extends Controller
                                 ' usulan perlu ditindaklanjuti.',
                             route(
                                 'adminBidang.permintaan.editPermintaan',
-                                ['no_tiket' => $tiket->no_tiket]
+                                [
+                                    'no_tiket' =>
+                                    $tiket->no_tiket
+                                ]
                             ),
                             $tiket->no_tiket,
                             'usulan_baru'
                         )
                     );
                 }
+
+
+                /*
+            |--------------------------------------------------------------------------
+            | ACTIVITY LOG
+            |--------------------------------------------------------------------------
+            */
+
+                ActivityLogService::log(
+                    'Manajemen Data Tiket',
+                    'CREATE',
+                    'Submit Review Tiket - Berkas Diterima BKPSDM',
+                    [],
+                    $tahap->toArray()
+                );
             } else {
 
-                // Notifikasi BTL ke Admin OPD
+                /*
+            |--------------------------------------------------------------------------
+            | MASIH ADA BTL
+            |--------------------------------------------------------------------------
+            |
+            | Jika masih ada syarat yang tidak valid,
+            | tiket ditandai masih membutuhkan perbaikan.
+            |
+            */
+
+                $tiket->update([
+                    'diperbaiki' => 0,
+                ]);
+
+
+                /*
+            |--------------------------------------------------------------------------
+            | NOTIFIKASI BTL KE ADMIN OPD
+            |--------------------------------------------------------------------------
+            */
+
                 $adminOpd = User::where('role_id', 3)
-                    ->where('kode_ukerja', $tiket->kode_ukerja)
+                    ->where(
+                        'kode_ukerja',
+                        $tiket->kode_ukerja
+                    )
                     ->get();
 
+
                 foreach ($adminOpd as $user) {
+
                     $user->notify(
                         new TiketNotification(
                             'Berkas Tidak Lengkap',
@@ -1174,26 +1417,67 @@ class DetailTiketController extends Controller
                         )
                     );
                 }
+
+
+                /*
+            |--------------------------------------------------------------------------
+            | ACTIVITY LOG
+            |--------------------------------------------------------------------------
+            */
+
+                ActivityLogService::log(
+                    'Manajemen Data Tiket',
+                    'UPDATE',
+                    'Submit Review Tiket - Berkas Tidak Lengkap',
+                    [],
+                    [
+                        'no_tiket' => $no_tiket,
+                        'status' => 2,
+                        'diperbaiki' => 0,
+                        'comment' => 'Berkas memerlukan perbaikan dokumen.',
+                    ]
+                );
             }
+
+
+            /*
+        |--------------------------------------------------------------------------
+        | COMMIT
+        |--------------------------------------------------------------------------
+        */
 
             DB::commit();
 
-            ActivityLogService::log(
-                'Manajemen Data Tiket',
-                'CREATE',
-                'Submit Review Tiket',
-                [],
-                $tahap->toArray()
-            );
+
+            /*
+        |--------------------------------------------------------------------------
+        | REDIRECT
+        |--------------------------------------------------------------------------
+        */
 
             return redirect()
                 ->route('adminBawah.perbaikan.indexAdminBawah')
-                ->with('success', 'Review berhasil disimpan.');
+                ->with(
+                    'success',
+                    'Review berhasil disimpan.'
+                );
         } catch (\Exception $e) {
+
+            /*
+        |--------------------------------------------------------------------------
+        | ROLLBACK
+        |--------------------------------------------------------------------------
+        */
 
             DB::rollBack();
 
-            return back()->with('error', $e->getMessage());
+
+            return back()
+                ->withInput()
+                ->with(
+                    'error',
+                    $e->getMessage()
+                );
         }
     }
 
@@ -2131,6 +2415,48 @@ class DetailTiketController extends Controller
 
                     $disk->delete($oldFile);
                 }
+            }
+
+            /*
+|--------------------------------------------------------------------------
+| NOTIFIKASI KE ADMIN BIDANG
+|--------------------------------------------------------------------------
+|
+| Admin OPD sudah selesai melakukan perbaikan.
+| Admin Bidang perlu melakukan review kembali.
+|
+*/
+
+            $adminBidang = User::where(
+                'role_id',
+                4
+            )
+                ->where(
+                    'bidang_id',
+                    $tiket->layanan->kode_bidang
+                )
+                ->get();
+
+            foreach ($adminBidang as $user) {
+
+                $user->notify(
+                    new TiketNotification(
+                        'Perbaikan Usulan Selesai',
+
+                        'No Tiket: ' .
+                            $tiket->no_tiket .
+                            ' telah diperbaiki oleh Admin OPD dan siap untuk direview kembali.',
+
+                        route(
+                            'adminBidang.permintaan.editPermintaan',
+                            $tiket->no_tiket
+                        ),
+
+                        $tiket->no_tiket,
+
+                        'status_update'
+                    )
+                );
             }
 
 

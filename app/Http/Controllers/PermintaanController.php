@@ -510,6 +510,7 @@ class PermintaanController extends Controller
             Regtiket::where('no_tiket', $no_tiket)
                 ->update([
                     'data_baru' => 0,
+                    'diperbaiki' => 0,
                     'diperbaiki_tgl' => now()
                 ]);
 
