@@ -264,7 +264,19 @@
 
                                 <form id="formLogin" class="user" method="POST" action="{{ route('login') }}">
                                     @csrf
-                                    <div class="form-floating mb-3">
+                                    <div class="mb-3 text-start">
+                                        <label for="username" class="form-label fw-semibold small text-secondary mb-1">NIP</label>
+                                        <input type="text" id="username" name="username"
+                                            class="form-control @error('username') is-invalid @enderror"
+                                            value="{{ old('username') }}" placeholder="Masukkan NIP" required autofocus>
+                                        @error('username')
+                                        <div class="invalid-feedback">
+                                            {{ $message }}
+                                        </div>
+                                        @enderror
+                                    </div>
+                                    <!-- <div class="form-floating mb-3">
+                                        <label for="username" class="form-label fw-semibold small text-secondary mb-1">NIP</label>
                                         <input type="text" id="username" name="username"
                                             class="form-control @error('username') is-invalid
                                         @enderror"
@@ -275,15 +287,25 @@
                                         </div>
                                         @enderror
                                         <label>NIP</label>
-                                    </div>
+                                    </div> -->
 
-                                    <div class="form-floating mb-3 position-relative">
+                                    <!-- <div class="form-floating mb-3 position-relative">
                                         <input type="password" id="password" name="password" class="form-control pe-5"
                                             placeholder="Password" required>
                                         <label>Password</label>
 
-                                        <!-- ICON MATA -->
                                         <i class="bi bi-eye toggle-password" onclick="togglePassword()"></i>
+                                    </div> -->
+
+                                    <!-- INPUT PASSWORD -->
+                                    <div class="mb-3 text-start">
+                                        <label for="password" class="form-label fw-semibold small text-secondary mb-1">Password</label>
+                                        <div class="position-relative">
+                                            <input type="password" id="password" name="password" class="form-control pe-5"
+                                                placeholder="Masukkan Password" required>
+                                            <!-- ICON MATA -->
+                                            <i class="bi bi-eye toggle-password" onclick="togglePassword()"></i>
+                                        </div>
                                     </div>
 
                                     <button type="submit"

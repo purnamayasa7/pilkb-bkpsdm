@@ -123,7 +123,7 @@
     <div class="modal fade" id="logoutModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
         aria-hidden="true">
         <div class="modal-dialog" role="document">
-            <form action="{{ route('logout') }}" method="post">
+            <form id="logoutForm" action="{{ route('logout') }}" method="post">
                 @csrf
                 <div class="modal-content">
                     <div class="modal-header">
@@ -137,6 +137,7 @@
                             Kembali
                         </button>
                         <button type="submit"
+                            id="btnLogout"
                             class="btn btn-danger">
                             <i class="me-1" data-feather="log-out"></i>
                             Logout
@@ -297,6 +298,25 @@
             }
 
             initUI();
+
+            // =====================
+            // LOGOUT SPINNER
+            // =====================
+            $('#logoutForm').on('submit', function () {
+
+            const btn = $('#btnLogout');
+
+            // Cegah double click
+            btn.prop('disabled', true);
+
+            // Ubah isi tombol
+            btn.html(`
+                <span class="spinner-border spinner-border-sm me-2"
+                    role="status"
+                aria-hidden="true"></span>
+                Logout...
+            `);
+            });
 
             ChatWidgetApp.loadUnreadBadge();
             ChatWidgetApp.startBadgePolling();
