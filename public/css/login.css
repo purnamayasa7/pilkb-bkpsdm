@@ -82,17 +82,17 @@ body::after {
    ========================================================================== */
 
 .login-card {
-    width: min(960px, 95vw);
+    width: min(950px, 95vw);
     max-width: 960px;
-    min-height: 520px;
+    min-height: 500px;
     border-radius: 20px;
     overflow: hidden;
     background: var(--surface-card);
-    border: 1px solid rgba(31, 91, 153, 0.1);
+    border: 1px solid rgba(226, 232, 240, 0.85);
     box-shadow:
-        0 25px 60px rgba(15, 23, 42, 0.12),
-        0 8px 20px rgba(15, 23, 42, 0.04);
-    animation: fadeSlide 0.8s ease;
+        0 20px 48px -12px rgba(15, 23, 42, 0.14),
+        0 4px 16px -2px rgba(15, 23, 42, 0.04);
+    animation: fadeSlide 0.7s cubic-bezier(0.16, 1, 0.3, 1);
     box-sizing: border-box;
     position: relative;
     z-index: 1;
@@ -101,7 +101,7 @@ body::after {
 @keyframes fadeSlide {
     from {
         opacity: 0;
-        transform: translateY(20px);
+        transform: translateY(16px);
     }
     to {
         opacity: 1;
@@ -112,7 +112,7 @@ body::after {
 .login-card .row,
 .left-box,
 .right-box {
-    min-height: 520px;
+    min-height: 500px;
 }
 
 /* ==========================================================================
@@ -124,7 +124,7 @@ body::after {
     overflow: hidden;
     display: flex;
     align-items: center;
-    padding: 48px 44px;
+    padding: 44px 40px;
     color: #ffffff;
     background: linear-gradient(135deg,
             #0f4478 0%,
@@ -164,74 +164,90 @@ body::after {
     position: relative;
     z-index: 2;
     width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
 }
 
 /* Logo & Brand Header */
 .brand-badge {
-    display: inline-flex;
+    display: flex;
     align-items: center;
-    gap: 14px;
-    margin-bottom: 24px;
+    gap: 12px;
+    margin-bottom: 20px;
+    width: 100%;
 }
 
 .logo {
-    width: 56px;
-    height: 56px;
-    border-radius: 16px;
+    width: 48px;
+    height: 48px;
+    border-radius: 14px;
     background: #ffffff;
-    padding: 6px;
+    padding: 5px;
     object-fit: contain;
-    box-shadow: 0 8px 20px rgba(0, 0, 0, .25);
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.16);
+    border: 1px solid rgba(255, 255, 255, 0.6);
+    flex-shrink: 0;
+}
+
+.brand-text-wrap {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
 }
 
 .brand-text {
-    font-size: 15px;
+    font-size: 14.5px;
     font-weight: 700;
-    letter-spacing: 0.3px;
-    color: #ffffff;
     line-height: 1.2;
+    color: #ffffff;
+    letter-spacing: 0.3px;
 }
 
 .brand-subtext {
     font-size: 12px;
     color: rgba(255, 255, 255, 0.85);
     font-weight: 400;
+    letter-spacing: 0.1px;
 }
 
 /* App Title & Accent */
 .app-title-wrap {
-    margin-bottom: 10px;
+    display: inline-flex;
+    flex-direction: column;
+    width: fit-content;
+    margin-bottom: 8px;
 }
 
 .app-title {
-    font-size: 42px;
+    font-size: 40px;
     font-weight: 800;
-    letter-spacing: 1px;
+    letter-spacing: 0.5px;
     color: #ffffff;
-    line-height: 1.1;
+    line-height: 1.05;
     margin-bottom: 6px;
-    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.15);
+    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
 }
 
 .accent-line {
-    width: 100px;
-    height: 3.5px;
-    background: linear-gradient(to right, #ffffff, rgba(255, 255, 255, 0.3));
-    border-radius: 10px;
-    margin-bottom: 16px;
+    width: 100%;
+    height: 3px;
+    background: linear-gradient(90deg, #ffffff 0%, rgba(255, 255, 255, 0.35) 100%);
+    border-radius: 6px;
+    margin-bottom: 14px;
 }
 
 .tagline {
-    font-size: 15px;
+    font-size: 14px;
     line-height: 1.55;
     color: rgba(255, 255, 255, 0.92);
-    margin-bottom: 22px;
+    margin-bottom: 20px;
     font-weight: 400;
 }
 
 /* New Version Elegant Badge */
 .version-badge-wrap {
-    margin-top: 10px;
+    margin-top: 6px;
 }
 
 .version-badge {
@@ -240,15 +256,15 @@ body::after {
     gap: 8px;
     padding: 6px 14px;
     background: rgba(255, 255, 255, 0.14);
-    border: 1px solid rgba(255, 255, 255, 0.25);
+    border: 1px solid rgba(255, 255, 255, 0.28);
     border-radius: 9999px;
-    font-size: 12.5px;
+    font-size: 12px;
     font-weight: 600;
     color: #ffffff;
     letter-spacing: 0.3px;
     backdrop-filter: blur(8px);
     -webkit-backdrop-filter: blur(8px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.06);
 }
 
 .pulse-dot {
@@ -256,27 +272,33 @@ body::after {
     height: 8px;
     border-radius: 50%;
     background: #38bdf8;
-    box-shadow: 0 0 8px #38bdf8;
+    box-shadow: 0 0 6px rgba(56, 189, 248, 0.9);
     position: relative;
     display: inline-block;
+    flex-shrink: 0;
 }
 
 .pulse-dot::after {
     content: '';
     position: absolute;
-    inset: -3px;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
     border-radius: 50%;
-    border: 1.5px solid #38bdf8;
-    animation: dotPulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+    background: #38bdf8;
+    transform-origin: center center;
+    animation: dotPulse 2s cubic-bezier(0, 0, 0.2, 1) infinite;
+    pointer-events: none;
 }
 
 @keyframes dotPulse {
-    0%, 100% {
+    0% {
         transform: scale(1);
         opacity: 0.85;
     }
-    50% {
-        transform: scale(1.8);
+    70%, 100% {
+        transform: scale(2.4);
         opacity: 0;
     }
 }
@@ -290,42 +312,44 @@ body::after {
     align-items: center;
     justify-content: center;
     background: #ffffff;
-    padding: 40px 48px;
+    padding: 38px 44px;
     box-sizing: border-box;
     min-width: 0;
     position: relative;
-    border-left: 1px solid #e5edf6;
-    box-shadow: inset 8px 0 20px rgba(31, 91, 153, 0.025);
+    border-left: 1px solid #eef2f6;
+    box-shadow: inset 6px 0 16px rgba(31, 91, 153, 0.015);
 }
 
 /* Mobile compact branding header */
 .mobile-brand-header {
     display: none;
     text-align: center;
-    margin-bottom: 20px;
+    margin-bottom: 18px;
 }
 
 .mobile-brand-header .mobile-logo {
-    width: 48px;
-    height: 48px;
-    padding: 5px;
-    border-radius: 14px;
+    width: 44px;
+    height: 44px;
+    padding: 4px;
+    border-radius: 12px;
     background: #ffffff;
     box-shadow: 0 4px 12px rgba(15, 23, 42, 0.08);
     border: 1px solid #e2e8f0;
-    margin-bottom: 8px;
+    margin-bottom: 6px;
 }
 
 .mobile-brand-header h5 {
     font-weight: 800;
     color: var(--blue-primary);
     margin: 0;
-    letter-spacing: -0.3px;
+    font-size: 17px;
+    letter-spacing: 0.3px;
 }
 
 .mobile-brand-header small {
     color: var(--text-muted);
     font-size: 12px;
+    font-weight: 500;
 }
 
 /* Slider Controls */
@@ -341,7 +365,7 @@ body::after {
     display: flex;
     width: 200%;
     height: 100%;
-    transition: transform 0.6s cubic-bezier(0.77, 0, 0.175, 1);
+    transition: transform 0.45s cubic-bezier(0.16, 1, 0.3, 1);
     box-sizing: border-box;
 }
 
@@ -356,23 +380,23 @@ body::after {
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 0 8px;
+    padding: 0 6px;
     box-sizing: border-box;
 }
 
 .form-content {
     width: 100%;
-    max-width: 370px;
+    max-width: 360px;
     min-width: 0;
     box-sizing: border-box;
 }
 
 /* Form Titles */
 .form-title {
-    color: var(--blue-primary);
+    color: #0f172a;
     font-weight: 700;
     font-size: 22px;
-    letter-spacing: 0.3px;
+    letter-spacing: -0.2px;
     margin-bottom: 4px;
 }
 
@@ -391,7 +415,7 @@ body::after {
 .form-label-custom {
     font-size: 13px;
     font-weight: 600;
-    color: var(--text-primary);
+    color: #334155;
     margin-bottom: 6px;
     display: block;
 }
@@ -405,25 +429,25 @@ body::after {
 .input-icon-wrap .input-icon {
     position: absolute;
     left: 14px;
-    color: var(--text-muted);
-    width: 18px;
-    height: 18px;
+    color: #94a3b8;
+    width: 17px;
+    height: 17px;
     pointer-events: none;
-    transition: color 0.25s ease;
+    transition: color 0.2s ease;
     z-index: 3;
 }
 
 .input-icon-wrap .form-control {
     width: 100%;
-    height: 48px;
+    height: 46px;
     border-radius: 12px;
-    border: 1px solid var(--border-color);
-    background: var(--surface-input);
+    border: 1px solid #e2e8f0;
+    background: #f8fafc;
     padding: 10px 16px 10px 42px;
-    font-size: 14px;
+    font-size: 13.5px;
     font-weight: 500;
     color: var(--text-primary);
-    transition: all 0.25s ease;
+    transition: all 0.2s ease;
     box-sizing: border-box;
 }
 
@@ -455,9 +479,9 @@ body::after {
     transform: translateY(-50%);
     cursor: pointer;
     color: var(--text-muted);
-    font-size: 18px;
+    font-size: 17px;
     z-index: 5;
-    transition: color 0.25s ease;
+    transition: color 0.2s ease;
     padding: 4px;
 }
 
@@ -470,64 +494,74 @@ body::after {
    ========================================================================== */
 
 .btn-login-primary {
-    height: 48px;
+    height: 46px;
     width: 100%;
     border: none;
-    border-radius: 14px;
+    border-radius: 12px;
     background: linear-gradient(135deg, #1f5b99 0%, #174d86 100%);
     color: #ffffff;
     font-weight: 600;
-    font-size: 15px;
+    font-size: 14.5px;
     display: inline-flex;
     align-items: center;
     justify-content: center;
     gap: 8px;
-    box-shadow: 0 4px 14px rgba(31, 91, 153, 0.25);
-    transition: all 0.25s ease;
+    box-shadow: 0 4px 14px rgba(31, 91, 153, 0.22);
+    transition: all 0.2s ease;
     cursor: pointer;
     padding: 10px 18px;
 }
 
-.btn-login-primary:hover {
-    background: linear-gradient(135deg, #2668ad 0%, #1b5b9c 100%);
+.btn-login-primary:hover:not(:disabled) {
+    background: linear-gradient(135deg, #256bb3 0%, #1a5696 100%);
     color: #ffffff;
-    transform: translateY(-2px);
-    box-shadow: 0 8px 20px rgba(31, 91, 153, 0.35);
+    transform: translateY(-1.5px);
+    box-shadow: 0 6px 18px rgba(31, 91, 153, 0.32);
 }
 
-.btn-login-primary:active {
+.btn-login-primary:active:not(:disabled) {
     transform: translateY(0);
+}
+
+.btn-login-primary:disabled,
+.btn-login-primary[disabled],
+.btn-login-primary.is-submitting {
+    opacity: 0.72;
+    cursor: not-allowed !important;
+    pointer-events: none;
+    transform: none !important;
+    box-shadow: none !important;
 }
 
 .btn-login-primary svg,
 .btn-login-primary i {
-    width: 18px;
-    height: 18px;
+    width: 17px;
+    height: 17px;
 }
 
 .btn-login-outline {
-    height: 48px;
+    height: 46px;
     width: 100%;
-    border-radius: 14px;
-    border: 1px solid var(--blue-border);
-    background: #ffffff;
+    border-radius: 12px;
+    border: 1px solid #e2e8f0;
+    background: #f8fafc;
     color: var(--blue-primary);
     font-weight: 600;
-    font-size: 14px;
+    font-size: 13.5px;
     display: inline-flex;
     align-items: center;
     justify-content: center;
     gap: 8px;
-    transition: all 0.25s ease;
+    transition: all 0.2s ease;
     padding: 10px 18px;
 }
 
 .btn-login-outline:hover {
-    background: var(--blue-soft);
-    border-color: var(--blue-primary);
+    background: #f0f7ff;
+    border-color: #bcd7f8;
     color: var(--blue-darker);
-    transform: translateY(-2px);
-    box-shadow: 0 10px 25px rgba(31, 91, 153, 0.12);
+    transform: translateY(-1.5px);
+    box-shadow: 0 4px 12px rgba(31, 91, 153, 0.08);
 }
 
 .btn-login-outline:active {
@@ -536,8 +570,8 @@ body::after {
 
 .btn-login-outline svg,
 .btn-login-outline i {
-    width: 17px;
-    height: 17px;
+    width: 16px;
+    height: 16px;
 }
 
 /* Quick Info Option Cards on Slide 2 */
@@ -546,31 +580,59 @@ body::after {
     align-items: center;
     justify-content: space-between;
     width: 100%;
-    padding: 12px 16px;
+    padding: 10px 14px;
     border-radius: 12px;
-    border: 1px solid var(--blue-border);
-    background: var(--surface-card);
+    border: 1px solid #e2e8f0;
+    background: #f8fafc;
     color: var(--blue-primary);
-    font-size: 13.5px;
+    font-size: 13px;
     font-weight: 600;
     transition: all 0.2s ease;
     text-align: left;
-    margin-bottom: 10px;
+    margin-bottom: 8px;
     cursor: pointer;
 }
 
 .slide-option-btn .btn-icon-box {
-    width: 36px;
-    height: 36px;
-    border-radius: 10px;
-    background: #f0f6fc;
+    width: 32px;
+    height: 32px;
+    border-radius: 9px;
+    background: #ffffff;
     color: var(--blue-primary);
     display: flex;
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
-    margin-right: 12px;
+    margin-right: 10px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    border: 1px solid #e2e8f0;
     transition: all 0.2s ease;
+}
+
+.slide-option-btn .btn-icon-box svg,
+.slide-option-btn .btn-icon-box i {
+    width: 15px;
+    height: 15px;
+}
+
+.slide-option-btn:hover {
+    border-color: #bcd7f8;
+    background: #f0f7ff;
+    color: var(--blue-darker);
+    transform: translateY(-1.5px);
+    box-shadow: 0 4px 12px rgba(31, 91, 153, 0.08);
+}
+
+.slide-option-btn:hover .btn-icon-box {
+    background: var(--blue-primary);
+    border-color: var(--blue-primary);
+    color: #ffffff;
+}
+
+.slide-option-btn .btn-icon-box svg,
+.slide-option-btn .btn-icon-box i {
+    width: 16px;
+    height: 16px;
 }
 
 .slide-option-btn:hover {
@@ -584,6 +646,17 @@ body::after {
 .slide-option-btn:hover .btn-icon-box {
     background: var(--blue-primary);
     color: #ffffff;
+}
+
+#cekTiketFeedback {
+    transition: all 0.25s ease;
+}
+
+#cekTiketFeedback .alert {
+    padding: 8px 12px;
+    font-size: 12.5px;
+    border-radius: 10px;
+    margin-bottom: 0;
 }
 
 .link-back-login {

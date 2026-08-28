@@ -228,9 +228,9 @@
                     <!-- Institution Header Badge -->
                     <div class="brand-badge">
                         <img src="{{ asset('images/KabBuleleng.png') }}" class="logo" alt="Logo Kabupaten Buleleng">
-                        <div>
+                        <div class="brand-text-wrap">
                             <div class="brand-text text-uppercase">
-                                BKPSDM Kab. Buleleng
+                                BKPSDM KAB. BULELENG
                             </div>
                             <div class="brand-subtext">Pemerintah Kabupaten Buleleng</div>
                         </div>
@@ -244,14 +244,14 @@
 
                     <!-- Tagline -->
                     <p class="tagline">
-                        Pusat Informasi Layanan Kepegawaian BKPSDM Buleleng
+                        Pusat Informasi Layanan Kepegawaian BKPSDM<br>Buleleng
                     </p>
 
-                    <!-- Version Badge -->
+                    <!-- System Badge -->
                     <div class="version-badge-wrap">
                         <span class="version-badge">
                             <span class="pulse-dot"></span>
-                            New Version
+                            Sistem Layanan Kepegawaian
                         </span>
                     </div>
 
@@ -270,8 +270,8 @@
                                 <!-- Mobile Header (visible only on small screens) -->
                                 <div class="mobile-brand-header">
                                     <img src="{{ asset('images/KabBuleleng.png') }}" class="mobile-logo" alt="Logo Buleleng">
-                                    <h5>PILKB BKPSDM</h5>
-                                    <small>Pusat Informasi Layanan Kepegawaian</small>
+                                    <h5>PILKB</h5>
+                                    <small>BKPSDM Kabupaten Buleleng</small>
                                 </div>
 
                                 <h4 class="form-title">Selamat Datang</h4>
@@ -346,7 +346,8 @@
                                 <!-- Mobile Header -->
                                 <div class="mobile-brand-header">
                                     <img src="{{ asset('images/KabBuleleng.png') }}" class="mobile-logo" alt="Logo Buleleng">
-                                    <h5>PILKB BKPSDM</h5>
+                                    <h5>BKPSDM</h5>
+                                    <small>Pemerintah Kabupaten Buleleng</small>
                                 </div>
 
                                 <h4 class="form-title">Cek Tiket & Bantuan</h4>
@@ -354,10 +355,10 @@
                                     Lacak status usulan atau akses informasi layanan
                                 </p>
 
-                                <form action="{{ route('tiket.cek') }}" method="POST" class="mb-3">
+                                <form id="formCekTiket" action="{{ route('tiket.cek') }}" method="POST" class="mb-2">
                                     @csrf
 
-                                    <div class="form-group-custom">
+                                    <div class="form-group-custom mb-2">
                                         <label for="no_tiket" class="form-label-custom">Masukkan No Tiket</label>
                                         <div class="input-icon-wrap">
                                             <i data-feather="tag" class="input-icon"></i>
@@ -367,15 +368,30 @@
                                                 name="no_tiket"
                                                 class="form-control"
                                                 placeholder="Contoh: CH01012026-ABC12345"
+                                                autocomplete="off"
                                                 required>
                                         </div>
                                     </div>
 
+                                    <!-- Feedback Alert / Status Message -->
+                                    <div id="cekTiketFeedback" class="d-none mb-2"></div>
+
                                     <button
                                         type="submit"
-                                        class="btn-login-primary mb-3">
-                                        <i data-feather="search" class="me-1"></i>
-                                        Cek Tiket
+                                        id="btnCekTiket"
+                                        class="btn-login-primary mb-2">
+                                        <span class="cek-normal">
+                                            <i data-feather="search" class="me-1"></i>
+                                            Cek Tiket
+                                        </span>
+                                        <span class="cek-loading d-none">
+                                            <span
+                                                class="spinner-border spinner-border-sm me-2"
+                                                role="status"
+                                                aria-hidden="true">
+                                            </span>
+                                            Memeriksa Tiket...
+                                        </span>
                                     </button>
                                 </form>
 
@@ -808,25 +824,131 @@
             const btnLogin = document.getElementById('btnLogin');
 
             if (formLogin && btnLogin) {
-
-                formLogin.addEventListener('submit', function() {
-
+                formLogin.addEventListener('submit', function(e) {
                     // Cegah double submit
-                    if (btnLogin.disabled) {
+                    if (btnLogin.disabled || btnLogin.classList.contains('is-submitting')) {
+                        e.preventDefault();
                         return;
                     }
 
                     // Disable tombol
                     btnLogin.disabled = true;
+                    btnLogin.classList.add('is-submitting');
 
                     // Ganti tampilan tombol
-                    btnLogin.querySelector('.login-normal')
-                        .classList.add('d-none');
-
-                    btnLogin.querySelector('.login-loading')
-                        .classList.remove('d-none');
+                    const normalSpan = btnLogin.querySelector('.login-normal');
+                    const loadingSpan = btnLogin.querySelector('.login-loading');
+                    if (normalSpan) normalSpan.classList.add('d-none');
+                    if (loadingSpan) loadingSpan.classList.remove('d-none');
                 });
+            }
 
+            // Spinner & AJAX Cek Tiket
+            const formCekTiket = document.getElementById('formCekTiket');
+            const btnCekTiket = document.getElementById('btnCekTiket');
+            const noTiketInput = document.getElementById('no_tiket');
+            const feedbackContainer = document.getElementById('cekTiketFeedback');
+
+            if (formCekTiket && btnCekTiket) {
+                formCekTiket.addEventListener('submit', function(e) {
+                    e.preventDefault();
+
+                    const noTiket = noTiketInput ? noTiketInput.value.trim() : '';
+                    if (!noTiket) {
+                        if (noTiketInput) noTiketInput.focus();
+                        return;
+                    }
+
+                    // Disable button and show spinner
+                    btnCekTiket.disabled = true;
+                    btnCekTiket.classList.add('is-submitting');
+                    const normalSpan = btnCekTiket.querySelector('.cek-normal');
+                    const loadingSpan = btnCekTiket.querySelector('.cek-loading');
+                    if (normalSpan) normalSpan.classList.add('d-none');
+                    if (loadingSpan) loadingSpan.classList.remove('d-none');
+
+                    if (feedbackContainer) {
+                        feedbackContainer.className = 'd-none mb-2';
+                        feedbackContainer.innerHTML = '';
+                    }
+
+                    fetch('{{ route('tiket.cek') }}', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                            'Accept': 'application/json'
+                        },
+                        body: JSON.stringify({ no_tiket: noTiket })
+                    })
+                    .then(async response => {
+                        const data = await response.json().catch(() => ({}));
+                        if (response.ok && data.status === 'found') {
+                            if (feedbackContainer) {
+                                feedbackContainer.className = 'alert alert-success d-flex align-items-center py-2 px-3 small rounded-3 mb-2';
+                                feedbackContainer.innerHTML = `
+                                    <i data-feather="check-circle" class="me-2 flex-shrink-0" style="width: 16px; height: 16px;"></i>
+                                    <div>Tiket ditemukan! Membuka data tiket...</div>
+                                `;
+                                feather.replace();
+                            }
+
+                            // Tunggu 1 detik baru buka tab baru, lalu hilangkan label
+                            const targetUrl = data.url || ('/cek-tiket/' + encodeURIComponent(noTiket));
+                            setTimeout(function() {
+                                window.open(targetUrl, '_blank');
+
+                                // Reset button
+                                btnCekTiket.disabled = false;
+                                btnCekTiket.classList.remove('is-submitting');
+                                if (normalSpan) normalSpan.classList.remove('d-none');
+                                if (loadingSpan) loadingSpan.classList.add('d-none');
+                                feather.replace();
+
+                                // Fade out & sembunyikan label setelah 1 detik lagi
+                                if (feedbackContainer) {
+                                    feedbackContainer.style.transition = 'opacity 0.5s ease';
+                                    feedbackContainer.style.opacity = '0';
+                                    setTimeout(function() {
+                                        feedbackContainer.className = 'd-none mb-2';
+                                        feedbackContainer.innerHTML = '';
+                                        feedbackContainer.style.opacity = '';
+                                        feedbackContainer.style.transition = '';
+                                    }, 500);
+                                }
+                            }, 1000);
+                        } else {
+                            if (feedbackContainer) {
+                                feedbackContainer.className = 'alert alert-danger d-flex align-items-center py-2 px-3 small rounded-3 mb-2';
+                                feedbackContainer.innerHTML = `
+                                    <i data-feather="alert-circle" class="me-2 flex-shrink-0" style="width: 16px; height: 16px;"></i>
+                                    <div>${data.message || 'No tiket tidak ditemukan.'}</div>
+                                `;
+                                feather.replace();
+                            }
+                            btnCekTiket.disabled = false;
+                            btnCekTiket.classList.remove('is-submitting');
+                            if (normalSpan) normalSpan.classList.remove('d-none');
+                            if (loadingSpan) loadingSpan.classList.add('d-none');
+                            feather.replace();
+                        }
+                    })
+                    .catch(err => {
+                        if (feedbackContainer) {
+                            feedbackContainer.className = 'alert alert-danger d-flex align-items-center py-2 px-3 small rounded-3 mb-3';
+                            feedbackContainer.innerHTML = `
+                                <i data-feather="alert-circle" class="me-2 flex-shrink-0" style="width: 16px; height: 16px;"></i>
+                                <div>Terjadi kesalahan saat memeriksa tiket. Silakan coba lagi.</div>
+                            `;
+                            feather.replace();
+                        }
+                        btnCekTiket.disabled = false;
+                        btnCekTiket.classList.remove('is-submitting');
+                        if (normalSpan) normalSpan.classList.remove('d-none');
+                        if (loadingSpan) loadingSpan.classList.add('d-none');
+                        feather.replace();
+                    });
+                });
             }
 
             // FAQ Search

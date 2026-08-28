@@ -1498,7 +1498,31 @@ class TiketController extends Controller
             'no_tiket' => 'required'
         ]);
 
-        return redirect()->route('tiket.public', $request->no_tiket);
+        $noTiket = trim($request->no_tiket);
+        $tiket = Regtiket::where('no_tiket', $noTiket)->first();
+
+        if ($request->ajax() || $request->wantsJson()) {
+            if (!$tiket) {
+                return response()->json([
+                    'status' => 'not_found',
+                    'message' => 'No tiket tidak ditemukan.'
+                ], 404);
+            }
+
+            return response()->json([
+                'status' => 'found',
+                'message' => 'Tiket ditemukan.',
+                'no_tiket' => $tiket->no_tiket,
+                'url' => route('tiket.public', $tiket->no_tiket),
+                'pdf_url' => route('tiket.cetak', $tiket->no_tiket)
+            ]);
+        }
+
+        if (!$tiket) {
+            return redirect()->route('login')->with('error_tiket', 'No tiket tidak ditemukan.');
+        }
+
+        return redirect()->route('tiket.public', $tiket->no_tiket);
     }
 
     public function showPublic($no_tiket)
