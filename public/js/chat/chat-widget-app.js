@@ -626,7 +626,7 @@
         },
 
         // Function Load My Conversations
-        loadConversationList() {
+        loadConversationList(initialData = null) {
             this.stopPolling();
             this.stopInboxPolling();
             this.stopConversationListPolling();
@@ -637,6 +637,8 @@
             this.selectedConversationIds.clear();
 
             const body = $('.chat-body');
+            const hasData = Array.isArray(initialData) ? initialData.length > 0 : (this.conversationsData && this.conversationsData.length > 0);
+            const dataToRender = Array.isArray(initialData) ? initialData : this.conversationsData;
 
             body.html(`
         <div class="chat-page chat-page-list">
@@ -730,11 +732,13 @@
                 id="conversationList"
                 class="chat-list">
 
+                ${hasData ? '' : `
                 <div class="chat-skeleton-wrapper">
                     <div class="chat-skeleton-item"></div>
                     <div class="chat-skeleton-item"></div>
                     <div class="chat-skeleton-item"></div>
                 </div>
+                `}
 
             </div>
 
@@ -743,26 +747,47 @@
 
             feather.replace();
 
-            this.fetchAndRenderConversationList();
+            if (hasData) {
+                this.renderConversationListItems(dataToRender);
+            }
+
+            this.fetchAndRenderConversationList(!hasData);
             this.startConversationListPolling();
         },
 
         // Function Fetch and Render Conversation List
-        fetchAndRenderConversationList() {
+        fetchAndRenderConversationList(showLoading = false) {
+            if (showLoading && !$('#conversationList .chat-skeleton-wrapper').length && !$('#conversationList .chat-item').length) {
+                $('#conversationList').html(`
+                    <div class="chat-skeleton-wrapper">
+                        <div class="chat-skeleton-item"></div>
+                        <div class="chat-skeleton-item"></div>
+                        <div class="chat-skeleton-item"></div>
+                    </div>
+                `);
+            }
+
             $.get('/chat/my-conversations')
                 .done((res) => {
                     this.conversationsData = Array.isArray(res) ? res : [];
-                    this.renderConversationListItems(this.conversationsData);
+                    const currentQuery = $('#searchMyConversations').val();
+                    if (currentQuery) {
+                        this.filterConversations(currentQuery);
+                    } else {
+                        this.renderConversationListItems(this.conversationsData);
+                    }
                 })
                 .fail((xhr) => {
                     console.error('Gagal memuat percakapan:', xhr.responseText);
-                    $('#conversationList').html(`
-                        <div class="text-center text-danger p-4">
-                            <i data-feather="alert-circle" class="mb-2 text-danger" style="width:28px;height:28px;"></i>
-                            <div>Gagal memuat percakapan. Silakan coba beberapa saat lagi.</div>
-                        </div>
-                    `);
-                    feather.replace();
+                    if (!$('#conversationList .chat-item').length) {
+                        $('#conversationList').html(`
+                            <div class="text-center text-danger p-4">
+                                <i data-feather="alert-circle" class="mb-2 text-danger" style="width:28px;height:28px;"></i>
+                                <div>Gagal memuat percakapan. Silakan coba beberapa saat lagi.</div>
+                            </div>
+                        `);
+                        feather.replace();
+                    }
                 });
         },
 

@@ -347,7 +347,9 @@ class DashboardController extends Controller
             'chartTahunLabels',
             'chartTahunData',
 
-            'pengajuanTerakhirOpd'
+            'pengajuanTerakhirOpd',
+
+            'year'
         ));
     }
 

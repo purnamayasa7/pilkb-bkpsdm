@@ -441,7 +441,7 @@
         <div class="col-lg-8 mb-4">
             <div class="card mb-4 h-100">
                 <div class="card-header">
-                    Jumlah Pengajuan Tahun Ini
+                    Jumlah Pengajuan Tahun {{ $year }}
                 </div>
                 <div class="card-body">
                     <div class="chart-area">

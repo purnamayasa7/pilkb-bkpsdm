@@ -2,6 +2,23 @@
     $menus = config('menu');
     $roleId = auth()->user()->role_id ?? null;
     $menuItems = $menus[$roleId] ?? [];
+
+    $hasUnreadChat = false;
+    if (auth()->check()) {
+        $userId = auth()->id();
+        $participants = \App\Models\ChatParticipant::where('user_id', $userId)->get(['conversation_id', 'last_read_message_id']);
+        foreach ($participants as $p) {
+            if (\App\Models\ChatMessage::where('conversation_id', $p->conversation_id)
+                ->where('id', '>', $p->last_read_message_id ?? 0)
+                ->where(function ($q) use ($userId) {
+                    $q->whereNull('sender_user_id')
+                        ->orWhere('sender_user_id', '!=', $userId);
+                })->exists()) {
+                $hasUnreadChat = true;
+                break;
+            }
+        }
+    }
 @endphp
 
 <div id="layoutSidenav_nav">
@@ -23,6 +40,12 @@
                                 <i data-feather="{{ $menu['icon'] }}"></i>
                             </div>
                             {{ $menu['title'] }}
+
+                            @if (($menu['path'] ?? '') === 'chat' && $hasUnreadChat)
+                                <span class="badge bg-warning-soft text-warning ms-auto" style="font-size: 0.65rem; font-weight: 700; padding: 0.25rem 0.45rem; letter-spacing: 0.3px;">
+                                    New
+                                </span>
+                            @endif
                         </a>
 
                         {{-- DIVIDER --}}
