@@ -298,7 +298,7 @@
 
                                     <!-- PASSWORD INPUT -->
                                     <div class="form-group-custom">
-                                        <label for="password" class="form-label-custom">Kata Sandi</label>
+                                        <label for="password" class="form-label-custom">Password</label>
                                         <div class="input-icon-wrap">
                                             <i data-feather="lock" class="input-icon"></i>
                                             <input type="password" id="password" name="password" class="form-control pe-5"
@@ -314,7 +314,7 @@
 
                                         <span class="login-normal">
                                             <i data-feather="log-in" class="me-1"></i>
-                                            Masuk Sekarang
+                                            Masuk
                                         </span>
 
                                         <span class="login-loading d-none">
@@ -358,7 +358,7 @@
                                     @csrf
 
                                     <div class="form-group-custom">
-                                        <label for="no_tiket" class="form-label-custom">Nomor Tiket Permintaan</label>
+                                        <label for="no_tiket" class="form-label-custom">Masukkan No Tiket</label>
                                         <div class="input-icon-wrap">
                                             <i data-feather="tag" class="input-icon"></i>
                                             <input
@@ -366,7 +366,7 @@
                                                 id="no_tiket"
                                                 name="no_tiket"
                                                 class="form-control"
-                                                placeholder="Contoh: TK-2026-0001"
+                                                placeholder="Contoh: CH01012026-ABC12345"
                                                 required>
                                         </div>
                                     </div>
@@ -375,7 +375,7 @@
                                         type="submit"
                                         class="btn-login-primary mb-3">
                                         <i data-feather="search" class="me-1"></i>
-                                        Lacak Status Tiket
+                                        Cek Tiket
                                     </button>
                                 </form>
 
