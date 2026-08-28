@@ -247,20 +247,12 @@
                         Pusat Informasi Layanan Kepegawaian BKPSDM Buleleng
                     </p>
 
-                    <!-- Feature Badges -->
-                    <div class="feature-pills">
-                        <div class="feature-pill">
-                            <i data-feather="zap"></i>
-                            <span>Layanan Cepat</span>
-                        </div>
-                        <div class="feature-pill">
-                            <i data-feather="shield"></i>
-                            <span>Aman & Akurat</span>
-                        </div>
-                        <div class="feature-pill">
-                            <i data-feather="database"></i>
-                            <span>Integrasi SIMPEG</span>
-                        </div>
+                    <!-- Version Badge -->
+                    <div class="version-badge-wrap">
+                        <span class="version-badge">
+                            <span class="pulse-dot"></span>
+                            New Version
+                        </span>
                     </div>
 
                 </div>

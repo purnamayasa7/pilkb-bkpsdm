@@ -311,6 +311,20 @@ class DashboardController extends Controller
             $chartTahunData[] = $chartTahun[$i] ?? 0;
         }
 
+        // 4 Pengajuan Terakhir Admin OPD
+        $pengajuanTerakhirOpd = collect();
+        if ($user->role->name == 'admin_opd') {
+            $pengajuanTerakhirOpd = Regtiket::with([
+                'layanan',
+                'tahapTerakhir.statusRel'
+            ])
+                ->where('kode_ukerja', $user->kode_ukerja)
+                ->orderBy('created_at', 'desc')
+                ->orderBy('tanggal', 'desc')
+                ->limit(4)
+                ->get();
+        }
+
         return view('pages.dashboard', compact(
             'user',
             'ket_ukerja',
@@ -331,7 +345,9 @@ class DashboardController extends Controller
             'chartBidangData',
 
             'chartTahunLabels',
-            'chartTahunData'
+            'chartTahunData',
+
+            'pengajuanTerakhirOpd'
         ));
     }
 

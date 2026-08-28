@@ -143,6 +143,10 @@
                 const lastMsg = this.escapeHtml(item.last_message || 'Belum ada pesan');
                 const prefixMe = item.is_last_from_me ? '<span class="text-primary fw-semibold me-1">Anda:</span>' : '';
                 const subTitle = item.layanan ? this.escapeHtml(item.layanan) : (item.bidang ? this.escapeHtml(item.bidang) : '');
+                const role = item.sender_role || (item.type === 'guest' ? 'tamu' : 'opd');
+                const roleLabel = item.sender_role_label || (role === 'tamu' ? 'Tamu' : 'OPD');
+                const roleIcon = role === 'tamu' ? 'user' : (role === 'bidang' ? 'layers' : (role === 'fo' ? 'user-check' : 'briefcase'));
+                const roleBadge = `<span class="chat-role-badge badge-${role}"><i data-feather="${roleIcon}"></i>${roleLabel}</span>`;
 
                 let ticketTag = '';
                 if (item.no_tiket) {
@@ -165,6 +169,7 @@
                         <div class="wa-item-body">
                             <div class="wa-item-top">
                                 <div class="d-flex align-items-center gap-1 overflow-hidden">
+                                    ${roleBadge}
                                     ${ticketTag}
                                 </div>
                                 <span class="wa-item-time">${formattedTime}</span>
@@ -271,6 +276,11 @@
             $('#waRoomAvatar').text(avatarText);
             $('#waRoomTitle').text(senderName);
             $('#waRoomSubtitle').text(subTitle);
+
+            const role = res.sender_role || (res.type === 'guest' ? 'tamu' : 'opd');
+            const roleLabel = res.sender_role_label || (role === 'tamu' ? 'Tamu' : 'OPD');
+            const roleIcon = role === 'tamu' ? 'user' : (role === 'bidang' ? 'layers' : (role === 'fo' ? 'user-check' : 'briefcase'));
+            $('#waRoomRoleBadge').html(`<span class="chat-role-badge badge-${role}"><i data-feather="${roleIcon}"></i>${roleLabel}</span>`);
 
             if (ticketNo && ticketNo !== '-') {
                 $('#waRoomTicketNo').text(ticketNo);

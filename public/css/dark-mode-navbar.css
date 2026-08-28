@@ -1,3 +1,8 @@
+/* ==========================================================================
+   PILKB BKPSDM - DARK MODE COMPREHENSIVE STYLESHEET
+   Rich, Elegant & Non-Monotone Palette for All Components & Views
+   ========================================================================== */
+
 html.theme-transitioning body,
 html.theme-transitioning #sidenavAccordion,
 html.theme-transitioning #layoutSidenav_nav,
@@ -29,6 +34,10 @@ html.page-loading #layoutSidenav_content {
     stroke: var(--bs-primary, #0061f2) !important;
 }
 
+/* ==========================================================================
+   1. Navbar & Top Navigation
+   ========================================================================== */
+
 body.dark-mode .theme-new-badge {
     background: #ef4444;
 }
@@ -59,6 +68,10 @@ body.dark-mode .btn-transparent-dark:focus {
     background-color: #1b2a40;
 }
 
+/* ==========================================================================
+   2. Sidebar & Navigation
+   ========================================================================== */
+
 body.dark-mode .sidebar,
 body.dark-mode #layoutSidenav_nav,
 body.dark-mode .sidenav {
@@ -78,7 +91,7 @@ body.dark-mode #layoutSidenav_nav .sidenav-light .sidenav-menu .nav-link.active,
 body.dark-mode #layoutSidenav_nav .sidenav-light .sidenav-menu .nav-link.active .nav-link-icon,
 body.dark-mode #layoutSidenav_nav .sidenav-light .sidenav-menu .nav-link.active .sidenav-collapse-arrow {
     background-color: transparent !important;
-    color: var(--bs-primary) !important;
+    color: #60a5fa !important;
 }
 
 body.dark-mode #layoutSidenav_nav .sidenav-light .sidenav-menu .nav-link.active {
@@ -88,24 +101,24 @@ body.dark-mode #layoutSidenav_nav .sidenav-light .sidenav-menu .nav-link.active 
 
 body.dark-mode #layoutSidenav_nav .sidenav-light .sidenav-menu .nav-link.active svg,
 body.dark-mode #layoutSidenav_nav .sidenav-light .sidenav-menu .nav-link.active .feather {
-    color: var(--bs-primary) !important;
-    stroke: var(--bs-primary) !important;
+    color: #60a5fa !important;
+    stroke: #60a5fa !important;
 }
 
 body.dark-mode #layoutSidenav_nav .sidenav-light .sidenav-menu .nav-link:hover {
     background-color: transparent !important;
-    color: var(--bs-primary) !important;
+    color: #60a5fa !important;
 }
 
 body.dark-mode #layoutSidenav_nav .sidenav-light .sidenav-menu .nav-link:hover .nav-link-icon,
 body.dark-mode #layoutSidenav_nav .sidenav-light .sidenav-menu .nav-link:hover .sidenav-collapse-arrow {
-    color: #64748b !important;
+    color: #94a3b8 !important;
 }
 
 body.dark-mode #layoutSidenav_nav .sidenav-light .sidenav-menu .nav-link:hover svg,
 body.dark-mode #layoutSidenav_nav .sidenav-light .sidenav-menu .nav-link:hover .feather {
-    color: #64748b !important;
-    stroke: #64748b !important;
+    color: #94a3b8 !important;
+    stroke: #94a3b8 !important;
 }
 
 body.dark-mode #layoutSidenav_nav .sidenav-footer {
@@ -119,9 +132,13 @@ body.dark-mode #layoutSidenav_nav .sidenav-footer-subtitle {
 }
 
 body.dark-mode #layoutSidenav_nav .sidenav-footer-title {
-    color: var(--bs-primary);
+    color: #60a5fa;
     font-weight: 600;
 }
+
+/* ==========================================================================
+   3. Search & Navbar Dropdowns
+   ========================================================================== */
 
 body.dark-mode #sidenavAccordion .input-group-joined.input-group-solid,
 body.dark-mode #sidenavAccordion .input-group-joined.input-group-solid .form-control,
@@ -153,9 +170,10 @@ body.dark-mode #sidenavAccordion #ticketSearch:focus {
 body.dark-mode .dropdown-menu,
 body.dark-mode .dropdown-notifications-item,
 body.dark-mode .dropdown-notifications-footer {
-    background-color: #182235;
-    color: #d6deeb;
-    border-color: #253247;
+    background-color: #182235 !important;
+    color: #d6deeb !important;
+    border-color: #253247 !important;
+    box-shadow: 0 10px 30px rgba(2, 6, 23, 0.45) !important;
 }
 
 body.dark-mode .ticket-search-dropdown {
@@ -183,7 +201,7 @@ body.dark-mode .ticket-search-status {
 
 body.dark-mode .dropdown-notifications-item:hover,
 body.dark-mode .dropdown-notifications-footer:hover {
-    background-color: #202d42;
+    background-color: #202d42 !important;
 }
 
 body.dark-mode .dropdown-user .dropdown-menu {
@@ -219,6 +237,10 @@ body.dark-mode .dropdown-user .dropdown-menu .dropdown-item-icon {
     color: #69a3ff !important;
 }
 
+/* ==========================================================================
+   4. Page Header
+   ========================================================================== */
+
 body.dark-mode .page-header,
 body.dark-mode .page-header.page-header-light,
 body.dark-mode .page-header.bg-white {
@@ -234,20 +256,386 @@ body.dark-mode .page-header .page-header-icon {
     stroke: #69a3ff !important;
 }
 
-body.dark-mode .modal-content .modal-footer,
-body.dark-mode .modal-content .modal-header {
-    background-color: #182235;
-    border-color: #253247 !important;
+body.dark-mode .page-header-icon {
+    background-color: transparent !important;
+    border: 0;
+    color: #69a3ff !important;
 }
 
-body.dark-mode .modal-content .btn-close {
-    filter: invert(1) grayscale(1);
+/* ==========================================================================
+   5. Rich & Vibrant Buttons in Dark Mode (Header, Action, Soft, Outline)
+   ========================================================================== */
+
+/* --- Success / Green (Export Excel, Export, Download) --- */
+body.dark-mode .btn.btn-light.text-success,
+body.dark-mode .btn-light.text-success,
+body.dark-mode .btn-success-soft {
+    background-color: rgba(16, 185, 129, 0.16) !important;
+    border: 1px solid rgba(16, 185, 129, 0.38) !important;
+    color: #34d399 !important;
 }
 
-body.dark-mode .modal-header,
-body.dark-mode .modal-footer {
-    border-color: #3a3e47;
+body.dark-mode .btn.btn-light.text-success:hover,
+body.dark-mode .btn-light.text-success:hover,
+body.dark-mode .btn-success-soft:hover,
+body.dark-mode .btn.btn-light.text-success:focus,
+body.dark-mode .btn-light.text-success:focus,
+body.dark-mode .btn-success-soft:focus,
+body.dark-mode .btn.btn-light.text-success.show {
+    background-color: rgba(16, 185, 129, 0.28) !important;
+    border-color: rgba(16, 185, 129, 0.65) !important;
+    color: #6ee7b7 !important;
+    box-shadow: 0 0 14px rgba(16, 185, 129, 0.25) !important;
 }
+
+body.dark-mode .btn.btn-light.text-success svg,
+body.dark-mode .btn-light.text-success svg,
+body.dark-mode .btn-success-soft svg,
+body.dark-mode .btn.btn-light.text-success i,
+body.dark-mode .btn-light.text-success i {
+    color: #34d399 !important;
+    stroke: #34d399 !important;
+}
+
+/* --- Primary / Blue (Tambah Baru, Lihat Semua, Action) --- */
+body.dark-mode .btn.btn-light.text-primary,
+body.dark-mode .btn-light.text-primary,
+body.dark-mode .btn-primary-soft {
+    background-color: rgba(59, 130, 246, 0.16) !important;
+    border: 1px solid rgba(59, 130, 246, 0.38) !important;
+    color: #60a5fa !important;
+}
+
+body.dark-mode .btn.btn-light.text-primary:hover,
+body.dark-mode .btn-light.text-primary:hover,
+body.dark-mode .btn-primary-soft:hover,
+body.dark-mode .btn.btn-light.text-primary:focus,
+body.dark-mode .btn-light.text-primary:focus,
+body.dark-mode .btn-primary-soft:focus,
+body.dark-mode .btn.btn-light.text-primary.show {
+    background-color: rgba(59, 130, 246, 0.28) !important;
+    border-color: rgba(59, 130, 246, 0.65) !important;
+    color: #93c5fd !important;
+    box-shadow: 0 0 14px rgba(59, 130, 246, 0.25) !important;
+}
+
+body.dark-mode .btn.btn-light.text-primary svg,
+body.dark-mode .btn-light.text-primary svg,
+body.dark-mode .btn-primary-soft svg,
+body.dark-mode .btn.btn-light.text-primary i,
+body.dark-mode .btn-light.text-primary i {
+    color: #60a5fa !important;
+    stroke: #60a5fa !important;
+}
+
+/* --- Danger / Red (Export PDF, Hapus, Tolak) --- */
+body.dark-mode .btn.btn-light.text-danger,
+body.dark-mode .btn-light.text-danger,
+body.dark-mode .btn-danger-soft {
+    background-color: rgba(239, 68, 68, 0.16) !important;
+    border: 1px solid rgba(239, 68, 68, 0.38) !important;
+    color: #f87171 !important;
+}
+
+body.dark-mode .btn.btn-light.text-danger:hover,
+body.dark-mode .btn-light.text-danger:hover,
+body.dark-mode .btn-danger-soft:hover,
+body.dark-mode .btn.btn-light.text-danger:focus,
+body.dark-mode .btn-light.text-danger:focus,
+body.dark-mode .btn-danger-soft:focus {
+    background-color: rgba(239, 68, 68, 0.28) !important;
+    border-color: rgba(239, 68, 68, 0.65) !important;
+    color: #fca5a5 !important;
+    box-shadow: 0 0 14px rgba(239, 68, 68, 0.25) !important;
+}
+
+body.dark-mode .btn.btn-light.text-danger svg,
+body.dark-mode .btn-light.text-danger svg,
+body.dark-mode .btn-danger-soft svg,
+body.dark-mode .btn.btn-light.text-danger i,
+body.dark-mode .btn-light.text-danger i {
+    color: #f87171 !important;
+    stroke: #f87171 !important;
+}
+
+/* --- Warning / Amber (Perbaikan, Edit, Filter) --- */
+body.dark-mode .btn.btn-light.text-warning,
+body.dark-mode .btn-light.text-warning,
+body.dark-mode .btn-warning-soft {
+    background-color: rgba(245, 158, 11, 0.16) !important;
+    border: 1px solid rgba(245, 158, 11, 0.38) !important;
+    color: #fbbf24 !important;
+}
+
+body.dark-mode .btn.btn-light.text-warning:hover,
+body.dark-mode .btn-light.text-warning:hover,
+body.dark-mode .btn-warning-soft:hover,
+body.dark-mode .btn.btn-light.text-warning:focus,
+body.dark-mode .btn-light.text-warning:focus,
+body.dark-mode .btn-warning-soft:focus {
+    background-color: rgba(245, 158, 11, 0.28) !important;
+    border-color: rgba(245, 158, 11, 0.65) !important;
+    color: #fde68a !important;
+    box-shadow: 0 0 14px rgba(245, 158, 11, 0.25) !important;
+}
+
+body.dark-mode .btn.btn-light.text-warning svg,
+body.dark-mode .btn-light.text-warning svg,
+body.dark-mode .btn-warning-soft svg,
+body.dark-mode .btn.btn-light.text-warning i,
+body.dark-mode .btn-light.text-warning i {
+    color: #fbbf24 !important;
+    stroke: #fbbf24 !important;
+}
+
+/* --- Info / Cyan (Detail, Syarat) --- */
+body.dark-mode .btn.btn-light.text-info,
+body.dark-mode .btn-light.text-info,
+body.dark-mode .btn-info-soft {
+    background-color: rgba(6, 182, 212, 0.16) !important;
+    border: 1px solid rgba(6, 182, 212, 0.38) !important;
+    color: #38bdf8 !important;
+}
+
+body.dark-mode .btn.btn-light.text-info:hover,
+body.dark-mode .btn-light.text-info:hover,
+body.dark-mode .btn-info-soft:hover,
+body.dark-mode .btn.btn-light.text-info:focus,
+body.dark-mode .btn-light.text-info:focus,
+body.dark-mode .btn-info-soft:focus {
+    background-color: rgba(6, 182, 212, 0.28) !important;
+    border-color: rgba(6, 182, 212, 0.65) !important;
+    color: #7dd3fc !important;
+    box-shadow: 0 0 14px rgba(6, 182, 212, 0.25) !important;
+}
+
+body.dark-mode .btn.btn-light.text-info svg,
+body.dark-mode .btn-light.text-info svg,
+body.dark-mode .btn-info-soft svg,
+body.dark-mode .btn.btn-light.text-info i,
+body.dark-mode .btn-light.text-info i {
+    color: #38bdf8 !important;
+    stroke: #38bdf8 !important;
+}
+
+/* --- Generic / Neutral Light Buttons --- */
+body.dark-mode .btn-light:not([class*="text-"]):not(.text-primary):not(.text-success):not(.text-danger):not(.text-warning):not(.text-info),
+body.dark-mode .btn.btn-light:not([class*="text-"]):not(.text-primary):not(.text-success):not(.text-danger):not(.text-warning):not(.text-info) {
+    background-color: #1e293b !important;
+    border: 1px solid #334155 !important;
+    color: #e2e8f0 !important;
+}
+
+body.dark-mode .btn-light:not([class*="text-"]):hover,
+body.dark-mode .btn.btn-light:not([class*="text-"]):hover,
+body.dark-mode .btn-light:not([class*="text-"]):focus,
+body.dark-mode .btn.btn-light:not([class*="text-"]):focus {
+    background-color: #2b394e !important;
+    border-color: #475569 !important;
+    color: #ffffff !important;
+}
+
+/* --- Outline Buttons --- */
+body.dark-mode .btn-outline-primary {
+    border-color: #3b82f6 !important;
+    color: #60a5fa !important;
+}
+body.dark-mode .btn-outline-primary:hover,
+body.dark-mode .btn-outline-primary:focus {
+    background-color: #2563eb !important;
+    border-color: #2563eb !important;
+    color: #ffffff !important;
+}
+
+body.dark-mode .btn-outline-success {
+    border-color: #10b981 !important;
+    color: #34d399 !important;
+}
+body.dark-mode .btn-outline-success:hover,
+body.dark-mode .btn-outline-success:focus {
+    background-color: #059669 !important;
+    border-color: #059669 !important;
+    color: #ffffff !important;
+}
+
+body.dark-mode .btn-outline-danger {
+    border-color: #ef4444 !important;
+    color: #f87171 !important;
+}
+body.dark-mode .btn-outline-danger:hover,
+body.dark-mode .btn-outline-danger:focus {
+    background-color: #dc2626 !important;
+    border-color: #dc2626 !important;
+    color: #ffffff !important;
+}
+
+body.dark-mode .btn-outline-warning {
+    border-color: #f59e0b !important;
+    color: #fbbf24 !important;
+}
+body.dark-mode .btn-outline-warning:hover,
+body.dark-mode .btn-outline-warning:focus {
+    background-color: #d97706 !important;
+    border-color: #d97706 !important;
+    color: #ffffff !important;
+}
+
+body.dark-mode .btn-outline-info {
+    border-color: #06b6d4 !important;
+    color: #38bdf8 !important;
+}
+body.dark-mode .btn-outline-info:hover,
+body.dark-mode .btn-outline-info:focus {
+    background-color: #0891b2 !important;
+    border-color: #0891b2 !important;
+    color: #ffffff !important;
+}
+
+/* ==========================================================================
+   6. Badges (Vivid, High Contrast & Elegant)
+   ========================================================================== */
+
+/* --- Green / Success Badges (Aktif, Selesai, Valid) --- */
+body.dark-mode .badge.bg-success-soft,
+body.dark-mode .badge.bg-green-soft,
+body.dark-mode .badge.bg-light-success,
+body.dark-mode .badge.bg-light.text-success,
+body.dark-mode .badge.bg-light.text-green,
+body.dark-mode .badge.status-valid {
+    background-color: rgba(16, 185, 129, 0.18) !important;
+    border: 1px solid rgba(16, 185, 129, 0.4) !important;
+    color: #34d399 !important;
+}
+
+body.dark-mode .badge.bg-success-soft svg,
+body.dark-mode .badge.bg-green-soft svg,
+body.dark-mode .badge.bg-light.text-success svg {
+    color: #34d399 !important;
+    stroke: #34d399 !important;
+}
+
+/* --- Red / Danger Badges (Tidak Aktif, BTL, Tolak, Batal) --- */
+body.dark-mode .badge.bg-danger-soft,
+body.dark-mode .badge.bg-red-soft,
+body.dark-mode .badge.bg-light-danger,
+body.dark-mode .badge.bg-light.text-danger,
+body.dark-mode .badge.bg-light.text-red,
+body.dark-mode .badge.status-btl {
+    background-color: rgba(239, 68, 68, 0.18) !important;
+    border: 1px solid rgba(239, 68, 68, 0.4) !important;
+    color: #f87171 !important;
+}
+
+body.dark-mode .badge.bg-danger-soft svg,
+body.dark-mode .badge.bg-red-soft svg,
+body.dark-mode .badge.bg-light.text-danger svg {
+    color: #f87171 !important;
+    stroke: #f87171 !important;
+}
+
+/* --- Yellow / Warning Badges (Perbaikan, Revisi, Pending) --- */
+body.dark-mode .badge.bg-warning-soft,
+body.dark-mode .badge.bg-yellow-soft,
+body.dark-mode .badge.bg-light-warning,
+body.dark-mode .badge.bg-light.text-warning,
+body.dark-mode .badge.bg-light.text-yellow {
+    background-color: rgba(245, 158, 11, 0.18) !important;
+    border: 1px solid rgba(245, 158, 11, 0.4) !important;
+    color: #fbbf24 !important;
+}
+
+body.dark-mode .badge.bg-warning-soft svg,
+body.dark-mode .badge.bg-yellow-soft svg,
+body.dark-mode .badge.bg-light.text-warning svg {
+    color: #fbbf24 !important;
+    stroke: #fbbf24 !important;
+}
+
+/* --- Blue / Primary Badges (Tahap Awal, Menunggu, Registrasi) --- */
+body.dark-mode .badge.bg-primary-soft,
+body.dark-mode .badge.bg-blue-soft,
+body.dark-mode .badge.bg-light-primary,
+body.dark-mode .badge.bg-light.text-primary,
+body.dark-mode .badge.bg-light.text-blue {
+    background-color: rgba(59, 130, 246, 0.18) !important;
+    border: 1px solid rgba(59, 130, 246, 0.4) !important;
+    color: #60a5fa !important;
+}
+
+body.dark-mode .badge.bg-primary-soft svg,
+body.dark-mode .badge.bg-blue-soft svg,
+body.dark-mode .badge.bg-light.text-primary svg {
+    color: #60a5fa !important;
+    stroke: #60a5fa !important;
+}
+
+/* --- Cyan / Info Badges (Proses, Verifikasi, Kirim) --- */
+body.dark-mode .badge.bg-info-soft,
+body.dark-mode .badge.bg-cyan-soft,
+body.dark-mode .badge.bg-light-info,
+body.dark-mode .badge.bg-light.text-info,
+body.dark-mode .badge.bg-light.text-cyan {
+    background-color: rgba(6, 182, 212, 0.18) !important;
+    border: 1px solid rgba(6, 182, 212, 0.4) !important;
+    color: #38bdf8 !important;
+}
+
+body.dark-mode .badge.bg-info-soft svg,
+body.dark-mode .badge.bg-cyan-soft svg,
+body.dark-mode .badge.bg-light.text-info svg {
+    color: #38bdf8 !important;
+    stroke: #38bdf8 !important;
+}
+
+/* --- Purple / Secondary Badges --- */
+body.dark-mode .badge.bg-secondary-soft,
+body.dark-mode .badge.bg-purple-soft,
+body.dark-mode .badge.bg-light-secondary,
+body.dark-mode .badge.bg-light.text-secondary,
+body.dark-mode .badge.bg-light.text-purple {
+    background-color: rgba(168, 85, 247, 0.18) !important;
+    border: 1px solid rgba(168, 85, 247, 0.4) !important;
+    color: #c084fc !important;
+}
+
+/* --- Muted / Dark Badges --- */
+body.dark-mode .badge.bg-light.text-muted,
+body.dark-mode .badge.bg-light.text-dark {
+    background-color: rgba(148, 163, 184, 0.15) !important;
+    border: 1px solid rgba(148, 163, 184, 0.3) !important;
+    color: #cbd5e1 !important;
+}
+
+/* ==========================================================================
+   7. Dropdown Items & Export Links in Dark Mode
+   ========================================================================== */
+
+body.dark-mode .dropdown-item {
+    color: #cbd5e1 !important;
+}
+
+body.dark-mode .dropdown-item:hover,
+body.dark-mode .dropdown-item:focus {
+    background-color: #202d42 !important;
+    color: #ffffff !important;
+}
+
+/* Specific icons inside dropdowns */
+body.dark-mode .dropdown-item i[data-feather="file-text"],
+body.dark-mode .dropdown-item svg[data-feather="file-text"] {
+    color: #34d399 !important;
+    stroke: #34d399 !important;
+}
+
+body.dark-mode .dropdown-item i[data-feather="file"],
+body.dark-mode .dropdown-item svg[data-feather="file"] {
+    color: #f87171 !important;
+    stroke: #f87171 !important;
+}
+
+/* ==========================================================================
+   8. DataTables & Tables
+   ========================================================================== */
 
 body.dark-mode .datatable-wrapper,
 body.dark-mode .datatable-top,
@@ -259,7 +647,7 @@ body.dark-mode .datatable-container {
 body.dark-mode .datatable-wrapper {
     background-color: #182235;
     border: 1px solid #253247 !important;
-    border-radius: 0.35rem;
+    border-radius: 0.5rem;
     overflow: hidden;
 }
 
@@ -346,6 +734,24 @@ body.dark-mode .datatable-wrapper .datatable-pagination .disabled a {
     color: #475569;
 }
 
+/* Action Icons inside DataTables */
+body.dark-mode .btn-datatable.btn-icon.btn-transparent-dark {
+    color: #94a3b8 !important;
+}
+
+body.dark-mode .btn-datatable.btn-icon.btn-transparent-dark:hover {
+    background-color: #24344d !important;
+    color: #60a5fa !important;
+}
+
+body.dark-mode .btn-datatable.btn-icon.btn-transparent-dark svg {
+    stroke: currentColor !important;
+}
+
+/* ==========================================================================
+   9. Dashboard Widgets & Cards
+   ========================================================================== */
+
 body.dark-mode #layoutSidenav_content h1,
 body.dark-mode #layoutSidenav_content .user-info-card,
 body.dark-mode #layoutSidenav_content .user-info-card .small,
@@ -394,6 +800,108 @@ body.dark-mode .user-info-card .icon-box-sm.bg-light-info {
 body.dark-mode .user-info-card .icon-box svg,
 body.dark-mode .user-info-card .icon-box-sm svg {
     stroke: currentColor !important;
+}
+
+/* Dashboard Border-Start Cards */
+body.dark-mode #layoutSidenav_content .card.border-start-lg .small.fw-bold {
+    color: #d6deeb !important;
+}
+
+body.dark-mode #layoutSidenav_content .card.border-start-lg .h5 {
+    color: #f8fafc !important;
+}
+
+body.dark-mode #layoutSidenav_content .card.border-start-lg .text-xs {
+    color: #b4c0d1 !important;
+}
+
+body.dark-mode #layoutSidenav_content .card.border-start-lg .text-muted {
+    color: #94a3b8 !important;
+}
+
+body.dark-mode #layoutSidenav_content .card.border-start-lg.border-start-primary {
+    background: linear-gradient(135deg, #182b4b 0%, #182235 72%) !important;
+    border-left-color: #4f8cff !important;
+}
+
+body.dark-mode #layoutSidenav_content .card.border-start-lg.border-start-secondary {
+    background: linear-gradient(135deg, #282346 0%, #182235 72%) !important;
+    border-left-color: #a78bfa !important;
+}
+
+body.dark-mode #layoutSidenav_content .card.border-start-lg.border-start-danger {
+    background: linear-gradient(135deg, #422332 0%, #182235 72%) !important;
+    border-left-color: #fb7185 !important;
+}
+
+body.dark-mode #layoutSidenav_content .card.border-start-lg.border-start-success {
+    background: linear-gradient(135deg, #173c38 0%, #182235 72%) !important;
+    border-left-color: #34d399 !important;
+}
+
+body.dark-mode #layoutSidenav_content .card.border-start-lg > .card-body > .d-flex > .ms-2 .fas {
+    opacity: .75 !important;
+}
+
+body.dark-mode #layoutSidenav_content .card.border-start-lg.border-start-primary > .card-body > .d-flex > .ms-2 .fas {
+    color: #69a3ff !important;
+}
+
+body.dark-mode #layoutSidenav_content .card.border-start-lg.border-start-secondary > .card-body > .d-flex > .ms-2 .fas {
+    color: #c4b5fd !important;
+}
+
+body.dark-mode #layoutSidenav_content .card.border-start-lg.border-start-danger > .card-body > .d-flex > .ms-2 .fas {
+    color: #fb7185 !important;
+}
+
+body.dark-mode #layoutSidenav_content .card.border-start-lg.border-start-success > .card-body > .d-flex > .ms-2 .fas {
+    color: #6ee7b7 !important;
+}
+
+/* Timeline Indicators in Dashboard */
+body.dark-mode .timeline-item-marker-indicator.bg-primary {
+    background-color: #3b82f6 !important;
+    box-shadow: 0 0 8px rgba(59, 130, 246, 0.6) !important;
+}
+
+body.dark-mode .timeline-item-marker-indicator.bg-success {
+    background-color: #10b981 !important;
+    box-shadow: 0 0 8px rgba(16, 185, 129, 0.6) !important;
+}
+
+body.dark-mode .timeline-item-marker-indicator.bg-danger {
+    background-color: #ef4444 !important;
+    box-shadow: 0 0 8px rgba(239, 68, 68, 0.6) !important;
+}
+
+body.dark-mode .timeline-item-marker-indicator.bg-warning {
+    background-color: #f59e0b !important;
+    box-shadow: 0 0 8px rgba(245, 158, 11, 0.6) !important;
+}
+
+body.dark-mode .timeline-item-marker-indicator.bg-info {
+    background-color: #06b6d4 !important;
+    box-shadow: 0 0 8px rgba(6, 182, 212, 0.6) !important;
+}
+
+/* ==========================================================================
+   10. Modals & Datepicker
+   ========================================================================== */
+
+body.dark-mode .modal-content .modal-footer,
+body.dark-mode .modal-content .modal-header {
+    background-color: #182235;
+    border-color: #253247 !important;
+}
+
+body.dark-mode .modal-content .btn-close {
+    filter: invert(1) grayscale(1);
+}
+
+body.dark-mode .modal-header,
+body.dark-mode .modal-footer {
+    border-color: #253247 !important;
 }
 
 body.dark-mode #layoutSidenav_content #filterBulanForm .input-group,
@@ -523,101 +1031,7 @@ body.dark-mode .litepicker .button-cancel:hover {
     color: #fff !important;
 }
 
-body.dark-mode .page-header.page-header-light,
-body.dark-mode .page-header.bg-white {
-    background-color: #101a2c !important;
-    border-color: #253247 !important;
-    color: #e2e8f0;
-}
-
-body.dark-mode .page-header-title,
-body.dark-mode .page-header-title .page-header-icon {
-    color: #e2e8f0 !important;
-}
-
-body.dark-mode .page-header-icon {
-    background-color: transparent !important;
-    border: 0;
-    color: #69a3ff !important;
-}
-
-body.dark-mode .page-header-icon svg {
-    color: #69a3ff !important;
-    stroke: #69a3ff !important;
-}
-
-body.dark-mode #layoutSidenav_content .card.border-start-lg .small.fw-bold {
-    color: #d6deeb !important;
-}
-
-body.dark-mode #layoutSidenav_content .card.border-start-lg .h5 {
-    color: #f8fafc !important;
-}
-
-body.dark-mode #layoutSidenav_content .card.border-start-lg .text-xs {
-    color: #b4c0d1 !important;
-}
-
-body.dark-mode #layoutSidenav_content .card.border-start-lg .text-muted {
-    color: #94a3b8 !important;
-}
-
-body.dark-mode #layoutSidenav_content .card.border-start-lg.border-start-primary {
-    background: linear-gradient(135deg, #182b4b 0%, #182235 72%) !important;
-    border-left-color: #4f8cff !important;
-}
-
-body.dark-mode #layoutSidenav_content .card.border-start-lg.border-start-secondary {
-    background: linear-gradient(135deg, #282346 0%, #182235 72%) !important;
-    border-left-color: #a78bfa !important;
-}
-
-body.dark-mode #layoutSidenav_content .card.border-start-lg.border-start-danger {
-    background: linear-gradient(135deg, #422332 0%, #182235 72%) !important;
-    border-left-color: #fb7185 !important;
-}
-
-body.dark-mode #layoutSidenav_content .card.border-start-lg.border-start-success {
-    background: linear-gradient(135deg, #173c38 0%, #182235 72%) !important;
-    border-left-color: #34d399 !important;
-}
-
-body.dark-mode #layoutSidenav_content .card.border-start-lg > .card-body > .d-flex > .ms-2 .fas {
-    opacity: .75 !important;
-}
-
-body.dark-mode #layoutSidenav_content .card.border-start-lg.border-start-primary > .card-body > .d-flex > .ms-2 .fas {
-    color: #69a3ff !important;
-}
-
-body.dark-mode #layoutSidenav_content .card.border-start-lg.border-start-secondary > .card-body > .d-flex > .ms-2 .fas {
-    color: #c4b5fd !important;
-}
-
-body.dark-mode #layoutSidenav_content .card.border-start-lg.border-start-danger > .card-body > .d-flex > .ms-2 .fas {
-    color: #fb7185 !important;
-}
-
-body.dark-mode #layoutSidenav_content .card.border-start-lg.border-start-success > .card-body > .d-flex > .ms-2 .fas {
-    color: #6ee7b7 !important;
-}
-
-body.dark-mode .page-header .btn-light,
-body.dark-mode .page-header .btn.btn-light {
-    background-color: #182235 !important;
-    border: 1px solid #34445b !important;
-    color: #4ade80 !important;
-}
-
-body.dark-mode .page-header .btn-light:hover,
-body.dark-mode .page-header .btn.btn-light:hover,
-body.dark-mode .page-header .btn-light:focus,
-body.dark-mode .page-header .btn.btn-light:focus {
-    background-color: #202d42 !important;
-    border-color: #4f6fff !important;
-    color: #86efac !important;
-}
-
+/* Waves background in dark mode */
 body.dark-mode #layoutSidenav_content img[src*="statistics.svg"] {
     display: none;
 }

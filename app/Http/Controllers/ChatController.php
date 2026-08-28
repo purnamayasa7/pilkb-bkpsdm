@@ -45,13 +45,12 @@ class ChatController extends Controller
         return view('chat.index', compact('conversations'));
     }
 
-    // List Percakapan milik user
     public function myConversations()
     {
         $user = Auth::user();
 
         $conversations = ChatConversation::with([
-            'creator',
+            'creator.role',
             'guest',
             'tiket.layanan.bidang',
             'layanan.bidang',
@@ -89,12 +88,36 @@ class ChatController extends Controller
                     ?? $conversation->creator?->nama
                     ?? 'Helpdesk BKPSDM';
 
+                $senderRole = 'opd';
+                $senderRoleLabel = 'OPD';
+                if ($conversation->guest_id || $conversation->type === 'guest' || $conversation->guest) {
+                    $senderRole = 'tamu';
+                    $senderRoleLabel = 'Tamu';
+                } elseif ($conversation->creator) {
+                    $roleName = $conversation->creator->role?->name;
+                    if ($roleName === 'admin_opd') {
+                        $senderRole = 'opd';
+                        $senderRoleLabel = 'OPD';
+                    } elseif ($roleName === 'bidang') {
+                        $senderRole = 'bidang';
+                        $senderRoleLabel = 'Bidang';
+                    } elseif ($roleName === 'admin_bawah') {
+                        $senderRole = 'fo';
+                        $senderRoleLabel = 'FO';
+                    } else {
+                        $senderRole = 'opd';
+                        $senderRoleLabel = 'OPD';
+                    }
+                }
+
                 return [
                     'id' => $conversation->id,
                     'no_tiket' => $conversation->no_tiket,
                     'status' => $conversation->status ?? 'open',
                     'last_message_id' => $conversation->last_message_id,
                     'nama_pengirim' => $senderName,
+                    'sender_role' => $senderRole,
+                    'sender_role_label' => $senderRoleLabel,
                     'layanan' => $layananNama,
                     'bidang' => $bidangNama,
                     'last_message' => optional($lastMsg)->message ?? 'Belum ada pesan',
@@ -112,11 +135,17 @@ class ChatController extends Controller
 
     public function startTicketConversation(Request $request)
     {
+        $user = Auth::user();
+
+        if ($user->role->name === 'bidang') {
+            return response()->json([
+                'message' => 'Admin Bidang hanya bertindak sebagai penerima/responder percakapan tiket.'
+            ], 403);
+        }
+
         $request->validate([
             'no_tiket' => 'required'
         ]);
-
-        $user = Auth::user();
 
         $tiket = Regtiket::with('layanan')
             ->where('no_tiket', $request->no_tiket)
@@ -179,6 +208,15 @@ class ChatController extends Controller
 
     public function searchTicket(Request $request)
     {
+        $user = Auth::user();
+
+        if ($user->role->name === 'bidang') {
+            return response()->json([
+                'success' => false,
+                'message' => 'Pembuatan chat baru hanya dapat dilakukan oleh Admin OPD.'
+            ], 403);
+        }
+
         $request->validate([
             'no_tiket' => 'required'
         ]);
@@ -378,7 +416,7 @@ class ChatController extends Controller
             });
 
 
-        $conversation->load(['tiket.layanan.bidang', 'layanan.bidang', 'bidang', 'creator', 'guest']);
+        $conversation->load(['tiket.layanan.bidang', 'layanan.bidang', 'bidang', 'creator.role', 'guest']);
 
         $layananNama = $conversation->tiket?->layanan?->nama_layanan
             ?? $conversation->layanan?->nama_layanan
@@ -388,14 +426,38 @@ class ChatController extends Controller
             ?? $conversation->tiket?->layanan?->bidang?->nama_bidang
             ?? null;
 
+        $senderRole = 'opd';
+        $senderRoleLabel = 'OPD';
+        if ($conversation->guest_id || $conversation->type === 'guest' || $conversation->guest) {
+            $senderRole = 'tamu';
+            $senderRoleLabel = 'Tamu';
+        } elseif ($conversation->creator) {
+            $roleName = $conversation->creator->role?->name;
+            if ($roleName === 'admin_opd') {
+                $senderRole = 'opd';
+                $senderRoleLabel = 'OPD';
+            } elseif ($roleName === 'bidang') {
+                $senderRole = 'bidang';
+                $senderRoleLabel = 'Bidang';
+            } elseif ($roleName === 'admin_bawah') {
+                $senderRole = 'fo';
+                $senderRoleLabel = 'FO';
+            } else {
+                $senderRole = 'opd';
+                $senderRoleLabel = 'OPD';
+            }
+        }
+
         return response()->json([
-            'ticket_number' => $conversation->no_tiket,
-            'status'        => $conversation->status ?? 'open',
-            'layanan'       => $layananNama,
-            'bidang'        => $bidangNama,
-            'type'          => $conversation->type,
-            'nama_pengirim' => $conversation->guest?->nama ?? $conversation->creator?->nama ?? 'Pengguna',
-            'messages'      => $messages
+            'ticket_number'     => $conversation->no_tiket,
+            'status'            => $conversation->status ?? 'open',
+            'layanan'           => $layananNama,
+            'bidang'            => $bidangNama,
+            'type'              => $conversation->type,
+            'sender_role'       => $senderRole,
+            'sender_role_label' => $senderRoleLabel,
+            'nama_pengirim'     => $conversation->guest?->nama ?? $conversation->creator?->nama ?? 'Pengguna',
+            'messages'          => $messages
         ]);
     }
 
@@ -460,7 +522,7 @@ class ChatController extends Controller
         $user = Auth::user();
 
         $query = ChatConversation::with([
-            'creator',
+            'creator.role',
             'guest',
             'tiket.layanan.bidang',
             'layanan.bidang',
@@ -505,6 +567,28 @@ class ChatController extends Controller
                     ?? $c->tiket?->layanan?->bidang?->nama_bidang
                     ?? null;
 
+                $senderRole = 'opd';
+                $senderRoleLabel = 'OPD';
+                if ($c->guest_id || $c->type === 'guest' || $c->guest) {
+                    $senderRole = 'tamu';
+                    $senderRoleLabel = 'Tamu';
+                } elseif ($c->creator) {
+                    $roleName = $c->creator->role?->name;
+                    if ($roleName === 'admin_opd') {
+                        $senderRole = 'opd';
+                        $senderRoleLabel = 'OPD';
+                    } elseif ($roleName === 'bidang') {
+                        $senderRole = 'bidang';
+                        $senderRoleLabel = 'Bidang';
+                    } elseif ($roleName === 'admin_bawah') {
+                        $senderRole = 'fo';
+                        $senderRoleLabel = 'FO';
+                    } else {
+                        $senderRole = 'opd';
+                        $senderRoleLabel = 'OPD';
+                    }
+                }
+
                 return [
                     'id' => $c->id,
                     'no_tiket' => $c->no_tiket,
@@ -513,6 +597,8 @@ class ChatController extends Controller
                     'nama_pengirim' => $c->guest?->nama
                         ?? $c->creator?->nama
                         ?? '-',
+                    'sender_role' => $senderRole,
+                    'sender_role_label' => $senderRoleLabel,
                     'layanan' => $layananNama,
                     'bidang' => $bidangNama,
                     'last_message' => optional($lastMsg)->message ?? 'Belum ada pesan',
@@ -984,7 +1070,7 @@ class ChatController extends Controller
         );
 
         $query = ChatConversation::with([
-            'creator',
+            'creator.role',
             'guest',
             'tiket.layanan.bidang',
             'layanan.bidang',
@@ -1034,6 +1120,28 @@ class ChatController extends Controller
                     ?? $c->tiket?->layanan?->bidang?->nama_bidang
                     ?? null;
 
+                $senderRole = 'opd';
+                $senderRoleLabel = 'OPD';
+                if ($c->guest_id || $c->type === 'guest' || $c->guest) {
+                    $senderRole = 'tamu';
+                    $senderRoleLabel = 'Tamu';
+                } elseif ($c->creator) {
+                    $roleName = $c->creator->role?->name;
+                    if ($roleName === 'admin_opd') {
+                        $senderRole = 'opd';
+                        $senderRoleLabel = 'OPD';
+                    } elseif ($roleName === 'bidang') {
+                        $senderRole = 'bidang';
+                        $senderRoleLabel = 'Bidang';
+                    } elseif ($roleName === 'admin_bawah') {
+                        $senderRole = 'fo';
+                        $senderRoleLabel = 'FO';
+                    } else {
+                        $senderRole = 'opd';
+                        $senderRoleLabel = 'OPD';
+                    }
+                }
+
                 return [
                     'id' => $c->id,
                     'no_tiket' => $c->no_tiket,
@@ -1042,6 +1150,8 @@ class ChatController extends Controller
                     'nama_pengirim' => $c->guest?->nama
                         ?? $c->creator?->nama
                         ?? '-',
+                    'sender_role' => $senderRole,
+                    'sender_role_label' => $senderRoleLabel,
                     'layanan' => $layananNama,
                     'bidang' => $bidangNama,
                     'last_message' => optional($lastMsg)->message ?? 'Belum ada pesan',

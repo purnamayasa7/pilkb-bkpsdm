@@ -78,3 +78,35 @@
     font-size: 2rem;
     line-height: 1;
 }
+
+/* Timeline Custom Styles */
+.timeline.timeline-xs .timeline-item .timeline-item-marker .timeline-item-marker-text {
+    width: 2.8rem;
+    font-size: 0.72rem;
+    font-weight: 500;
+    text-align: right;
+    white-space: nowrap;
+}
+
+.timeline.timeline-xs .timeline-item .timeline-item-content {
+    padding-left: 1.15rem;
+    padding-bottom: 0.85rem;
+    overflow: hidden;
+}
+
+.timeline.timeline-xs .timeline-item:last-child .timeline-item-content {
+    padding-bottom: 0.1rem;
+}
+
+/* Dark Mode Support for Timeline */
+html.dark-mode .timeline.timeline-xs .timeline-item .timeline-item-content .text-dark {
+    color: #e2e8f0 !important;
+}
+
+html.dark-mode .timeline.timeline-xs .timeline-item .timeline-item-marker .timeline-item-marker-text {
+    color: #94a3b8 !important;
+}
+
+html.dark-mode .timeline.timeline-xs .timeline-item .timeline-item-marker .timeline-item-marker-indicator {
+    border-color: #182235 !important;
+}

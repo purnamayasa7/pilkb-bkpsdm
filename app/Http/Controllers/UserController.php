@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Exports\LaporanUserExport;
 use App\Models\Bidang;
+use App\Models\Regtiket;
 use App\Models\User;
 use App\Services\ActivityLogService;
 use Illuminate\Http\Request;
@@ -343,13 +344,22 @@ class UserController extends Controller
 
         $ket_ukerja = $pegawai['ket_ukerja'] ?? '-';
 
+        $tiket = Regtiket::with([
+            'layanan',
+            'tahapTerakhir.statusRel'
+        ])
+            ->where('nip', $user->username)
+            ->orderBy('tanggal', 'desc')
+            ->get();
+
         return view(
             'profile.index',
             compact(
                 'user',
                 'bidang',
                 'nama_lengkap',
-                'ket_ukerja'
+                'ket_ukerja',
+                'tiket'
             )
         );
     }

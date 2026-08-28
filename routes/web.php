@@ -88,8 +88,9 @@ Route::middleware(['auth', 'force.password'])->group(function () {
     Route::get('/log-aktivitas', [LogController::class, 'index'])->middleware('role:root,admin_bawah,admin_opd,bidang')->name('log.index');
     Route::get('/log-aktivitas/export-excel', [LogController::class, 'exportExcel'])->middleware('role:root,admin_bawah,admin_opd,bidang')->name('log.exportExcel');
 
-    // Cetak QR
+    // Cetak QR & Riwayat Tiket
     Route::get('/tiket/{no_tiket}/qr', [TiketController::class, 'showQr'])->name('tiket.qr');
+    Route::get('/tiket/history/{no_tiket}', [TiketController::class, 'getHistory'])->name('tiket.getHistory');
 
     // Chat
     Route::get('/chat', [ChatController::class, 'index'])->name('chat.index');
@@ -280,6 +281,7 @@ Route::prefix('adminBidang')
         Route::get('layanan/create', [LayananController::class, 'createBidang'])->name('layanan.createBidang');
         Route::post('layanan', [LayananController::class, 'storeBidang'])->name('layanan.storeBidang');
         Route::get('layanan/export-excel', [LayananController::class, 'exportExcelList'])->name('layanan.exportExcelList');
+        Route::get('layanan/export-pdf', [LayananController::class, 'exportPdfListBidang'])->name('layanan.exportPdfListBidang');
         Route::get('layanan/{id}', [LayananController::class, 'editBidang'])->name('layanan.editBidang');
         Route::put('layanan/{id}', [LayananController::class, 'updateBidang'])->name('layanan.updateBidang');
         Route::put('layanan/{id}/toggle-aktif', [LayananController::class, 'toggleAktifBidang'])->name('layanan.toggle-aktifBidang');

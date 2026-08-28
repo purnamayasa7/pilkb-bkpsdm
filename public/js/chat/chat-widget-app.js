@@ -262,26 +262,19 @@
                 `;
             }
 
-            let badgeHtml = '';
+            const role = item.sender_role || (item.type === 'guest' ? 'tamu' : 'opd');
+            const roleLabel = item.sender_role_label || (role === 'tamu' ? 'Tamu' : 'OPD');
+            const roleIcon = role === 'tamu' ? 'user' : (role === 'bidang' ? 'layers' : (role === 'fo' ? 'user-check' : 'briefcase'));
+            const roleBadge = `<span class="chat-role-badge badge-${role}"><i data-feather="${roleIcon}"></i>${roleLabel}</span>`;
+
+            let ticketBadge = '';
             if (item.no_tiket) {
-                badgeHtml = `
+                ticketBadge = `
                     <span class="chat-item-ticket">
                         <i data-feather="tag"></i>
                         ${this.escapeHtml(item.no_tiket)}
                     </span>
                 `;
-            } else {
-                switch (item.type) {
-                    case 'guest':
-                        badgeHtml = `<span class="badge bg-success-soft text-success">Tamu</span>`;
-                        break;
-                    case 'ticket':
-                        badgeHtml = `<span class="badge bg-primary-soft text-primary">OPD</span>`;
-                        break;
-                    case 'admin':
-                        badgeHtml = `<span class="badge bg-info-soft text-info">Admin</span>`;
-                        break;
-                }
             }
 
             const statusClass = item.status === 'closed' ? 'closed' : 'open';
@@ -318,7 +311,8 @@
     <div class="chat-content">
         <div class="chat-item-top">
             <div class="d-flex align-items-center gap-1 overflow-hidden">
-                ${badgeHtml}
+                ${roleBadge}
+                ${ticketBadge}
             </div>
             ${formattedTime ? `<span class="chat-item-time">${formattedTime}</span>` : ''}
         </div>
@@ -357,9 +351,20 @@
                 `;
             }
 
-            const ticketNumber = item.no_tiket
-                ? this.escapeHtml(item.no_tiket)
-                : 'Tanpa tiket';
+            const role = item.sender_role || (item.type === 'guest' ? 'tamu' : 'opd');
+            const roleLabel = item.sender_role_label || (role === 'tamu' ? 'Tamu' : 'OPD');
+            const roleIcon = role === 'tamu' ? 'user' : (role === 'bidang' ? 'layers' : (role === 'fo' ? 'user-check' : 'briefcase'));
+            const roleBadge = `<span class="chat-role-badge badge-${role}"><i data-feather="${roleIcon}"></i>${roleLabel}</span>`;
+
+            let ticketBadge = '';
+            if (item.no_tiket) {
+                ticketBadge = `
+                    <span class="chat-item-ticket">
+                        <i data-feather="tag"></i>
+                        ${this.escapeHtml(item.no_tiket)}
+                    </span>
+                `;
+            }
 
             const statusClass = item.status === 'closed' ? 'closed' : 'open';
             const statusLabel = item.status === 'closed' ? 'Closed' : 'Open';
@@ -398,10 +403,8 @@
     <div class="chat-content">
         <div class="chat-item-top">
             <div class="d-flex align-items-center gap-1 overflow-hidden">
-                <span class="chat-item-ticket">
-                    <i data-feather="tag"></i>
-                    ${ticketNumber}
-                </span>
+                ${roleBadge}
+                ${ticketBadge}
             </div>
             ${formattedTime ? `<span class="chat-item-time">${formattedTime}</span>` : ''}
         </div>
@@ -948,6 +951,7 @@
                         </button>
                         <div class="chat-room-info overflow-hidden">
                             <div class="d-flex align-items-center gap-1 flex-wrap">
+                                <span id="roomRoleBadge"></span>
                                 <span class="chat-item-ticket" id="roomTicketBadge">
                                     <i data-feather="tag"></i>
                                     <span id="roomTicketNo">-</span>
@@ -1098,6 +1102,11 @@
 
         // Function Header Chat
         updateChatHeader(res) {
+            const role = res.sender_role || (res.type === 'guest' ? 'tamu' : 'opd');
+            const roleLabel = res.sender_role_label || (role === 'tamu' ? 'Tamu' : 'OPD');
+            const roleIcon = role === 'tamu' ? 'user' : (role === 'bidang' ? 'layers' : (role === 'fo' ? 'user-check' : 'briefcase'));
+            $('#roomRoleBadge').html(`<span class="chat-role-badge badge-${role}"><i data-feather="${roleIcon}"></i>${roleLabel}</span>`);
+
             const ticketNo = res.ticket_number || '';
             if (ticketNo && ticketNo !== '-') {
                 $('#roomTicketNo').text(ticketNo);
@@ -1259,7 +1268,7 @@
                     message: message
                 },
                 success: (res) => {
-                    input.val('');
+                    input.val('').css('height', 'auto');
                     $('#sendMessage').prop('disabled', true);
 
                     $('#chatMessages').append(
@@ -1527,6 +1536,16 @@
         const isClosed = window.ChatWidgetApp.activeConversationStatus === 'closed';
         const hasText = $(this).val().trim().length > 0;
         $('#sendMessage, #sendChatBtn').prop('disabled', isClosed || !hasText);
+    });
+
+    // Kirim pesan dengan Enter (Shift + Enter untuk baris baru)
+    $(document).on('keydown', '#chatInput', function (e) {
+        if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            if (!$('#sendMessage, #sendChatBtn').prop('disabled')) {
+                window.ChatWidgetApp.sendMessage();
+            }
+        }
     });
 
     // Toggle Emoji Picker

@@ -676,54 +676,56 @@ Membuka Percakapan...
 
             }
 
+            function clearMessageInput() {
+                if (el.messageInput) {
+                    el.messageInput.value = "";
+                    el.messageInput.style.height = "auto";
+                }
+                if (el.sendButton) {
+                    el.sendButton.disabled = true;
+                }
+            }
+
             // Function Send Message
             function bindSendMessage() {
 
-                el.sendButton?.addEventListener(
-                    "click",
-                    async function () {
-
-                        const message =
-                            el.messageInput.value.trim();
-
-                        if (!message) {
-                            return;
-                        }
-
-                        try {
-
-                            let conversationId =
-                                await createConversationIfNeeded();
-
-                            await sendGuestMessage(
-                                conversationId,
-                                message
-                            );
-
-                            appendMessage({
-
-                                senderName: "Saya",
-
-                                message,
-
-                                createdAt: new Date().toISOString(),
-
-                                isGuest: true
-
-                            });
-
-                            clearMessageInput();
-
-                        } catch (error) {
-
-                            console.error(error);
-
-                            alert(error.message);
-
-                        }
-
+                async function handleSendMessage() {
+                    const message = el.messageInput.value.trim();
+                    if (!message) {
+                        return;
                     }
-                );
+
+                    if (el.sendButton) el.sendButton.disabled = true;
+
+                    try {
+                        let conversationId = await createConversationIfNeeded();
+                        await sendGuestMessage(conversationId, message);
+
+                        appendMessage({
+                            senderName: "Saya",
+                            message,
+                            createdAt: new Date().toISOString(),
+                            isGuest: true
+                        });
+
+                        clearMessageInput();
+                    } catch (error) {
+                        console.error(error);
+                        alert(error.message);
+                        if (el.sendButton) el.sendButton.disabled = false;
+                    }
+                }
+
+                el.sendButton?.addEventListener("click", handleSendMessage);
+
+                el.messageInput?.addEventListener("keydown", function (e) {
+                    if (e.key === "Enter" && !e.shiftKey) {
+                        e.preventDefault();
+                        if (!el.sendButton?.disabled) {
+                            handleSendMessage();
+                        }
+                    }
+                });
 
             }
 

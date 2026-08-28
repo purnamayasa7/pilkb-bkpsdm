@@ -107,45 +107,6 @@ hr,
     opacity: 1;
 }
 
-body.dark-mode .bg-light,
-body.dark-mode .bg-white,
-body.dark-mode .bg-light-primary,
-body.dark-mode .bg-light-success,
-body.dark-mode .bg-light-info,
-body.dark-mode .bg-light-warning,
-body.dark-mode .bg-light-danger {
-    background-color: #182235 !important;
-    color: #d6deeb !important;
-}
-
-body.dark-mode .badge.bg-light,
-body.dark-mode .badge.bg-light-primary,
-body.dark-mode .badge.bg-light-success,
-body.dark-mode .badge.bg-light-info,
-body.dark-mode .badge.bg-light-warning,
-body.dark-mode .badge.bg-light-danger {
-    border: 1px solid #34445b;
-}
-
-body.dark-mode .btn-light,
-body.dark-mode .btn.btn-light,
-body.dark-mode .btn-outline-light {
-    background-color: #182235 !important;
-    border-color: #34445b !important;
-    color: #d6deeb !important;
-}
-
-body.dark-mode .btn-light:hover,
-body.dark-mode .btn.btn-light:hover,
-body.dark-mode .btn-outline-light:hover,
-body.dark-mode .btn-light:focus,
-body.dark-mode .btn.btn-light:focus,
-body.dark-mode .btn-outline-light:focus {
-    background-color: #202d42 !important;
-    border-color: #4f6fff !important;
-    color: #f1f5f9 !important;
-}
-
 body.dark-mode .form-check-input,
 body.dark-mode .form-control,
 body.dark-mode .form-select {

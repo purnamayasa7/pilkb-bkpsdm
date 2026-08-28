@@ -51,10 +51,12 @@
             </div>
 
             <div class="wa-header-actions">
-                <!-- Search Ticket Modal Button -->
-                <button type="button" class="wa-icon-btn" id="waBtnSearchTicketModal" title="Cari Nomor Tiket">
+                <!-- Search Ticket Modal Button (Hanya untuk Admin OPD) -->
+                @if(optional(auth()->user()->role)->name === 'admin_opd')
+                <button type="button" class="wa-icon-btn" id="waBtnSearchTicketModal" title="Cari Nomor Tiket / Mulai Chat Baru">
                     <i data-feather="plus-circle"></i>
                 </button>
+                @endif
 
                 <!-- Options Dropdown (Titik Tiga) -->
                 <div class="dropdown">
@@ -131,13 +133,19 @@
                 <i data-feather="message-square"></i>
             </div>
             <h4 class="fw-bold text-dark mb-2">Pusat Komunikasi & Bantuan PILKB</h4>
-            <p class="text-muted small mb-4" style="max-width: 440px;">
-                Pilih salah satu percakapan di sebelah kiri untuk melihat pesan, atau mulai percakapan baru dengan memasukkan nomor tiket layanan kepegawaian Anda.
-            </p>
-            <button class="btn chat-gradient-btn px-4 d-inline-flex align-items-center" id="btnOpenSearchModal">
-                <i data-feather="search" class="me-2"></i>
-                Cari Nomor Tiket
-            </button>
+            @if(optional(auth()->user()->role)->name === 'admin_opd')
+                <p class="text-muted small mb-4" style="max-width: 440px;">
+                    Pilih salah satu percakapan di sebelah kiri untuk melihat pesan, atau mulai percakapan baru dengan memasukkan nomor tiket layanan kepegawaian Anda.
+                </p>
+                <button class="btn chat-gradient-btn px-4 d-inline-flex align-items-center" id="btnOpenSearchModal">
+                    <i data-feather="search" class="me-2"></i>
+                    Cari Nomor Tiket
+                </button>
+            @else
+                <p class="text-muted small mb-4" style="max-width: 440px;">
+                    Pilih salah satu percakapan di sebelah kiri untuk melihat dan membalas pesan tiket atau tamu yang masuk ke bidang Anda.
+                </p>
+            @endif
             <div class="mt-5 text-muted small d-flex align-items-center gap-1 opacity-75">
                 <i data-feather="lock" style="width: 13px; height: 13px;"></i>
                 Pesan terenkripsi dan tersimpan aman di server BKPSDM Buleleng
@@ -161,6 +169,7 @@
                     <div class="wa-room-details overflow-hidden">
                         <div class="wa-room-title">
                             <span id="waRoomTitle">-</span>
+                            <span id="waRoomRoleBadge"></span>
                             <span class="chat-item-ticket d-none" id="waRoomTicketBadge">
                                 <i data-feather="tag"></i>
                                 <span id="waRoomTicketNo">-</span>

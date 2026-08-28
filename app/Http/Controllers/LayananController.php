@@ -321,6 +321,24 @@ class LayananController extends Controller
         ));
     }
 
+    // Export PDF Master Data Layanan - Admin Bidang
+    public function exportPdfListBidang()
+    {
+        $user = Auth::user();
+
+        $layanan = Layanan::with('bidang')
+            ->where('kode_bidang', $user->bidang_id)
+            ->orderBy('nama_layanan')
+            ->get();
+
+        $pdf = Pdf::loadView('pages.bidang.layanan.export-pdf', [
+            'layanan' => $layanan,
+            'bidang' => $user->bidang,
+        ])->setPaper('A4', 'landscape');
+
+        return $pdf->stream('Laporan-Layanan.pdf');
+    }
+
     //Export Excel Laporan Pengajuan Layanan - Admin OPD
     public function exportLaporan(Request $request)
     {
