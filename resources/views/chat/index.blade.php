@@ -318,9 +318,7 @@ $chatAuthData = [
 ];
 @endphp
 <script>
-    window.ChatAuth = {
-        !!json_encode($chatAuthData) !!
-    };
+    window.ChatAuth = {!! json_encode($chatAuthData) !!};
 </script>
 <script src="{{ asset('js/chat/chat-page.js') }}"></script>
 @endpush
