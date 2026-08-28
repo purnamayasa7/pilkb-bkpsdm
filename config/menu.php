@@ -183,23 +183,11 @@ return [
         ],
 
         [
-            'type' => 'collapse',
-            'title' => 'Registrasi',
+            'type' => 'item',
+            'title' => 'Registrasi SKPD',
+            'path' => 'adminBawah/permintaan',
             'icon' => 'globe',
-            'target' => 'masterRegistrasi',
-            'active_key' => 'masterRegistrasi',
-            'children' => [
-                [
-                    'title' => 'Registrasi Online',
-                    'path' => '',
-                    'active_key' => 'reg-online',
-                ],
-                [
-                    'title' => 'Registrasi SKPD',
-                    'path' => 'adminBawah/permintaan',
-                    'active_key' => 'reg-skpd',
-                ],
-            ]
+            'active_key' => 'reg-skpd',
         ],
 
         [

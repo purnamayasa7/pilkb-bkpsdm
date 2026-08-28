@@ -483,7 +483,7 @@
                     <div class="chat-welcome-icon">
                         <span class="wave-hand">👋</span>
                     </div>
-                    <h6 class="fw-bold mb-1">Halo Pengunjung</h6>
+                    <h6 class="fw-bold mb-1">Halo!</h6>
                     <p class="text-muted small mb-0">
                         Silakan pilih menu bantuan di bawah untuk berkonsultasi dengan tim BKPSDM.
                     </p>

@@ -17,7 +17,7 @@
                         @endphp
 
                         <a class="nav-link {{ $isActive ? 'active' : '' }}"
-                            href="{{ url($menu['path']) }}?menu={{ $menu['active_key'] }}">
+                            href="{{ !empty($menu['path']) ? url($menu['path']) . '?menu=' . ($menu['active_key'] ?? '') : 'javascript:void(0);' }}">
 
                             <div class="nav-link-icon">
                                 <i data-feather="{{ $menu['icon'] }}"></i>
@@ -41,7 +41,7 @@
                             $isParentActive =
                                 request()->get('menu') === $menu['active_key'] ||
                                 collect($menu['children'] ?? [])->contains(function ($child) {
-                                    return request()->is($child['path']) ||
+                                    return (!empty($child['path']) && request()->is($child['path'])) ||
                                         request()->get('menu') === $child['active_key'];
                                 });
                         @endphp
@@ -65,8 +65,8 @@
 
                             <nav class="sidenav-menu-nested nav">
                                 @foreach ($menu['children'] ?? [] as $child)
-                                    <a class="nav-link {{ request()->is($child['path']) ? 'active' : '' }}"
-                                        href="{{ url($child['path']) }}?menu={{ $child['active_key'] }}">
+                                    <a class="nav-link {{ (!empty($child['path']) && request()->is($child['path'])) ? 'active' : '' }}"
+                                        href="{{ !empty($child['path']) ? url($child['path']) . '?menu=' . ($child['active_key'] ?? '') : 'javascript:void(0);' }}">
                                         {{ $child['title'] }}
                                     </a>
                                 @endforeach
