@@ -1,17 +1,18 @@
 @extends('layouts.app')
 
 @push('styles')
-    <link rel="stylesheet" href="{{ asset('css/chat-page.css') }}">
-    <style>
-        /* Sembunyikan floating button saat berada di halaman /chat */
-        #chatFloatingButton {
-            display: none !important;
-        }
-        /* Hilangkan padding default pada main container untuk full-height chat */
-        #layoutSidenav_content main {
-            padding: 0 !important;
-        }
-    </style>
+<link rel="stylesheet" href="{{ asset('css/chat-page.css') }}">
+<style>
+    /* Sembunyikan floating button saat berada di halaman /chat */
+    #chatFloatingButton {
+        display: none !important;
+    }
+
+    /* Hilangkan padding default pada main container untuk full-height chat */
+    #layoutSidenav_content main {
+        padding: 0 !important;
+    }
+</style>
 @endpush
 
 @section('content')
@@ -26,11 +27,11 @@
             <div class="d-flex align-items-center gap-2 overflow-hidden">
                 <div class="wa-user-avatar">
                     @php
-                        $nameParts = explode(' ', trim(auth()->user()->nama ?? 'User'));
-                        $initials = (isset($nameParts[0][0]) ? $nameParts[0][0] : '') . (isset($nameParts[1][0]) ? $nameParts[1][0] : '');
-                        if(strlen($initials) < 2) $initials = strtoupper(substr(auth()->user()->nama ?? 'U', 0, 2));
-                    @endphp
-                    {{ strtoupper($initials) }}
+                    $nameParts = explode(' ', trim(auth()->user()->nama ?? 'User'));
+                    $initials = (isset($nameParts[0][0]) ? $nameParts[0][0] : '') . (isset($nameParts[1][0]) ? $nameParts[1][0] : '');
+                    if(strlen($initials) < 2) $initials=strtoupper(substr(auth()->user()->nama ?? 'U', 0, 2));
+                        @endphp
+                        {{ strtoupper($initials) }}
                 </div>
                 <div class="overflow-hidden">
                     <div class="fw-bold text-dark text-truncate" style="font-size: 13.5px;">
@@ -38,13 +39,13 @@
                     </div>
                     <div class="text-muted small text-truncate" style="font-size: 11px;">
                         @if(auth()->user()->role->name === 'admin_opd')
-                            Admin OPD
+                        Admin OPD
                         @elseif(auth()->user()->role->name === 'bidang')
-                            Admin Bidang
+                        Admin Bidang
                         @elseif(auth()->user()->role->name === 'admin_bawah')
-                            Admin FO
+                        Admin FO
                         @else
-                            Administrator
+                        Administrator
                         @endif
                     </div>
                 </div>
@@ -134,22 +135,22 @@
             </div>
             <h4 class="fw-bold text-dark mb-2">Pusat Komunikasi & Bantuan PILKB</h4>
             @if(optional(auth()->user()->role)->name === 'admin_opd')
-                <p class="text-muted small mb-4" style="max-width: 440px;">
-                    Pilih salah satu percakapan di sebelah kiri untuk melihat pesan, atau mulai percakapan baru dengan memasukkan nomor tiket layanan kepegawaian Anda.
-                </p>
-                <button class="btn chat-gradient-btn px-4 d-inline-flex align-items-center" id="btnOpenSearchModal">
-                    <i data-feather="search" class="me-2"></i>
-                    Cari Nomor Tiket
-                </button>
+            <p class="text-muted small mb-4" style="max-width: 440px;">
+                Pilih salah satu percakapan di sebelah kiri untuk melihat pesan, atau mulai percakapan baru dengan memasukkan nomor tiket layanan kepegawaian Anda.
+            </p>
+            <button class="btn chat-gradient-btn px-4 d-inline-flex align-items-center" id="btnOpenSearchModal">
+                <i data-feather="search" class="me-2"></i>
+                Cari Nomor Tiket
+            </button>
             @else
-                <p class="text-muted small mb-4" style="max-width: 440px;">
-                    Pilih salah satu percakapan di sebelah kiri untuk melihat dan membalas pesan tiket atau tamu yang masuk ke bidang Anda.
-                </p>
+            <p class="text-muted small mb-4" style="max-width: 440px;">
+                Pilih salah satu percakapan di sebelah kiri untuk melihat dan membalas pesan tiket atau tamu yang masuk ke bidang Anda.
+            </p>
             @endif
-            <div class="mt-5 text-muted small d-flex align-items-center gap-1 opacity-75">
+            <!-- <div class="mt-5 text-muted small d-flex align-items-center gap-1 opacity-75">
                 <i data-feather="lock" style="width: 13px; height: 13px;"></i>
                 Pesan terenkripsi dan tersimpan aman di server BKPSDM Buleleng
-            </div>
+            </div> -->
         </div>
 
         <!-- 2. ACTIVE ROOM VIEW -->
@@ -217,8 +218,8 @@
 
             <!-- Input Footer -->
             <div class="wa-input-footer position-relative">
-                <!-- Emoji Picker Tray -->
-                <div class="chat-emoji-picker d-none" id="waChatEmojiPicker" style="bottom: calc(100% + 8px); left: 16px; right: auto; width: 300px;">
+                <!-- Emoji Picker Tray (Muncul tepat di atas tombol emoji) -->
+                <div class="chat-emoji-picker d-none" id="waChatEmojiPicker">
                     <div class="chat-emoji-header">
                         <span>Pilih Emoji</span>
                         <button type="button" class="btn-close btn-close-sm" id="waCloseEmojiPicker" aria-label="Tutup"></button>
@@ -309,11 +310,16 @@
 @endsection
 
 @push('scripts')
+@php
+$chatAuthData = [
+'id' => (int) Auth::id(),
+'name' => optional(Auth::user())->nama,
+'role' => optional(Auth::user()->role)->name,
+];
+@endphp
 <script>
     window.ChatAuth = {
-        id: {{ Auth::id() }},
-        name: @json(optional(Auth::user())->nama),
-        role: @json(optional(Auth::user()->role)->name)
+        !!json_encode($chatAuthData) !!
     };
 </script>
 <script src="{{ asset('js/chat/chat-page.js') }}"></script>

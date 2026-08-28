@@ -212,7 +212,7 @@ return [
             'title' => 'Lainnya',
         ],
 
-         [
+        [
             'type' => 'item',
             'title' => 'Percakapan',
             'path' => 'chat',
@@ -403,11 +403,11 @@ return [
                     'path' => 'adminBidang/syarat',
                     'active_key' => 'adminBidangsyarat',
                 ],
-                [
-                    'title' => 'Status',
-                    'path' => 'adminBidang/statusBidang',
-                    'active_key' => 'adminBidangstatus',
-                ],
+                // [
+                //     'title' => 'Status',
+                //     'path' => 'adminBidang/statusBidang',
+                //     'active_key' => 'adminBidangstatus',
+                // ],
             ]
         ],
 

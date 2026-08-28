@@ -719,3 +719,38 @@ body.dark-mode .wa-send-btn:disabled {
         padding: 8px 12px;
     }
 }
+
+/* Emoji Picker in Blade Chat (Aligned Directly Above Emoji Button) */
+#waChatEmojiPicker {
+    position: absolute;
+    bottom: calc(100% + 12px);
+    right: 55px;
+    left: auto;
+    width: 310px;
+    max-width: calc(100vw - 32px);
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 16px;
+    box-shadow: 0 12px 36px rgba(0, 0, 0, 0.16);
+    padding: 10px 12px;
+    z-index: 1000;
+    animation: emojiPop 0.22s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+body.dark-mode #waChatEmojiPicker {
+    background: #182235;
+    border-color: #253247;
+    box-shadow: 0 12px 36px rgba(0, 0, 0, 0.4);
+}
+
+body.dark-mode #waChatEmojiPicker .chat-emoji-header {
+    border-bottom-color: #202d42;
+    color: #94a3b8;
+}
+
+@media (max-width: 576px) {
+    #waChatEmojiPicker {
+        right: 12px;
+        width: 290px;
+    }
+}
