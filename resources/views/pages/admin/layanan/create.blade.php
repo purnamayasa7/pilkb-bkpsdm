@@ -1,119 +1,136 @@
- @extends('layouts.app')
+@extends('layouts.app')
 
  @section('content')
      <!-- Modal -->
-     <div class="modal fade" id="modalSimpan" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle"
-         aria-hidden="true">
-         <div class="modal-dialog modal-dialog-centered" role="document">
-             <div class="modal-content">
-                 <div class="modal-header">
-                     <h5 class="modal-title" id="exampleModalCenterTitle">Simpan Data Layanan</h5>
-                     <button class="btn-close" type="button" data-bs-dismiss="modal" aria-label="Close"></button>
-                 </div>
-                 <div class="modal-body">Apakah anda yakin menyimpan data layanan ini?</div>
-                 <div class="modal-footer"><button class="btn btn-light" type="button"
-                         data-bs-dismiss="modal">Kembali</button><button class="btn btn-primary" type="button"
-                         id="confirmSimpan">Simpan</button></div>
-             </div>
-         </div>
-     </div>
-     <header class="page-header page-header-compact page-header-light border-bottom bg-white mb-4">
-         <div class="container-fluid px-4">
-             <div class="page-header-content">
-                 <div class="row align-items-center justify-content-between pt-3">
-                     <div class="col-auto mb-3">
-                         <h1 class="page-header-title">
-                             <div class="page-header-icon"><i data-feather="plus-circle"></i></div>
-                             Tambah Layanan
-                         </h1>
-                     </div>
-                     <div class="col-12 col-xl-auto mb-3">
-                         <a class="btn btn-sm btn-light text-primary" href="{{ url()->previous() }}">
-                             <i class="me-1" data-feather="arrow-left"></i>
-                             Kembali ke List Layanan
-                         </a>
-                     </div>
-                 </div>
-             </div>
-         </div>
-     </header>
-     <!-- Main page content-->
-     <div class="container-fluid px-4 mt-4">
-         <div class="row">
-             <div class="col-12">
-                 <div class="card mb-4">
-                     <div class="card-header bg-gradient-primary-to-secondary text-white">Detail Layanan</div>
-                     <div class="card-body">
-                         <form id="formRegister" method="POST" action="{{ route('root.layanan.store') }}">
-                             @csrf
+    <div class="modal fade" id="modalSimpan" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle"
+        aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalCenterTitle">Simpan Data Layanan</h5>
+                    <button class="btn-close" type="button" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">Apakah anda yakin menyimpan data layanan ini?</div>
+                <div class="modal-footer">
+                    <button class="btn btn-light" type="button" data-bs-dismiss="modal">
+                        <i data-feather="arrow-left" class="me-1"></i> Batal
+                    </button>
+                    <button class="btn btn-primary" type="button" id="confirmSimpan">
+                        <span class="btn-text">
+                            <i data-feather="save" class="me-1"></i> Simpan
+                        </span>
+                        <span class="btn-loading d-none">
+                            <span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
+                            Menyimpan...
+                        </span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <header class="page-header page-header-compact page-header-light border-bottom bg-white mb-4">
+        <div class="container-fluid px-4">
+            <div class="page-header-content">
+                <div class="row align-items-center justify-content-between pt-3">
+                    <div class="col-auto mb-3">
+                        <h1 class="page-header-title">
+                            <div class="page-header-icon"><i data-feather="plus-circle"></i></div>
+                            Tambah Layanan
+                        </h1>
+                    </div>
+                    <div class="col-12 col-xl-auto mb-3">
+                        <a class="btn btn-sm btn-light text-primary" href="{{ url()->previous() }}">
+                            <i class="me-1" data-feather="arrow-left"></i>
+                            Kembali ke List Layanan
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+    <!-- Main page content-->
+    <div class="container-fluid px-4 mt-4">
+        <div class="row">
+            <div class="col-12">
+                <div class="card mb-4">
+                    <div class="card-header bg-gradient-primary-to-secondary text-white">Detail Layanan</div>
+                    <div class="card-body">
+                        <form id="formRegister" method="POST" action="{{ route('root.layanan.store') }}">
+                            @csrf
 
-                             <div class="mb-3">
-                                 <label class="small mb-1">Bidang</label>
-                                 <select name="kode_bidang" id="kode_bidang" class="form-select"
-                                     aria-label="Default select example" required>
-                                     <option selected disabled>Pilih Bidang:</option>
-                                     @foreach ($bidang as $b)
-                                         <option value="{{ $b->id }}">
-                                             {{ $b->nama_bidang }}
-                                         </option>
-                                     @endforeach
-                                 </select>
-                             </div>
+                            <div class="mb-3">
+                                <label class="small mb-1">Bidang</label>
+                                <select name="kode_bidang" id="kode_bidang" class="form-select"
+                                    aria-label="Default select example" required>
+                                    <option selected disabled>Pilih Bidang:</option>
+                                    @foreach ($bidang as $b)
+                                        <option value="{{ $b->id }}">
+                                            {{ $b->nama_bidang }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                            </div>
 
-                             <div class="mb-3">
-                                 <label class="small mb-1" for="nama_layanan">Nama Layanan</label>
-                                 @error('nama_layanan')
-                                     <div class="text-danger mb-1">{{ $message }}</div>
-                                 @enderror
-                                 <input class="form-control @error('nama_layanan') is-invalid @enderror" id="nama_layanan" name="nama_layanan"
-                                     type="text" placeholder="Masukkan nama layanan" value="{{ old('nama_layanan') }}"
-                                     required />
-                             </div>
+                            <div class="mb-3">
+                                <label class="small mb-1" for="nama_layanan">Nama Layanan</label>
+                                @error('nama_layanan')
+                                    <div class="text-danger mb-1">{{ $message }}</div>
+                                @enderror
+                                <input class="form-control @error('nama_layanan') is-invalid @enderror" id="nama_layanan" name="nama_layanan"
+                                    type="text" placeholder="Masukkan nama layanan" value="{{ old('nama_layanan') }}"
+                                    required />
+                            </div>
 
-                             <div class="mb-3">
-                                 <label class="small mb-1" for="waktu_penyelesaian">Waktu Penyelesaian</label>
-                                 <input class="form-control" id="waktu_penyelesaian" name="waktu_penyelesaian" type="text"
-                                     placeholder="Masukkan Waktu Penyelesaian" value="{{ old('waktu_penyelesaian') }}" required />
-                             </div>
+                            <div class="mb-3">
+                                <label class="small mb-1" for="waktu_penyelesaian">Waktu Penyelesaian</label>
+                                <input class="form-control" id="waktu_penyelesaian" name="waktu_penyelesaian" type="text"
+                                    placeholder="Masukkan Waktu Penyelesaian" value="{{ old('waktu_penyelesaian') }}" required />
+                            </div>
 
-                             <div class="mb-3">
-                                 <label class="small mb-1" for="deskripsi">Deskripsi</label>
-                                 <textarea class="form-control" id="deskripsi" name="deskripsi" rows="4"
-                                     placeholder="Masukkan Deskripsi" required>{{ old('deskripsi') }}</textarea>
-                             </div>
+                            <div class="mb-3">
+                                <label class="small mb-1" for="deskripsi">Deskripsi</label>
+                                <textarea class="form-control" id="deskripsi" name="deskripsi" rows="4"
+                                    placeholder="Masukkan Deskripsi" required>{{ old('deskripsi') }}</textarea>
+                            </div>
 
-                             <button class="btn btn-primary" type="button" id="btnTambah">
-                                 Tambah Layanan
-                             </button>
-                         </form>
-                     </div>
-                 </div>
-             </div>
-         </div>
-     </div>
+                            <button class="btn btn-primary" type="button" id="btnTambah">
+                                <i data-feather="save" class="me-1"></i> Tambah Layanan
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 
-     <script>
-         document.addEventListener('DOMContentLoaded', function() {
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
 
-             const form = document.getElementById('formRegister');
-             const btnTambah = document.getElementById('btnTambah');
-             const modalEl = document.getElementById('modalSimpan');
+            feather.replace();
 
-             btnTambah.addEventListener('click', function() {
+            const form = document.getElementById('formRegister');
+            const btnTambah = document.getElementById('btnTambah');
+            const modalEl = document.getElementById('modalSimpan');
+            const confirmSimpan = document.getElementById('confirmSimpan');
 
-                 if (!form.checkValidity()) {
-                     form.reportValidity();
-                     return;
-                 }
+            btnTambah.addEventListener('click', function() {
 
-                 const modal = new bootstrap.Modal(modalEl);
-                 modal.show();
-             });
+                if (!form.checkValidity()) {
+                    form.reportValidity();
+                    return;
+                }
 
-             document.getElementById('confirmSimpan').addEventListener('click', function() {
-                 form.submit();
-             });
+                const modal = new bootstrap.Modal(modalEl);
+                modal.show();
+            });
 
-         });
-     </script>
+            confirmSimpan.addEventListener('click', function() {
+                confirmSimpan.disabled = true;
+                confirmSimpan.querySelector('.btn-text')?.classList.add('d-none');
+                confirmSimpan.querySelector('.btn-loading')?.classList.remove('d-none');
+                form.submit();
+            });
+
+        });
+    </script>
  @endsection

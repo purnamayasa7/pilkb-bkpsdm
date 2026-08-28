@@ -11,9 +11,20 @@
                 <button class="btn-close" type="button" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">Apakah anda yakin menyimpan data syarat ini?</div>
-            <div class="modal-footer"><button class="btn btn-light" type="button"
-                    data-bs-dismiss="modal">Batal</button><button class="btn btn-primary" type="button"
-                    id="confirmSimpan">Simpan</button></div>
+            <div class="modal-footer">
+                <button class="btn btn-light" type="button" data-bs-dismiss="modal">
+                    <i data-feather="arrow-left" class="me-1"></i> Batal
+                </button>
+                <button class="btn btn-primary" type="button" id="confirmSimpan">
+                    <span class="btn-text">
+                        <i data-feather="save" class="me-1"></i> Simpan
+                    </span>
+                    <span class="btn-loading d-none">
+                        <span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
+                        Menyimpan...
+                    </span>
+                </button>
+            </div>
         </div>
     </div>
 </div>
@@ -117,7 +128,7 @@
                         </div>
 
                         <button class="btn btn-primary" type="button" id="btnTambah">
-                            Simpan Syarat
+                            <i data-feather="save" class="me-1"></i> Simpan Syarat
                         </button>
 
                     </form>
@@ -130,6 +141,8 @@
 
 <script>
     document.addEventListener('DOMContentLoaded', function() {
+
+        feather.replace();
 
         // ==========================
         // ELEMENT
@@ -210,6 +223,11 @@
                 form.reportValidity();
                 return;
             }
+
+            // Cegah double submit
+            confirmSimpan.disabled = true;
+            confirmSimpan.querySelector('.btn-text')?.classList.add('d-none');
+            confirmSimpan.querySelector('.btn-loading')?.classList.remove('d-none');
 
             // Submit form
             form.submit();

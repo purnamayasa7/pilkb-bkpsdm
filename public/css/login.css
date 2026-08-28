@@ -1,17 +1,53 @@
-html {
+/* ==========================================================================
+   PILKB BKPSDM KABUPATEN BULELENG - LOGIN STYLESHEET
+   Typography: Plus Jakarta Sans / Tailwind Style
+   Theme: Original PILKB Blue Palette (#0f4478, #19558f, #266eb5, #3d82cb, #1f5b99)
+   ========================================================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
+
+:root {
+    --font-primary: 'Plus Jakarta Sans', ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    
+    /* Original PILKB Blue Palette */
+    --blue-darkest: #0f4478;
+    --blue-darker: #174d86;
+    --blue-dark: #19558f;
+    --blue-primary: #1f5b99;
+    --blue-medium: #266eb5;
+    --blue-light: #3d82cb;
+    --blue-sky: #60a5fa;
+    --blue-soft: #f8fbff;
+    --blue-tint: #e5edf6;
+    --blue-border: #d7e3f1;
+
+    --surface-card: #ffffff;
+    --surface-input: #fafafa;
+    --border-color: #dbe2ea;
+    --text-primary: #0f172a;
+    --text-secondary: #475569;
+    --text-muted: #64748b;
+}
+
+html, body {
     min-height: 100%;
+    font-family: var(--font-primary);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
 }
 
 body {
     margin: 0;
     min-height: 100vh;
     display: flex;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
-    overflow-x: auto;
-    overflow-y: auto;
-    padding: 30px 20px 80px;
+    background: radial-gradient(circle at 10% 20%, #f0f7ff 0%, #e2effd 40%, #f8fafc 90%);
+    position: relative;
+    padding: 30px 20px 24px;
     box-sizing: border-box;
+    overflow-x: hidden;
 }
 
 /* Background Ambient Glow */
@@ -19,59 +55,77 @@ body::before,
 body::after {
     content: "";
     position: fixed;
-    width: 320px;
-    height: 320px;
+    width: 340px;
+    height: 340px;
     border-radius: 50%;
     filter: blur(80px);
     z-index: -1;
+    pointer-events: none;
 }
 
 body::before {
     top: -120px;
     left: -100px;
     background: #60a5fa;
-    opacity: .25;
+    opacity: 0.25;
 }
 
 body::after {
     right: -120px;
     bottom: -120px;
     background: #2563eb;
-    opacity: .18;
+    opacity: 0.18;
 }
 
-/* Card Container */
+/* ==========================================================================
+   Main Card Container
+   ========================================================================== */
+
 .login-card {
-    width: min(950px, 95vw);
-    max-width: 950px;
-    height: 500px;
-    min-height: 500px;
-    flex-shrink: 0;
-    border-radius: 14px;
+    width: min(960px, 95vw);
+    max-width: 960px;
+    min-height: 520px;
+    border-radius: 16px;
     overflow: hidden;
-    background: #fff;
-    border: 1px solid rgba(31, 91, 153, 0.08);
+    background: var(--surface-card);
+    border: 1px solid rgba(31, 91, 153, 0.1);
     box-shadow:
         0 25px 60px rgba(15, 23, 42, 0.12),
         0 8px 20px rgba(15, 23, 42, 0.05);
     animation: fadeSlide 0.8s ease;
     box-sizing: border-box;
+    position: relative;
+    z-index: 1;
+}
+
+@keyframes fadeSlide {
+    from {
+        opacity: 0;
+        transform: translateY(25px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 .login-card .row,
 .left-box,
 .right-box {
-    height: 100%;
+    min-height: 520px;
 }
 
-/* Panel Kiri */
+/* ==========================================================================
+   Left Branding Panel
+   ========================================================================== */
+
 .left-box {
     position: relative;
     overflow: hidden;
     display: flex;
     align-items: center;
-    padding: 50px;
-    color: white;
+    padding: 48px 44px;
+    color: #ffffff;
     background: linear-gradient(135deg,
             #0f4478 0%,
             #19558f 35%,
@@ -93,6 +147,7 @@ body::after {
             rgba(255, 255, 255, .08) 45%,
             transparent 75%);
     z-index: 1;
+    pointer-events: none;
 }
 
 .left-box::after {
@@ -102,57 +157,154 @@ body::after {
     background-image: radial-gradient(rgba(255, 255, 255, .15) 1px, transparent 1px);
     background-size: 22px 22px;
     opacity: .35;
+    pointer-events: none;
 }
 
 .left-content {
     position: relative;
     z-index: 2;
+    width: 100%;
 }
 
-.left-content h1 {
-    letter-spacing: 1px;
-}
-
-.left-content p {
-    opacity: 0.9;
+/* Logo & Brand Header */
+.brand-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 24px;
 }
 
 .logo {
-    width: 62px;
-    border-radius: 18px;
-    background: white;
+    width: 56px;
+    height: 56px;
+    border-radius: 16px;
+    background: #ffffff;
     padding: 6px;
+    object-fit: contain;
     box-shadow: 0 8px 20px rgba(0, 0, 0, .25);
 }
 
 .brand-text {
-    font-size: 16px;
+    font-size: 15px;
+    font-weight: 700;
+    letter-spacing: 0.3px;
+    color: #ffffff;
+    line-height: 1.2;
+}
+
+.brand-subtext {
+    font-size: 12px;
+    color: rgba(255, 255, 255, 0.85);
+    font-weight: 400;
+}
+
+/* App Title & Accent */
+.app-title-wrap {
+    margin-bottom: 10px;
+}
+
+.app-title {
+    font-size: 40px;
+    font-weight: 800;
+    letter-spacing: 1px;
+    color: #ffffff;
+    line-height: 1.1;
+    margin-bottom: 6px;
 }
 
 .accent-line {
     width: 115px;
-    height: 3px;
-    background: linear-gradient(to right, #fff, rgba(255, 255, 255, 0.3));
+    height: 3.5px;
+    background: linear-gradient(to right, #ffffff, rgba(255, 255, 255, 0.3));
     border-radius: 10px;
+    margin-bottom: 16px;
 }
 
-.badge {
+.tagline {
+    font-size: 15px;
+    line-height: 1.5;
+    color: rgba(255, 255, 255, 0.92);
+    margin-bottom: 24px;
+    font-weight: 400;
+}
+
+/* Feature Badges */
+.feature-pills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 12px;
+}
+
+.feature-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 14px;
+    background: rgba(255, 255, 255, 0.12);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 9999px;
     font-size: 12px;
+    font-weight: 500;
+    color: #ffffff;
+    backdrop-filter: blur(6px);
 }
 
-/* Panel Kanan & Form */
+.feature-pill i,
+.feature-pill svg {
+    width: 14px;
+    height: 14px;
+    color: #ffffff;
+}
+
+/* ==========================================================================
+   Right Form Panel
+   ========================================================================== */
+
 .right-box {
     display: flex;
     align-items: center;
     justify-content: center;
     background: #ffffff;
-    padding: clamp(20px, 4vw, 50px);
+    padding: 40px 48px;
     box-sizing: border-box;
     min-width: 0;
+    position: relative;
     border-left: 1px solid #e5edf6;
     box-shadow: inset 8px 0 20px rgba(31, 91, 153, 0.025);
 }
 
+/* Mobile compact branding header */
+.mobile-brand-header {
+    display: none;
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.mobile-brand-header .mobile-logo {
+    width: 48px;
+    height: 48px;
+    padding: 5px;
+    border-radius: 14px;
+    background: #ffffff;
+    box-shadow: 0 4px 12px rgba(15, 23, 42, 0.08);
+    border: 1px solid #e2e8f0;
+    margin-bottom: 8px;
+}
+
+.mobile-brand-header h5 {
+    font-weight: 800;
+    color: var(--blue-primary);
+    margin: 0;
+    letter-spacing: -0.3px;
+}
+
+.mobile-brand-header small {
+    color: var(--text-muted);
+    font-size: 12px;
+}
+
+/* Slider Controls */
 .slider-wrapper {
     width: 100%;
     height: 100%;
@@ -180,200 +332,414 @@ body::after {
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 0 6px;
+    padding: 0 8px;
     box-sizing: border-box;
 }
 
 .form-content {
     width: 100%;
-    max-width: 360px;
+    max-width: 370px;
     min-width: 0;
     box-sizing: border-box;
 }
 
+/* Form Titles */
 .form-title {
-    color: #1f5b99;
+    color: var(--blue-primary);
     font-weight: 700;
-    letter-spacing: .3px;
+    font-size: 22px;
+    letter-spacing: 0.3px;
+    margin-bottom: 4px;
 }
 
-.form-content p.text-muted {
-    margin-bottom: 12px !important;
-    /* Mengurangi jarak ke bawah */
+.form-subtitle {
+    color: var(--text-muted);
+    font-size: 13.5px;
+    margin-bottom: 20px;
 }
 
-.form-content .mb-3 {
-    margin-bottom: 12px !important;
-    /* Merapatkan jarak antara field NIP dan Password */
+/* Form Controls & Inputs */
+.form-group-custom {
+    margin-bottom: 14px;
+    text-align: left;
 }
 
-.form-content .form-control {
+.form-label-custom {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 6px;
+    display: block;
+}
+
+.input-icon-wrap {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.input-icon-wrap .input-icon {
+    position: absolute;
+    left: 14px;
+    color: var(--text-muted);
+    width: 18px;
+    height: 18px;
+    pointer-events: none;
+    transition: color 0.25s ease;
+    z-index: 3;
+}
+
+.input-icon-wrap .form-control {
     width: 100%;
     height: 48px;
     border-radius: 12px;
-    border: 1px solid #dbe2ea;
-    background: #fafafa;
-    padding: 10px 16px;
+    border: 1px solid var(--border-color);
+    background: var(--surface-input);
+    padding: 10px 16px 10px 42px;
     font-size: 14px;
-    transition: .25s;
+    font-weight: 500;
+    color: var(--text-primary);
+    transition: all 0.25s ease;
     box-sizing: border-box;
 }
 
-.form-content .form-control:focus {
-    background: #fff;
-    border-color: #1f5b99;
+.input-icon-wrap .form-control.pe-5 {
+    padding-right: 42px;
+}
+
+.input-icon-wrap .form-control:hover {
+    background: #ffffff;
+    border-color: #cbd5e1;
+}
+
+.input-icon-wrap .form-control:focus {
+    background: #ffffff;
+    border-color: var(--blue-primary);
     box-shadow: 0 0 0 3px rgba(31, 91, 153, 0.12);
+    outline: none;
+}
+
+.input-icon-wrap .form-control:focus ~ .input-icon,
+.input-icon-wrap .form-control:focus + .input-icon {
+    color: var(--blue-primary);
 }
 
 .toggle-password {
     position: absolute;
     top: 50%;
-    right: 15px;
+    right: 14px;
     transform: translateY(-50%);
     cursor: pointer;
-    color: #6c757d;
+    color: var(--text-muted);
     font-size: 18px;
     z-index: 5;
-    transition: 0.3s;
+    transition: color 0.25s ease;
+    padding: 4px;
 }
 
 .toggle-password:hover {
-    color: #1f5b99;
+    color: var(--blue-primary);
 }
 
-/* Tombol */
+/* ==========================================================================
+   Action Buttons
+   ========================================================================== */
+
 .btn-login-primary {
     height: 48px;
+    width: 100%;
     border: none;
     border-radius: 14px;
     background: linear-gradient(135deg, #1f5b99 0%, #174d86 100%);
-    color: #fff;
+    color: #ffffff;
     font-weight: 600;
     font-size: 15px;
-    transition: all .25s ease;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    box-shadow: 0 4px 14px rgba(31, 91, 153, 0.25);
+    transition: all 0.25s ease;
+    cursor: pointer;
     padding: 10px 18px;
 }
 
 .btn-login-primary:hover {
     background: linear-gradient(135deg, #2668ad 0%, #1b5b9c 100%);
-    color: #fff;
+    color: #ffffff;
     transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(31, 91, 153, 0.35);
 }
 
 .btn-login-primary:active {
     transform: translateY(0);
 }
 
+.btn-login-primary svg,
 .btn-login-primary i {
-    margin-right: 8px;
+    width: 18px;
+    height: 18px;
 }
 
 .btn-login-outline {
     height: 48px;
+    width: 100%;
     border-radius: 14px;
-    border: 1px solid #d7e3f1;
-    background: #fff;
-    color: #1f5b99;
+    border: 1px solid var(--blue-border);
+    background: #ffffff;
+    color: var(--blue-primary);
     font-weight: 600;
-    transition: .25s;
+    font-size: 14px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: all 0.25s ease;
     padding: 10px 18px;
 }
 
 .btn-login-outline:hover {
-    background: #f8fbff;
-    border-color: #1f5b99;
-    color: #174d86;
+    background: var(--blue-soft);
+    border-color: var(--blue-primary);
+    color: var(--blue-darker);
     transform: translateY(-2px);
+    box-shadow: 0 10px 25px rgba(31, 91, 153, 0.12);
 }
 
-/* Modal FAQ */
-#modalFaq .accordion-button {
-    padding: 1rem 0;
+.btn-login-outline:active {
+    transform: translateY(0);
+}
+
+.btn-login-outline svg,
+.btn-login-outline i {
+    width: 17px;
+    height: 17px;
+}
+
+/* Quick Info Option Cards on Slide 2 */
+.slide-option-btn {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    padding: 12px 16px;
+    border-radius: 12px;
+    border: 1px solid var(--blue-border);
+    background: var(--surface-card);
+    color: var(--blue-primary);
+    font-size: 13.5px;
     font-weight: 600;
+    transition: all 0.2s ease;
+    text-align: left;
+    margin-bottom: 10px;
+    cursor: pointer;
 }
 
-#modalFaq .accordion-button:focus {
-    box-shadow: none;
+.slide-option-btn .btn-icon-box {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    background: #f0f6fc;
+    color: var(--blue-primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    margin-right: 12px;
+    transition: all 0.2s ease;
+}
+
+.slide-option-btn:hover {
+    border-color: var(--blue-primary);
+    background: var(--blue-soft);
+    color: var(--blue-darker);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 14px rgba(31, 91, 153, 0.12);
+}
+
+.slide-option-btn:hover .btn-icon-box {
+    background: var(--blue-primary);
+    color: #ffffff;
+}
+
+.link-back-login {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--blue-primary);
+    font-size: 13.5px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 0.2s ease;
+    padding: 6px 12px;
+    border-radius: 8px;
+}
+
+.link-back-login:hover {
+    color: var(--blue-darker);
+    background: var(--blue-soft);
+}
+
+/* ==========================================================================
+   Modals (FAQ & Syarat Layanan)
+   ========================================================================== */
+
+.modal-content {
+    border-radius: 16px;
+    overflow: hidden;
+    border: 1px solid rgba(31, 91, 153, 0.1);
+    box-shadow: 0 25px 50px -12px rgba(15, 23, 42, 0.25);
+}
+
+.modal-header.bg-gradient-header {
+    background: linear-gradient(135deg, #0f4478 0%, #1f5b99 100%);
+    color: #ffffff;
+    padding: 18px 24px;
+    border-bottom: none;
+}
+
+.modal-header .modal-title {
+    font-weight: 700;
+    font-size: 18px;
+    letter-spacing: -0.2px;
+}
+
+.modal-body {
+    padding: 24px;
+}
+
+#modalFaq .faq-item {
+    border: 1px solid #e2e8f0;
+    border-radius: 12px !important;
+    margin-bottom: 10px;
+    overflow: hidden;
+    transition: all 0.2s ease;
+}
+
+#modalFaq .faq-item:hover {
+    border-color: #cbd5e1;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+#modalFaq .accordion-button {
+    padding: 14px 18px;
+    font-weight: 600;
+    font-size: 14px;
+    color: var(--text-primary);
+    background: var(--surface-input);
+    border-radius: 12px;
 }
 
 #modalFaq .accordion-button:not(.collapsed) {
-    background: transparent;
-    color: var(--bs-primary);
+    background: var(--blue-soft);
+    color: var(--blue-primary);
     box-shadow: none;
 }
 
-#modalFaq .accordion-item {
-    border-bottom: 1px solid #e9ecef;
-}
-
 #modalFaq .accordion-body {
-    padding-left: 2rem;
-    color: #6c757d;
-    line-height: 1.8;
+    padding: 16px 20px;
+    font-size: 13.5px;
+    color: var(--text-secondary);
+    line-height: 1.7;
+    background: #ffffff;
 }
 
-#modalFaq .modal-body {
-    min-height: 500px;
+.modal-footer {
+    padding: 14px 24px;
+    background: #f8fafc;
+    border-top: 1px solid #e2e8f0;
 }
+
+/* ==========================================================================
+   Footer
+   ========================================================================== */
 
 .footer {
-    position: fixed;
-    bottom: 10px;
-    width: min(950px, 95%);
-    left: 50%;
-    transform: translateX(-50%);
+    position: relative;
+    margin-top: 22px;
+    width: 100%;
+    max-width: 960px;
     text-align: center;
-    color: #64748b;
-    font-size: 14px;
+    color: var(--text-muted);
+    font-size: 13px;
+    font-weight: 500;
     z-index: 10;
+    letter-spacing: 0.2px;
+    padding: 0 16px;
+    box-sizing: border-box;
 }
 
-/* Animasi */
-@keyframes fadeSlide {
-    from {
-        opacity: 0;
-        transform: translateY(25px);
-    }
+/* ==========================================================================
+   Responsive Breakpoints
+   ========================================================================== */
 
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-/* Responsif Mobile */
-@media (max-width: 768px) {
+@media (max-width: 900px) {
     body {
-        padding: 20px 15px 80px;
-        align-items: flex-start;
+        padding: 24px 16px 24px;
+        justify-content: center;
+        min-height: 100vh;
+    }
+
+    .login-card {
+        width: 100%;
+        max-width: 480px;
+        min-height: auto;
+        border-radius: 16px;
     }
 
     .left-box {
         display: none !important;
     }
 
-    .login-card {
-        width: 100%;
-        max-width: 500px;
-        height: auto;
-        min-height: 500px;
-        border-radius: 12px;
-    }
-
     .right-box {
         width: 100%;
         flex: 0 0 100%;
-        padding: 30px 25px;
-        min-height: 500px;
+        padding: 32px 24px;
+        min-height: auto;
+    }
+
+    .mobile-brand-header {
+        display: block;
+        margin-bottom: 20px;
+    }
+
+    .footer {
+        margin-top: 18px;
+        padding: 0 16px 12px;
+        font-size: 12px;
+    }
+}
+
+@media (max-width: 480px) {
+    body {
+        padding: 16px 12px 20px;
+    }
+
+    .login-card {
+        border-radius: 14px;
+        box-shadow: 0 10px 30px -10px rgba(15, 43, 77, 0.12);
+    }
+
+    .right-box {
+        padding: 24px 16px;
     }
 
     .form-content {
-        max-width: 300px;
-        margin: 0 auto;
+        max-width: 100%;
     }
 
-    h4,
-    p {
-        text-align: center;
+    .form-title {
+        font-size: 20px;
+    }
+
+    .form-subtitle {
+        font-size: 13px;
+        margin-bottom: 18px;
+    }
+
+    .footer {
+        font-size: 11.5px;
+        margin-top: 14px;
+        padding-bottom: 60px; /* Safe space for floating chat button on mobile */
     }
 }

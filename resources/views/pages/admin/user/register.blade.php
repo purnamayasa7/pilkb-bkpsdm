@@ -2,62 +2,75 @@
 
  @section('content')
  <!-- Modal -->
- <div class="modal fade" id="modalSimpan" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle"
-     aria-hidden="true">
-     <div class="modal-dialog modal-dialog-centered" role="document">
-         <div class="modal-content">
-             <div class="modal-header">
-                 <h5 class="modal-title" id="exampleModalCenterTitle">Simpan Data User</h5>
-                 <button class="btn-close" type="button" data-bs-dismiss="modal" aria-label="Close"></button>
-             </div>
-             <div class="modal-body">Apakah anda yakin menyimpan data user ini?</div>
-             <div class="modal-footer"><button class="btn btn-light" type="button"
-                     data-bs-dismiss="modal">Batal</button><button class="btn btn-primary" type="button"
-                     id="confirmSimpan">Simpan</button></div>
-         </div>
-     </div>
- </div>
- <header class="page-header page-header-compact page-header-light border-bottom bg-white mb-4">
-     <div class="container-fluid px-4">
-         <div class="page-header-content">
-             <div class="row align-items-center justify-content-between pt-3">
-                 <div class="col-auto mb-3">
-                     <h1 class="page-header-title">
-                         <div class="page-header-icon"><i data-feather="user-plus"></i></div>
-                         Tambah User
-                     </h1>
-                 </div>
-                 <div class="col-12 col-xl-auto mb-3">
-                     <a class="btn btn-sm btn-light text-primary" href="{{ url()->previous() }}">
-                         <i class="me-1" data-feather="arrow-left"></i>
-                         Kembali ke List User
-                     </a>
-                 </div>
-             </div>
-         </div>
-     </div>
- </header>
- <!-- Main page content-->
- <div class="container-fluid px-4 mt-4">
-     <div class="row">
-         <div class="col-xl-4">
-             <!-- Profile picture card-->
-             <div class="card mb-4 mb-xl-0">
-                 <div class="card-header bg-gradient-primary-to-secondary text-white">Foto Profil</div>
-                 <div class="card-body text-center">
-                     <!-- Profile picture image-->
-                     <img id="fotoPreview"
-                         class="img-account-profile rounded-circle mb-2 shadow"
-                         src="{{ asset('templatepro/assets/img/demo/user-placeholder.svg') }}"
-                         alt=""
-                         style="width: 180px; height: 180px; object-fit: cover;">
-                     <!-- Profile picture help block-->
-                     <div class="small font-italic text-muted mb-4">JPG atau PNG tidak lebih dari 2 MB</div>
-                     <!-- Profile picture upload button-->
-                     <button class="btn btn-primary" type="button">Upload Foto</button>
-                 </div>
-             </div>
-         </div>
+<div class="modal fade" id="modalSimpan" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle"
+    aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalCenterTitle">Simpan Data User</h5>
+                <button class="btn-close" type="button" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">Apakah anda yakin menyimpan data user ini?</div>
+            <div class="modal-footer">
+                <button class="btn btn-light" type="button" data-bs-dismiss="modal">
+                    <i data-feather="arrow-left" class="me-1"></i> Batal
+                </button>
+                <button class="btn btn-primary" type="button" id="confirmSimpan">
+                    <span class="btn-text">
+                        <i data-feather="save" class="me-1"></i> Simpan
+                    </span>
+                    <span class="btn-loading d-none">
+                        <span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
+                        Menyimpan...
+                    </span>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+<header class="page-header page-header-compact page-header-light border-bottom bg-white mb-4">
+    <div class="container-fluid px-4">
+        <div class="page-header-content">
+            <div class="row align-items-center justify-content-between pt-3">
+                <div class="col-auto mb-3">
+                    <h1 class="page-header-title">
+                        <div class="page-header-icon"><i data-feather="user-plus"></i></div>
+                        Tambah User
+                    </h1>
+                </div>
+                <div class="col-12 col-xl-auto mb-3">
+                    <a class="btn btn-sm btn-light text-primary" href="{{ url()->previous() }}">
+                        <i class="me-1" data-feather="arrow-left"></i>
+                        Kembali ke List User
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+<!-- Main page content-->
+<div class="container-fluid px-4 mt-4">
+    <div class="row">
+        <div class="col-xl-4">
+            <!-- Profile picture card-->
+            <div class="card mb-4 mb-xl-0">
+                <div class="card-header bg-gradient-primary-to-secondary text-white">Foto Profil</div>
+                <div class="card-body text-center">
+                    <!-- Profile picture image-->
+                    <img id="fotoPreview"
+                        class="img-account-profile rounded-circle mb-2 shadow"
+                        src="{{ asset('templatepro/assets/img/demo/user-placeholder.svg') }}"
+                        alt=""
+                        style="width: 180px; height: 180px; object-fit: cover;">
+                    <!-- Profile picture help block-->
+                    <div class="small font-italic text-muted mb-4">JPG atau PNG tidak lebih dari 2 MB</div>
+                    <!-- Profile picture upload button-->
+                    <button class="btn btn-primary" type="button">
+                        <i data-feather="upload" class="me-1"></i> Upload Foto
+                    </button>
+                </div>
+            </div>
+        </div>
          <div class="col-xl-8">
              <!-- Account details card-->
              <div class="card mb-4">
@@ -159,7 +172,9 @@
                                  value="{{ old('email') }}" required />
                          </div>
 
-                         <button class="btn btn-primary" type="button" id="btnTambah">Tambah User</button>
+                         <button class="btn btn-primary" type="button" id="btnTambah">
+                              <i data-feather="save" class="me-1"></i> Tambah User
+                          </button>
                      </form>
                  </div>
              </div>
@@ -175,6 +190,7 @@
          const form = document.getElementById('formRegister');
          const btnTambah = document.getElementById('btnTambah');
          const modalEl = document.getElementById('modalSimpan');
+         const confirmSimpan = document.getElementById('confirmSimpan');
 
          const btnCekPegawai = document.getElementById('btnCekPegawai');
          const nipInput = document.getElementById('nip');
@@ -218,10 +234,12 @@
          });
 
          // CONFIRM
-         document.getElementById('confirmSimpan')
-             .addEventListener('click', function() {
-                 form.submit();
-             });
+         confirmSimpan.addEventListener('click', function() {
+             confirmSimpan.disabled = true;
+             confirmSimpan.querySelector('.btn-text')?.classList.add('d-none');
+             confirmSimpan.querySelector('.btn-loading')?.classList.remove('d-none');
+             form.submit();
+         });
 
          // CEK PEGAWAI
          btnCekPegawai.addEventListener('click', function() {

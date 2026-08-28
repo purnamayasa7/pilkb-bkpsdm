@@ -1,14 +1,19 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="id">
 
 <head>
     <meta charset="UTF-8">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="PILKB">
-    <title>PILKB</title>
+    <meta name="description" content="PILKB - Pusat Informasi Layanan Kepegawaian BKPSDM Kabupaten Buleleng">
+    <title>PILKB - BKPSDM Kabupaten Buleleng</title>
 
-    {{-- <link rel="stylesheet" href="{{ asset('resources/css/login.css') }}"> --}}
+    <!-- Google Fonts: Plus Jakarta Sans -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <!-- Stylesheets -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
     <link rel="stylesheet" href="{{ asset('css/login.css') }}">
@@ -19,47 +24,48 @@
     <!-- Modal FAQ -->
     <div class="modal fade" id="modalFaq" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
-            <div class="modal-content border-0 shadow">
+            <div class="modal-content">
                 {{-- Header --}}
-                <div class="modal-header bg-primary text-white">
+                <div class="modal-header bg-gradient-header">
                     <h5 class="modal-title d-flex align-items-center">
                         <i data-feather="help-circle" class="me-2"></i>
-                        Pusat Bantuan & FAQ
+                        Pusat Bantuan & Tanya Jawab (FAQ)
                     </h5>
 
                     <button
                         type="button"
                         class="btn-close btn-close-white"
-                        data-bs-dismiss="modal">
+                        data-bs-dismiss="modal"
+                        aria-label="Tutup">
                     </button>
                 </div>
 
                 {{-- Body --}}
                 <div class="modal-body">
                     {{-- Informasi --}}
-                    <div class="alert alert-primary d-flex align-items-center">
-                        <i data-feather="info" class="me-2"></i>
+                    <div class="alert alert-primary d-flex align-items-center mb-4 rounded-3 border-0 shadow-sm">
+                        <i data-feather="info" class="me-2 flex-shrink-0"></i>
                         <span>
-                            Cari pertanyaan atau klik salah satu FAQ untuk melihat jawaban.
+                            Cari topik pertanyaan atau klik salah satu FAQ untuk melihat rincian jawaban.
                         </span>
                     </div>
 
                     {{-- Search --}}
                     <div class="mb-4">
                         <div class="input-group">
-                            <span class="input-group-text">
+                            <span class="input-group-text bg-light border-end-0">
                                 <i data-feather="search"></i>
                             </span>
 
                             <input
                                 type="text"
                                 id="faqSearch"
-                                class="form-control"
-                                placeholder="Cari pertanyaan atau jawaban...">
+                                class="form-control border-start-0"
+                                placeholder="Cari pertanyaan atau kata kunci...">
                         </div>
                     </div>
 
-                    {{-- FAQ --}}
+                    {{-- FAQ List --}}
                     @if($faq->count())
                     <div class="accordion accordion-flush" id="accordionFaq">
                         @foreach($faq as $index => $item)
@@ -73,7 +79,7 @@
                                     aria-expanded="{{ $index == 0 ? 'true' : 'false' }}">
                                     <i
                                         data-feather="help-circle"
-                                        class="me-2 text-primary">
+                                        class="me-2 text-primary flex-shrink-0">
                                     </i>
                                     {{ $item->pertanyaan }}
                                 </button>
@@ -112,44 +118,46 @@
                     <div
                         id="faqNotFound"
                         class="alert alert-warning mt-3 d-none">
-                        FAQ tidak ditemukan.
+                        <i data-feather="alert-circle" class="me-1"></i> FAQ yang Anda cari tidak ditemukan.
                     </div>
                 </div>
 
                 {{-- Footer --}}
                 <div class="modal-footer">
                     <button
-                        class="btn btn-primary"
+                        class="btn btn-light"
                         data-bs-dismiss="modal">
-                        Tutup
+                        <i data-feather="arrow-left" class="me-1"></i> Tutup
                     </button>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Modal Syarat -->
+    <!-- Modal Syarat Layanan -->
     <div class="modal fade"
         id="modalSyarat"
         tabindex="-1">
 
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
-                <div class="modal-header bg-primary text-white">
-                    <h5 class="modal-title">
-                        Lihat Syarat Layanan
+                <div class="modal-header bg-gradient-header">
+                    <h5 class="modal-title d-flex align-items-center">
+                        <i data-feather="file-text" class="me-2"></i>
+                        Syarat & Ketentuan Layanan
                     </h5>
                     <button
                         type="button"
                         class="btn-close btn-close-white"
-                        data-bs-dismiss="modal">
+                        data-bs-dismiss="modal"
+                        aria-label="Tutup">
                     </button>
                 </div>
 
                 <div class="modal-body">
                     <div class="mb-3">
-                        <label class="form-label">
-                            Bidang
+                        <label class="form-label fw-semibold small text-dark mb-1">
+                            Pilih Bidang
                         </label>
 
                         <select
@@ -157,7 +165,7 @@
                             class="form-select">
 
                             <option value="">
-                                Pilih Bidang
+                                -- Pilih Bidang --
                             </option>
 
                             @foreach($bidang as $item)
@@ -171,8 +179,8 @@
                     </div>
 
                     <div class="mb-3">
-                        <label class="form-label">
-                            Layanan
+                        <label class="form-label fw-semibold small text-dark mb-1">
+                            Pilih Layanan
                         </label>
 
                         <select
@@ -181,7 +189,7 @@
                             disabled>
 
                             <option>
-                                Pilih bidang terlebih dahulu
+                                Silakan pilih bidang terlebih dahulu
                             </option>
                         </select>
                     </div>
@@ -192,6 +200,7 @@
                     <button
                         class="btn btn-light"
                         data-bs-dismiss="modal">
+                        <i data-feather="arrow-left" class="me-1"></i>
                         Tutup
                     </button>
 
@@ -200,121 +209,120 @@
                         id="btnLihatPdf"
                         class="btn btn-primary">
 
-                        <i data-feather="file-text"></i>
-                        Lihat PDF
+                        <i data-feather="download" class="me-1"></i>
+                        Unduh Syarat PDF
                     </button>
                 </div>
             </div>
         </div>
     </div>
 
+    <!-- Main Card Container -->
     <div class="card login-card border-0">
         <div class="row g-0">
 
-            <!-- LEFT -->
+            <!-- LEFT BRANDING PANEL -->
             <div class="col-md-6 left-box">
                 <div class="left-content">
 
-                    <!-- HEADER -->
-                    <div class="d-flex align-items-center mb-3">
-                        <img src="{{ asset('images/KabBuleleng.png') }}" class="logo me-3">
+                    <!-- Institution Header Badge -->
+                    <div class="brand-badge">
+                        <img src="{{ asset('images/KabBuleleng.png') }}" class="logo" alt="Logo Kabupaten Buleleng">
                         <div>
-                            <h6 class="mb-0 fw-semibold text-uppercase small brand-text">
-                                BKPSDM Kabupaten Buleleng
-                            </h6>
-                            <small class="opacity-75">Sistem Layanan Kepegawaian</small>
+                            <div class="brand-text text-uppercase">
+                                BKPSDM Kab. Buleleng
+                            </div>
+                            <div class="brand-subtext">Pemerintah Kabupaten Buleleng</div>
                         </div>
                     </div>
 
-                    <!-- TITLE -->
-                    <h1 class="fw-bold display-6 mb-2">PILKB</h1>
+                    <!-- Application Title & Accent -->
+                    <div class="app-title-wrap">
+                        <h1 class="app-title">PILKB</h1>
+                        <div class="accent-line"></div>
+                    </div>
 
-                    <!-- ACCENT LINE -->
-                    <div class="accent-line mb-2"></div>
+                    <!-- Tagline -->
+                    <p class="tagline">
+                        Pusat Informasi Layanan Kepegawaian BKPSDM Buleleng
+                    </p>
 
-                    <!-- TAGLINE -->
-                    <p class="lead mb-3">Pusat Informasi Layanan Kepegawaian BKPSDM Buleleng</p>
-
-                    <!-- <div class="badge bg-light text-dark px-3 py-2 rounded-pill">
-                        Pre-Production
-                    </div> -->
-
-                    <!-- <div class="badge bg-warning text-white px-3 py-2 rounded-pill">
-                        Pre-Production
-                    </div> -->
-
-                    <!-- <div class="badge text-white px-3 py-2 rounded-pill"
-                        style="background-color: #f59e0b;">
-                        Pre-Production
-                    </div> -->
+                    <!-- Feature Badges -->
+                    <div class="feature-pills">
+                        <div class="feature-pill">
+                            <i data-feather="zap"></i>
+                            <span>Layanan Cepat</span>
+                        </div>
+                        <div class="feature-pill">
+                            <i data-feather="shield"></i>
+                            <span>Aman & Akurat</span>
+                        </div>
+                        <div class="feature-pill">
+                            <i data-feather="database"></i>
+                            <span>Integrasi SIMPEG</span>
+                        </div>
+                    </div>
 
                 </div>
             </div>
 
-            <!-- RIGHT -->
+            <!-- RIGHT FORM PANEL -->
             <div class="col-md-6 right-box">
                 <div class="slider-wrapper">
                     <div class="form-slider" id="formSlider">
 
-                        <!-- LOGIN -->
+                        <!-- SLIDE 1: LOGIN FORM -->
                         <div class="form-slide">
                             <div class="form-content">
-                                <h4 class="form-title">Login PILKB</h4>
-                                <p class="text-muted mb-4">Masukkan akun anda</p>
+
+                                <!-- Mobile Header (visible only on small screens) -->
+                                <div class="mobile-brand-header">
+                                    <img src="{{ asset('images/KabBuleleng.png') }}" class="mobile-logo" alt="Logo Buleleng">
+                                    <h5>PILKB BKPSDM</h5>
+                                    <small>Pusat Informasi Layanan Kepegawaian</small>
+                                </div>
+
+                                <h4 class="form-title">Selamat Datang</h4>
+                                <p class="form-subtitle">Masukkan akun Anda untuk mengakses sistem</p>
 
                                 <form id="formLogin" class="user" method="POST" action="{{ route('login') }}">
                                     @csrf
-                                    <div class="mb-3 text-start">
-                                        <label for="username" class="form-label fw-semibold small text-secondary mb-1">NIP</label>
-                                        <input type="text" id="username" name="username"
-                                            class="form-control @error('username') is-invalid @enderror"
-                                            value="{{ old('username') }}" placeholder="Masukkan NIP" required autofocus>
+
+                                    <!-- NIP INPUT -->
+                                    <div class="form-group-custom">
+                                        <label for="username" class="form-label-custom">NIP (Nomor Induk Pegawai)</label>
+                                        <div class="input-icon-wrap">
+                                            <i data-feather="user" class="input-icon"></i>
+                                            <input type="text" id="username" name="username"
+                                                class="form-control @error('username') is-invalid @enderror"
+                                                value="{{ old('username') }}" placeholder="Masukkan 18 digit NIP" required autofocus>
+                                        </div>
                                         @error('username')
-                                        <div class="invalid-feedback">
+                                        <div class="invalid-feedback d-block mt-1">
                                             {{ $message }}
                                         </div>
                                         @enderror
                                     </div>
-                                    <!-- <div class="form-floating mb-3">
-                                        <label for="username" class="form-label fw-semibold small text-secondary mb-1">NIP</label>
-                                        <input type="text" id="username" name="username"
-                                            class="form-control @error('username') is-invalid
-                                        @enderror"
-                                            value="{{ old('username') }}" placeholder="Username" required autofocus>
-                                        @error('username')
-                                        <div class="invalid-feedback">
-                                            {{ $message }}
-                                        </div>
-                                        @enderror
-                                        <label>NIP</label>
-                                    </div> -->
 
-                                    <!-- <div class="form-floating mb-3 position-relative">
-                                        <input type="password" id="password" name="password" class="form-control pe-5"
-                                            placeholder="Password" required>
-                                        <label>Password</label>
-
-                                        <i class="bi bi-eye toggle-password" onclick="togglePassword()"></i>
-                                    </div> -->
-
-                                    <!-- INPUT PASSWORD -->
-                                    <div class="mb-3 text-start">
-                                        <label for="password" class="form-label fw-semibold small text-secondary mb-1">Password</label>
-                                        <div class="position-relative">
+                                    <!-- PASSWORD INPUT -->
+                                    <div class="form-group-custom">
+                                        <label for="password" class="form-label-custom">Kata Sandi</label>
+                                        <div class="input-icon-wrap">
+                                            <i data-feather="lock" class="input-icon"></i>
                                             <input type="password" id="password" name="password" class="form-control pe-5"
-                                                placeholder="Masukkan Password" required>
-                                            <!-- ICON MATA -->
-                                            <i class="bi bi-eye toggle-password" onclick="togglePassword()"></i>
+                                                placeholder="Masukkan password" required>
+                                            <i class="bi bi-eye toggle-password" onclick="togglePassword()" title="Tampilkan / Sembunyikan Password"></i>
                                         </div>
                                     </div>
 
+                                    <!-- SUBMIT BUTTON -->
                                     <button type="submit"
                                         id="btnLogin"
-                                        class="btn btn-login-primary w-100 mb-3">
+                                        class="btn-login-primary mb-3">
 
                                         <span class="login-normal">
-                                            <i data-feather="log-in"></i>
-                                            Login
+                                            <i data-feather="log-in" class="me-1"></i>
+                                            Masuk Sekarang
                                         </span>
 
                                         <span class="login-loading d-none">
@@ -328,88 +336,97 @@
 
                                     </button>
 
+                                    <!-- CEK TIKET BUTTON -->
                                     <button type="button"
                                         onclick="showRegister()"
-                                        class="btn btn-login-outline w-100">
-
-                                        <span>Cek Tiket & Lainnya</span>
-                                        <i class="bi bi-arrow-right ms-2"></i>
-
+                                        class="btn-login-outline">
+                                        <span>Cek Tiket & Pusat Bantuan</span>
+                                        <i data-feather="arrow-right" class="ms-1"></i>
                                     </button>
-
-                                    {{-- <p class="text-center small">
-                                        Belum punya akun?
-                                        <a href="javascript:void(0)" onclick="showRegister()">Daftar</a>
-                                    </p> --}}
                                 </form>
                             </div>
                         </div>
 
-                        <!-- REGISTER -->
+                        <!-- SLIDE 2: CEK TIKET & PUSAT BANTUAN -->
                         <div class="form-slide">
                             <div class="form-content">
 
-                                <h4 class="form-title">Cek Tiket</h4>
-                                <p class="text-muted mb-3">
-                                    Masukkan nomor tiket anda
+                                <!-- Mobile Header -->
+                                <div class="mobile-brand-header">
+                                    <img src="{{ asset('images/KabBuleleng.png') }}" class="mobile-logo" alt="Logo Buleleng">
+                                    <h5>PILKB BKPSDM</h5>
+                                </div>
+
+                                <h4 class="form-title">Cek Tiket & Bantuan</h4>
+                                <p class="form-subtitle">
+                                    Lacak status usulan atau akses informasi layanan
                                 </p>
 
-                                <form action="{{ route('tiket.cek') }}" method="POST">
+                                <form action="{{ route('tiket.cek') }}" method="POST" class="mb-3">
                                     @csrf
 
-                                    <div class="form-floating mb-2">
-                                        <input
-                                            type="text"
-                                            name="no_tiket"
-                                            class="form-control"
-                                            placeholder="Nomor Tiket"
-                                            required>
-
-                                        <label>Nomor Tiket</label>
+                                    <div class="form-group-custom">
+                                        <label for="no_tiket" class="form-label-custom">Nomor Tiket Permintaan</label>
+                                        <div class="input-icon-wrap">
+                                            <i data-feather="tag" class="input-icon"></i>
+                                            <input
+                                                type="text"
+                                                id="no_tiket"
+                                                name="no_tiket"
+                                                class="form-control"
+                                                placeholder="Contoh: TK-2026-0001"
+                                                required>
+                                        </div>
                                     </div>
 
                                     <button
                                         type="submit"
-                                        class="btn btn-login-primary w-100 mb-2">
-
-                                        <i data-feather="search"></i>
-                                        Cek Tiket
+                                        class="btn-login-primary mb-3">
+                                        <i data-feather="search" class="me-1"></i>
+                                        Lacak Status Tiket
                                     </button>
-
-                                    <button
-                                        type="button"
-                                        class="btn btn-login-outline w-100 mb-2"
-                                        data-bs-toggle="modal"
-                                        data-bs-target="#modalFaq">
-
-                                        <i data-feather="help-circle"></i>
-                                        Tanya Jawab (FAQ)
-
-                                    </button>
-
-                                    <button
-                                        type="button"
-                                        class="btn btn-login-outline w-100"
-                                        data-bs-toggle="modal"
-                                        data-bs-target="#modalSyarat">
-
-                                        <i data-feather="file-text"></i>
-                                        Lihat Syarat Layanan
-
-                                    </button>
-
-                                    <div class="text-center mt-3">
-                                        <a href="javascript:void(0)"
-                                            onclick="showLogin()"
-                                            class="text-decoration-none">
-
-                                            <i class="bi bi-arrow-left"></i>
-                                            Kembali ke Login
-
-                                        </a>
-                                    </div>
-
                                 </form>
+
+                                <!-- Quick Navigation Options -->
+                                <div class="slide-option-btn"
+                                    data-bs-toggle="modal"
+                                    data-bs-target="#modalFaq">
+                                    <div class="d-flex align-items-center">
+                                        <div class="btn-icon-box">
+                                            <i data-feather="help-circle"></i>
+                                        </div>
+                                        <div>
+                                            <div>Tanya Jawab (FAQ)</div>
+                                            <small class="text-muted fw-normal">Panduan & jawaban umum</small>
+                                        </div>
+                                    </div>
+                                    <i data-feather="chevron-right" class="text-muted"></i>
+                                </div>
+
+                                <div class="slide-option-btn"
+                                    data-bs-toggle="modal"
+                                    data-bs-target="#modalSyarat">
+                                    <div class="d-flex align-items-center">
+                                        <div class="btn-icon-box">
+                                            <i data-feather="file-text"></i>
+                                        </div>
+                                        <div>
+                                            <div>Syarat & Ketentuan Layanan</div>
+                                            <small class="text-muted fw-normal">Dokumen & e-file persyaratan</small>
+                                        </div>
+                                    </div>
+                                    <i data-feather="chevron-right" class="text-muted"></i>
+                                </div>
+
+                                <!-- Back to Login Link -->
+                                <div class="text-center mt-3">
+                                    <a href="javascript:void(0)"
+                                        onclick="showLogin()"
+                                        class="link-back-login">
+                                        <i data-feather="arrow-left" class="me-1"></i>
+                                        Kembali ke Login
+                                    </a>
+                                </div>
 
                             </div>
                         </div>
@@ -421,24 +438,29 @@
         </div>
     </div>
 
+    <!-- Page Footer -->
+    <footer class="footer">
+        &copy; {{ date('Y') }} BKPSDM Kabupaten Buleleng. All rights reserved.
+    </footer>
+
+    <!-- Live Chat Floating Trigger Button -->
     <div id="chatFloatingButton">
-        <button type="button" id="openChatDrawer">
+        <button type="button" id="openChatDrawer" title="Pusat Bantuan & Chat Admin">
             <i data-feather="message-square"></i>
         </button>
     </div>
 
+    <!-- Live Chat Drawer Widget -->
     <div id="chatDrawer">
         <div class="chat-header">
             <div class="chat-header-info">
-                <!-- <div class="chat-avatar">
-                    <i data-feather="message-square"></i>
-                </div> -->
-
+                <div class="chat-header-avatar">
+                    <i data-feather="message-circle"></i>
+                </div>
                 <div>
-                    <div class="fw-bold">
+                    <div class="fw-bold fs-6">
                         Pusat Bantuan PILKB
                     </div>
-
                     <small class="text-white-50">
                         BKPSDM Kabupaten Buleleng
                     </small>
@@ -448,360 +470,330 @@
             <button
                 type="button"
                 class="btn-close btn-close-white"
-                id="closeChatDrawer">
+                id="closeChatDrawer"
+                aria-label="Tutup">
             </button>
         </div>
         <div class="chat-body">
 
-            <!-- PAGE 1 -->
+            <!-- PAGE 1: HOME -->
             <div class="chat-page" id="pageHome">
 
-                <div class="chat-welcome-card">
-
+                <div class="chat-welcome-card mb-3">
                     <div class="chat-welcome-icon">
                         <span class="wave-hand">👋</span>
                     </div>
-
-                    <h6>Halo, ada yang bisa kami bantu?</h6>
-
-                    <p>
-                        Silakan pilih salah satu layanan berikut
+                    <h6 class="fw-bold mb-1">Halo Pengunjung</h6>
+                    <p class="text-muted small mb-0">
+                        Silakan pilih menu bantuan di bawah untuk berkonsultasi dengan tim BKPSDM.
                     </p>
-
                 </div>
 
-                <div
-                    class="help-card"
-                    id="btnNewChat">
-
-                    <div>
-                        <div class="fw-semibold">
-                            Tanya Admin
+                <div class="d-flex flex-column gap-2">
+                    <div class="help-card" id="btnNewChat">
+                        <div class="help-card-icon bg-primary-soft text-primary">
+                            <i data-feather="message-square"></i>
                         </div>
-
-                        <small class="text-muted">
-                            Buat percakapan baru
-                        </small>
+                        <div class="flex-grow-1">
+                            <div class="fw-semibold text-dark">Tanya Admin</div>
+                            <small class="text-muted">Mulai konsultasi & percakapan baru</small>
+                        </div>
+                        <i data-feather="chevron-right" class="text-muted"></i>
                     </div>
 
-                    <i data-feather="chevron-right"></i>
-                </div>
-
-                <div
-                    class="help-card"
-                    id="btnOpenTicket">
-
-                    <div>
-                        <div class="fw-semibold">
-                            Sudah Punya Tiket
+                    <div class="help-card" id="btnOpenTicket">
+                        <div class="help-card-icon bg-success-soft text-success">
+                            <i data-feather="tag"></i>
                         </div>
-
-                        <small class="text-muted">
-                            Lanjutkan percakapan
-                        </small>
+                        <div class="flex-grow-1">
+                            <div class="fw-semibold text-dark">Sudah Punya Tiket</div>
+                            <small class="text-muted">Lanjutkan percakapan dengan nomor tiket</small>
+                        </div>
+                        <i data-feather="chevron-right" class="text-muted"></i>
                     </div>
-
-                    <i data-feather="chevron-right"></i>
                 </div>
 
             </div>
 
-            <!-- PAGE CHAT BARU -->
-            <div
-                class="chat-page d-none"
-                id="pageNewChat">
+            <!-- PAGE 2: CHAT BARU -->
+            <div class="chat-page d-none" id="pageNewChat">
 
                 <!-- Header -->
-                <div class="d-flex align-items-center gap-2 mb-3">
-
-                    <button
-                        class="btn btn-light chat-back-btn"
-                        id="backHome1">
-
-                        <i data-feather="arrow-left"></i>
-                    </button>
-
+                <div class="chat-list-header mb-3">
+                    <div class="d-flex align-items-center gap-2">
+                        <button
+                            class="btn btn-light chat-back-btn"
+                            id="backHome1"
+                            title="Kembali">
+                            <i data-feather="arrow-left"></i>
+                        </button>
+                        <div>
+                            <div class="chat-header-title">Mulai Percakapan</div>
+                            <div class="chat-header-subtitle">Lengkapi data untuk memulai chat</div>
+                        </div>
+                    </div>
                 </div>
 
                 <!-- Form -->
-                <div class="card border-0 shadow-sm">
-
-                    <div class="card-body">
+                <div class="card border-0 shadow-sm" style="border-radius: 16px;">
+                    <div class="card-body p-3">
 
                         <div class="mb-3">
-
-                            <label class="form-label fw-semibold">
-                                NIP
+                            <label class="form-label fw-semibold text-dark small mb-1">
+                                NIP Pegawai
                             </label>
-
                             <div class="input-group">
-
                                 <input
                                     type="text"
-                                    class="form-control"
+                                    class="form-control text-dark"
                                     id="guestNip"
                                     maxlength="18"
-                                    placeholder="Masukkan NIP">
-
+                                    placeholder="Masukkan 18 digit NIP">
                                 <button
-                                    class="btn btn-gradient-search"
+                                    class="btn btn-gradient-search px-3"
                                     type="button"
-                                    id="btnCariNip">
-
+                                    id="btnCariNip"
+                                    title="Cari NIP">
                                     <i data-feather="search"></i>
-
                                 </button>
-
                             </div>
-
                             <div
                                 id="nipLoading"
                                 class="small text-primary mt-2 d-none">
-
-                                Mencari data pegawai...
-
+                                <span class="spinner-border spinner-border-sm me-1"></span> Mencari data pegawai...
                             </div>
-
                             <div
                                 id="nipError"
                                 class="small text-danger mt-2 d-none">
                             </div>
-
                         </div>
 
                         <div class="mb-3">
-
-                            <label class="form-label fw-semibold">
-
-                                Nama
-
+                            <label class="form-label fw-semibold text-dark small mb-1">
+                                Nama Lengkap
                             </label>
-
                             <input
                                 type="text"
-                                class="form-control"
+                                class="form-control text-dark bg-light"
                                 id="guestNama"
-                                readonly>
-
+                                readonly
+                                placeholder="Nama otomatis terisi">
                         </div>
 
                         <div class="mb-3">
-
-                            <label class="form-label fw-semibold">
-
-                                Unit Kerja
-
+                            <label class="form-label fw-semibold text-dark small mb-1">
+                                Unit Kerja / Instansi
                             </label>
-
                             <input
                                 type="text"
-                                class="form-control"
+                                class="form-control text-dark bg-light"
                                 id="guestUnitKerja"
-                                readonly>
-
+                                readonly
+                                placeholder="Unit kerja otomatis terisi">
                         </div>
 
                         <div class="mb-3">
-                            <label class="form-label fw-semibold">
-                                Email
+                            <label class="form-label fw-semibold text-dark small mb-1">
+                                Email Aktif
                             </label>
-
                             <input
                                 type="email"
-                                class="form-control"
+                                class="form-control text-dark"
                                 id="guestEmail"
-                                placeholder="Masukkan email aktif">
+                                placeholder="Masukkan email aktif Anda">
                         </div>
 
                         <div class="mb-3">
-                            <label class="form-label fw-semibold">
-                                Bidang
+                            <label class="form-label fw-semibold text-dark small mb-1">
+                                Bidang Tujuan
                             </label>
-
                             <select
-                                class="form-select"
+                                class="form-select text-dark"
                                 id="guestBidang">
-
-                                <option value="">
-                                    Pilih Bidang
-                                </option>
-
+                                <option value="">Pilih Bidang</option>
                                 @foreach($bidang as $item)
                                 <option value="{{ $item->id }}">
                                     {{ $item->nama_bidang }}
                                 </option>
                                 @endforeach
-
                             </select>
                         </div>
 
                         <div class="mb-4">
-                            <label class="form-label fw-semibold">
+                            <label class="form-label fw-semibold text-dark small mb-1">
                                 Layanan
                             </label>
-
                             <select
-                                class="form-select"
+                                class="form-select text-dark"
                                 id="guestLayanan"
                                 disabled>
-
-                                <option value="">
-                                    Pilih bidang terlebih dahulu
-                                </option>
-
+                                <option value="">Pilih bidang terlebih dahulu</option>
                             </select>
                         </div>
 
                         <button
-                            class="btn chat-gradient-btn w-100"
+                            class="btn chat-gradient-btn w-100 d-flex align-items-center justify-content-center"
                             id="btnStartChat">
-
                             <i data-feather="message-square" class="me-2"></i>
-
-                            Mulai Chat
-
+                            Mulai Percakapan
                         </button>
 
                     </div>
-
                 </div>
 
             </div>
 
-            <!-- PAGE TIKET -->
-            <div
-                class="chat-page d-none"
-                id="pageTicket">
+            <!-- PAGE 3: TIKET -->
+            <div class="chat-page d-none" id="pageTicket">
 
                 <!-- Header -->
-                <div class="d-flex align-items-center gap-2 mb-3">
-
-                    <button
-                        class="btn btn-light chat-back-btn"
-                        id="backHome2">
-
-                        <i data-feather="arrow-left"></i>
-
-                    </button>
-
+                <div class="chat-list-header mb-3">
+                    <div class="d-flex align-items-center gap-2">
+                        <button
+                            class="btn btn-light chat-back-btn"
+                            id="backHome2"
+                            title="Kembali">
+                            <i data-feather="arrow-left"></i>
+                        </button>
+                        <div>
+                            <div class="chat-header-title">Buka Tiket Percakapan</div>
+                            <div class="chat-header-subtitle">Lanjutkan obrolan yang sudah tersimpan</div>
+                        </div>
+                    </div>
                 </div>
 
                 <!-- Form -->
-                <div class="card border-0 shadow-sm">
-
-                    <div class="card-body">
+                <div class="card border-0 shadow-sm" style="border-radius: 16px;">
+                    <div class="card-body p-3">
 
                         <div class="mb-3">
-
-                            <label class="form-label fw-semibold">
+                            <label class="form-label fw-semibold text-dark small mb-1">
                                 Nomor Tiket
                             </label>
-
                             <input
                                 type="text"
-                                class="form-control"
+                                class="form-control text-dark"
                                 id="guestTicket"
-                                placeholder="Contoh: TKT-2026-001">
-
+                                placeholder="Contoh: TK-2026-0001">
                         </div>
 
                         <div class="mb-4">
-
-                            <label class="form-label fw-semibold">
-                                Email
+                            <label class="form-label fw-semibold text-dark small mb-1">
+                                Email Terdaftar
                             </label>
-
                             <input
                                 type="email"
-                                class="form-control"
+                                class="form-control text-dark"
                                 id="guestTicketEmail"
                                 placeholder="nama@email.com">
-
                         </div>
 
                         <button
-                            class="btn chat-gradient-btn w-100"
+                            class="btn chat-gradient-btn w-100 d-flex align-items-center justify-content-center"
                             id="btnOpenConversation">
-
                             <i data-feather="message-square" class="me-2"></i>
                             Buka Percakapan
-
                         </button>
 
                     </div>
-
                 </div>
 
             </div>
 
-            <!-- PAGE ROOM CHAT -->
-            <div
-                class="chat-page d-none p-0 d-flex flex-column"
-                id="pageRoom">
+            <!-- PAGE 4: ROOM CHAT -->
+            <div class="chat-page d-none p-0 d-flex flex-column h-100" id="pageRoom">
 
-                <div
-                    class="border-bottom bg-white p-3">
-
-                    <div class="d-flex align-items-center gap-2">
-
+                <div class="chat-room-header">
+                    <div class="d-flex align-items-center gap-2 overflow-hidden">
                         <button
                             class="btn btn-light chat-back-btn"
-                            id="btnBackInbox">
-
+                            id="btnBackInbox"
+                            title="Tutup / Kembali">
                             <i data-feather="arrow-left"></i>
-
                         </button>
-
-                        <div class="small d-flex align-items-center gap-1">
-
-                            <span>No Tiket :</span>
-
-                            <span
-                                class="fw-bold"
-                                id="roomTicketNo">
-                                -
-                            </span>
-
-                            <span
-                                id="chatStatusBadge"
-                                class="badge bg-success-soft text-success">
-                                Open
-                            </span>
-
+                        <div class="chat-room-info overflow-hidden">
+                            <div class="d-flex align-items-center gap-1 flex-wrap">
+                                <span class="chat-item-ticket" id="roomTicketBadge">
+                                    <i data-feather="tag"></i>
+                                    <span id="roomTicketNo">-</span>
+                                </span>
+                                <span
+                                    id="chatStatusBadge"
+                                    class="chat-status-pill open">
+                                    Open
+                                </span>
+                            </div>
+                            <div id="roomSubtitle" class="chat-room-sub text-truncate">
+                                Pusat Bantuan PILKB (Guest)
+                            </div>
                         </div>
-
                     </div>
-
-                    <input
-                        type="hidden"
-                        id="conversationId">
+                    <input type="hidden" id="conversationId">
                 </div>
 
                 <div
                     id="chatMessages"
-                    class="flex-grow-1 overflow-auto p-3">
+                    class="chat-messages flex-grow-1">
                 </div>
 
-                <div class="border-top py-2 px-3 bg-white">
-
+                <div class="chat-input-footer position-relative">
+                    <div class="chat-emoji-picker d-none" id="chatEmojiPicker">
+                        <div class="chat-emoji-header">
+                            <span>Pilih Emoji</span>
+                            <button type="button" class="btn-close btn-close-sm" id="closeEmojiPicker" aria-label="Tutup"></button>
+                        </div>
+                        <div class="chat-emoji-grid">
+                            <button type="button" class="emoji-item" data-emoji="😊">😊</button>
+                            <button type="button" class="emoji-item" data-emoji="👍">👍</button>
+                            <button type="button" class="emoji-item" data-emoji="🙏">🙏</button>
+                            <button type="button" class="emoji-item" data-emoji="👋">👋</button>
+                            <button type="button" class="emoji-item" data-emoji="😄">😄</button>
+                            <button type="button" class="emoji-item" data-emoji="🤝">🤝</button>
+                            <button type="button" class="emoji-item" data-emoji="👌">👌</button>
+                            <button type="button" class="emoji-item" data-emoji="✅">✅</button>
+                            <button type="button" class="emoji-item" data-emoji="🙌">🙌</button>
+                            <button type="button" class="emoji-item" data-emoji="✨">✨</button>
+                            <button type="button" class="emoji-item" data-emoji="💡">💡</button>
+                            <button type="button" class="emoji-item" data-emoji="🎉">🎉</button>
+                            <button type="button" class="emoji-item" data-emoji="😁">😁</button>
+                            <button type="button" class="emoji-item" data-emoji="😉">😉</button>
+                            <button type="button" class="emoji-item" data-emoji="🤔">🤔</button>
+                            <button type="button" class="emoji-item" data-emoji="🫡">🫡</button>
+                            <button type="button" class="emoji-item" data-emoji="😎">😎</button>
+                            <button type="button" class="emoji-item" data-emoji="👏">👏</button>
+                            <button type="button" class="emoji-item" data-emoji="💪">💪</button>
+                            <button type="button" class="emoji-item" data-emoji="❤️">❤️</button>
+                            <button type="button" class="emoji-item" data-emoji="🔥">🔥</button>
+                            <button type="button" class="emoji-item" data-emoji="💯">💯</button>
+                            <button type="button" class="emoji-item" data-emoji="📌">📌</button>
+                            <button type="button" class="emoji-item" data-emoji="📝">📝</button>
+                            <button type="button" class="emoji-item" data-emoji="📋">📋</button>
+                            <button type="button" class="emoji-item" data-emoji="💼">💼</button>
+                            <button type="button" class="emoji-item" data-emoji="📂">📂</button>
+                            <button type="button" class="emoji-item" data-emoji="☕">☕</button>
+                        </div>
+                    </div>
                     <div class="chat-input-wrapper">
-
                         <textarea
                             id="chatInput"
                             class="form-control"
                             placeholder="Tulis pesan..."
                             rows="1"></textarea>
-
+                        <button
+                            class="chat-emoji-btn"
+                            id="chatEmojiBtn"
+                            type="button"
+                            title="Pilih emoji">
+                            <i data-feather="smile"></i>
+                        </button>
                         <button
                             class="chat-send-btn"
-                            id="sendChatBtn">
-
+                            id="sendChatBtn"
+                            disabled
+                            title="Kirim pesan">
                             <i data-feather="navigation"></i>
-
                         </button>
-
                     </div>
-
                 </div>
 
             </div>
@@ -809,6 +801,7 @@
         </div>
     </div>
 
+    <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://unpkg.com/feather-icons"></script>
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
@@ -878,28 +871,27 @@
 
             // Modal Syarat Layanan
             const bidang = document.getElementById('modalBidang');
-
             const layanan = document.getElementById('modalLayanan');
 
             if (bidang && layanan) {
                 bidang.addEventListener('change', function() {
                     if (!this.value) {
-                        layanan.innerHTML = '<option>Pilih bidang terlebih dahulu</option>';
+                        layanan.innerHTML = '<option>Silakan pilih bidang terlebih dahulu</option>';
                         layanan.disabled = true;
                         return;
                     }
 
-                    layanan.innerHTML = '<option>Loading...</option>';
+                    layanan.innerHTML = '<option>Memuat data layanan...</option>';
                     layanan.disabled = true;
 
                     fetch(`/get-layanan-syarat/${this.value}`)
                         .then(response => response.json())
                         .then(data => {
 
-                            layanan.innerHTML = '<option value="">Pilih Layanan</option>';
+                            layanan.innerHTML = '<option value="">-- Pilih Layanan --</option>';
 
                             if (data.length === 0) {
-                                layanan.innerHTML += '<option disabled>Tidak ada layanan</option>';
+                                layanan.innerHTML += '<option disabled>Tidak ada layanan aktif</option>';
                             } else {
                                 data.forEach(item => {
                                     layanan.innerHTML += `<option value="${item.id}">
@@ -938,9 +930,7 @@
                 });
             }
 
-            // Chat
-
-
+            // Chat Drawer Widget Trigger
             const drawer = document.getElementById('chatDrawer');
             const openBtn = document.getElementById('openChatDrawer');
             const closeBtn = document.getElementById('closeChatDrawer');
@@ -948,23 +938,21 @@
             if (drawer && openBtn && closeBtn) {
 
                 openBtn.addEventListener('click', function(e) {
-
                     e.stopPropagation();
-
                     drawer.classList.toggle('show');
                 });
 
                 closeBtn.addEventListener('click', function() {
-
                     drawer.classList.remove('show');
-
-                    resetGuestSession();
-
-                    showPage(el.pageHome);
+                    if (typeof resetGuestSession === 'function') {
+                        resetGuestSession();
+                    }
+                    if (typeof showPage === 'function' && typeof el !== 'undefined' && el.pageHome) {
+                        showPage(el.pageHome);
+                    }
                 });
 
                 document.addEventListener('click', function(e) {
-
                     if (
                         drawer.classList.contains('show') &&
                         !drawer.contains(e.target) &&
@@ -974,25 +962,24 @@
                     }
                 });
 
-                let guestSession = null;
-
                 ChatWidgetLogin.init();
             }
         });
 
-        // Slider Login
+        // Slider Navigation
         function showRegister() {
             document.getElementById('formSlider').classList.add('active');
+            feather.replace();
         }
 
         function showLogin() {
             document.getElementById('formSlider').classList.remove('active');
+            feather.replace();
         }
 
-        // Show - Hide Password
+        // Show - Hide Password Toggle
         function togglePassword() {
             const input = document.getElementById('password');
-
             const icon = document.querySelector('.toggle-password');
 
             if (input.type === "password") {
@@ -1008,20 +995,12 @@
 
         // Auto Height Text
         document.addEventListener('input', function(e) {
-
             if (e.target.id === 'chatInput') {
-
                 e.target.style.height = 'auto';
                 e.target.style.height = e.target.scrollHeight + 'px';
-
             }
-
         });
     </script>
 </body>
-
-<footer class="footer">
-    © 2026 BKPSDM Kabupaten Buleleng
-</footer>
 
 </html>

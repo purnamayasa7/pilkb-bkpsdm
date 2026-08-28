@@ -19,7 +19,7 @@
 <div class="container-fluid px-4 mt-4">
     <div class="card">
         <div class="card-body">
-            <form method="POST"
+            <form id="formPindah" method="POST"
                 action="{{ route('adminBawah.pindah.updatePindah', $tiket->no_tiket) }}">
 
                 @csrf
@@ -145,10 +145,16 @@
 
                     <button
                         type="submit"
-                        class="btn btn-primary">
+                        class="btn btn-primary"
+                        id="btnSubmitPindah">
 
-                        <i data-feather="save"></i>
-                        Simpan Perubahan
+                        <span class="btn-text">
+                            <i data-feather="save" class="me-1"></i> Simpan Perubahan
+                        </span>
+                        <span class="btn-loading d-none">
+                            <span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
+                            Menyimpan...
+                        </span>
                     </button>
 
                 </div>
@@ -291,6 +297,10 @@
                     return false;
                 }
 
+                const btnSubmitPindah = document.getElementById('btnSubmitPindah');
+                btnSubmitPindah.disabled = true;
+                btnSubmitPindah.querySelector('.btn-text')?.classList.add('d-none');
+                btnSubmitPindah.querySelector('.btn-loading')?.classList.remove('d-none');
             });
     });
 </script>

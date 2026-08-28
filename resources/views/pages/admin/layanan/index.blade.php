@@ -56,12 +56,22 @@
             </div>
 
             <div class="modal-footer">
-                <button class="btn btn-light" data-bs-dismiss="modal">Batal</button>
+                <button class="btn btn-light" data-bs-dismiss="modal">
+                    <i data-feather="arrow-left" class="me-1"></i> Batal
+                </button>
 
                 <form id="formToggle" method="POST">
                     @csrf
                     @method('PUT')
-                    <button class="btn btn-primary">Ya, Lanjutkan</button>
+                    <button class="btn btn-primary" type="submit" id="btnConfirmToggle">
+                        <span class="btn-toggle-text">
+                            <i data-feather="check" class="me-1"></i> Ya, Lanjutkan
+                        </span>
+                        <span class="btn-toggle-loading d-none">
+                            <span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
+                            Memproses...
+                        </span>
+                    </button>
                 </form>
             </div>
         </div>
@@ -146,7 +156,7 @@
 
             <div class="modal-footer">
                 <button type="button" class="btn btn-light" data-bs-dismiss="modal">
-                    Tutup
+                    <i data-feather="arrow-left" class="me-1"></i> Tutup
                 </button>
             </div>
 
@@ -217,18 +227,6 @@
                             </td>
                             <td>
                                 <div class="d-flex align-items-center">
-                                    <!-- <a class="btn btn-datatable btn-icon btn-transparent-dark me-1 btnDetail"
-                                        href="#"
-                                        data-id="{{ $item->id }}"
-                                        data-bidang="{{ $item->bidang->nama_bidang }}"
-                                        data-nama="{{ $item->nama_layanan }}"
-                                        data-waktu="{{ $item->waktu_penyelesaian }}"
-                                        data-deskripsi="{{ $item->deskripsi }}"
-                                        data-status="{{ $item->aktif }}"
-                                        title="Lihat layanan">
-
-                                        <i data-feather="eye" class="text-primary"></i>
-                                    </a> -->
                                     <a class="btn btn-datatable btn-icon btn-transparent-dark me-1"
                                         href="{{ route('root.layanan.edit', $item->id) }}" data-bs-toggle="tooltip"
                                         title="Edit layanan"><i data-feather="edit" class="text-warning"></i></a>
@@ -265,6 +263,7 @@
 
         const textModal = document.getElementById('textModal');
         const form = document.getElementById('formToggle');
+        const btnConfirmToggle = document.getElementById('btnConfirmToggle');
 
         document.addEventListener('click', function(e) {
 
@@ -285,6 +284,12 @@
             form.action = `/root/layanan/${id}/toggle-aktif`;
 
             modalAktif.show();
+        });
+
+        form.addEventListener('submit', function() {
+            btnConfirmToggle.disabled = true;
+            btnConfirmToggle.querySelector('.btn-toggle-text')?.classList.add('d-none');
+            btnConfirmToggle.querySelector('.btn-toggle-loading')?.classList.remove('d-none');
         });
 
         //Modal Detail

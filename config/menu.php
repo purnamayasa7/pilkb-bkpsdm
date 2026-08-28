@@ -92,6 +92,14 @@ return [
 
         [
             'type' => 'item',
+            'title' => 'Percakapan',
+            'path' => 'chat',
+            'icon' => 'message-square',
+            'active_key' => 'chat-center',
+        ],
+
+        [
+            'type' => 'item',
             'title' => 'Aktivitas User',
             'path' => 'log-aktivitas',
             'icon' => 'activity',
@@ -216,6 +224,14 @@ return [
             'title' => 'Lainnya',
         ],
 
+         [
+            'type' => 'item',
+            'title' => 'Percakapan',
+            'path' => 'chat',
+            'icon' => 'message-square',
+            'active_key' => 'chat-center',
+        ],
+
         [
             'type' => 'item',
             'title' => 'Aktivitas Anda',
@@ -329,6 +345,14 @@ return [
 
         [
             'type' => 'item',
+            'title' => 'Percakapan',
+            'path' => 'chat',
+            'icon' => 'message-square',
+            'active_key' => 'chat-center',
+        ],
+
+        [
+            'type' => 'item',
             'title' => 'Aktivitas Instansi',
             'path' => 'log-aktivitas',
             'icon' => 'activity',
@@ -427,6 +451,14 @@ return [
         [
             'type' => 'heading',
             'title' => 'Lainnya',
+        ],
+
+        [
+            'type' => 'item',
+            'title' => 'Percakapan',
+            'path' => 'chat',
+            'icon' => 'message-square',
+            'active_key' => 'chat-center',
         ],
 
         [

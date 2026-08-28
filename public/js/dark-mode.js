@@ -2,13 +2,37 @@
     'use strict';
 
     const storageKey = 'pilkb-dark-mode';
+    const clickedKey = 'pilkb-dark-mode-clicked';
     const newBadgeId = 'darkModeNewBadge';
     const transitionClass = 'theme-transitioning';
+
+    function isBadgeSeen() {
+        return localStorage.getItem(clickedKey) === 'true' || localStorage.getItem(storageKey) !== null;
+    }
+
+    function updateBadgeVisibility() {
+        const newBadge = document.getElementById(newBadgeId);
+        if (!newBadge) return;
+
+        if (isBadgeSeen()) {
+            newBadge.classList.add('d-none');
+        } else {
+            newBadge.classList.remove('d-none');
+        }
+    }
+
+    function markBadgeSeen() {
+        localStorage.setItem(clickedKey, 'true');
+        const newBadge = document.getElementById(newBadgeId);
+        if (newBadge) {
+            newBadge.classList.add('d-none');
+        }
+    }
 
     function setTheme(isDark, persist, animate) {
         const darkStylesheet = document.getElementById('appDarkThemeStylesheet');
         const toggle = document.getElementById('darkModeToggle');
-        const newBadge = document.getElementById(newBadgeId);
+        const iconWrapper = document.getElementById('darkModeIcon') || toggle;
 
         if (animate) {
             document.documentElement.classList.add(transitionClass);
@@ -24,7 +48,9 @@
         if (toggle) {
             toggle.setAttribute('aria-label', isDark ? 'Aktifkan light mode' : 'Aktifkan dark mode');
             toggle.setAttribute('title', isDark ? 'Aktifkan light mode' : 'Aktifkan dark mode');
-            toggle.innerHTML = '<i data-feather="' + (isDark ? 'sun' : 'moon') + '"></i>';
+            if (iconWrapper) {
+                iconWrapper.innerHTML = '<i data-feather="' + (isDark ? 'sun' : 'moon') + '"></i>';
+            }
             if (window.feather) {
                 window.feather.replace();
             }
@@ -32,9 +58,7 @@
 
         if (persist) {
             localStorage.setItem(storageKey, isDark ? 'dark' : 'light');
-            if (newBadge) {
-                newBadge.remove();
-            }
+            markBadgeSeen();
         }
 
         if (animate) {
@@ -48,19 +72,15 @@
         const savedTheme = localStorage.getItem(storageKey);
         const useDarkMode = savedTheme === 'dark';
 
-        if (savedTheme) {
-            const newBadge = document.getElementById(newBadgeId);
-            if (newBadge) {
-                newBadge.remove();
-            }
-        }
-
+        updateBadgeVisibility();
         setTheme(useDarkMode, false, false);
 
         const toggle = document.getElementById('darkModeToggle');
         if (toggle) {
             toggle.addEventListener('click', function () {
-                setTheme(!document.body.classList.contains('dark-mode'), true, true);
+                markBadgeSeen();
+                const isCurrentlyDark = document.body.classList.contains('dark-mode');
+                setTheme(!isCurrentlyDark, true, true);
             });
         }
 

@@ -75,12 +75,22 @@
             </div>
 
             <div class="modal-footer">
-                <button class="btn btn-light" data-bs-dismiss="modal">Batal</button>
+                <button class="btn btn-light" data-bs-dismiss="modal">
+                    <i data-feather="arrow-left" class="me-1"></i> Batal
+                </button>
 
                 <form id="formDelete" method="POST">
                     @csrf
                     @method('DELETE')
-                    <button class="btn btn-danger">Ya, Hapus</button>
+                    <button class="btn btn-danger" type="submit" id="btnConfirmDelete">
+                        <span class="btn-delete-text">
+                            <i data-feather="trash-2" class="me-1"></i> Ya, Hapus
+                        </span>
+                        <span class="btn-delete-loading d-none">
+                            <span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
+                            Menghapus...
+                        </span>
+                    </button>
                 </form>
             </div>
         </div>
@@ -201,7 +211,10 @@
         });
 
         //Delete Data
-        const modalDelete = new bootstrap.Modal(document.getElementById('modalDelete'));
+        const modalDeleteEl = document.getElementById('modalDelete');
+        const modalDelete = new bootstrap.Modal(modalDeleteEl);
+        const formDelete = document.getElementById('formDelete');
+        const btnConfirmDelete = document.getElementById('btnConfirmDelete');
 
         document.addEventListener('click', function(e) {
             const btn = e.target.closest('.btnDelete');
@@ -216,9 +229,15 @@
             document.getElementById('textDelete').innerHTML =
                 `Apakah anda yakin ingin menghapus status <b>${nama}</b> pada layanan <b>${layanan}</b>?`;
 
-            document.getElementById('formDelete').action = `/root/status/${id}`;
+            formDelete.action = `/root/status/${id}`;
 
             modalDelete.show();
+        });
+
+        formDelete.addEventListener('submit', function() {
+            btnConfirmDelete.disabled = true;
+            btnConfirmDelete.querySelector('.btn-delete-text')?.classList.add('d-none');
+            btnConfirmDelete.querySelector('.btn-delete-loading')?.classList.remove('d-none');
         });
     });
 </script>

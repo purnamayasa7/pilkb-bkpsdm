@@ -90,6 +90,7 @@ Route::middleware(['auth', 'force.password'])->group(function () {
 
     // Chat
     Route::get('/chat', [ChatController::class, 'index'])->name('chat.index');
+    Route::get('/chat/my-conversations', [ChatController::class, 'myConversations'])->name('chat.my-conversations');
     Route::get('/chat/{conversation}', [ChatController::class, 'show'])->whereNumber('conversation')->name('chat.show');
     Route::post('/chat/search-ticket', [ChatController::class, 'searchTicket'])->name('chat.search-ticket');
     Route::post('/chat/start-ticket', [ChatController::class, 'startTicketConversation'])->name('chat.start-ticket');
@@ -99,6 +100,8 @@ Route::middleware(['auth', 'force.password'])->group(function () {
     Route::get('/chat/admin/inbox', [ChatController::class, 'adminInbox']);
     Route::get('/chat/{conversation}/poll', [ChatController::class, 'pollMessages'])->whereNumber('conversation');
     Route::get('/chat/admin/inbox/poll', [ChatController::class, 'pollInbox'])->name('chat.admin.poll');
+    Route::post('/chat/mark-all-read', [ChatController::class, 'markAllRead'])->name('chat.mark-all-read');
+    Route::post('/chat/delete-conversations', [ChatController::class, 'deleteConversations'])->name('chat.delete-conversations');
 
     // Search
     Route::get('/search-ticket', [SearchController::class, 'ticket'])->name('search.ticket');

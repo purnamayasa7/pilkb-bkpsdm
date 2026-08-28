@@ -1,4 +1,4 @@
- @extends('layouts.app')
+@extends('layouts.app')
 
  @section('content')
      <!-- Modal -->
@@ -11,9 +11,20 @@
                      <button class="btn-close" type="button" data-bs-dismiss="modal" aria-label="Close"></button>
                  </div>
                  <div class="modal-body">Apakah anda yakin menyimpan perubahan layanan ini?</div>
-                 <div class="modal-footer"><button class="btn btn-light" type="button"
-                         data-bs-dismiss="modal">Kembali</button><button class="btn btn-primary" type="button"
-                         id="confirmSimpan">Simpan</button></div>
+                 <div class="modal-footer">
+                     <button class="btn btn-light" type="button" data-bs-dismiss="modal">
+                         <i data-feather="arrow-left" class="me-1"></i> Kembali
+                     </button>
+                     <button class="btn btn-primary" type="button" id="confirmSimpan">
+                         <span class="btn-text">
+                             <i data-feather="save" class="me-1"></i> Simpan
+                         </span>
+                         <span class="btn-loading d-none">
+                             <span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
+                             Menyimpan...
+                         </span>
+                     </button>
+                 </div>
              </div>
          </div>
      </div>
@@ -95,7 +106,9 @@
                                      </option>
                                  </select>
                              </div>
-                             <button class="btn btn-primary" type="button" id="btnUpdate">Update Layanan</button>
+                             <button class="btn btn-primary" type="button" id="btnUpdate">
+                                 <i data-feather="save" class="me-1"></i> Update Layanan
+                             </button>
                          </form>
                      </div>
                  </div>
@@ -106,9 +119,12 @@
      <script>
          document.addEventListener('DOMContentLoaded', function() {
 
+             feather.replace();
+
              const form = document.getElementById('formUpdate');
              const btnTambah = document.getElementById('btnUpdate');
              const modalEl = document.getElementById('modalSimpan');
+             const confirmSimpan = document.getElementById('confirmSimpan');
 
              btnTambah.addEventListener('click', function() {
 
@@ -121,7 +137,10 @@
                  modal.show();
              });
 
-             document.getElementById('confirmSimpan').addEventListener('click', function() {
+             confirmSimpan.addEventListener('click', function() {
+                 confirmSimpan.disabled = true;
+                 confirmSimpan.querySelector('.btn-text')?.classList.add('d-none');
+                 confirmSimpan.querySelector('.btn-loading')?.classList.remove('d-none');
                  form.submit();
              });
 

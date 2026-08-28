@@ -3,7 +3,7 @@
 @section('content')
 {{-- MODAL KONFIRMASI --}}
 <div class="modal fade" id="modalKonfirmasi" tabindex="-1">
-    <div class="modal-dialog">
+    <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
 
             <div class="modal-header">
@@ -25,12 +25,19 @@
                     <button type="button"
                         class="btn btn-light"
                         data-bs-dismiss="modal">
-                        Batal
+                        <i data-feather="arrow-left" class="me-1"></i> Batal
                     </button>
 
                     <button type="submit"
-                        class="btn btn-primary">
-                        Ya, Konfirmasi
+                        class="btn btn-primary"
+                        id="btnConfirmPerbaikan">
+                        <span class="btn-text">
+                            <i data-feather="check" class="me-1"></i> Ya, Konfirmasi
+                        </span>
+                        <span class="btn-loading d-none">
+                            <span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
+                            Memproses...
+                        </span>
                     </button>
                 </div>
 
@@ -116,6 +123,12 @@
                         </div>
                     </div>
                 </div>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-light" data-bs-dismiss="modal">
+                    <i data-feather="arrow-left" class="me-1"></i> Tutup
+                </button>
             </div>
         </div>
     </div>
@@ -333,6 +346,14 @@
                 .setAttribute('action', actionUrl);
 
             modalKonfirmasi.show();
+        });
+
+        const formKonfirmasi = document.getElementById('formKonfirmasi');
+        const btnConfirmPerbaikan = document.getElementById('btnConfirmPerbaikan');
+        formKonfirmasi.addEventListener('submit', function() {
+            btnConfirmPerbaikan.disabled = true;
+            btnConfirmPerbaikan.querySelector('.btn-text')?.classList.add('d-none');
+            btnConfirmPerbaikan.querySelector('.btn-loading')?.classList.remove('d-none');
         });
     });
 </script>

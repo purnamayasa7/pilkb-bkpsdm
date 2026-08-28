@@ -63,12 +63,22 @@
             </div>
 
             <div class="modal-footer">
-                <button class="btn btn-light" data-bs-dismiss="modal">Batal</button>
+                <button class="btn btn-light" data-bs-dismiss="modal">
+                    <i data-feather="arrow-left" class="me-1"></i> Batal
+                </button>
 
                 <form id="formToggle" method="POST">
                     @csrf
                     @method('PUT')
-                    <button class="btn btn-primary">Ya, Lanjutkan</button>
+                    <button class="btn btn-primary" type="submit" id="btnConfirmToggle">
+                        <span class="btn-toggle-text">
+                            <i data-feather="check" class="me-1"></i> Ya, Lanjutkan
+                        </span>
+                        <span class="btn-toggle-loading d-none">
+                            <span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
+                            Memproses...
+                        </span>
+                    </button>
                 </form>
             </div>
         </div>
@@ -295,6 +305,7 @@
 
         const textModal = document.getElementById('textModal');
         const form = document.getElementById('formToggle');
+        const btnConfirmToggle = document.getElementById('btnConfirmToggle');
 
         document.addEventListener('click', function(e) {
 
@@ -315,6 +326,12 @@
             form.action = `/root/user/${id}/toggle-aktif`;
 
             modalAktif.show();
+        });
+
+        form.addEventListener('submit', function() {
+            btnConfirmToggle.disabled = true;
+            btnConfirmToggle.querySelector('.btn-toggle-text')?.classList.add('d-none');
+            btnConfirmToggle.querySelector('.btn-toggle-loading')?.classList.remove('d-none');
         });
 
         //Modal Detail

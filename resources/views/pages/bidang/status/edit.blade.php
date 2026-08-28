@@ -101,6 +101,8 @@
 <script>
     document.addEventListener('DOMContentLoaded', function() {
 
+        feather.replace();
+
         const form = document.getElementById('formRegister');
         const btnTambah = document.getElementById('btnTambah');
         const modal = new bootstrap.Modal(document.getElementById('modalSimpan'));

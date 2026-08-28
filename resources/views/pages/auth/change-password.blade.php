@@ -7,6 +7,7 @@
     <title>Ganti Password</title>
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/feather-icons/4.29.0/feather.min.js"></script>
 </head>
 
 <body class="bg-light">
@@ -17,8 +18,7 @@
                 <div class="modal-body text-center p-5">
 
                     <div class="mb-4">
-                        <i class="bi bi-check-circle-fill text-success"
-                            style="font-size: 70px;"></i>
+                        <i data-feather="check-circle" class="text-success" style="width: 70px; height: 70px;"></i>
                     </div>
 
                     <h4 class="fw-bold mb-2">
@@ -31,7 +31,7 @@
 
                     <a href="{{ route('dashboard') }}"
                         class="btn btn-primary px-4">
-                        Masuk ke Sistem
+                        <i data-feather="log-in" class="me-1"></i> Masuk ke Sistem
                     </a>
 
                 </div>
@@ -60,7 +60,7 @@
                             </p>
                         </div>
 
-                        <form method="POST" action="{{ route('password.update') }}">
+                        <form id="formPassword" method="POST" action="{{ route('password.update') }}">
                             @csrf
 
                             {{-- Password Lama --}}
@@ -69,7 +69,7 @@
 
                                 <input type="password"
                                     name="current_password"
-                                    class="form-control @error('current_password') is-invalid @enderror">
+                                    class="form-control @error('current_password') is-invalid @enderror" required>
 
                                 @error('current_password')
                                 <div class="invalid-feedback">
@@ -84,7 +84,7 @@
 
                                 <input type="password"
                                     name="password"
-                                    class="form-control @error('password') is-invalid @enderror">
+                                    class="form-control @error('password') is-invalid @enderror" required>
 
                                 @error('password')
                                 <div class="invalid-feedback">
@@ -99,13 +99,19 @@
 
                                 <input type="password"
                                     name="password_confirmation"
-                                    class="form-control">
+                                    class="form-control" required>
                             </div>
 
                             <div class="d-grid gap-2">
 
-                                <button type="submit" class="btn btn-primary">
-                                    Ganti Password
+                                <button type="submit" class="btn btn-primary" id="btnSubmitPassword">
+                                    <span class="btn-text">
+                                        <i data-feather="key" class="me-1"></i> Ganti Password
+                                    </span>
+                                    <span class="btn-loading d-none">
+                                        <span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
+                                        Menyimpan...
+                                    </span>
                                 </button>
 
                             </div>
@@ -120,8 +126,8 @@
                             @csrf
 
                             <div class="d-grid">
-                                <button class="btn btn-light border">
-                                    Batal & Logout
+                                <button class="btn btn-light border" type="submit">
+                                    <i data-feather="log-out" class="me-1"></i> Batal & Logout
                                 </button>
                             </div>
                         </form>
@@ -130,8 +136,23 @@
             </div>
         </div>
     </div>
-    @if(session('password_changed'))
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            feather.replace();
+
+            const formPassword = document.getElementById('formPassword');
+            const btnSubmitPassword = document.getElementById('btnSubmitPassword');
+
+            formPassword.addEventListener('submit', function() {
+                btnSubmitPassword.disabled = true;
+                btnSubmitPassword.querySelector('.btn-text')?.classList.add('d-none');
+                btnSubmitPassword.querySelector('.btn-loading')?.classList.remove('d-none');
+            });
+        });
+    </script>
+    @if(session('password_changed'))
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             let modal = new bootstrap.Modal(

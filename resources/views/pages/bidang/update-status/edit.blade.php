@@ -29,7 +29,7 @@
 
 <div class="container-fluid px-4">
 
-    <form method="POST" action="{{ route('adminBidang.status.update', $tiket->no_tiket) }}">
+    <form id="formStatus" method="POST" action="{{ route('adminBidang.status.update', $tiket->no_tiket) }}">
         @csrf
         <div class="card mb-4">
 
@@ -204,9 +204,15 @@
 
                 {{-- BUTTON --}}
                 <div class="d-flex justify-content-end mt-4">
-                    <button type="submit" class="btn btn-primary me-2">
-                        <i data-feather="save" class="me-1"></i>
-                        Simpan
+                    <button type="submit" class="btn btn-primary me-2" id="btnSimpanStatus">
+                        <span class="btn-text">
+                            <i data-feather="save" class="me-1"></i>
+                            Simpan
+                        </span>
+                        <span class="btn-loading d-none">
+                            <span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
+                            Menyimpan...
+                        </span>
                     </button>
                 </div>
 
@@ -219,6 +225,15 @@
     document.addEventListener('DOMContentLoaded', function() {
 
         feather.replace();
+
+        const formStatus = document.getElementById('formStatus');
+        const btnSimpanStatus = document.getElementById('btnSimpanStatus');
+
+        formStatus.addEventListener('submit', function() {
+            btnSimpanStatus.disabled = true;
+            btnSimpanStatus.querySelector('.btn-text')?.classList.add('d-none');
+            btnSimpanStatus.querySelector('.btn-loading')?.classList.remove('d-none');
+        });
 
         document.addEventListener('change', function(e) {
             const checkbox = e.target.closest('.checkSyarat');

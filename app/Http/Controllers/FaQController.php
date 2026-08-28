@@ -44,10 +44,10 @@ class FaQController extends Controller
             'CREATE',
             'Menambah FAQ Baru',
             [],
-            $$faq->toArray()
+            $faq->toArray()
         );
 
-        return redirect('root.faq.index')->with('success', 'Berhasil menambah data');
+        return redirect()->route('root.faq.index')->with('success', 'Berhasil menambah data');
     }
 
     public function update(Request $request, $id)
@@ -82,7 +82,7 @@ class FaQController extends Controller
             $newData
         );
 
-        return redirect('root.faq.index')->with('success', 'FAQ Berhasil diupdate');
+        return redirect()->route('root.faq.index')->with('success', 'FAQ Berhasil diupdate');
     }
 
     public function destroy($id)

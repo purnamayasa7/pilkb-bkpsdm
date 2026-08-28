@@ -58,7 +58,7 @@
                             <input type="text" name="no_tiket" id="no_tiket" class="form-control"
                                 placeholder="Masukkan no tiket" required>
                             <button type="button" class="btn btn-primary" id="btnCekTiket">
-                                Cek
+                                <i data-feather="search" class="me-1"></i> Cek
                             </button>
                         </div>
                         <small id="infoTiket" class="text-muted"></small>
@@ -77,11 +77,17 @@
 
                 <div class="modal-footer">
                     <button class="btn btn-light" data-bs-dismiss="modal" type="button">
-                        Batal
+                        <i data-feather="arrow-left" class="me-1"></i> Batal
                     </button>
 
                     <button type="submit" id="btnSimpan" class="btn btn-primary" disabled>
-                        Simpan
+                        <span class="btn-text">
+                            <i data-feather="save" class="me-1"></i> Simpan
+                        </span>
+                        <span class="btn-loading d-none">
+                            <span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
+                            Menyimpan...
+                        </span>
                     </button>
                 </div>
             </form>
@@ -244,6 +250,14 @@
 
             document.getElementById('btnSimpan').disabled = true;
 
+        });
+
+        const formTambah = document.getElementById('modalTambahPengambilan').querySelector('form');
+        formTambah.addEventListener('submit', function() {
+            const btnSimpan = document.getElementById('btnSimpan');
+            btnSimpan.disabled = true;
+            btnSimpan.querySelector('.btn-text')?.classList.add('d-none');
+            btnSimpan.querySelector('.btn-loading')?.classList.remove('d-none');
         });
     });
 </script>

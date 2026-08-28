@@ -14,7 +14,7 @@
             <div class="modal-footer">
                 <button class="btn btn-light" type="button"
                     data-bs-dismiss="modal">
-                    <i data-feather="x" class="me-1"></i>
+                    <i data-feather="arrow-left" class="me-1"></i>
                     Batal
                 </button>
                 <button class="btn btn-primary" type="button" id="confirmSimpan">
@@ -156,6 +156,8 @@
 
 <script>
     document.addEventListener('DOMContentLoaded', function() {
+
+        feather.replace();
 
         const form = document.getElementById('formRegister');
         const btnTambah = document.getElementById('btnTambah');

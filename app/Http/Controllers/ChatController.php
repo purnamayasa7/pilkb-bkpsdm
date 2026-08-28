@@ -45,6 +45,71 @@ class ChatController extends Controller
         return view('chat.index', compact('conversations'));
     }
 
+    // List Percakapan milik user
+    public function myConversations()
+    {
+        $user = Auth::user();
+
+        $conversations = ChatConversation::with([
+            'creator',
+            'guest',
+            'tiket.layanan.bidang',
+            'layanan.bidang',
+            'bidang',
+            'participants.user',
+            'messages' => function ($q) {
+                $q->latest();
+            }
+        ])
+            ->whereHas('participants', function ($q) use ($user) {
+                $q->where('user_id', $user->id);
+            })
+            ->orderByDesc('last_message_id')
+            ->get();
+
+        return response()->json(
+            $conversations->map(function ($conversation) use ($user) {
+                $lastMsg = $conversation->messages->first();
+
+                $responder = $conversation->participants
+                    ->where('user_id', '!=', $user->id)
+                    ->first()
+                    ?->user;
+
+                $layananNama = $conversation->tiket?->layanan?->nama_layanan
+                    ?? $conversation->layanan?->nama_layanan
+                    ?? null;
+
+                $bidangNama = $conversation->bidang?->nama_bidang
+                    ?? $conversation->tiket?->layanan?->bidang?->nama_bidang
+                    ?? null;
+
+                $senderName = $responder?->nama
+                    ?? $conversation->guest?->nama
+                    ?? $conversation->creator?->nama
+                    ?? 'Helpdesk BKPSDM';
+
+                return [
+                    'id' => $conversation->id,
+                    'no_tiket' => $conversation->no_tiket,
+                    'status' => $conversation->status ?? 'open',
+                    'last_message_id' => $conversation->last_message_id,
+                    'nama_pengirim' => $senderName,
+                    'layanan' => $layananNama,
+                    'bidang' => $bidangNama,
+                    'last_message' => optional($lastMsg)->message ?? 'Belum ada pesan',
+                    'last_message_time' => $lastMsg
+                        ? $lastMsg->created_at->format('Y-m-d H:i:s')
+                        : ($conversation->updated_at ? $conversation->updated_at->format('Y-m-d H:i:s') : null),
+                    'is_last_from_me' => $lastMsg ? (int) $lastMsg->sender_user_id === (int) $user->id : false,
+                    'unread' => $conversation->unreadCount($user->id),
+                    'need_reply' => (bool) $conversation->need_reply,
+                    'type' => $conversation->type,
+                ];
+            })
+        );
+    }
+
     public function startTicketConversation(Request $request)
     {
         $request->validate([
@@ -209,6 +274,38 @@ class ChatController extends Controller
             'need_reply'      => $needReply
         ]);
 
+        // Pastikan creator terdaftar kembali sebagai participant jika sebelumnya menghapus chat
+        if ($conversation->created_by && (int)$user->id !== (int)$conversation->created_by) {
+            ChatParticipant::firstOrCreate(
+                [
+                    'conversation_id' => $conversation->id,
+                    'user_id'         => $conversation->created_by,
+                ],
+                [
+                    'role' => 'creator'
+                ]
+            );
+        }
+
+        // Pastikan admin bidang / FO terdaftar kembali jika creator mengirim pesan baru
+        if ($conversation->type === 'ticket' && $conversation->bidang_id && (int)$user->id === (int)$conversation->created_by) {
+            $admins = User::where('bidang_id', $conversation->bidang_id)
+                ->whereHas('role', fn($q) => $q->where('name', 'bidang'))
+                ->get();
+
+            foreach ($admins as $admin) {
+                ChatParticipant::firstOrCreate(
+                    [
+                        'conversation_id' => $conversation->id,
+                        'user_id'         => $admin->id,
+                    ],
+                    [
+                        'role' => 'responder'
+                    ]
+                );
+            }
+        }
+
         return response()->json([
             'success' => true,
             'message' => $message
@@ -281,12 +378,25 @@ class ChatController extends Controller
             });
 
 
+        $conversation->load(['tiket.layanan.bidang', 'layanan.bidang', 'bidang', 'creator', 'guest']);
+
+        $layananNama = $conversation->tiket?->layanan?->nama_layanan
+            ?? $conversation->layanan?->nama_layanan
+            ?? null;
+
+        $bidangNama = $conversation->bidang?->nama_bidang
+            ?? $conversation->tiket?->layanan?->bidang?->nama_bidang
+            ?? null;
+
         return response()->json([
             'ticket_number' => $conversation->no_tiket,
-            'status'        => $conversation->status,
+            'status'        => $conversation->status ?? 'open',
+            'layanan'       => $layananNama,
+            'bidang'        => $bidangNama,
+            'type'          => $conversation->type,
+            'nama_pengirim' => $conversation->guest?->nama ?? $conversation->creator?->nama ?? 'Pengguna',
             'messages'      => $messages
         ]);
-        // return response()->json($messages);
     }
 
     public function startGlobalChat()
@@ -352,6 +462,9 @@ class ChatController extends Controller
         $query = ChatConversation::with([
             'creator',
             'guest',
+            'tiket.layanan.bidang',
+            'layanan.bidang',
+            'bidang',
             'participants',
             'messages' => function ($q) {
                 $q->latest();
@@ -382,28 +495,34 @@ class ChatController extends Controller
 
         return response()->json(
             $conversations->map(function ($c) use ($user) {
+                $lastMsg = $c->messages->first();
+
+                $layananNama = $c->tiket?->layanan?->nama_layanan
+                    ?? $c->layanan?->nama_layanan
+                    ?? null;
+
+                $bidangNama = $c->bidang?->nama_bidang
+                    ?? $c->tiket?->layanan?->bidang?->nama_bidang
+                    ?? null;
 
                 return [
                     'id' => $c->id,
-
+                    'no_tiket' => $c->no_tiket,
+                    'status' => $c->status ?? 'open',
                     'last_message_id' => $c->last_message_id,
-
-                    'nama_pengirim' =>
-                    $c->guest?->nama
+                    'nama_pengirim' => $c->guest?->nama
                         ?? $c->creator?->nama
                         ?? '-',
-
-                    'last_message' =>
-                    optional($c->messages->first())->message,
-
-                    'unread' =>
-                    $c->unreadCount($user->id),
-
-                    'need_reply' =>
-                    $c->need_reply,
-
-                    'type' =>
-                    $c->type,
+                    'layanan' => $layananNama,
+                    'bidang' => $bidangNama,
+                    'last_message' => optional($lastMsg)->message ?? 'Belum ada pesan',
+                    'last_message_time' => $lastMsg
+                        ? $lastMsg->created_at->format('Y-m-d H:i:s')
+                        : ($c->updated_at ? $c->updated_at->format('Y-m-d H:i:s') : null),
+                    'is_last_from_me' => $lastMsg ? (int) $lastMsg->sender_user_id === (int) $user->id : false,
+                    'unread' => $c->unreadCount($user->id),
+                    'need_reply' => (bool) $c->need_reply,
+                    'type' => $c->type,
                 ];
             })
         );
@@ -867,6 +986,9 @@ class ChatController extends Controller
         $query = ChatConversation::with([
             'creator',
             'guest',
+            'tiket.layanan.bidang',
+            'layanan.bidang',
+            'bidang',
             'participants',
             'messages' => function ($q) {
                 $q->latest();
@@ -901,36 +1023,80 @@ class ChatController extends Controller
             ->get();
 
         return response()->json(
-
             $conversations->map(function ($c) use ($user) {
+                $lastMsg = $c->messages->first();
+
+                $layananNama = $c->tiket?->layanan?->nama_layanan
+                    ?? $c->layanan?->nama_layanan
+                    ?? null;
+
+                $bidangNama = $c->bidang?->nama_bidang
+                    ?? $c->tiket?->layanan?->bidang?->nama_bidang
+                    ?? null;
 
                 return [
-
                     'id' => $c->id,
-
-                    'last_message_id' =>
-                    $c->last_message_id,
-
-                    'nama_pengirim' =>
-                    $c->guest?->nama
+                    'no_tiket' => $c->no_tiket,
+                    'status' => $c->status ?? 'open',
+                    'last_message_id' => $c->last_message_id,
+                    'nama_pengirim' => $c->guest?->nama
                         ?? $c->creator?->nama
                         ?? '-',
-
-                    'last_message' =>
-                    optional($c->messages->first())->message,
-
-                    'unread' =>
-                    $c->unreadCount($user->id),
-
-                    'need_reply' =>
-                    $c->need_reply,
-
-                    'type' =>
-                    $c->type,
-
+                    'layanan' => $layananNama,
+                    'bidang' => $bidangNama,
+                    'last_message' => optional($lastMsg)->message ?? 'Belum ada pesan',
+                    'last_message_time' => $lastMsg
+                        ? $lastMsg->created_at->format('Y-m-d H:i:s')
+                        : ($c->updated_at ? $c->updated_at->format('Y-m-d H:i:s') : null),
+                    'is_last_from_me' => $lastMsg ? (int) $lastMsg->sender_user_id === (int) $user->id : false,
+                    'unread' => $c->unreadCount($user->id),
+                    'need_reply' => (bool) $c->need_reply,
+                    'type' => $c->type,
                 ];
             })
-
         );
+    }
+
+    public function markAllRead(Request $request)
+    {
+        $user = Auth::user();
+
+        $participants = ChatParticipant::where('user_id', $user->id)->get();
+
+        foreach ($participants as $participant) {
+            $lastMsgId = ChatMessage::where('conversation_id', $participant->conversation_id)->max('id');
+            if ($lastMsgId) {
+                $participant->update([
+                    'last_read_message_id' => $lastMsgId
+                ]);
+            }
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Semua pesan berhasil ditandai dibaca'
+        ]);
+    }
+
+    public function deleteConversations(Request $request)
+    {
+        $request->validate([
+            'conversation_ids' => 'required|array',
+            'conversation_ids.*' => 'integer'
+        ]);
+
+        $user = Auth::user();
+        $ids = $request->conversation_ids;
+
+        // Hapus participant hanya untuk user ini (seperti WhatsApp: hapus chat untuk saya)
+        // Chat room dan pesan tetap utuh untuk lawan bicara (admin/bidang/pengguna lain)
+        ChatParticipant::whereIn('conversation_id', $ids)
+            ->where('user_id', $user->id)
+            ->delete();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Percakapan berhasil dihapus dari daftar Anda'
+        ]);
     }
 }

@@ -106,10 +106,13 @@
             </div>
         </li>
         <!-- Dark Mode -->
-        <li class="nav-item me-3">
-            <button class="btn btn-icon btn-transparent-dark" id="darkModeToggle" type="button"
+        <li class="nav-item me-3 position-relative">
+            <button class="btn btn-icon btn-transparent-dark position-relative" id="darkModeToggle" type="button"
                 aria-label="Aktifkan dark mode" title="Aktifkan dark mode">
-                <i data-feather="moon"></i>
+                <span id="darkModeIcon">
+                    <i data-feather="moon"></i>
+                </span>
+                <span id="darkModeNewBadge" class="notification-dot d-none"></span>
             </button>
         </li>
         <!-- Alerts Dropdown-->

@@ -16,21 +16,31 @@
 
         initGuestChat() {
 
+            function escapeHtml(text) {
+                if (text === null || text === undefined) return '';
+                return String(text)
+                    .replace(/&/g, '&amp;')
+                    .replace(/</g, '&lt;')
+                    .replace(/>/g, '&gt;')
+                    .replace(/"/g, '&quot;')
+                    .replace(/'/g, '&#039;');
+            }
+
             function updateChatStatus(status) {
                 const badge = el.chatStatusBadge;
-
                 if (!badge) return;
 
-                if (status === 'closed') {
-                    badge.className = 'badge bg-danger-soft text-danger';
-                    badge.innerText = 'Closed';
-                    el.messageInput.disabled = true;
-                    el.sendButton.disabled = true;
-                } else {
-                    badge.className = 'badge bg-success-soft text-success';
-                    badge.innerText = 'Open';
-                    el.messageInput.disabled = false;
-                    el.sendButton.disabled = false;
+                const isClosed = status === 'closed';
+                badge.className = `chat-status-pill ${isClosed ? 'closed' : 'open'}`;
+                badge.innerText = isClosed ? 'Closed' : 'Open';
+
+                const emojiBtn = document.getElementById('chatEmojiBtn');
+                if (emojiBtn) emojiBtn.disabled = isClosed;
+
+                if (el.messageInput) el.messageInput.disabled = isClosed;
+                if (el.sendButton) {
+                    const hasText = el.messageInput ? el.messageInput.value.trim().length > 0 : false;
+                    el.sendButton.disabled = isClosed || !hasText;
                 }
             }
 
@@ -184,25 +194,37 @@
 
             // Function Show Page
             function showPage(activePage) {
-
                 pages.forEach(page => {
-
                     page.classList.add('d-none');
-
                 });
 
                 activePage.classList.remove('d-none');
+                if (window.feather) {
+                    window.feather.replace();
+                }
             }
 
-            // Function Enter
+            // Function Enter & Input
             function bindKeyboardEvents() {
                 el.messageInput?.addEventListener(
                     'keydown',
                     function (e) {
                         if (e.key === 'Enter' && !e.shiftKey) {
                             e.preventDefault();
+                            if (!el.sendButton?.disabled) {
+                                el.sendButton?.click();
+                            }
+                        }
+                    }
+                );
 
-                            el.sendButton?.click();
+                el.messageInput?.addEventListener(
+                    'input',
+                    function () {
+                        const isClosed = el.chatStatusBadge?.innerText?.trim().toLowerCase() === 'closed';
+                        const hasText = this.value.trim().length > 0;
+                        if (el.sendButton) {
+                            el.sendButton.disabled = isClosed || !hasText;
                         }
                     }
                 );
@@ -523,18 +545,19 @@
                             el.roomTicketNo.innerHTML = '-';
 
                             el.chatMessages.innerHTML = `
-<div
-    class="message-row"
-    id="ticketInfoMessage">
-
-    <div class="message-bubble system">
-
-        Silakan tuliskan pertanyaan Anda.
-
+<div class="ticket-card-banner mb-3 p-3" id="ticketInfoMessage">
+    <div class="d-flex align-items-center gap-2">
+        <span class="ticket-card-badge">
+            <i data-feather="info"></i>
+            Mulai Obrolan
+        </span>
     </div>
-
+    <div class="ticket-card-desc mt-2">
+        Silakan tuliskan pertanyaan atau konsultasi Anda pada kolom pesan di bawah.
+    </div>
 </div>
 `;
+                            if (window.feather) window.feather.replace();
                             enableSound();
 
                         }
@@ -799,45 +822,31 @@ Membuka Percakapan...
                 chatState.ticket =
                     result.no_tiket;
 
-                el.roomTicketNo.innerHTML = result.no_tiket;
+                el.roomTicketNo.innerHTML = escapeHtml(result.no_tiket);
 
                 const ticketInfo =
                     document.getElementById("ticketInfoMessage");
 
                 if (ticketInfo) {
-
-                    ticketInfo.innerHTML = `
-<div class="message-bubble system ticket-info">
-
-    <div class="fw-bold mb-2">
-        Nomor Tiket
-    </div>
-
-    <div class="d-flex align-items-center gap-2 mb-2">
-
-        <span id="ticketNumberText">
-            ${result.no_tiket}
+                    ticketInfo.outerHTML = `
+<div class="ticket-card-banner mb-3 p-3" id="ticketInfoMessage">
+    <div class="d-flex align-items-center justify-content-between mb-1">
+        <span class="ticket-card-badge">
+            <i data-feather="tag"></i>
+            Tiket Percakapan
         </span>
-
-        <button
-            type="button"
-            class="btn btn-sm btn-light"
-            id="copyTicketBtn">
-
-            📋
-
+        <button type="button" class="btn btn-sm copy-ticket-btn" id="copyTicketBtn" title="Salin nomor tiket">
+            <i data-feather="copy"></i>
+            <span>Salin</span>
         </button>
-
     </div>
-
-    <small>
-        Nomor tiket sudah dikirim ke email.
-        Mohon disimpan untuk melanjutkan percakapan.
-    </small>
-
+    <div class="ticket-card-number font-monospace" id="ticketNumberText">${escapeHtml(result.no_tiket)}</div>
+    <div class="ticket-card-desc">
+        Nomor tiket telah dikirim ke email Anda. Harap simpan nomor tiket ini untuk melanjutkan percakapan di kemudian hari.
+    </div>
 </div>
 `;
-
+                    if (window.feather) window.feather.replace();
                 }
 
                 startPolling();
@@ -921,42 +930,26 @@ Membuka Percakapan...
                 createdAt,
                 isGuest
             }) {
-
                 const chatTime = formatChatTime(createdAt);
+                const cleanName = senderName || (isGuest ? 'Saya' : 'Admin BKPSDM');
 
                 el.chatMessages.insertAdjacentHTML(
                     "beforeend",
                     `
 <div class="message-row ${isGuest ? 'me' : 'other'}">
-
     <div class="message-wrapper">
-
         <div class="message-info ${isGuest ? 'me' : 'other'}">
-
-            <span class="sender-name">
-                ${senderName}
-            </span>
-
-            <span class="message-time">
-                ${chatTime}
-            </span>
-
+            <span class="sender-name">${escapeHtml(cleanName)}</span>
+            <span class="message-dot">•</span>
+            <span class="message-time">${chatTime}</span>
         </div>
-
-        <div class="message-bubble ${isGuest ? 'me' : 'other'}">
-
-            ${message}
-
-        </div>
-
+        <div class="message-bubble ${isGuest ? 'me' : 'other'}">${escapeHtml(message)}</div>
     </div>
-
 </div>
 `
                 );
 
                 el.chatMessages.scrollTop = el.chatMessages.scrollHeight;
-
             }
 
             async function getConversationMessages(
@@ -1075,28 +1068,69 @@ Membuka Percakapan...
 
             }
 
-            document.addEventListener(
-                'click',
-                function (e) {
-
-                    if (
-                        e.target.id === 'copyTicketBtn'
-                    ) {
-
-                        const ticket =
-                            document.getElementById(
-                                'ticketNumberText'
-                            )?.innerText;
-
-                        navigator.clipboard
-                            .writeText(ticket);
-
-                        alert(
-                            'Nomor tiket berhasil disalin'
-                        );
+            document.addEventListener('click', function (e) {
+                // Copy ticket button
+                const copyBtn = e.target.closest('#copyTicketBtn');
+                if (copyBtn) {
+                    const ticket = document.getElementById('ticketNumberText')?.innerText;
+                    if (ticket) {
+                        navigator.clipboard.writeText(ticket);
+                        alert('Nomor tiket berhasil disalin');
                     }
+                    return;
                 }
-            );
+
+                // Emoji Button Toggle
+                const emojiBtn = e.target.closest('#chatEmojiBtn');
+                if (emojiBtn) {
+                    e.stopPropagation();
+                    const picker = document.getElementById('chatEmojiPicker');
+                    if (picker) {
+                        picker.classList.toggle('d-none');
+                        if (!picker.classList.contains('d-none') && window.feather) {
+                            feather.replace();
+                        }
+                    }
+                    return;
+                }
+
+                // Close Emoji Picker Button
+                const closeEmoji = e.target.closest('#closeEmojiPicker');
+                if (closeEmoji) {
+                    e.stopPropagation();
+                    document.getElementById('chatEmojiPicker')?.classList.add('d-none');
+                    return;
+                }
+
+                // Emoji Item Click
+                const emojiItem = e.target.closest('.emoji-item');
+                if (emojiItem) {
+                    e.stopPropagation();
+                    const emoji = emojiItem.getAttribute('data-emoji') || emojiItem.innerText.trim();
+                    const input = document.getElementById('chatInput');
+                    if (input) {
+                        const start = input.selectionStart || input.value.length;
+                        const end = input.selectionEnd || input.value.length;
+                        const text = input.value;
+                        input.value = text.substring(0, start) + emoji + text.substring(end);
+                        input.focus();
+                        input.selectionStart = input.selectionEnd = start + emoji.length;
+
+                        const isClosed = el.chatStatusBadge?.innerText?.trim().toLowerCase() === 'closed';
+                        const hasText = input.value.trim().length > 0;
+                        if (el.sendButton) {
+                            el.sendButton.disabled = isClosed || !hasText;
+                        }
+                    }
+                    return;
+                }
+
+                // Click Outside Emoji Picker
+                const insidePicker = e.target.closest('#chatEmojiPicker, #chatEmojiBtn');
+                if (!insidePicker) {
+                    document.getElementById('chatEmojiPicker')?.classList.add('d-none');
+                }
+            });
         }
 
     };

@@ -137,6 +137,8 @@
  <script>
      document.addEventListener('DOMContentLoaded', function() {
 
+         feather.replace();
+
          const form = document.getElementById('formUpdate');
          const btnUpdate = document.getElementById('btnUpdate');
          const modalEl = document.getElementById('modalSimpan');

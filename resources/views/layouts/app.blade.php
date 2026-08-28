@@ -57,8 +57,7 @@
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400;1,600&display=swap" rel="stylesheet">
 
     <link rel="icon" type="image/png" href="{{ asset('images/KabBuleleng.png') }}">
     <link rel="stylesheet"
@@ -164,7 +163,8 @@
     </div>
 
     <!-- Chat Drawer -->
-    <div id="chatDrawer">
+     <div id="chatDrawer"
+    class="{{ optional(Auth::user()->role)->name === 'admin_opd' ? 'chat-drawer-admin-opd' : '' }}">
         <!-- Header -->
         <div class="chat-header">
             <div class="chat-header-info">
@@ -236,8 +236,8 @@
             function loadTicketSearch(direction = 'back', animate = true) {
 
                 const userName = ChatWidgetApp.shortName(
-    window.ChatAuth.name || 'Pengguna'
-);
+                    window.ChatAuth.name || 'Pengguna'
+                );
 
                 renderPage(`
 
@@ -269,16 +269,32 @@
 
         </div>
 
+       <button
+            class="btn chat-gradient-btn w-100 d-flex align-items-center justify-content-center"
+            id="searchTicket">
+
+            <i data-feather="search" class="me-2"></i>
+            Cari Tiket
+
+        </button>
+
         <button
-    class="btn chat-gradient-btn w-100 d-flex align-items-center justify-content-center"
-    id="searchTicket">
+            class="btn chat-secondary-btn w-100 d-flex align-items-center justify-content-center position-relative mt-2"
+            id="btnConversationList">
 
-    <i data-feather="search" class="me-2"></i>
-    Cari Tiket
+            <i data-feather="message-square" class="me-2 text-primary"></i>
+            <span class="fw-semibold">List Percakapan</span>
 
-</button>
+            <span class="badge bg-danger rounded-pill chat-btn-unread-badge position-absolute d-none"
+                style="top: 50%; right: 16px; transform: translateY(-50%); font-size: 11px; font-weight: 700; padding: 4px 8px; box-shadow: 0 2px 6px rgba(220,53,69,0.35);">
+                0
+            </span>
+
+        </button>
 
     `, direction, animate);
+
+                ChatWidgetApp.loadUnreadBadge();
             }
 
             // =====================
@@ -408,44 +424,52 @@
 
             $(document).on('click', '#btnBackInbox', function() {
 
-            ChatWidgetApp.stopPolling();
-            
+                ChatWidgetApp.stopPolling();
+
                 ChatWidgetApp.activeConversationId = null;
 
                 const role = @json(optional(Auth::user()->role)->name);
 
                 if (
                     role === 'admin_bawah' ||
-                    role === 'bidang'
+                    role === 'bidang' ||
+                    ChatWidgetApp.previousView === 'inbox'
                 ) {
                     loadInboxAdminFo();
+                    return;
+                }
+
+                if (ChatWidgetApp.previousView === 'list') {
+                    ChatWidgetApp.loadConversationList();
                     return;
                 }
 
                 loadTicketSearch('back');
             });
 
-            // setInterval(function() {
-
-            //     if (!window.activeConversationId) {
-            //         return;
-            //     }
-
-            //     $.get(
-            //         `/chat/${window.activeConversationId}/messages`,
-            //         function(res) {
-
-            //             renderMessages(res);
-            //         }
-            //     );
-
-            // }, 3000);
-
-            $(document).on('click', '.openConversation', function() {
+            $(document).on('click', '.openConversation', function(e) {
+                if (ChatWidgetApp.isSelectionMode) {
+                    if ($(e.target).is('.item-select-checkbox')) return;
+                    const checkbox = $(this).find('.item-select-checkbox');
+                    const isChecked = !checkbox.prop('checked');
+                    checkbox.prop('checked', isChecked);
+                    const id = Number($(this).data('id'));
+                    if (isChecked) {
+                        ChatWidgetApp.selectedConversationIds.add(id);
+                        $(this).addClass('selected');
+                    } else {
+                        ChatWidgetApp.selectedConversationIds.delete(id);
+                        $(this).removeClass('selected');
+                    }
+                    ChatWidgetApp.updateSelectionUI();
+                    return;
+                }
 
                 let conversationId = $(this).data('id');
+                const role = @json(optional(Auth::user()->role)->name);
+                const source = (role === 'admin_bawah' || role === 'bidang') ? 'inbox' : 'list';
 
-                ChatWidgetApp.loadChat(conversationId);
+                ChatWidgetApp.loadChat(conversationId, source);
             });
 
             // =====================
@@ -453,47 +477,49 @@
             // =====================
             $('#openChatDrawer').on('click', function(e){
 
-    e.stopPropagation();
+                e.stopPropagation();
 
-    const drawer = $('#chatDrawer');
+                const drawer = $('#chatDrawer');
 
-    drawer.toggleClass('show');
+                drawer.toggleClass('show');
 
-    if(!drawer.hasClass('show')){
-        return;
-    }
+                if(!drawer.hasClass('show')){
+                    return;
+                }
 
-    const role = @json(optional(Auth::user()->role)->name);
+                const role = @json(optional(Auth::user()->role)->name);
 
-    if(
-        role === 'admin_bawah' ||
-        role === 'bidang'
-    ){
+                if(
+                    role === 'admin_bawah' ||
+                    role === 'bidang'
+                ){
 
-        if(!ChatWidgetApp.activeConversationId){
-            loadInboxAdminFo();
-        }
+                    if(!ChatWidgetApp.activeConversationId){
+                        loadInboxAdminFo();
+                    }
 
-    }else{
+                }else{
 
-       if(!ChatWidgetApp.activeConversationId){
+                   if(!ChatWidgetApp.activeConversationId){
 
-        loadTicketSearch('back', false);
+                    loadTicketSearch('back', false);
 
-    }
+                }
 
-    }
+                }
 
-});
+            });
 
             $('#closeChatDrawer').on('click', function() {
 
-    $('#chatDrawer').removeClass('show');
+                $('#chatDrawer').removeClass('show');
 
-    ChatWidgetApp.stopPolling();
+                ChatWidgetApp.stopPolling();
 
-    ChatWidgetApp.stopInboxPolling();
-});
+                ChatWidgetApp.stopInboxPolling();
+
+                ChatWidgetApp.stopConversationListPolling();
+            });
 
             $(document).on('mouseup', function(e) {
                 let drawer = $('#chatDrawer');
@@ -508,30 +534,34 @@
                 ) {
                     drawer.removeClass('show');
                     ChatWidgetApp.stopPolling();
-
-ChatWidgetApp.stopInboxPolling();
-
+                    ChatWidgetApp.stopInboxPolling();
+                    ChatWidgetApp.stopConversationListPolling();
                 }
             });
 
             // =====================
-            // CEK TIKET
+            // LIST PERCAKAPAN
             // =====================
-            // $(document).on('click', '#btnCekTiket', function() {
+            $(document).on('click', '#btnConversationList', function(e) {
+                e.preventDefault();
+                ChatWidgetApp.loadConversationList();
+            });
 
-            //     renderPage(`
-            //         <button class="btn btn-link p-0 mb-3" id="backToMenu">← Kembali</button>
+            // Btn Kembali Chat Admin OPD
+            $(document).on('click', '#btnBackToChatHome', function(e) {
 
-            //         <div class="mb-3">
-            //             <label>Nomor Tiket</label>
-            //             <input type="text" class="form-control" id="ticketNumber">
-            //         </div>
+                e.preventDefault();
 
-            //         <button class="btn btn-primary w-100" id="searchTicket">
-            //             Cari Tiket
-            //         </button>
-            //     `, 'forward');
-            // });
+                ChatWidgetApp.stopPolling();
+                ChatWidgetApp.stopInboxPolling();
+                ChatWidgetApp.stopConversationListPolling();
+
+                ChatWidgetApp.activeConversationId = null;
+                ChatWidgetApp.previousView = 'search';
+
+                loadTicketSearch('back');
+
+            });
 
             // =====================
             // SEARCH TIKET
@@ -677,7 +707,7 @@ ChatWidgetApp.stopInboxPolling();
 
                         if (res.conversation_id) {
 
-                            ChatWidgetApp.loadChat(res.conversation_id);
+                            ChatWidgetApp.loadChat(res.conversation_id, 'search');
 
                             $('#chatDrawer').addClass('show');
 

@@ -158,7 +158,7 @@
 
             <div class="modal-footer">
                 <button type="button" class="btn btn-light" data-bs-dismiss="modal">
-                    Tutup
+                    <i data-feather="arrow-left" class="me-1"></i> Tutup
                 </button>
             </div>
 
