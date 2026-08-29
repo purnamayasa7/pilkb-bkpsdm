@@ -22,6 +22,7 @@ use BaconQrCode\Renderer\RendererStyle\RendererStyle;
 use BaconQrCode\Renderer\Image\SvgImageBackEnd;
 use BaconQrCode\Writer;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Storage;
 
 class DetailTiketController extends Controller
@@ -1588,6 +1589,24 @@ class DetailTiketController extends Controller
                         )
                     );
                 }
+            }
+
+            // Notifikasi Email langsung ke ASN bersangkutan (email dari input Step 1)
+            if (!empty($tiket->email)) {
+                $pesanAsn = $semuaValid
+                    ? 'Berkas usulan layanan Anda dengan No Tiket: ' . $tiket->no_tiket . ' telah diterima dan diverifikasi oleh pihak BKPSDM.'
+                    : 'Berkas usulan layanan Anda dengan No Tiket: ' . $tiket->no_tiket . ' memerlukan perbaikan dokumen. Silakan hubungi Admin OPD Anda.';
+
+                Notification::route('mail', $tiket->email)
+                    ->notify(
+                        new TiketNotification(
+                            $semuaValid ? 'Berkas Diterima BKPSDM' : 'Perbaikan Berkas Diperlukan',
+                            $pesanAsn,
+                            route('tiket.public', $tiket->no_tiket),
+                            $tiket->no_tiket,
+                            $semuaValid ? 'berkas_diterima' : 'berkas_tidak_lengkap'
+                        )
+                    );
             }
 
             DB::commit();

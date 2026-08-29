@@ -1,8 +1,9 @@
 <?php
+
 return [
-    //Role ID = 1 -> Root
+    // Role ID = 1 -> Root (Administrator Utama)
     1 => [
-        //Heading
+        // Heading
         [
             'type' => 'heading',
             'title' => 'Dashboard',
@@ -16,7 +17,7 @@ return [
             'active_key' => 'dashboard-root',
         ],
 
-        //Heading
+        // Heading
         [
             'type' => 'heading',
             'title' => 'Master Data',
@@ -24,7 +25,7 @@ return [
 
         [
             'type' => 'item',
-            'title' => 'User',
+            'title' => 'Data Pengguna',
             'path' => 'root/user',
             'icon' => 'users',
             'active_key' => 'users',
@@ -32,7 +33,7 @@ return [
 
         [
             'type' => 'item',
-            'title' => 'Bidang',
+            'title' => 'Data Bidang',
             'path' => 'root/bidang',
             'icon' => 'layers',
             'active_key' => 'bidang',
@@ -40,7 +41,7 @@ return [
 
         [
             'type' => 'item',
-            'title' => 'Layanan',
+            'title' => 'Data Layanan',
             'path' => 'root/layanan',
             'icon' => 'briefcase',
             'active_key' => 'layanan',
@@ -48,7 +49,7 @@ return [
 
         [
             'type' => 'item',
-            'title' => 'Syarat',
+            'title' => 'Persyaratan Layanan',
             'path' => 'root/syarat',
             'icon' => 'check-square',
             'active_key' => 'syarat',
@@ -56,13 +57,13 @@ return [
 
         [
             'type' => 'item',
-            'title' => 'Status',
+            'title' => 'Status Layanan',
             'path' => 'root/status',
             'icon' => 'info',
             'active_key' => 'status',
         ],
 
-        //Heading
+        // Heading
         [
             'type' => 'heading',
             'title' => 'Manajemen Layanan',
@@ -72,19 +73,11 @@ return [
             'type' => 'item',
             'title' => 'Permintaan Layanan',
             'path' => 'root/tiket',
-            'icon' => 'briefcase',
+            'icon' => 'clipboard',
             'active_key' => 'permintaanLayanan',
         ],
 
-        [
-            'type' => 'item',
-            'title' => 'Laporan',
-            'path' => 'root/laporan',
-            'icon' => 'bar-chart-2',
-            'active_key' => 'laporan',
-        ],
-
-        //Heading
+        // Heading
         [
             'type' => 'heading',
             'title' => 'Lainnya',
@@ -100,10 +93,18 @@ return [
 
         [
             'type' => 'item',
-            'title' => 'Aktivitas User',
+            'title' => 'Log Aktivitas',
             'path' => 'log-aktivitas',
             'icon' => 'activity',
             'active_key' => 'aktivitas',
+        ],
+
+        [
+            'type' => 'item',
+            'title' => 'Laporan',
+            'path' => 'root/laporan',
+            'icon' => 'bar-chart-2',
+            'active_key' => 'laporan',
         ],
 
         [
@@ -123,9 +124,9 @@ return [
         ],
     ],
 
-    //Role ID = 2 -> Admin Bawah
+    // Role ID = 2 -> Admin Bawah (Front Office / Loket Pelayanan)
     2 => [
-        //Heading
+        // Heading
         [
             'type' => 'heading',
             'title' => 'Dashboard',
@@ -139,44 +140,7 @@ return [
             'active_key' => 'dashboard-admin_bawah',
         ],
 
-        [
-            'type' => 'heading',
-            'title' => 'Manajemen Tiket',
-        ],
-
-        [
-            'type' => 'item',
-            'title' => 'List Tiket',
-            'path' => 'adminBawah/tiket',
-            'icon' => 'list',
-            'active_key' => 'list-tiket',
-        ],
-
-        [
-            'type' => 'item',
-            'title' => 'Cetak Ulang Tiket',
-            'path' => 'adminBawah/tiket/cetak-form',
-            'icon' => 'printer',
-            'active_key' => 'cetak-ulang',
-        ],
-
-        [
-            'type' => 'item',
-            'title' => 'Update Perbaikan',
-            'path' => 'adminBawah/perbaikan',
-            'icon' => 'edit',
-            'active_key' => 'update-perbaikan',
-        ],
-
-        [
-            'type' => 'item',
-            'title' => 'Pindah Data Tiket',
-            'path' => 'adminBawah/pindah',
-            'icon' => 'shuffle',
-            'active_key' => 'pindah-tiket',
-        ],
-
-        //Heading
+        // Heading
         [
             'type' => 'heading',
             'title' => 'Manajemen Layanan',
@@ -192,7 +156,7 @@ return [
 
         [
             'type' => 'item',
-            'title' => 'Pengambilan',
+            'title' => 'Pengambilan Berkas',
             'path' => 'adminBawah/pengambilan',
             'icon' => 'download',
             'active_key' => 'pengambilan',
@@ -200,13 +164,51 @@ return [
 
         [
             'type' => 'item',
-            'title' => 'Archives',
+            'title' => 'Arsip Layanan',
             'path' => 'adminBawah/archives',
             'icon' => 'archive',
             'active_key' => 'archives',
         ],
 
-        //Heading
+        // Heading
+        [
+            'type' => 'heading',
+            'title' => 'Manajemen Tiket',
+        ],
+
+        [
+            'type' => 'item',
+            'title' => 'Daftar Tiket',
+            'path' => 'adminBawah/tiket',
+            'icon' => 'list',
+            'active_key' => 'list-tiket',
+        ],
+
+        [
+            'type' => 'item',
+            'title' => 'Cetak Ulang Tiket',
+            'path' => 'adminBawah/tiket/cetak-form',
+            'icon' => 'printer',
+            'active_key' => 'cetak-ulang',
+        ],
+
+        [
+            'type' => 'item',
+            'title' => 'Perbaikan Berkas',
+            'path' => 'adminBawah/perbaikan',
+            'icon' => 'edit',
+            'active_key' => 'update-perbaikan',
+        ],
+
+        [
+            'type' => 'item',
+            'title' => 'Pindah Data Tiket',
+            'path' => 'adminBawah/pindah',
+            'icon' => 'shuffle',
+            'active_key' => 'pindah-tiket',
+        ],
+
+        // Heading
         [
             'type' => 'heading',
             'title' => 'Lainnya',
@@ -245,9 +247,9 @@ return [
         ],
     ],
 
-    //Role ID = 3 -> Admin OPD
+    // Role ID = 3 -> Admin OPD (Pemohon Usulan)
     3 => [
-        //Heading
+        // Heading
         [
             'type' => 'heading',
             'title' => 'Dashboard',
@@ -261,7 +263,7 @@ return [
             'active_key' => 'dashboard-admin_opd',
         ],
 
-        //Heading
+        // Heading
         [
             'type' => 'heading',
             'title' => 'Manajemen Layanan',
@@ -275,29 +277,9 @@ return [
             'active_key' => 'register',
         ],
 
-        // [
-        //     'type' => 'collapse',
-        //     'title' => 'Register',
-        //     'icon' => 'file-plus',
-        //     'target' => 'masterRegister',
-        //     'active_key' => 'masterRegister',
-        //     'children' => [
-        //         [
-        //             'title' => 'Register',
-        //             'path' => 'adminOpd/tiket/create',
-        //             'active_key' => 'register',
-        //         ],
-        //         [
-        //             'title' => 'Trans Register',
-        //             'path' => '',
-        //             'active_key' => 'trans-register',
-        //         ],
-        //     ]
-        // ],
-
         [
             'type' => 'item',
-            'title' => 'List Pengajuan',
+            'title' => 'Daftar Pengajuan',
             'path' => 'adminOpd/tiket',
             'icon' => 'clipboard',
             'active_key' => 'list-permintaan',
@@ -311,7 +293,7 @@ return [
 
         [
             'type' => 'item',
-            'title' => 'List Perbaikan Data',
+            'title' => 'Daftar Perbaikan Usulan',
             'path' => 'adminOpd/perbaikan',
             'icon' => 'edit',
             'active_key' => 'list-perbaikan',
@@ -364,9 +346,9 @@ return [
         ],
     ],
 
-    //Role ID 4-> Admin Bidang
+    // Role ID = 4 -> Admin Bidang (Verifikator / Teknis)
     4 => [
-        //Heading
+        // Heading
         [
             'type' => 'heading',
             'title' => 'Dashboard',
@@ -380,40 +362,37 @@ return [
             'active_key' => 'dashboard-admin_bidang',
         ],
 
-        //Heading
+        // Heading
+        [
+            'type' => 'heading',
+            'title' => 'Master Data',
+        ],
+
+        [
+            'type' => 'item',
+            'title' => 'Data Layanan',
+            'path' => 'adminBidang/layanan',
+            'icon' => 'briefcase',
+            'active_key' => 'adminBidanglayanan',
+        ],
+
+        [
+            'type' => 'item',
+            'title' => 'Persyaratan Layanan',
+            'path' => 'adminBidang/syarat',
+            'icon' => 'check-square',
+            'active_key' => 'adminBidangsyarat',
+        ],
+
+        // Heading
         [
             'type' => 'heading',
             'title' => 'Manajemen Layanan',
         ],
 
         [
-            'type' => 'collapse',
-            'title' => 'Master Data',
-            'icon' => 'database',
-            'target' => 'masterData',
-            'active_key' => 'masterData',
-            'children' => [
-                [
-                    'title' => 'Layanan',
-                    'path' => 'adminBidang/layanan',
-                    'active_key' => 'adminBidanglayanan',
-                ],
-                [
-                    'title' => 'Syarat',
-                    'path' => 'adminBidang/syarat',
-                    'active_key' => 'adminBidangsyarat',
-                ],
-                // [
-                //     'title' => 'Status',
-                //     'path' => 'adminBidang/statusBidang',
-                //     'active_key' => 'adminBidangstatus',
-                // ],
-            ]
-        ],
-
-        [
             'type' => 'item',
-            'title' => 'List Permintaan',
+            'title' => 'Daftar Permintaan',
             'path' => 'adminBidang/permintaan',
             'icon' => 'clipboard',
             'active_key' => 'list-permintaan',
@@ -429,13 +408,13 @@ return [
 
         [
             'type' => 'item',
-            'title' => 'List Perbaikan Usulan',
+            'title' => 'Daftar Perbaikan Usulan',
             'path' => 'adminBidang/perbaikan',
             'icon' => 'tool',
             'active_key' => 'list-permintaan_data',
         ],
 
-        //Heading
+        // Heading
         [
             'type' => 'heading',
             'title' => 'Lainnya',

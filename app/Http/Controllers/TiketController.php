@@ -17,6 +17,7 @@ use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use BaconQrCode\Renderer\ImageRenderer;
@@ -1127,42 +1128,61 @@ class TiketController extends Controller
 
                 /*
             |--------------------------------------------------------------------------
-            | NOTIFIKASI ADMIN BAWAH
-            |--------------------------------------------------------------------------
-            */
-                $adminBawah = User::where(
-                    'role_id',
-                    2
-                )->get();
-
-                foreach ($adminBawah as $user) {
-
-                    $user->notify(
-                        new TiketNotification(
-                            'Usulan Baru',
-                            'No Tiket: ' .
-                                $regTiket->no_tiket .
-                                ' usulan perlu diverifikasi.',
-                            route(
-                                'adminBawah.permintaan.reviewPermintaan',
-                                [
-                                    'no_tiket' =>
-                                    $regTiket->no_tiket
-                                ]
-                            ),
-                            $regTiket->no_tiket,
-                            'usulan_baru'
-                        )
-                    );
-                }
-
-
-                /*
-            |--------------------------------------------------------------------------
-            | COMMIT
+            | COMMIT DATABASE TRANSAKSI
             |--------------------------------------------------------------------------
             */
                 DB::commit();
+
+                /*
+            |--------------------------------------------------------------------------
+            | NOTIFIKASI ADMIN BAWAH, PEMOHON & ASN BERSANGKUTAN
+            |--------------------------------------------------------------------------
+            */
+                try {
+                    $adminBawah = User::where('role_id', 2)->get();
+                    foreach ($adminBawah as $user) {
+                        $user->notify(
+                            new TiketNotification(
+                                'Usulan Baru',
+                                'No Tiket: ' . $regTiket->no_tiket . ' usulan perlu diverifikasi.',
+                                route('adminBawah.permintaan.reviewPermintaan', ['no_tiket' => $regTiket->no_tiket]),
+                                $regTiket->no_tiket,
+                                'usulan_baru'
+                            )
+                        );
+                    }
+
+                    // 1. Notifikasi in-app / email ke Admin OPD yang sedang login
+                    $pemohon = Auth::user();
+                    if ($pemohon) {
+                        $pemohon->notify(
+                            new TiketNotification(
+                                'Tiket Usulan Berhasil Dibuat',
+                                'No Tiket: ' . $regTiket->no_tiket . ' usulan berhasil diajukan dan sedang menunggu verifikasi.',
+                                route('adminOpd.tiket.indexProses'),
+                                $regTiket->no_tiket,
+                                'tiket_dibuat'
+                            )
+                        );
+                    }
+
+                    // 2. Notifikasi Email langsung ke ASN bersangkutan (email dari input Step 1)
+                    if (!empty($regTiket->email)) {
+                        Notification::route('mail', $regTiket->email)
+                            ->notify(
+                                new TiketNotification(
+                                    'Tiket Usulan Berhasil Diajukan',
+                                    'Halo ' . ($regTiket->nama ?? 'Bapak/Ibu') . ', pengajuan usulan layanan Anda dengan No Tiket: ' .
+                                        $regTiket->no_tiket . ' telah berhasil terdaftar pada sistem PILKB dan sedang menunggu verifikasi berkas.',
+                                    route('tiket.public', $regTiket->no_tiket),
+                                    $regTiket->no_tiket,
+                                    'tiket_dibuat'
+                                )
+                            );
+                    }
+                } catch (\Throwable $e) {
+                    Log::warning('Gagal mengirim notifikasi email tiket: ' . $e->getMessage());
+                }
 
 
                 /*

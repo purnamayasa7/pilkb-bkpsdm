@@ -15,6 +15,7 @@ use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Notification;
 
 class PermintaanController extends Controller
 {
@@ -563,6 +564,24 @@ class PermintaanController extends Controller
                 }
             }
 
+            // Notifikasi Email langsung ke ASN bersangkutan (email dari input Step 1)
+            if (!empty($tiket->email)) {
+                $pesanAsn = $semuaValid
+                    ? 'Status pengajuan usulan Anda dengan No Tiket: ' . $tahap->no_tiket . ' telah diperbarui menjadi ' . ($tahap->statusRel->status ?? 'Sedang Diproses') . '.'
+                    : 'Pengajuan usulan Anda dengan No Tiket: ' . $tahap->no_tiket . ' memerlukan perbaikan dokumen berkas. Silakan koordinasi dengan Admin OPD Anda.';
+
+                Notification::route('mail', $tiket->email)
+                    ->notify(
+                        new TiketNotification(
+                            $semuaValid ? 'Status Usulan Diperbarui' : 'Perbaikan Berkas Diperlukan',
+                            $pesanAsn,
+                            route('tiket.public', $tahap->no_tiket),
+                            $tahap->no_tiket,
+                            $semuaValid ? 'status_update' : 'berkas_tidak_lengkap'
+                        )
+                    );
+            }
+
             return redirect()
                 ->route('adminBidang.permintaan.index')
                 ->with('success', 'Review berhasil disimpan.');
@@ -621,6 +640,39 @@ class PermintaanController extends Controller
                         'selesai'
                     )
                 );
+            }
+
+            // Notifikasi ke pemohon (user OPD pemilik tiket) bahwa proses selesai
+            $pemohon = User::where('role_id', 3)
+                ->where('kode_ukerja', $tiket->kode_ukerja)
+                ->whereNotNull('email')
+                ->get();
+
+            foreach ($pemohon as $user) {
+                $user->notify(
+                    new TiketNotification(
+                        'Layanan Anda Telah Selesai Diproses',
+                        'No Tiket: ' . $tiket->no_tiket .
+                            ' telah selesai diproses. Silakan hubungi BKPSDM untuk pengambilan dokumen.',
+                        route('adminOpd.tiket.indexProses'),
+                        $tiket->no_tiket,
+                        'selesai'
+                    )
+                );
+            }
+
+            // Notifikasi Email langsung ke ASN bersangkutan (email dari input Step 1)
+            if (!empty($tiket->email)) {
+                Notification::route('mail', $tiket->email)
+                    ->notify(
+                        new TiketNotification(
+                            'Layanan Anda Telah Selesai Diproses',
+                            'Halo ' . ($tiket->nama ?? 'Bapak/Ibu') . ', pengajuan usulan layanan Anda dengan No Tiket: ' . $tiket->no_tiket . ' telah selesai diproses oleh pihak BKPSDM.',
+                            route('tiket.public', $tiket->no_tiket),
+                            $tiket->no_tiket,
+                            'selesai'
+                        )
+                    );
             }
 
             return redirect()

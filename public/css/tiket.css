@@ -1,0 +1,738 @@
+/* ==========================================================================
+   PILKB - TIKET & USULAN MODULE STYLES (SB Admin Pro Design System)
+   Digunakan untuk:
+   - OPD: create.blade.php (Wizard 4 Tahap)
+   - Admin Bawah: registrasi/edit.blade.php, perbaikan/edit.blade.php
+   - Bidang: permintaan/edit.blade.php, status/edit.blade.php
+   ========================================================================== */
+
+/* ==========================================================================
+   1. STEPPER WIZARD & SHINE ANIMATION
+   ========================================================================== */
+.stepper-container {
+    position: relative;
+    max-width: 840px;
+    margin: 0 auto 2rem;
+    padding: 0 0.5rem;
+}
+
+.stepper-nav {
+    display: flex;
+    justify-content: space-between;
+    position: relative;
+}
+
+.stepper-track-bg {
+    position: absolute;
+    top: 20px;
+    left: 12.5%;
+    width: 75%;
+    height: 5px;
+    background-color: #e2e8f0;
+    border-radius: 999px;
+    z-index: 1;
+}
+
+.stepper-track-progress {
+    position: absolute;
+    top: 20px;
+    left: 12.5%;
+    max-width: 75%;
+    height: 5px;
+    background: linear-gradient(90deg, #0061f2, #3b82f6, #4dabf7);
+    border-radius: 999px;
+    z-index: 2;
+    transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+    overflow: hidden;
+}
+
+.stepper-track-progress::after {
+    content: "";
+    position: absolute;
+    top: -40%;
+    left: -40%;
+    width: 40%;
+    height: 180%;
+    background: linear-gradient(90deg,
+            rgba(255, 255, 255, 0),
+            rgba(255, 255, 255, 0.9),
+            rgba(255, 255, 255, 0));
+    filter: blur(3px);
+    transform: skewX(-20deg);
+    animation: shine 3.4s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+
+@keyframes shine {
+    0% {
+        left: -40%;
+        opacity: 0;
+    }
+    12% {
+        opacity: 1;
+    }
+    48% {
+        left: 96%;
+        opacity: 1;
+    }
+    60% {
+        left: 115%;
+        opacity: 0;
+    }
+    100% {
+        left: 115%;
+        opacity: 0;
+    }
+}
+
+.stepper-step {
+    position: relative;
+    z-index: 3;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    flex: 1;
+    padding: 0 4px;
+}
+
+.stepper-icon {
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    background-color: #ffffff;
+    border: 2px solid #cbd5e1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 0.875rem;
+    color: #64748b;
+    margin-bottom: 0.5rem;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.04);
+}
+
+.stepper-icon svg {
+    width: 18px;
+    height: 18px;
+}
+
+.stepper-title {
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: #64748b;
+    transition: color 0.3s ease;
+}
+
+/* Active Step: Efek denyut lembut bertahap saat sinar progress bar tiba di dot */
+.stepper-step.active .stepper-icon {
+    background-color: #0061f2;
+    border-color: #0061f2;
+    color: #ffffff;
+    animation: pulse-ring-sync 3.4s ease-out infinite;
+}
+
+@keyframes pulse-ring-sync {
+    0%, 46% {
+        box-shadow: 0 0 0 0 rgba(0, 97, 242, 0);
+    }
+    48% {
+        box-shadow: 0 0 0 0 rgba(0, 97, 242, 0.45);
+    }
+    68% {
+        box-shadow: 0 0 0 8px rgba(0, 97, 242, 0.2);
+    }
+    86% {
+        box-shadow: 0 0 0 14px rgba(0, 97, 242, 0);
+    }
+    100% {
+        box-shadow: 0 0 0 0 rgba(0, 97, 242, 0);
+    }
+}
+
+.stepper-step.active .stepper-title {
+    color: #0061f2;
+    font-weight: 700;
+}
+
+/* Completed Step */
+.stepper-step.completed .stepper-icon {
+    background: linear-gradient(135deg, #0061f2, #2563eb);
+    border-color: #0061f2;
+    color: #ffffff;
+    box-shadow: 0 3px 8px rgba(0, 97, 242, 0.25);
+}
+
+.stepper-step.completed .stepper-title {
+    color: #1e293b;
+    font-weight: 600;
+}
+
+/* ==========================================================================
+   2. SB ADMIN PRO COMPLIANT CARDS & INFO BOXES
+   ========================================================================== */
+.form-wizard-card {
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    border-radius: 0.5rem;
+    box-shadow: 0 0.15rem 1.75rem 0 rgba(33, 40, 50, 0.05);
+}
+
+.form-wizard-header {
+    background: #ffffff;
+    border-bottom: 1px solid #e3e6ec;
+    padding: 1rem 1.35rem;
+    border-top-left-radius: calc(0.5rem - 1px);
+    border-top-right-radius: calc(0.5rem - 1px);
+}
+
+.service-banner-box {
+    background-color: #f8fafc;
+    border: 1px solid #e2e8f0;
+}
+
+.summary-info-card {
+    background-color: #ffffff;
+    border: 1px solid #e3e6ec;
+    border-radius: 0.45rem;
+}
+
+.summary-info-card .card-header {
+    background-color: #f8fafc;
+    border-bottom: 1px solid #e3e6ec;
+}
+
+.ticket-qr-box {
+    background-color: #f8fafc;
+    border: 1px solid #e3e6ec;
+    border-radius: 0.45rem;
+}
+
+.ticket-qr-frame {
+    background-color: #ffffff;
+    border: 1px solid #e2e8f0;
+    padding: 8px;
+    border-radius: 0.5rem;
+    display: inline-block;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+}
+
+.input-group-text {
+    border-color: #d1d5db;
+    color: #64748b;
+}
+
+.form-control:focus, .form-select:focus {
+    border-color: #0061f2;
+    box-shadow: 0 0 0 0.2rem rgba(0, 97, 242, 0.15);
+}
+
+/* ==========================================================================
+   3. E-FILE TABLE & CHECKLIST
+   ========================================================================== */
+.table-checklist thead th {
+    padding: 0.75rem 1rem !important;
+    font-size: 0.8125rem !important;
+    font-weight: 700 !important;
+    color: #475569 !important;
+    background-color: #f8fafc !important;
+    border-bottom: 1px solid #e2e8f0 !important;
+    vertical-align: middle !important;
+    letter-spacing: 0.025em;
+}
+
+.table-checklist tbody td {
+    padding: 0.75rem 1rem !important;
+    vertical-align: middle !important;
+}
+
+.efile-cell {
+    vertical-align: middle !important;
+    text-align: center !important;
+    width: 110px;
+    min-width: 110px;
+}
+
+.efile-action {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    min-height: 48px;
+}
+
+.efile-action .btn,
+.efile-action .badge {
+    margin: 0;
+}
+
+/* BUTTON E-FILE */
+.efile-btn {
+    min-width: 88px;
+    height: 32px;
+    padding: 0 10px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    gap: 5px;
+    border-radius: 6px;
+    white-space: nowrap;
+    transition: all 0.2s ease;
+}
+
+.efile-btn svg {
+    width: 14px;
+    height: 14px;
+    flex-shrink: 0;
+}
+
+/* Button Lihat Dokumen SIMPEG Multiple */
+.btn-lihat-dokumen {
+    position: relative;
+    min-width: 88px;
+    height: 32px;
+    padding: 0 10px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    gap: 5px;
+    border-radius: 6px;
+    white-space: nowrap;
+    transition: all 0.2s ease;
+}
+
+.btn-lihat-dokumen svg {
+    width: 14px;
+    height: 14px;
+    flex-shrink: 0;
+}
+
+/* Nama file preview */
+.efile-filename {
+    max-width: 220px;
+    word-break: break-word;
+    line-height: 1.4;
+    font-size: 0.75rem;
+}
+
+/* Status dokumen */
+.efile-status {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+}
+
+/* Tombol Upload & Ganti */
+.btn-upload,
+.btn-ganti {
+    border-color: #f59e0b;
+    color: #d97706;
+    background-color: #fffbeb;
+}
+
+.btn-upload:hover,
+.btn-ganti:hover {
+    background-color: #f59e0b;
+    color: #ffffff;
+}
+
+.btn-loading {
+    min-width: 130px;
+    justify-content: center;
+}
+
+.btn-loading .spinner-border {
+    width: 1rem;
+    height: 1rem;
+}
+
+/* Checkbox Syarat & Comment */
+.checkSyarat {
+    width: 19px !important;
+    height: 19px !important;
+    cursor: pointer;
+    margin: 0 !important;
+    flex-shrink: 0;
+}
+
+.comment-wrapper {
+    min-width: 140px;
+}
+
+.comment-input {
+    font-size: 0.8125rem;
+}
+
+/* ==========================================================================
+   4. MODAL DOKUMEN SIMPEG
+   ========================================================================== */
+.dokumen-item {
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    transition: all .2s ease;
+}
+
+.dokumen-item:hover {
+    border-color: #cbd5e1;
+    background-color: #f8fafc;
+}
+
+.dokumen-icon {
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #f1f5f9;
+    border-radius: 8px;
+    flex-shrink: 0;
+}
+
+.dokumen-icon svg {
+    width: 20px;
+    height: 20px;
+}
+
+.dokumen-nama {
+    font-weight: 600;
+    line-height: 1.4;
+    word-break: break-word;
+}
+
+.dokumen-meta {
+    font-size: .8125rem;
+    color: #6b7280;
+}
+
+.dokumen-lihat {
+    min-width: 75px;
+    white-space: nowrap;
+}
+
+.dokumen-empty {
+    padding: 40px 20px;
+    text-align: center;
+    color: #6b7280;
+}
+
+.dokumen-empty svg {
+    width: 40px;
+    height: 40px;
+    margin-bottom: 10px;
+}
+
+/* ==========================================================================
+   5. RESPONSIVE OPTIMIZATIONS
+   ========================================================================== */
+@media (max-width: 575.98px) {
+    .stepper-container {
+        margin-bottom: 1.25rem;
+        padding: 0 0.25rem;
+    }
+
+    .stepper-icon {
+        width: 34px;
+        height: 34px;
+        font-size: 0.75rem;
+        margin-bottom: 0.35rem;
+    }
+
+    .stepper-icon svg {
+        width: 14px;
+        height: 14px;
+    }
+
+    .stepper-title {
+        font-size: 0.6875rem;
+        line-height: 1.2;
+    }
+
+    .stepper-track-bg,
+    .stepper-track-progress {
+        top: 16px;
+        height: 4px;
+    }
+
+    .form-wizard-card .card-body {
+        padding: 1.25rem 1rem !important;
+    }
+
+    .form-wizard-header {
+        padding: 0.75rem 1rem;
+    }
+
+    .form-wizard-header h5 {
+        font-size: 0.95rem;
+    }
+
+    .wizard-actions {
+        display: flex !important;
+        flex-direction: column-reverse !important;
+        gap: 0.75rem !important;
+        width: 100% !important;
+    }
+
+    .wizard-actions .btn {
+        width: 100% !important;
+        justify-content: center !important;
+    }
+
+    .wizard-actions-end {
+        display: flex !important;
+        flex-direction: column !important;
+        gap: 0.75rem !important;
+        width: 100% !important;
+    }
+
+    .wizard-actions-end .btn {
+        width: 100% !important;
+        justify-content: center !important;
+    }
+}
+
+@media (max-width: 767.98px) {
+    .table.table-checklist {
+        min-width: 540px;
+    }
+}
+
+/* ==========================================================================
+   6. DARK MODE OVERRIDES (SB Admin Pro Style)
+   ========================================================================== */
+body.dark-mode .stepper-track-bg {
+    background-color: #253247;
+}
+
+body.dark-mode .stepper-icon {
+    background-color: #182235;
+    border-color: #334155;
+    color: #94a3b8;
+}
+
+body.dark-mode .stepper-title {
+    color: #94a3b8;
+}
+
+body.dark-mode .stepper-step.active .stepper-icon {
+    background-color: #0061f2;
+    border-color: #60a5fa;
+    color: #ffffff;
+    box-shadow: 0 0 0 5px rgba(96, 165, 250, 0.25);
+}
+
+body.dark-mode .stepper-step.active .stepper-title {
+    color: #60a5fa;
+}
+
+body.dark-mode .stepper-step.completed .stepper-icon {
+    background-color: #0061f2;
+    border-color: #0061f2;
+    color: #ffffff;
+}
+
+body.dark-mode .stepper-step.completed .stepper-title {
+    color: #e2e8f0;
+}
+
+body.dark-mode .form-wizard-card {
+    background-color: #182235 !important;
+    border-color: #253247 !important;
+    box-shadow: 0 0.15rem 1.75rem 0 rgba(0, 0, 0, 0.35) !important;
+}
+
+body.dark-mode .form-wizard-header {
+    background-color: #182235 !important;
+    border-color: #253247 !important;
+}
+
+body.dark-mode .form-wizard-header h5,
+body.dark-mode .form-wizard-header .card-title {
+    color: #f1f5f9 !important;
+}
+
+body.dark-mode .input-group-text {
+    background-color: #1b283d !important;
+    border-color: #253247 !important;
+    color: #94a3b8 !important;
+}
+
+body.dark-mode .form-control,
+body.dark-mode .form-select {
+    background-color: #111c2f !important;
+    border-color: #253247 !important;
+    color: #f1f5f9 !important;
+}
+
+body.dark-mode .form-control:focus,
+body.dark-mode .form-select:focus {
+    border-color: #60a5fa !important;
+    box-shadow: 0 0 0 0.2rem rgba(96, 165, 250, 0.2) !important;
+}
+
+body.dark-mode .form-control:disabled,
+body.dark-mode .form-select:disabled {
+    background-color: #182235 !important;
+    color: #64748b !important;
+    border-color: #253247 !important;
+}
+
+body.dark-mode .form-label,
+body.dark-mode .step-section-heading {
+    color: #f1f5f9 !important;
+}
+
+body.dark-mode .form-text,
+body.dark-mode .text-muted {
+    color: #94a3b8 !important;
+}
+
+body.dark-mode .service-banner-box {
+    background-color: #141f32 !important;
+    border-color: #253247 !important;
+}
+
+body.dark-mode .service-banner-box h6 {
+    color: #f1f5f9 !important;
+}
+
+body.dark-mode .summary-info-card {
+    background-color: #141f32 !important;
+    border-color: #253247 !important;
+}
+
+body.dark-mode .summary-info-card .card-header {
+    background-color: #182235 !important;
+    border-color: #253247 !important;
+    color: #f1f5f9 !important;
+}
+
+body.dark-mode .summary-info-card .fw-bold {
+    color: #f1f5f9 !important;
+}
+
+body.dark-mode .ticket-qr-box {
+    background-color: #141f32 !important;
+    border-color: #253247 !important;
+}
+
+body.dark-mode .ticket-qr-frame {
+    background-color: #ffffff;
+    border-color: #334155;
+}
+
+body.dark-mode .table-responsive {
+    border-color: #253247 !important;
+}
+
+body.dark-mode .table {
+    color: #d6deeb !important;
+    border-color: #253247 !important;
+}
+
+body.dark-mode .table thead.table-light th,
+body.dark-mode .table thead th,
+body.dark-mode .table tfoot th {
+    background-color: #141f32 !important;
+    color: #94a3b8 !important;
+    border-color: #253247 !important;
+}
+
+body.dark-mode .table tbody tr td {
+    border-color: #253247 !important;
+    color: #cbd5e1;
+}
+
+body.dark-mode .table tbody tr td .fw-semibold,
+body.dark-mode .table tbody tr td .text-dark {
+    color: #f1f5f9 !important;
+}
+
+body.dark-mode .table-hover>tbody>tr:hover>* {
+    background-color: #1b283d !important;
+    color: #f1f5f9 !important;
+}
+
+body.dark-mode .badge.bg-light {
+    background-color: #1e293b !important;
+    border-color: #334155 !important;
+}
+
+body.dark-mode .btn-upload,
+body.dark-mode .btn-ganti {
+    border-color: #d97706;
+    color: #fbbf24;
+    background-color: rgba(245, 158, 11, 0.15);
+}
+
+body.dark-mode .btn-upload:hover,
+body.dark-mode .btn-ganti:hover {
+    background-color: #f59e0b;
+    color: #ffffff;
+}
+
+body.dark-mode .btn-outline-secondary {
+    border-color: #334155 !important;
+    color: #cbd5e1 !important;
+}
+
+body.dark-mode .btn-outline-secondary:hover {
+    background-color: #253247 !important;
+    color: #ffffff !important;
+}
+
+body.dark-mode .border-top,
+body.dark-mode .border-bottom {
+    border-color: #253247 !important;
+}
+
+body.dark-mode .modal-content {
+    background-color: #182235 !important;
+    border-color: #253247 !important;
+    color: #d6deeb !important;
+}
+
+body.dark-mode .modal-header,
+body.dark-mode .modal-footer {
+    border-color: #253247 !important;
+}
+
+body.dark-mode .modal-title {
+    color: #f1f5f9 !important;
+}
+
+body.dark-mode .modal-body .card {
+    background-color: #141f32 !important;
+    border-color: #253247 !important;
+}
+
+body.dark-mode .dokumen-item {
+    background-color: #141f32;
+    border-color: #253247;
+}
+
+body.dark-mode .dokumen-item:hover {
+    background-color: #1b283d;
+    border-color: #334155;
+}
+
+body.dark-mode .dokumen-icon {
+    background-color: #182235;
+    color: #60a5fa;
+}
+
+body.dark-mode .dokumen-nama {
+    color: #f1f5f9;
+}
+
+body.dark-mode .dokumen-meta {
+    color: #94a3b8;
+}
+
+body.dark-mode .btn-close {
+    filter: invert(1) grayscale(100%) brightness(200%);
+}

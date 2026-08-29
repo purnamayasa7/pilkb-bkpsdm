@@ -43,6 +43,9 @@ Route::get('/tiket/cetak/{no_tiket}', [TiketController::class, 'cetak'])->name('
 // Guest Chat
 Route::get('/guest-chat/bidang', [ChatController::class, 'getBidang']);
 Route::get('/guesct-chat/layanan/{bidang}', [ChatController::class, 'getLayanan']);
+
+
+
 Route::post('/guest-chat/start', [ChatController::class, 'startGuestChat']);
 Route::post('/guest-chat/resume', [ChatController::class, 'resumeGuestChat']);
 Route::get('/guest-chat/{conversation}/messages', [ChatController::class, 'loadGuestMessages']);

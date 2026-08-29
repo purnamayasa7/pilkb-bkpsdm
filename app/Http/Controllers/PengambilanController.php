@@ -12,6 +12,7 @@ use App\Services\PegawaiService;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Notification;
 
 class PengambilanController extends Controller
 {
@@ -207,6 +208,39 @@ class PengambilanController extends Controller
             [],
             $pengambilan->toArray()
         );
+
+        // Notifikasi ke pemohon (user OPD pemilik tiket) bahwa dokumen sudah bisa diambil/telah diambil
+        $pemohon = User::where('role_id', 3)
+            ->where('kode_ukerja', $tiket->kode_ukerja)
+            ->whereNotNull('email')
+            ->get();
+
+        foreach ($pemohon as $user) {
+            $user->notify(
+                new TiketNotification(
+                    'Dokumen Siap Diambil',
+                    'No Tiket: ' . $tiket->no_tiket .
+                        ' dokumen usulan Anda telah selesai diproses dan siap untuk diambil di kantor BKPSDM.',
+                    route('adminOpd.tiket.indexProses'),
+                    $tiket->no_tiket,
+                    'pengambilan'
+                )
+            );
+        }
+
+        // Notifikasi Email langsung ke ASN bersangkutan (email dari input Step 1)
+        if (!empty($tiket->email)) {
+            Notification::route('mail', $tiket->email)
+                ->notify(
+                    new TiketNotification(
+                        'Dokumen Telah Diambil',
+                        'Halo ' . ($tiket->nama ?? 'Bapak/Ibu') . ', dokumen untuk usulan layanan No Tiket: ' . $tiket->no_tiket . ' telah tercatat diambil oleh ' . ($request->nama_pengambil ?? 'Pemohon') . '.',
+                        route('tiket.public', $tiket->no_tiket),
+                        $tiket->no_tiket,
+                        'pengambilan'
+                    )
+                );
+        }
 
         return back()->with('success', 'Data pengambilan berhasil ditambahkan');
     }

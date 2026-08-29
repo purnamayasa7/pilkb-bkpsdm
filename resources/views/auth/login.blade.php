@@ -230,7 +230,7 @@
                         <img src="{{ asset('images/KabBuleleng.png') }}" class="logo" alt="Logo Kabupaten Buleleng">
                         <div class="brand-text-wrap">
                             <div class="brand-text text-uppercase">
-                                BKPSDM KAB. BULELENG
+                                BKPSDM BULELENG
                             </div>
                             <div class="brand-subtext">Pemerintah Kabupaten Buleleng</div>
                         </div>
