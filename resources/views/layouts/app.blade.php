@@ -478,43 +478,36 @@
             // DRAWER
             // =====================
             $('#openChatDrawer').on('click', function(e){
-
                 e.stopPropagation();
 
                 const drawer = $('#chatDrawer');
-
                 drawer.toggleClass('show');
 
                 if(!drawer.hasClass('show')){
+                    ChatWidgetApp.loadUnreadBadge();
                     return;
                 }
 
-                const role = @json(optional(Auth::user()->role)->name);
+                // Jika drawer belum pernah me-render halaman apapun, buka halaman awal sesuai role
+                const hasPage = $('.chat-body').find('.chat-page, .chat-room-container').length > 0;
 
-                if(
-                    role === 'admin_bawah' ||
-                    role === 'bidang'
-                ){
+                if (!hasPage) {
+                    const role = @json(optional(Auth::user()->role)->name);
 
-                    if(!ChatWidgetApp.activeConversationId){
+                    if (role === 'admin_bawah' || role === 'bidang') {
                         loadInboxAdminFo();
+                    } else {
+                        loadTicketSearch('back', false);
                     }
-
-                }else{
-
-                   if(!ChatWidgetApp.activeConversationId){
-
-                    loadTicketSearch('back', false);
-
+                } else if (ChatWidgetApp.isRoomCurrentlyOpen(ChatWidgetApp.activeConversationId)) {
+                    // Jika saat dibuka kembali masih berada di dalam room chat, scroll ke bawah & mark-read
+                    $('#chatMessages').scrollTop($('#chatMessages')[0]?.scrollHeight || 0);
+                    ChatWidgetApp.markRoomRead(ChatWidgetApp.activeConversationId);
                 }
-
-                }
-
             });
 
             $('#closeChatDrawer').on('click', function() {
                 $('#chatDrawer').removeClass('show');
-                ChatWidgetApp.activeConversationId = null;
                 ChatWidgetApp.stopPolling();
                 ChatWidgetApp.stopInboxPolling();
                 ChatWidgetApp.stopConversationListPolling();
@@ -533,7 +526,6 @@
                     button.has(e.target).length === 0
                 ) {
                     drawer.removeClass('show');
-                    ChatWidgetApp.activeConversationId = null;
                     ChatWidgetApp.stopPolling();
                     ChatWidgetApp.stopInboxPolling();
                     ChatWidgetApp.stopConversationListPolling();
