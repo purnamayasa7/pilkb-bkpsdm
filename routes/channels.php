@@ -13,14 +13,37 @@ Broadcast::channel('user.{userId}', function ($user, $userId) {
 
 // Channel otorisasi untuk room chat percakapan
 Broadcast::channel('chat.{conversationId}', function ($user, $conversationId) {
-    if (in_array($user->role?->name, ['admin_bawah', 'root'])) {
+    if (!$user) {
+        return false;
+    }
+
+    $roleName = $user->role?->name;
+    if (in_array($roleName, ['admin_bawah', 'root'])) {
         return true;
     }
 
-    return \App\Models\ChatParticipant::where('conversation_id', $conversationId)
+    $isParticipant = \App\Models\ChatParticipant::where('conversation_id', $conversationId)
         ->where('user_id', $user->id)
-        ->exists()
-        || \App\Models\ChatConversation::where('id', $conversationId)
-            ->where('created_by', $user->id)
-            ->exists();
+        ->exists();
+
+    if ($isParticipant) {
+        return true;
+    }
+
+    $isCreator = \App\Models\ChatConversation::where('id', $conversationId)
+        ->where('created_by', $user->id)
+        ->exists();
+
+    if ($isCreator) {
+        return true;
+    }
+
+    if ($roleName === 'bidang') {
+        $conv = \App\Models\ChatConversation::find($conversationId);
+        if ($conv && $conv->bidang_id && (int) $conv->bidang_id === (int) $user->bidang_id) {
+            return true;
+        }
+    }
+
+    return false;
 });

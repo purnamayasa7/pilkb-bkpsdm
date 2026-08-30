@@ -224,11 +224,29 @@
             wssPort: isHttps ? (window.location.port || 443) : {{ env("REVERB_PORT", 8080) }},
             forceTLS: isHttps,
             enabledTransports: ['ws', 'wss'],
-            authEndpoint: '/broadcasting/auth',
-            auth: {
-                headers: {
-                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                }
+            authorizer: (channel, options) => {
+                return {
+                    authorize: (socketId, callback) => {
+                        $.ajax({
+                            url: '/broadcasting/auth',
+                            type: 'POST',
+                            data: {
+                                socket_id: socketId,
+                                channel_name: channel.name
+                            },
+                            headers: {
+                                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') || '{{ csrf_token() }}'
+                            },
+                            success: (data) => {
+                                callback(null, data);
+                            },
+                            error: (error) => {
+                                console.error('Broadcasting auth error:', error);
+                                callback(error);
+                            }
+                        });
+                    }
+                };
             }
         });
     </script>
