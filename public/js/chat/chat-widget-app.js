@@ -32,59 +32,55 @@
             this.subscribeUserChannel();
         },
 
+        _userSubscribedTime: 0,
+        _roomSubscribedTime: 0,
+
         // Subscribe to user private channel / Firebase for realtime inbox updates & unread badges
         subscribeUserChannel() {
             if (!window.ChatAuth?.id || this.isUserSubscribed) return;
             this.isUserSubscribed = true;
+            this._userSubscribedTime = Date.now();
 
-            const handleUserEvent = (e) => {
+            const handleUserEvent = (e, isLive = true) => {
                 if (!e || !e.messageData) return;
                 const isActiveRoom = Number(this.activeConversationId) === Number(e.conversationData?.id);
 
                 this.updateConversationListItem(e);
 
-                // Jika user sedang berada di dalam room ini, langsung append pesan baru
-                if (isActiveRoom) {
-                    if (Number(e.messageData?.sender_user_id) !== Number(window.ChatAuth?.id)) {
-                        this.appendNewMessages([e.messageData]);
-                        this.markRoomRead(e.conversationData?.id);
-                        this.hideTypingIndicator();
-                    }
-                } else {
-                    // Jika pesan untuk room lain, update badge & putar audio notifikasi
-                    this.loadUnreadBadge();
+                // Hanya proses interaksi aktif (suara / mark read / append) jika ini pesan live yang baru masuk
+                if (isLive) {
+                    if (isActiveRoom) {
+                        if (Number(e.messageData?.sender_user_id) !== Number(window.ChatAuth?.id)) {
+                            this.appendNewMessages([e.messageData]);
+                            this.markRoomRead(e.conversationData?.id);
+                            this.hideTypingIndicator();
+                        }
+                    } else {
+                        this.loadUnreadBadge();
 
-                    if (this.notificationSound) {
-                        this.notificationSound.pause();
-                        this.notificationSound.currentTime = 0;
-                        this.notificationSound.play().catch(() => {});
+                        if (this.notificationSound) {
+                            this.notificationSound.pause();
+                            this.notificationSound.currentTime = 0;
+                            this.notificationSound.play().catch(() => {});
+                        }
                     }
                 }
             };
 
-            // 1. Firebase Realtime Database Listener
+            // Firebase Realtime Database Listener
             if (window.FirebaseDB) {
                 try {
                     window.FirebaseDB.ref(`users/${window.ChatAuth.id}/last_event`)
                         .on('value', (snapshot) => {
                             const data = snapshot.val();
                             if (data && data.messageData) {
-                                handleUserEvent(data);
+                                const isLive = (data.sent_at || 0) >= (this._userSubscribedTime - 1000);
+                                handleUserEvent(data, isLive);
                             }
                         });
                 } catch (err) {
                     console.warn('Firebase user listener error:', err);
                 }
-            }
-
-            // 2. Fallback Echo Listener (jika tersedia)
-            if (window.Echo) {
-                try {
-                    window.Echo.private(`user.${window.ChatAuth.id}`)
-                        .listen('.ChatMessageSent', (e) => {
-                            handleUserEvent(e);
-                        });
-                } catch (err) {}
             }
         },
 
@@ -99,6 +95,7 @@
         // Subscribe to active room channel
         subscribeRoomChannel(conversationId) {
             if (!conversationId) return;
+            this._roomSubscribedTime = Date.now();
 
             const handleRoomMessage = (msgData) => {
                 if (!msgData) return;
@@ -128,15 +125,18 @@
                 }
             };
 
-            // 1. Firebase Realtime Database Room Listeners
+            // Firebase Realtime Database Room Listeners
             if (window.FirebaseDB) {
                 try {
-                    // Message Listener
+                    // Message Listener (hanya tangkap pesan yang dikirim saat room dibuka)
                     window.FirebaseDB.ref(`conversations/${conversationId}/last_message`)
                         .on('value', (snapshot) => {
                             const val = snapshot.val();
                             if (val && val.messageData) {
-                                handleRoomMessage(val.messageData);
+                                const isLive = (val.sent_at || 0) >= (this._roomSubscribedTime - 1000);
+                                if (isLive) {
+                                    handleRoomMessage(val.messageData);
+                                }
                             }
                         });
 
@@ -158,7 +158,7 @@
                                 Object.keys(typingUsers).forEach((uid) => {
                                     if (Number(uid) !== Number(window.ChatAuth?.id)) {
                                         const userObj = typingUsers[uid];
-                                        if (userObj && (now - (userObj.time || 0) < 4000)) {
+                                        if (userObj && (now - (userObj.time || 0) < 3500)) {
                                             this.showTypingIndicator(userObj.name);
                                         }
                                     }
@@ -169,33 +169,14 @@
                     console.warn('Firebase room listener error:', err);
                 }
             }
-
-            // 2. Fallback Echo Room Listener (jika tersedia)
-            if (window.Echo) {
-                try {
-                    window.Echo.private(`chat.${conversationId}`)
-                        .listen('.ChatMessageSent', (e) => {
-                            handleRoomMessage(e.messageData);
-                        })
-                        .listen('.ChatStatusChanged', (e) => {
-                            handleStatusChange(e.status);
-                        })
-                        .listenForWhisper('typing', (e) => {
-                            if (Number(e.userId) !== Number(window.ChatAuth?.id)) {
-                                this.showTypingIndicator(e.name);
-                            }
-                        });
-                } catch (err) {}
-            }
         },
 
         whisperTyping() {
             if (!this.activeConversationId || !window.ChatAuth?.id) return;
             const now = Date.now();
-            if (now - (this._lastWhisperTime || 0) < 1500) return;
+            if (now - (this._lastWhisperTime || 0) < 1200) return;
             this._lastWhisperTime = now;
 
-            // 1. Firebase Typing
             if (window.FirebaseDB) {
                 try {
                     const typingRef = window.FirebaseDB.ref(`conversations/${this.activeConversationId}/typing/${window.ChatAuth.id}`);
@@ -204,17 +185,6 @@
                         time: now
                     });
                     typingRef.onDisconnect().remove();
-                } catch (err) {}
-            }
-
-            // 2. Echo Typing Fallback
-            if (window.Echo) {
-                try {
-                    window.Echo.private(`chat.${this.activeConversationId}`)
-                        .whisper('typing', {
-                            userId: window.ChatAuth.id,
-                            name: window.ChatAuth.name || 'Pengguna'
-                        });
                 } catch (err) {}
             }
         },
@@ -1493,7 +1463,7 @@
             );
         },
 
-        // Function Send Message
+        // Function Send Message (Optimistic 0ms Instant Feedback)
         sendMessage() {
             if (this.activeConversationStatus === 'closed') {
                 return;
@@ -1503,12 +1473,36 @@
             const message = input.val().trim();
 
             if (!message) {
-                $('#sendMessage').prop('disabled', true);
+                $('#sendMessage, #sendChatBtn').prop('disabled', true);
                 return;
             }
 
-            $('#sendMessage').prop('disabled', true);
+            // 1. Instant UI Clear & Disable
+            input.val('').css('height', 'auto');
+            $('#sendMessage, #sendChatBtn').prop('disabled', true);
 
+            // 2. Instant Optimistic Render (0 millisecond delay)
+            const tempId = 'temp_' + Date.now();
+            const nowIso = new Date().toISOString();
+            const optimisticBubble = $(this.renderMessageItem({
+                id: tempId,
+                sender_user_id: window.ChatAuth.id,
+                sender_name: window.ChatAuth.name,
+                message: message,
+                created_at: nowIso
+            }));
+
+            $('#chatMessages').append(optimisticBubble);
+            $('#chatMessages').scrollTop($('#chatMessages')[0].scrollHeight);
+
+            // 3. Clear typing indicator on send
+            if (window.FirebaseDB && this.activeConversationId && window.ChatAuth?.id) {
+                try {
+                    window.FirebaseDB.ref(`conversations/${this.activeConversationId}/typing/${window.ChatAuth.id}`).remove();
+                } catch (err) {}
+            }
+
+            // 4. Send to Server
             $.ajax({
                 url: `/chat/${this.activeConversationId}/message`,
                 method: 'POST',
@@ -1516,44 +1510,32 @@
                     message: message
                 },
                 success: (res) => {
-                    input.val('').css('height', 'auto');
-                    $('#sendMessage').prop('disabled', true);
-
-                    $('#chatMessages').append(
-                        this.renderMessageItem({
-                            sender_user_id: window.ChatAuth.id,
-                            sender_name: window.ChatAuth.name,
-                            message: res.message.message,
-                            created_at: res.message.created_at
-                        })
-                    );
-
-                    this.renderedMessageIds.add(res.message.id);
-                    this.lastMessageId = res.message.id;
-
-                    $('#chatMessages').scrollTop(
-                        $('#chatMessages')[0].scrollHeight
-                    );
+                    if (res && res.message) {
+                        this.renderedMessageIds.add(res.message.id);
+                        this.lastMessageId = res.message.id;
+                    }
                 },
                 error: (xhr) => {
-                    console.error(xhr.responseJSON);
-                    const hasText = input.val().trim().length > 0;
-                    $('#sendMessage').prop('disabled', this.activeConversationStatus === 'closed' || !hasText);
+                    console.error('Send message failed:', xhr.responseJSON);
+                    optimisticBubble.addClass('opacity-50 border-danger');
+                    alert('Gagal mengirim pesan. Silakan coba lagi.');
+                    input.val(message);
+                    $('#sendMessage, #sendChatBtn').prop('disabled', false);
                 }
             });
         },
 
-        // Function Start Polling (Managed via Reverb WebSockets)
+        // Function Start Polling
         startPolling() {
             this.stopPolling();
         },
 
-        // Function Start Inbox Polling (Managed via Reverb WebSockets)
+        // Function Start Inbox Polling
         startInboxPolling() {
             this.stopInboxPolling();
         },
 
-        // Function Start Badge Polling (Managed via Reverb WebSockets)
+        // Function Start Badge Polling
         startBadgePolling() {
             this.stopBadgePolling();
         },
@@ -1567,9 +1549,6 @@
 
         // Function Stop Polling
         stopPolling() {
-            if (this.activeConversationId && window.Echo) {
-                window.Echo.leave(`chat.${this.activeConversationId}`);
-            }
             if (this.pollingTimer) {
                 clearInterval(this.pollingTimer);
                 this.pollingTimer = null;

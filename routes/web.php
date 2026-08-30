@@ -59,35 +59,6 @@ Route::get('/chat/unread-count', [ChatController::class, 'unreadCount']);
 // Check NIP Tanya Admin
 Route::get('/guest-chat/pegawai/{nip}', [ChatController::class, 'getPegawaiByNip']);
 
-// Explicit Broadcasting Auth Endpoint (Guaranteed clean JSON object)
-Route::post('/broadcasting/auth', function (\Illuminate\Http\Request $request) {
-    if (!auth()->check()) {
-        return response()->json(['error' => 'Unauthenticated'], 403);
-    }
-    try {
-        $result = \Illuminate\Support\Facades\Broadcast::auth($request);
-        
-        // Unpack if Laravel double-encoded it into a string
-        if (is_string($result)) {
-            $data = json_decode($result, true);
-            while (is_string($data)) {
-                $data = json_decode($data, true);
-            }
-            if (is_array($data)) {
-                return response()->json($data);
-            }
-        }
-        
-        return response($result)->header('Content-Type', 'application/json');
-    } catch (\Throwable $e) {
-        \Illuminate\Support\Facades\Log::warning('Broadcast auth failed: ' . $e->getMessage(), [
-            'user' => auth()->id(),
-            'channel' => $request->channel_name
-        ]);
-        return response()->json(['error' => $e->getMessage()], 403);
-    }
-})->middleware('web');
-
 /* Authenticated */
 
 Route::middleware(['auth', 'force.password'])->group(function () {

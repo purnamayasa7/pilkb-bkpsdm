@@ -812,30 +812,6 @@
     <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://unpkg.com/feather-icons"></script>
-    <script src="https://js.pusher.com/8.3.0/pusher.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/laravel-echo@1.16.1/dist/echo.iife.js"></script>
-    <script>
-        window.Pusher = Pusher;
-        const isHttps = window.location.protocol === 'https:';
-        @if(config('broadcasting.default') === 'pusher')
-        window.Echo = new Echo({
-            broadcaster: 'pusher',
-            key: '{{ config("broadcasting.connections.pusher.key", env("PUSHER_APP_KEY")) }}',
-            cluster: '{{ config("broadcasting.connections.pusher.options.cluster", env("PUSHER_APP_CLUSTER", "ap1")) }}',
-            forceTLS: true
-        });
-        @else
-        window.Echo = new Echo({
-            broadcaster: 'reverb',
-            key: '{{ config("reverb.apps.apps.0.key", env("REVERB_APP_KEY")) }}',
-            wsHost: isHttps ? window.location.hostname : '{{ env("REVERB_HOST", "localhost") }}',
-            wsPort: isHttps ? (window.location.port || 443) : {{ env("REVERB_PORT", 8080) }},
-            wssPort: isHttps ? (window.location.port || 443) : {{ env("REVERB_PORT", 8080) }},
-            forceTLS: isHttps,
-            enabledTransports: ['ws', 'wss']
-        });
-        @endif
-    </script>
     <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-database-compat.js"></script>
     <script>

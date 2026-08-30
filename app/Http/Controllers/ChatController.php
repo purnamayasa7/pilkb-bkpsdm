@@ -894,9 +894,9 @@ class ChatController extends Controller
         ]);
 
         try {
-            broadcast(new \App\Events\ChatStatusChanged($conversation))->toOthers();
+            app(\App\Services\FirebaseChatService::class)->broadcastStatusChange($conversation, 'closed');
         } catch (\Throwable $e) {
-            Log::warning('Broadcast ChatStatusChanged failed: ' . $e->getMessage());
+            Log::warning('Firebase broadcastStatusChange failed: ' . $e->getMessage());
         }
 
         return response()->json([
@@ -925,9 +925,9 @@ class ChatController extends Controller
         ]);
 
         try {
-            broadcast(new \App\Events\ChatStatusChanged($conversation))->toOthers();
+            app(\App\Services\FirebaseChatService::class)->broadcastStatusChange($conversation, 'open');
         } catch (\Throwable $e) {
-            Log::warning('Broadcast ChatStatusChanged failed: ' . $e->getMessage());
+            Log::warning('Firebase broadcastStatusChange failed: ' . $e->getMessage());
         }
 
         return response()->json([

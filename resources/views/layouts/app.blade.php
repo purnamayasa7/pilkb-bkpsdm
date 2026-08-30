@@ -211,42 +211,7 @@
     <!-- <script src="https://unpkg.com/feather-icons"></script> -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap-datepicker@1.10.0/dist/js/bootstrap-datepicker.min.js"></script>
-    <script src="https://js.pusher.com/8.3.0/pusher.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/laravel-echo@1.16.1/dist/echo.iife.js"></script>
     <script>
-        window.Pusher = Pusher;
-        const isHttps = window.location.protocol === 'https:';
-        @if(config('broadcasting.default') === 'pusher')
-        window.Echo = new Echo({
-            broadcaster: 'pusher',
-            key: '{{ config("broadcasting.connections.pusher.key", env("PUSHER_APP_KEY")) }}',
-            cluster: '{{ config("broadcasting.connections.pusher.options.cluster", env("PUSHER_APP_CLUSTER", "ap1")) }}',
-            forceTLS: true,
-            authEndpoint: '/broadcasting/auth',
-            auth: {
-                headers: {
-                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                }
-            }
-        });
-        @else
-        window.Echo = new Echo({
-            broadcaster: 'reverb',
-            key: '{{ config("reverb.apps.apps.0.key", env("REVERB_APP_KEY")) }}',
-            wsHost: isHttps ? window.location.hostname : '{{ env("REVERB_HOST", "localhost") }}',
-            wsPort: isHttps ? (window.location.port || 443) : {{ env("REVERB_PORT", 8080) }},
-            wssPort: isHttps ? (window.location.port || 443) : {{ env("REVERB_PORT", 8080) }},
-            forceTLS: isHttps,
-            enabledTransports: ['ws', 'wss'],
-            authEndpoint: '/broadcasting/auth',
-            auth: {
-                headers: {
-                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                }
-            }
-        });
-        @endif
-
         window.ChatAuth = {
             id: Number({{ Auth::id() }}),
             name: @json(optional(Auth::user())->nama),

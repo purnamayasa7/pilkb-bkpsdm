@@ -657,6 +657,7 @@
             sendBtn.prop('disabled', isClosed || !hasText);
         },
 
+        // Function Send Message (Optimistic 0ms Instant Feedback)
         sendMessage() {
             if (this.activeConversationStatus === 'closed') return;
             const input = $('#waChatInput');
@@ -666,54 +667,68 @@
                 return;
             }
 
+            // 1. Instant UI Clear & Disable
+            input.val('');
             $('#waSendMessage').prop('disabled', true);
 
+            // 2. Instant Optimistic Render
+            const tempId = 'temp_' + Date.now();
+            const nowIso = new Date().toISOString();
+            const box = $('#waMessagesBox');
+            const optimisticBubble = $(this.renderMessageItem({
+                id: tempId,
+                sender_user_id: window.ChatAuth?.id,
+                sender_name: window.ChatAuth?.name,
+                message: message,
+                created_at: nowIso
+            }));
+
+            box.append(optimisticBubble);
+            box.scrollTop(box[0].scrollHeight);
+
+            // 3. Clear typing on send
+            if (window.FirebaseDB && this.activeConversationId && window.ChatAuth?.id) {
+                try {
+                    window.FirebaseDB.ref(`conversations/${this.activeConversationId}/typing/${window.ChatAuth.id}`).remove();
+                } catch (err) {}
+            }
+
+            // 4. Update last message in list immediately
+            const found = this.conversationsData.find(i => Number(i.id) === Number(this.activeConversationId));
+            if (found) {
+                found.last_message = message;
+                found.last_message_time = nowIso;
+                found.is_last_from_me = true;
+                this.renderConversationList(this.conversationsData);
+            }
+
+            // 5. Send to Server
             $.ajax({
                 url: `/chat/${this.activeConversationId}/message`,
                 method: 'POST',
                 data: { message: message },
                 success: (res) => {
-                    input.val('');
-                    $('#waSendMessage').prop('disabled', true);
-
-                    const box = $('#waMessagesBox');
-                    box.append(this.renderMessageItem({
-                        sender_user_id: window.ChatAuth?.id,
-                        sender_name: window.ChatAuth?.name,
-                        message: res.message.message,
-                        created_at: res.message.created_at
-                    }));
-
-                    this.renderedMessageIds.add(res.message.id);
-                    this.lastMessageId = res.message.id;
-                    box.scrollTop(box[0].scrollHeight);
-
-                    // Update last message in list
-                    const found = this.conversationsData.find(i => Number(i.id) === Number(this.activeConversationId));
-                    if (found) {
-                        found.last_message = res.message.message;
-                        found.last_message_time = res.message.created_at;
-                        found.is_last_from_me = true;
-                        this.renderConversationList(this.conversationsData);
+                    if (res && res.message) {
+                        this.renderedMessageIds.add(res.message.id);
+                        this.lastMessageId = res.message.id;
                     }
                 },
                 error: (xhr) => {
-                    console.error(xhr.responseJSON);
-                    const hasText = input.val().trim().length > 0;
-                    $('#waSendMessage').prop('disabled', this.activeConversationStatus === 'closed' || !hasText);
+                    console.error('Send message failed:', xhr.responseJSON);
+                    optimisticBubble.addClass('opacity-50 border-danger');
+                    alert('Gagal mengirim pesan. Silakan coba lagi.');
+                    input.val(message);
+                    $('#waSendMessage').prop('disabled', false);
                 }
             });
         },
 
-        // Polling Room (Managed via Reverb WebSockets)
+        // Polling Room
         startPolling() {
             this.stopPolling();
         },
 
         stopPolling() {
-            if (this.activeConversationId && window.Echo) {
-                window.Echo.leave(`chat.${this.activeConversationId}`);
-            }
             if (this.pollingTimer) {
                 clearInterval(this.pollingTimer);
                 this.pollingTimer = null;
