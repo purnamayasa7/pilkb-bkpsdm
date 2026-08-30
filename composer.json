@@ -13,6 +13,7 @@
         "laravel/reverb": "*",
         "laravel/tinker": "^2.10.1",
         "maatwebsite/excel": "^3.1",
+        "pusher/pusher-php-server": "*",
         "spatie/laravel-backup": "^10.3"
     },
     "require-dev": {

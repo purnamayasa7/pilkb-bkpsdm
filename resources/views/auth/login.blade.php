@@ -817,6 +817,14 @@
     <script>
         window.Pusher = Pusher;
         const isHttps = window.location.protocol === 'https:';
+        @if(config('broadcasting.default') === 'pusher')
+        window.Echo = new Echo({
+            broadcaster: 'pusher',
+            key: '{{ config("broadcasting.connections.pusher.key", env("PUSHER_APP_KEY")) }}',
+            cluster: '{{ config("broadcasting.connections.pusher.options.cluster", env("PUSHER_APP_CLUSTER", "ap1")) }}',
+            forceTLS: true
+        });
+        @else
         window.Echo = new Echo({
             broadcaster: 'reverb',
             key: '{{ config("reverb.apps.apps.0.key", env("REVERB_APP_KEY")) }}',
@@ -826,6 +834,7 @@
             forceTLS: isHttps,
             enabledTransports: ['ws', 'wss']
         });
+        @endif
     </script>
     <script src="{{ asset('js/chat/chat-widget-login.js') }}"></script>
     <script>
