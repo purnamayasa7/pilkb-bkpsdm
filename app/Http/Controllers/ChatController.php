@@ -353,9 +353,8 @@ class ChatController extends Controller
 
         try {
             app(\App\Services\FirebaseChatService::class)->broadcastMessage($message);
-            broadcast(new \App\Events\ChatMessageSent($message));
         } catch (\Throwable $e) {
-            Log::warning('Broadcast ChatMessageSent failed: ' . $e->getMessage());
+            Log::warning('Firebase broadcastMessage failed: ' . $e->getMessage());
         }
 
         return response()->json([
@@ -834,9 +833,8 @@ class ChatController extends Controller
 
         try {
             app(\App\Services\FirebaseChatService::class)->broadcastMessage($message);
-            broadcast(new \App\Events\ChatMessageSent($message));
         } catch (\Throwable $e) {
-            Log::warning('Broadcast ChatMessageSent failed: ' . $e->getMessage());
+            Log::warning('Firebase broadcastMessage failed: ' . $e->getMessage());
         }
 
         return response()->json([

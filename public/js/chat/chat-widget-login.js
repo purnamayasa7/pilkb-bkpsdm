@@ -881,32 +881,46 @@ Membuka Percakapan...
 
             }
 
+            let _guestSubscribedTime = 0;
             function subscribeGuestChannel(ticketNo) {
-                if (!window.Echo || !ticketNo) return;
+                if (!ticketNo || !window.FirebaseDB) return;
+                _guestSubscribedTime = Date.now();
 
-                window.Echo.channel(`guest-chat.${ticketNo}`)
-                    .listen('.ChatMessageSent', (e) => {
-                        if (e.messageData && e.messageData.sender_user_id) {
-                            appendMessage({
-                                senderName: e.messageData.sender_name || "Admin",
-                                message: e.messageData.message,
-                                createdAt: e.messageData.created_at,
-                                isGuest: false,
-                                senderRole: e.messageData.sender_role,
-                                senderRoleLabel: e.messageData.sender_role_label
-                            });
-                            playNotificationSound();
-                        }
-                    })
-                    .listen('.ChatStatusChanged', (e) => {
-                        updateChatStatus(e.status);
-                    });
+                try {
+                    // Message listener
+                    window.FirebaseDB.ref(`guest_conversations/${ticketNo}/last_message`)
+                        .on('value', (snapshot) => {
+                            const data = snapshot.val();
+                            if (data && data.messageData && (data.sent_at || 0) >= (_guestSubscribedTime - 1000)) {
+                                if (data.messageData.sender_user_id) {
+                                    appendMessage({
+                                        senderName: data.messageData.sender_name || "Admin",
+                                        message: data.messageData.message,
+                                        createdAt: data.messageData.created_at,
+                                        isGuest: false,
+                                        senderRole: data.messageData.sender_role,
+                                        senderRoleLabel: data.messageData.sender_role_label
+                                    });
+                                    playNotificationSound();
+                                }
+                            }
+                        });
+
+                    // Status listener
+                    window.FirebaseDB.ref(`guest_conversations/${ticketNo}/status`)
+                        .on('value', (snapshot) => {
+                            const data = snapshot.val();
+                            if (data && data.status) {
+                                updateChatStatus(data.status);
+                            }
+                        });
+                } catch (err) {
+                    console.warn('Firebase guest listener error:', err);
+                }
             }
 
             function unsubscribeGuestChannel() {
-                if (chatState.ticket && window.Echo) {
-                    window.Echo.leave(`guest-chat.${chatState.ticket}`);
-                }
+                // Handled via Firebase lifecycle
             }
 
             // Function Start Polling (Managed via Reverb WebSockets)

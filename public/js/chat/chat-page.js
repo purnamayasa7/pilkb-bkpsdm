@@ -47,16 +47,6 @@
                         });
                 } catch (err) {}
             }
-
-            // 2. Echo Fallback
-            if (window.Echo) {
-                try {
-                    window.Echo.private(`user.${window.ChatAuth.id}`)
-                        .listen('.ChatMessageSent', (e) => {
-                            this.handleIncomingMessageForUser(e);
-                        });
-                } catch (err) {}
-            }
         },
 
         // Mark room as read on server, lalu sync badge floating
@@ -199,24 +189,6 @@
                         });
                 } catch (err) {}
             }
-
-            // 2. Echo Fallback
-            if (window.Echo) {
-                try {
-                    window.Echo.private(`chat.${conversationId}`)
-                        .listen('.ChatMessageSent', (e) => {
-                            handleRoomMessage(e.messageData);
-                        })
-                        .listen('.ChatStatusChanged', (e) => {
-                            handleStatusChange(e.status);
-                        })
-                        .listenForWhisper('typing', (e) => {
-                            if (Number(e.userId) !== Number(window.ChatAuth?.id)) {
-                                this.showTypingIndicator(e.name);
-                            }
-                        });
-                } catch (err) {}
-            }
         },
 
         whisperTyping() {
@@ -233,16 +205,6 @@
                         time: now
                     });
                     typingRef.onDisconnect().remove();
-                } catch (err) {}
-            }
-
-            if (window.Echo) {
-                try {
-                    window.Echo.private(`chat.${this.activeConversationId}`)
-                        .whisper('typing', {
-                            userId: window.ChatAuth.id,
-                            name: window.ChatAuth.name || 'Pengguna'
-                        });
                 } catch (err) {}
             }
         },
