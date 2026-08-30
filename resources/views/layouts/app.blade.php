@@ -231,21 +231,18 @@
                 }
             }
         });
+
+        window.ChatAuth = {
+            id: Number({{ Auth::id() }}),
+            name: @json(optional(Auth::user())->nama),
+            role: @json(optional(Auth::user()->role)->name)
+        };
     </script>
     <script src="{{ asset('js/chat/chat-widget-app.js') }}"></script>
     <script src="{{ asset('js/dark-mode.js') }}"></script>
     @stack('scripts')
     <script>
         $(document).ready(function() {
-
-            // =====================
-            // AUTH (harus diset SEBELUM init() supaya subscribeUserChannel bisa berjalan)
-            // =====================
-            window.ChatAuth = {
-                id: Number({{ Auth::id() }}),
-                name: @json(optional(Auth::user())->nama),
-                role: @json(optional(Auth::user()->role)->name)
-            };
 
             // =====================
             // STATE
