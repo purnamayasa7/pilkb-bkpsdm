@@ -50,26 +50,29 @@
             const handleUserEvent = (e, isLive = true) => {
                 if (!e || !e.messageData) return;
                 const convId = Number(e.conversationData?.id);
-                const isRoomOpen = this.isRoomCurrentlyOpen(convId);
+                const isTargetRoom = Number(this.activeConversationId) === convId && $('.chat-room-container').length > 0;
+                const isDrawerOpen = $('#chatDrawer').hasClass('show');
 
                 this.updateConversationListItem(e);
 
-                // Hanya proses interaksi aktif (suara / mark read / append) jika ini pesan live yang baru masuk
-                if (isLive) {
-                    if (isRoomOpen) {
-                        if (Number(e.messageData?.sender_user_id) !== Number(window.ChatAuth?.id)) {
-                            this.appendNewMessages([e.messageData]);
+                // Jika user sedang berada di dalam room ini (meski drawer sedang minimized/closed), langsung append pesan baru
+                if (isTargetRoom) {
+                    if (Number(e.messageData?.sender_user_id) !== Number(window.ChatAuth?.id)) {
+                        this.appendNewMessages([e.messageData]);
+                        if (isDrawerOpen) {
                             this.markRoomRead(convId);
                             this.hideTypingIndicator();
+                        } else {
+                            this.loadUnreadBadge();
                         }
-                    } else {
-                        this.loadUnreadBadge();
+                    }
+                } else {
+                    this.loadUnreadBadge();
 
-                        if (this.notificationSound) {
-                            this.notificationSound.pause();
-                            this.notificationSound.currentTime = 0;
-                            this.notificationSound.play().catch(() => {});
-                        }
+                    if (this.notificationSound && isLive) {
+                        this.notificationSound.pause();
+                        this.notificationSound.currentTime = 0;
+                        this.notificationSound.play().catch(() => {});
                     }
                 }
             };
@@ -107,10 +110,15 @@
             const handleRoomMessage = (msgData) => {
                 if (!msgData) return;
                 if (Number(msgData.sender_user_id) !== Number(window.ChatAuth?.id)) {
-                    if (this.isRoomCurrentlyOpen(conversationId)) {
+                    const isTargetRoom = Number(this.activeConversationId) === Number(conversationId) && $('.chat-room-container').length > 0;
+                    if (isTargetRoom) {
                         this.appendNewMessages([msgData]);
-                        this.markRoomRead(conversationId);
-                        this.hideTypingIndicator();
+                        if ($('#chatDrawer').hasClass('show')) {
+                            this.markRoomRead(conversationId);
+                            this.hideTypingIndicator();
+                        } else {
+                            this.loadUnreadBadge();
+                        }
                     }
                 }
             };

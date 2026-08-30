@@ -499,9 +499,14 @@
                     } else {
                         loadTicketSearch('back', false);
                     }
-                } else if (ChatWidgetApp.isRoomCurrentlyOpen(ChatWidgetApp.activeConversationId)) {
-                    // Jika saat dibuka kembali masih berada di dalam room chat, scroll ke bawah & mark-read
-                    $('#chatMessages').scrollTop($('#chatMessages')[0]?.scrollHeight || 0);
+                } else if (ChatWidgetApp.activeConversationId && $('.chat-room-container').length > 0) {
+                    // Sync pesan terbaru yang mungkin masuk saat drawer tertutup
+                    ChatWidgetApp.fetchConversation(ChatWidgetApp.activeConversationId).done((res) => {
+                        if (res && res.messages) {
+                            ChatWidgetApp.appendNewMessages(res.messages);
+                            $('#chatMessages').scrollTop($('#chatMessages')[0]?.scrollHeight || 0);
+                        }
+                    });
                     ChatWidgetApp.markRoomRead(ChatWidgetApp.activeConversationId);
                 }
             });
