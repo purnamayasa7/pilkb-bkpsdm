@@ -40,4 +40,14 @@ return [
         'token' => env('SIMPEG_API_TOKEN'),
     ],
 
+    'firebase' => [
+        'api_key' => env('FIREBASE_API_KEY', 'AIzaSyB8ly4Suc5D7jaBc0lm8K9Cb02626xDRTw'),
+        'auth_domain' => env('FIREBASE_AUTH_DOMAIN', 'pilkb-bkpsdm.firebaseapp.com'),
+        'database_url' => env('FIREBASE_DATABASE_URL', 'https://pilkb-bkpsdm-default-rtdb.asia-southeast1.firebasedatabase.app'),
+        'project_id' => env('FIREBASE_PROJECT_ID', 'pilkb-bkpsdm'),
+        'storage_bucket' => env('FIREBASE_STORAGE_BUCKET', 'pilkb-bkpsdm.firebasestorage.app'),
+        'messaging_sender_id' => env('FIREBASE_MESSAGING_SENDER_ID', '1064671001480'),
+        'app_id' => env('FIREBASE_APP_ID', '1:1064671001480:web:2289b0ea3655eae271583d'),
+    ],
+
 ];

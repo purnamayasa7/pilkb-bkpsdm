@@ -32,35 +32,60 @@
             this.subscribeUserChannel();
         },
 
-        // Subscribe to user private channel for realtime inbox updates & unread badges
+        // Subscribe to user private channel / Firebase for realtime inbox updates & unread badges
         subscribeUserChannel() {
-            if (!window.Echo || !window.ChatAuth?.id || this.isUserSubscribed) return;
+            if (!window.ChatAuth?.id || this.isUserSubscribed) return;
             this.isUserSubscribed = true;
 
-            window.Echo.private(`user.${window.ChatAuth.id}`)
-                .listen('.ChatMessageSent', (e) => {
-                    const isActiveRoom = Number(this.activeConversationId) === Number(e.conversationData?.id);
+            const handleUserEvent = (e) => {
+                if (!e || !e.messageData) return;
+                const isActiveRoom = Number(this.activeConversationId) === Number(e.conversationData?.id);
 
-                    this.updateConversationListItem(e);
+                this.updateConversationListItem(e);
 
-                    // Jika user sedang berada di dalam room ini, langsung append pesan baru
-                    if (isActiveRoom) {
-                        if (Number(e.messageData?.sender_user_id) !== Number(window.ChatAuth?.id)) {
-                            this.appendNewMessages([e.messageData]);
-                            this.markRoomRead(e.conversationData?.id);
-                            this.hideTypingIndicator();
-                        }
-                    } else {
-                        // Jika pesan untuk room lain, update badge & putar audio notifikasi
-                        this.loadUnreadBadge();
-
-                        if (this.notificationSound) {
-                            this.notificationSound.pause();
-                            this.notificationSound.currentTime = 0;
-                            this.notificationSound.play().catch(() => {});
-                        }
+                // Jika user sedang berada di dalam room ini, langsung append pesan baru
+                if (isActiveRoom) {
+                    if (Number(e.messageData?.sender_user_id) !== Number(window.ChatAuth?.id)) {
+                        this.appendNewMessages([e.messageData]);
+                        this.markRoomRead(e.conversationData?.id);
+                        this.hideTypingIndicator();
                     }
-                });
+                } else {
+                    // Jika pesan untuk room lain, update badge & putar audio notifikasi
+                    this.loadUnreadBadge();
+
+                    if (this.notificationSound) {
+                        this.notificationSound.pause();
+                        this.notificationSound.currentTime = 0;
+                        this.notificationSound.play().catch(() => {});
+                    }
+                }
+            };
+
+            // 1. Firebase Realtime Database Listener
+            if (window.FirebaseDB) {
+                try {
+                    window.FirebaseDB.ref(`users/${window.ChatAuth.id}/last_event`)
+                        .on('value', (snapshot) => {
+                            const data = snapshot.val();
+                            if (data && data.messageData) {
+                                handleUserEvent(data);
+                            }
+                        });
+                } catch (err) {
+                    console.warn('Firebase user listener error:', err);
+                }
+            }
+
+            // 2. Fallback Echo Listener (jika tersedia)
+            if (window.Echo) {
+                try {
+                    window.Echo.private(`user.${window.ChatAuth.id}`)
+                        .listen('.ChatMessageSent', (e) => {
+                            handleUserEvent(e);
+                        });
+                } catch (err) {}
+            }
         },
 
         // Mark room as read on server, lalu sync badge
@@ -73,53 +98,125 @@
 
         // Subscribe to active room channel
         subscribeRoomChannel(conversationId) {
-            if (!window.Echo || !conversationId) return;
+            if (!conversationId) return;
 
-            window.Echo.private(`chat.${conversationId}`)
-                .listen('.ChatMessageSent', (e) => {
-                    if (Number(e.messageData.sender_user_id) !== Number(window.ChatAuth?.id)) {
-                        this.appendNewMessages([e.messageData]);
-                        // Langsung mark-as-read agar badge tidak muncul (user sudah di room ini)
-                        this.markRoomRead(conversationId);
-                        this.hideTypingIndicator();
-                    }
-                })
-                .listen('.ChatStatusChanged', (e) => {
-                    this.activeConversationStatus = e.status;
-                    this.updateChatActionsButtons(e.status);
-                    this.updateChatInput(e.status);
+            const handleRoomMessage = (msgData) => {
+                if (!msgData) return;
+                if (Number(msgData.sender_user_id) !== Number(window.ChatAuth?.id)) {
+                    this.appendNewMessages([msgData]);
+                    this.markRoomRead(conversationId);
+                    this.hideTypingIndicator();
+                }
+            };
 
-                    const isClosed = e.status === 'closed';
-                    const statusPill = $('#chatStatusBadge');
-                    statusPill
-                        .removeClass('open closed')
-                        .addClass(isClosed ? 'closed' : 'open')
-                        .text(isClosed ? 'Closed' : 'Open');
+            const handleStatusChange = (status) => {
+                this.activeConversationStatus = status;
+                this.updateChatActionsButtons(status);
+                this.updateChatInput(status);
 
-                    if (isClosed) {
-                        $('#chatClosedNotice').removeClass('d-none');
-                    } else {
-                        $('#chatClosedNotice').addClass('d-none');
-                    }
-                })
-                .listenForWhisper('typing', (e) => {
-                    if (Number(e.userId) !== Number(window.ChatAuth?.id)) {
-                        this.showTypingIndicator(e.name);
-                    }
-                });
+                const isClosed = status === 'closed';
+                const statusPill = $('#chatStatusBadge');
+                statusPill
+                    .removeClass('open closed')
+                    .addClass(isClosed ? 'closed' : 'open')
+                    .text(isClosed ? 'Closed' : 'Open');
+
+                if (isClosed) {
+                    $('#chatClosedNotice').removeClass('d-none');
+                } else {
+                    $('#chatClosedNotice').addClass('d-none');
+                }
+            };
+
+            // 1. Firebase Realtime Database Room Listeners
+            if (window.FirebaseDB) {
+                try {
+                    // Message Listener
+                    window.FirebaseDB.ref(`conversations/${conversationId}/last_message`)
+                        .on('value', (snapshot) => {
+                            const val = snapshot.val();
+                            if (val && val.messageData) {
+                                handleRoomMessage(val.messageData);
+                            }
+                        });
+
+                    // Status Listener
+                    window.FirebaseDB.ref(`conversations/${conversationId}/status`)
+                        .on('value', (snapshot) => {
+                            const val = snapshot.val();
+                            if (val && val.status) {
+                                handleStatusChange(val.status);
+                            }
+                        });
+
+                    // Typing Listener
+                    window.FirebaseDB.ref(`conversations/${conversationId}/typing`)
+                        .on('value', (snapshot) => {
+                            const typingUsers = snapshot.val();
+                            if (typingUsers) {
+                                const now = Date.now();
+                                Object.keys(typingUsers).forEach((uid) => {
+                                    if (Number(uid) !== Number(window.ChatAuth?.id)) {
+                                        const userObj = typingUsers[uid];
+                                        if (userObj && (now - (userObj.time || 0) < 4000)) {
+                                            this.showTypingIndicator(userObj.name);
+                                        }
+                                    }
+                                });
+                            }
+                        });
+                } catch (err) {
+                    console.warn('Firebase room listener error:', err);
+                }
+            }
+
+            // 2. Fallback Echo Room Listener (jika tersedia)
+            if (window.Echo) {
+                try {
+                    window.Echo.private(`chat.${conversationId}`)
+                        .listen('.ChatMessageSent', (e) => {
+                            handleRoomMessage(e.messageData);
+                        })
+                        .listen('.ChatStatusChanged', (e) => {
+                            handleStatusChange(e.status);
+                        })
+                        .listenForWhisper('typing', (e) => {
+                            if (Number(e.userId) !== Number(window.ChatAuth?.id)) {
+                                this.showTypingIndicator(e.name);
+                            }
+                        });
+                } catch (err) {}
+            }
         },
 
         whisperTyping() {
-            if (!this.activeConversationId || !window.Echo || !window.ChatAuth?.id) return;
+            if (!this.activeConversationId || !window.ChatAuth?.id) return;
             const now = Date.now();
-            if (now - (this._lastWhisperTime || 0) < 2000) return;
+            if (now - (this._lastWhisperTime || 0) < 1500) return;
             this._lastWhisperTime = now;
 
-            window.Echo.private(`chat.${this.activeConversationId}`)
-                .whisper('typing', {
-                    userId: window.ChatAuth.id,
-                    name: window.ChatAuth.name || 'Pengguna'
-                });
+            // 1. Firebase Typing
+            if (window.FirebaseDB) {
+                try {
+                    const typingRef = window.FirebaseDB.ref(`conversations/${this.activeConversationId}/typing/${window.ChatAuth.id}`);
+                    typingRef.set({
+                        name: window.ChatAuth.name || 'Pengguna',
+                        time: now
+                    });
+                    typingRef.onDisconnect().remove();
+                } catch (err) {}
+            }
+
+            // 2. Echo Typing Fallback
+            if (window.Echo) {
+                try {
+                    window.Echo.private(`chat.${this.activeConversationId}`)
+                        .whisper('typing', {
+                            userId: window.ChatAuth.id,
+                            name: window.ChatAuth.name || 'Pengguna'
+                        });
+                } catch (err) {}
+            }
         },
 
         showTypingIndicator(name) {

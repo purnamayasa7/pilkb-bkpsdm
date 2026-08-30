@@ -32,13 +32,31 @@
         },
 
         subscribeUserChannel() {
-            if (!window.Echo || !window.ChatAuth?.id || this.isUserSubscribed) return;
+            if (!window.ChatAuth?.id || this.isUserSubscribed) return;
             this.isUserSubscribed = true;
 
-            window.Echo.private(`user.${window.ChatAuth.id}`)
-                .listen('.ChatMessageSent', (e) => {
-                    this.handleIncomingMessageForUser(e);
-                });
+            // 1. Firebase Listener
+            if (window.FirebaseDB) {
+                try {
+                    window.FirebaseDB.ref(`users/${window.ChatAuth.id}/last_event`)
+                        .on('value', (snapshot) => {
+                            const data = snapshot.val();
+                            if (data && data.messageData) {
+                                this.handleIncomingMessageForUser(data);
+                            }
+                        });
+                } catch (err) {}
+            }
+
+            // 2. Echo Fallback
+            if (window.Echo) {
+                try {
+                    window.Echo.private(`user.${window.ChatAuth.id}`)
+                        .listen('.ChatMessageSent', (e) => {
+                            this.handleIncomingMessageForUser(e);
+                        });
+                } catch (err) {}
+            }
         },
 
         // Mark room as read on server, lalu sync badge floating
@@ -89,11 +107,11 @@
                 });
             }
 
-            const currentQuery = $('#waSearchInput').val();
-            if (currentQuery) {
-                this.filterConversations(currentQuery);
+            const q = $('#waSearchConversations').val();
+            if (q) {
+                this.filterConversations(q);
             } else {
-                this.renderConversationList(this.conversationsData);
+                this.renderConversationListItems(this.conversationsData);
             }
 
             // Jika user sedang berada di dalam room ini, langsung append pesan baru
@@ -114,54 +132,119 @@
         },
 
         subscribeRoomChannel(conversationId) {
-            if (!window.Echo || !conversationId) return;
+            if (!conversationId) return;
 
-            window.Echo.private(`chat.${conversationId}`)
-                .listen('.ChatMessageSent', (e) => {
-                    if (Number(e.messageData.sender_user_id) !== Number(window.ChatAuth?.id)) {
-                        this.appendNewMessages([e.messageData]);
-                        // Langsung mark-as-read agar badge tidak muncul (user sudah di room ini)
-                        this.markRoomRead(conversationId);
-                        this.hideTypingIndicator();
-                    }
-                })
-                .listen('.ChatStatusChanged', (e) => {
-                    this.activeConversationStatus = e.status;
-                    this.updateChatInput(e.status);
-                    const isClosed = e.status === 'closed';
-                    $('#waRoomStatusBadge')
-                        .removeClass('open closed')
-                        .addClass(isClosed ? 'closed' : 'open')
-                        .text(isClosed ? 'Closed' : 'Open');
+            const handleRoomMessage = (msgData) => {
+                if (!msgData) return;
+                if (Number(msgData.sender_user_id) !== Number(window.ChatAuth?.id)) {
+                    this.appendNewMessages([msgData]);
+                    this.markRoomRead(conversationId);
+                    this.hideTypingIndicator();
+                }
+            };
 
-                    if (isClosed) {
-                        $('#waLiCloseChat, #waBtnCloseChat').addClass('d-none').hide();
-                        $('#waLiReopenChat, #waBtnReopenChat').removeClass('d-none').show();
-                        $('#waChatClosedNotice').removeClass('d-none');
-                    } else {
-                        $('#waLiCloseChat, #waBtnCloseChat').removeClass('d-none').show();
-                        $('#waLiReopenChat, #waBtnReopenChat').addClass('d-none').hide();
-                        $('#waChatClosedNotice').addClass('d-none');
-                    }
-                })
-                .listenForWhisper('typing', (e) => {
-                    if (Number(e.userId) !== Number(window.ChatAuth?.id)) {
-                        this.showTypingIndicator(e.name);
-                    }
-                });
+            const handleStatusChange = (status) => {
+                this.activeConversationStatus = status;
+                this.updateChatInput(status);
+                const isClosed = status === 'closed';
+                $('#waRoomStatusBadge')
+                    .removeClass('open closed')
+                    .addClass(isClosed ? 'closed' : 'open')
+                    .text(isClosed ? 'Closed' : 'Open');
+
+                if (isClosed) {
+                    $('#waLiCloseChat, #waBtnCloseChat').addClass('d-none').hide();
+                    $('#waLiReopenChat, #waBtnReopenChat').removeClass('d-none').show();
+                    $('#waChatClosedNotice').removeClass('d-none');
+                } else {
+                    $('#waLiCloseChat, #waBtnCloseChat').removeClass('d-none').show();
+                    $('#waLiReopenChat, #waBtnReopenChat').addClass('d-none').hide();
+                    $('#waChatClosedNotice').addClass('d-none');
+                }
+            };
+
+            // 1. Firebase Room Listeners
+            if (window.FirebaseDB) {
+                try {
+                    window.FirebaseDB.ref(`conversations/${conversationId}/last_message`)
+                        .on('value', (snapshot) => {
+                            const val = snapshot.val();
+                            if (val && val.messageData) {
+                                handleRoomMessage(val.messageData);
+                            }
+                        });
+
+                    window.FirebaseDB.ref(`conversations/${conversationId}/status`)
+                        .on('value', (snapshot) => {
+                            const val = snapshot.val();
+                            if (val && val.status) {
+                                handleStatusChange(val.status);
+                            }
+                        });
+
+                    window.FirebaseDB.ref(`conversations/${conversationId}/typing`)
+                        .on('value', (snapshot) => {
+                            const typingUsers = snapshot.val();
+                            if (typingUsers) {
+                                const now = Date.now();
+                                Object.keys(typingUsers).forEach((uid) => {
+                                    if (Number(uid) !== Number(window.ChatAuth?.id)) {
+                                        const userObj = typingUsers[uid];
+                                        if (userObj && (now - (userObj.time || 0) < 4000)) {
+                                            this.showTypingIndicator(userObj.name);
+                                        }
+                                    }
+                                });
+                            }
+                        });
+                } catch (err) {}
+            }
+
+            // 2. Echo Fallback
+            if (window.Echo) {
+                try {
+                    window.Echo.private(`chat.${conversationId}`)
+                        .listen('.ChatMessageSent', (e) => {
+                            handleRoomMessage(e.messageData);
+                        })
+                        .listen('.ChatStatusChanged', (e) => {
+                            handleStatusChange(e.status);
+                        })
+                        .listenForWhisper('typing', (e) => {
+                            if (Number(e.userId) !== Number(window.ChatAuth?.id)) {
+                                this.showTypingIndicator(e.name);
+                            }
+                        });
+                } catch (err) {}
+            }
         },
 
         whisperTyping() {
-            if (!this.activeConversationId || !window.Echo || !window.ChatAuth?.id) return;
+            if (!this.activeConversationId || !window.ChatAuth?.id) return;
             const now = Date.now();
-            if (now - (this._lastWhisperTime || 0) < 2000) return;
+            if (now - (this._lastWhisperTime || 0) < 1500) return;
             this._lastWhisperTime = now;
 
-            window.Echo.private(`chat.${this.activeConversationId}`)
-                .whisper('typing', {
-                    userId: window.ChatAuth.id,
-                    name: window.ChatAuth.name || 'Pengguna'
-                });
+            if (window.FirebaseDB) {
+                try {
+                    const typingRef = window.FirebaseDB.ref(`conversations/${this.activeConversationId}/typing/${window.ChatAuth.id}`);
+                    typingRef.set({
+                        name: window.ChatAuth.name || 'Pengguna',
+                        time: now
+                    });
+                    typingRef.onDisconnect().remove();
+                } catch (err) {}
+            }
+
+            if (window.Echo) {
+                try {
+                    window.Echo.private(`chat.${this.activeConversationId}`)
+                        .whisper('typing', {
+                            userId: window.ChatAuth.id,
+                            name: window.ChatAuth.name || 'Pengguna'
+                        });
+                } catch (err) {}
+            }
         },
 
         showTypingIndicator(name) {

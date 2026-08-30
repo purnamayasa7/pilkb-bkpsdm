@@ -836,6 +836,23 @@
         });
         @endif
     </script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-database-compat.js"></script>
+    <script>
+        const firebaseConfig = {
+            apiKey: "{{ config('services.firebase.api_key') }}",
+            authDomain: "{{ config('services.firebase.auth_domain') }}",
+            databaseURL: "{{ config('services.firebase.database_url') }}",
+            projectId: "{{ config('services.firebase.project_id') }}",
+            storageBucket: "{{ config('services.firebase.storage_bucket') }}",
+            messagingSenderId: "{{ config('services.firebase.messaging_sender_id') }}",
+            appId: "{{ config('services.firebase.app_id') }}"
+        };
+        if (!window.firebase?.apps?.length) {
+            window.firebase?.initializeApp(firebaseConfig);
+        }
+        window.FirebaseDB = window.firebase ? window.firebase.database() : null;
+    </script>
     <script src="{{ asset('js/chat/chat-widget-login.js') }}"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
