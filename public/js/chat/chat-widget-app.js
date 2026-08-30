@@ -12,61 +12,227 @@
         isSelectionMode: false,
         selectedConversationIds: new Set(),
 
-        pollingTimer: null,
-        inboxPollingTimer: null,
-        badgePollingTimer: null,
-        convListPollingTimer: null,
+        isUserSubscribed: false,
 
         lastMessageId: null,
-        lastInboxMessageId: 0,
-
-        isPolling: false,
-        isInboxPolling: false,
-        isConvListPolling: false,
-
         renderedMessageIds: new Set(),
-
         notificationSound: null,
 
         init() {
-
             $.ajaxSetup({
-
                 headers: {
                     'X-CSRF-TOKEN':
                         $('meta[name="csrf-token"]').attr('content')
                 }
-
             });
 
             this.notificationSound = new Audio('/sound/notification.mp3');
-
             this.notificationSound.preload = 'auto';
 
-            // document.addEventListener(
-            //     'click',
-            //     () => {
+            this.subscribeUserChannel();
+        },
 
-            //         if (!this.notificationSound) {
-            //             return;
-            //         }
+        // Subscribe to user private channel for realtime inbox updates & unread badges
+        subscribeUserChannel() {
+            if (!window.Echo || !window.ChatAuth?.id || this.isUserSubscribed) return;
+            this.isUserSubscribed = true;
 
-            //         this.notificationSound.play()
-            //             .then(() => {
+            window.Echo.private(`user.${window.ChatAuth.id}`)
+                .listen('.ChatMessageSent', (e) => {
+                    const isActiveRoom = Number(this.activeConversationId) === Number(e.conversationData?.id);
 
-            //                 this.notificationSound.pause();
+                    this.updateConversationListItem(e);
 
-            //                 this.notificationSound.currentTime = 0;
+                    // Jika pesan untuk room lain (bukan yang sedang dibuka), update badge & suara
+                    if (!isActiveRoom) {
+                        this.loadUnreadBadge();
 
-            //             })
-            //             .catch(() => { });
+                        if (this.notificationSound) {
+                            this.notificationSound.pause();
+                            this.notificationSound.currentTime = 0;
+                            this.notificationSound.play().catch(() => {});
+                        }
+                    }
+                    // Jika pesan masuk ke room aktif, badge TIDAK boleh naik —
+                    // markRoomRead() di subscribeRoomChannel yang bertanggung jawab
+                });
+        },
 
-            //     },
-            //     {
-            //         once: true
-            //     }
-            // );
+        // Mark room as read on server, lalu sync badge
+        markRoomRead(conversationId) {
+            if (!conversationId) return;
+            $.post(`/chat/${conversationId}/mark-read`).done(() => {
+                this.loadUnreadBadge();
+            });
+        },
 
+        // Subscribe to active room channel
+        subscribeRoomChannel(conversationId) {
+            if (!window.Echo || !conversationId) return;
+
+            window.Echo.private(`chat.${conversationId}`)
+                .listen('.ChatMessageSent', (e) => {
+                    if (Number(e.messageData.sender_user_id) !== Number(window.ChatAuth?.id)) {
+                        this.appendNewMessages([e.messageData]);
+                        // Langsung mark-as-read agar badge tidak muncul (user sudah di room ini)
+                        this.markRoomRead(conversationId);
+                        this.hideTypingIndicator();
+                    }
+                })
+                .listen('.ChatStatusChanged', (e) => {
+                    this.activeConversationStatus = e.status;
+                    this.updateChatActionsButtons(e.status);
+                    this.updateChatInput(e.status);
+
+                    const isClosed = e.status === 'closed';
+                    const statusPill = $('#chatStatusBadge');
+                    statusPill
+                        .removeClass('open closed')
+                        .addClass(isClosed ? 'closed' : 'open')
+                        .text(isClosed ? 'Closed' : 'Open');
+
+                    if (isClosed) {
+                        $('#chatClosedNotice').removeClass('d-none');
+                    } else {
+                        $('#chatClosedNotice').addClass('d-none');
+                    }
+                })
+                .listenForWhisper('typing', (e) => {
+                    if (Number(e.userId) !== Number(window.ChatAuth?.id)) {
+                        this.showTypingIndicator(e.name);
+                    }
+                });
+        },
+
+        whisperTyping() {
+            if (!this.activeConversationId || !window.Echo || !window.ChatAuth?.id) return;
+            const now = Date.now();
+            if (now - (this._lastWhisperTime || 0) < 2000) return;
+            this._lastWhisperTime = now;
+
+            window.Echo.private(`chat.${this.activeConversationId}`)
+                .whisper('typing', {
+                    userId: window.ChatAuth.id,
+                    name: window.ChatAuth.name || 'Pengguna'
+                });
+        },
+
+        showTypingIndicator(name) {
+            const subtitleEl = $('#roomSubtitle');
+            if (subtitleEl.length) {
+                if (!this._originalSubtitle) {
+                    this._originalSubtitle = subtitleEl.text();
+                }
+                subtitleEl.html('<span class="text-success fw-semibold fst-italic"><i data-feather="edit-2" style="width:11px;height:11px;" class="me-1"></i>sedang mengetik...</span>');
+                if (window.feather) feather.replace();
+            }
+
+            const stream = $('#chatMessages');
+            if (stream.length && !$('#chatTypingBubble').length) {
+                stream.append(`
+                    <div class="chat-typing-bubble" id="chatTypingBubble">
+                        <div class="typing-dots">
+                            <span></span><span></span><span></span>
+                        </div>
+                    </div>
+                `);
+                stream.scrollTop(stream[0].scrollHeight);
+            }
+
+            if (this._typingTimer) {
+                clearTimeout(this._typingTimer);
+            }
+            this._typingTimer = setTimeout(() => {
+                this.hideTypingIndicator();
+            }, 3500);
+        },
+
+        hideTypingIndicator() {
+            if (this._typingTimer) {
+                clearTimeout(this._typingTimer);
+                this._typingTimer = null;
+            }
+            $('#chatTypingBubble').remove();
+            if (this._originalSubtitle) {
+                $('#roomSubtitle').text(this._originalSubtitle);
+                this._originalSubtitle = null;
+            }
+        },
+
+        // Update list items when message received in background
+        updateConversationListItem(e) {
+            const conv = e.conversationData;
+            if (!conv || !conv.id) return;
+
+            const convId = Number(conv.id);
+            const isActiveRoom = Number(this.activeConversationId) === convId;
+            const isFromMe = Number(e.messageData?.sender_user_id) === Number(window.ChatAuth?.id);
+
+            // Helper: update satu item di array data
+            const updateInArray = (arr, addIfMissing = true) => {
+                const idx = arr.findIndex(item => Number(item.id) === convId);
+                if (idx !== -1) {
+                    const item = arr[idx];
+                    item.last_message = conv.last_message;
+                    item.last_message_time = conv.last_message_time;
+                    item.status = conv.status;
+                    item.need_reply = conv.need_reply;
+                    item.is_last_from_me = isFromMe;
+                    if (!isActiveRoom) {
+                        item.unread = (item.unread || 0) + 1;
+                    }
+                    arr.splice(idx, 1);
+                    arr.unshift(item);
+                    return true;
+                } else if (addIfMissing) {
+                    arr.unshift({
+                        id: conv.id,
+                        no_tiket: conv.no_tiket,
+                        status: conv.status,
+                        nama_pengirim: conv.nama_pengirim,
+                        sender_role: conv.sender_role,
+                        sender_role_label: conv.sender_role_label,
+                        layanan: conv.layanan,
+                        bidang: conv.bidang,
+                        last_message: conv.last_message,
+                        last_message_time: conv.last_message_time,
+                        unread: isActiveRoom ? 0 : 1,
+                        type: conv.type,
+                        need_reply: conv.need_reply,
+                        is_last_from_me: isFromMe
+                    });
+                    return true;
+                }
+                return false;
+            };
+
+            // Update conversationsData (dipakai oleh halaman OPD / list percakapan)
+            const convListEl = $('#conversationList');
+            if (convListEl.length) {
+                updateInArray(this.conversationsData, true);
+                if (!this.isSelectionMode) {
+                    const q = $('#searchMyConversations').val();
+                    if (q) {
+                        this.filterConversations(q);
+                    } else {
+                        this.renderConversationListItems(this.conversationsData);
+                    }
+                }
+            }
+
+            // Update inboxData (dipakai oleh admin bidang/bawah lewat renderInboxList)
+            const inboxListEl = $('#searchAdminInbox');
+            if (inboxListEl.length) {
+                updateInArray(this.inboxData, true);
+                if (!this.isSelectionMode) {
+                    const q = inboxListEl.val();
+                    if (q) {
+                        this.filterInbox(q);
+                    } else {
+                        this.renderInboxListItems(this.inboxData);
+                    }
+                }
+            }
         },
 
         escapeHtml(text) {
@@ -867,41 +1033,9 @@
             this.renderConversationListItems(filtered, query);
         },
 
-        // Function Start Conversation List Polling
+        // Function Start Conversation List Polling (Handled via Reverb WebSockets)
         startConversationListPolling() {
             this.stopConversationListPolling();
-
-            this.convListPollingTimer = setInterval(() => {
-                if (!$('#chatDrawer').hasClass('show')) {
-                    this.stopConversationListPolling();
-                    return;
-                }
-
-                if (this.activeConversationId || !$('#conversationList').length) {
-                    this.stopConversationListPolling();
-                    return;
-                }
-
-                if (this.isConvListPolling) return;
-                this.isConvListPolling = true;
-
-                $.get('/chat/my-conversations')
-                    .done((res) => {
-                        if (!$('#chatDrawer').hasClass('show') || this.activeConversationId || !$('#conversationList').length) {
-                            return;
-                        }
-                        this.conversationsData = Array.isArray(res) ? res : [];
-                        const currentQuery = $('#searchMyConversations').val();
-                        if (currentQuery) {
-                            this.filterConversations(currentQuery);
-                        } else {
-                            this.renderConversationListItems(this.conversationsData);
-                        }
-                    })
-                    .always(() => {
-                        this.isConvListPolling = false;
-                    });
-            }, 5000);
         },
 
         // Function Stop Conversation List Polling
@@ -1183,55 +1317,42 @@
 
         // Function Load Chat
         loadChat(conversationId, source = null) {
+            this.hideTypingIndicator();
             this.stopInboxPolling();
             this.stopConversationListPolling();
+
+            if (this.activeConversationId && window.Echo) {
+                window.Echo.leave(`chat.${this.activeConversationId}`);
+            }
 
             if (source) {
                 this.previousView = source;
             }
 
             this.lastMessageId = null;
-
             this.renderedMessageIds.clear();
-
             this.activeConversationId = conversationId;
 
             this.fetchConversation(conversationId)
                 .done((res) => {
-
                     this.activeConversationStatus = res.status;
-
                     this.renderChatPage(res);
+                    this.subscribeRoomChannel(conversationId);
 
-                    this.startPolling();
+                    // Reset unread count di lokal state agar badge list hilang
+                    const inConvData = this.conversationsData.find(i => Number(i.id) === Number(conversationId));
+                    if (inConvData) inConvData.unread = 0;
+                    const inInboxData = this.inboxData.find(i => Number(i.id) === Number(conversationId));
+                    if (inInboxData) inInboxData.unread = 0;
 
+                    // Sync badge floating button setelah pesan terbaca
+                    this.loadUnreadBadge();
                 });
         },
 
         // Fetch Conversation
         fetchConversation(conversationId) {
             return $.get(`/chat/${conversationId}/messages`);
-        },
-
-        // Function Poll Messages
-        pollMessages() {
-
-            return $.get(
-                `/chat/${this.activeConversationId}/poll`,
-                {
-                    last_message_id: this.lastMessageId ?? 0
-                }
-            );
-        },
-
-        // Function Poll Inbox
-        pollInbox() {
-            return $.get(
-                '/chat/admin/inbox/poll',
-                {
-                    last_message_id: this.lastInboxMessageId ?? 0
-                }
-            );
         },
 
         // Function Close Chat
@@ -1320,123 +1441,33 @@
             });
         },
 
-        // Function Start Polling
+        // Function Start Polling (Managed via Reverb WebSockets)
         startPolling() {
-
             this.stopPolling();
-
-            this.pollingTimer = setInterval(() => {
-
-                if (!this.activeConversationId) {
-                    return;
-                }
-
-                // Kalau request sebelumnya belum selesai, jangan kirim request baru
-                if (this.isPolling) {
-                    return;
-                }
-
-                this.isPolling = true;
-
-                this.pollMessages()
-                    .done((res) => {
-                        if (res.messages.length) {
-                            this.appendNewMessages(
-                                res.messages
-                            );
-                        }
-                    })
-
-                    .fail(() => {
-                        console.error(
-                            "Polling gagal"
-                        );
-                    })
-
-                    .always(() => {
-                        // SELALU dijalankan, baik sukses maupun gagal
-                        this.isPolling = false;
-                    });
-            }, 3000);
         },
 
-        // Function Start Inbox Polling
+        // Function Start Inbox Polling (Managed via Reverb WebSockets)
         startInboxPolling() {
-
             this.stopInboxPolling();
-
-            this.inboxPollingTimer = setInterval(() => {
-
-                // Drawer sudah ditutup?
-                if (!$('#chatDrawer').hasClass('show')) {
-                    this.stopInboxPolling();
-                    return;
-                }
-
-                if (this.activeConversationId) {
-                    return;
-                }
-
-                if (this.isInboxPolling) {
-                    return;
-                }
-
-                this.isInboxPolling = true;
-
-                this.pollInbox()
-                    .done((res) => {
-
-                        // Drawer sudah ditutup saat request berlangsung
-                        if (!$('#chatDrawer').hasClass('show')) {
-                            return;
-                        }
-
-                        if (!res.length) {
-                            return;
-                        }
-
-                        this.refreshInbox(res);
-
-                    })
-
-                    .fail(() => {
-                        console.error(
-                            "Inbox polling gagal"
-                        );
-                    })
-
-                    .always(() => {
-                        this.isInboxPolling = false;
-                    });
-            }, 3000);
         },
 
-        // Function Start Badge Polling
+        // Function Start Badge Polling (Managed via Reverb WebSockets)
         startBadgePolling() {
-
-            if (this.badgePollingTimer) {
-                return;
-            }
-
-            this.badgePollingTimer = setInterval(() => {
-                this.loadUnreadBadge();
-            }, 3000);
-
+            this.stopBadgePolling();
         },
 
         // Function Handle Visibility Change
         handleVisibilityChange() {
-
-            if (document.hidden) {
-                this.stopBadgePolling();
-            } else {
+            if (!document.hidden) {
                 this.loadUnreadBadge();
-                this.startBadgePolling();
             }
         },
 
         // Function Stop Polling
         stopPolling() {
+            if (this.activeConversationId && window.Echo) {
+                window.Echo.leave(`chat.${this.activeConversationId}`);
+            }
             if (this.pollingTimer) {
                 clearInterval(this.pollingTimer);
                 this.pollingTimer = null;
@@ -1561,6 +1592,10 @@
         const isClosed = window.ChatWidgetApp.activeConversationStatus === 'closed';
         const hasText = $(this).val().trim().length > 0;
         $('#sendMessage, #sendChatBtn').prop('disabled', isClosed || !hasText);
+
+        if (!isClosed && hasText) {
+            window.ChatWidgetApp.whisperTyping();
+        }
     });
 
     // Kirim pesan dengan Enter (Shift + Enter untuk baris baru)
@@ -1569,6 +1604,11 @@
             e.preventDefault();
             if (!$('#sendMessage, #sendChatBtn').prop('disabled')) {
                 window.ChatWidgetApp.sendMessage();
+            }
+        } else if (e.key !== 'Enter') {
+            const isClosed = window.ChatWidgetApp.activeConversationStatus === 'closed';
+            if (!isClosed) {
+                window.ChatWidgetApp.whisperTyping();
             }
         }
     });

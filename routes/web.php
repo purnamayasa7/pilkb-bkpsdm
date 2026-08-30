@@ -42,7 +42,7 @@ Route::get('/tiket/cetak/{no_tiket}', [TiketController::class, 'cetak'])->name('
 
 // Guest Chat
 Route::get('/guest-chat/bidang', [ChatController::class, 'getBidang']);
-Route::get('/guesct-chat/layanan/{bidang}', [ChatController::class, 'getLayanan']);
+Route::get('/guest-chat/layanan/{bidang}', [ChatController::class, 'getLayanan']);
 
 
 
@@ -108,6 +108,7 @@ Route::middleware(['auth', 'force.password'])->group(function () {
     Route::get('/chat/{conversation}/poll', [ChatController::class, 'pollMessages'])->whereNumber('conversation');
     Route::get('/chat/admin/inbox/poll', [ChatController::class, 'pollInbox'])->name('chat.admin.poll');
     Route::post('/chat/mark-all-read', [ChatController::class, 'markAllRead'])->name('chat.mark-all-read');
+    Route::post('/chat/{conversation}/mark-read', [ChatController::class, 'markConversationRead'])->whereNumber('conversation')->name('chat.mark-read');
     Route::post('/chat/delete-conversations', [ChatController::class, 'deleteConversations'])->name('chat.delete-conversations');
 
     // Search

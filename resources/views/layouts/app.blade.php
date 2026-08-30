@@ -211,20 +211,40 @@
     <!-- <script src="https://unpkg.com/feather-icons"></script> -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap-datepicker@1.10.0/dist/js/bootstrap-datepicker.min.js"></script>
+    <script src="https://js.pusher.com/8.3.0/pusher.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/laravel-echo@1.16.1/dist/echo.iife.js"></script>
+    <script>
+        window.Pusher = Pusher;
+        window.Echo = new Echo({
+            broadcaster: 'reverb',
+            key: '{{ env("REVERB_APP_KEY", config("reverb.apps.apps.0.key")) }}',
+            wsHost: '{{ env("REVERB_HOST", "localhost") }}',
+            wsPort: {{ env("REVERB_PORT", 8080) }},
+            wssPort: {{ env("REVERB_PORT", 8080) }},
+            forceTLS: ('{{ env("REVERB_SCHEME", "http") }}' === 'https'),
+            enabledTransports: ['ws', 'wss'],
+            authEndpoint: '/broadcasting/auth',
+            auth: {
+                headers: {
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                }
+            }
+        });
+    </script>
     <script src="{{ asset('js/chat/chat-widget-app.js') }}"></script>
     <script src="{{ asset('js/dark-mode.js') }}"></script>
     @stack('scripts')
     <script>
         $(document).ready(function() {
-            ChatWidgetApp.init();
 
             // =====================
-            // AUTH
+            // AUTH (harus diset SEBELUM init() supaya subscribeUserChannel bisa berjalan)
             // =====================
             window.ChatAuth = {
-    id: Number({{ Auth::id() }}),
-    name: @json(optional(Auth::user())->nama)
-};
+                id: Number({{ Auth::id() }}),
+                name: @json(optional(Auth::user())->nama),
+                role: @json(optional(Auth::user()->role)->name)
+            };
 
             // =====================
             // STATE
@@ -232,6 +252,8 @@
             ChatWidgetApp.activeConversationStatus = 'open';
             ChatWidgetApp.activeConversationId = null;
             ChatWidgetApp.isSearching = false;
+
+            ChatWidgetApp.init();
 
             function loadTicketSearch(direction = 'back', animate = true) {
 
@@ -335,17 +357,11 @@
             });
 
             ChatWidgetApp.loadUnreadBadge();
-            ChatWidgetApp.startBadgePolling();
 
-            document.addEventListener(
-    "visibilitychange",
-    function () {
+            document.addEventListener('visibilitychange', function () {
+                ChatWidgetApp.handleVisibilityChange();
+            });
 
-        ChatWidgetApp.handleVisibilityChange();
-
-    }
-);
-            
             // =====================
             // RENDER PAGE
             // =====================
@@ -404,23 +420,14 @@
 }
 
             function loadInboxAdminFo() {
-
-    $.get('/chat/admin/inbox')
-    .done(function(res){
-
-        ChatWidgetApp.renderInboxList(res);
-
-        ChatWidgetApp.startInboxPolling();
-
-    })
-    .fail(function(){
-
-        console.error("Gagal memuat inbox");
-
-    });
-
-
-}
+                $.get('/chat/admin/inbox')
+                    .done(function(res){
+                        ChatWidgetApp.renderInboxList(res);
+                    })
+                    .fail(function(){
+                        console.error("Gagal memuat inbox");
+                    });
+            }
 
             $(document).on('click', '#btnBackInbox', function() {
 
@@ -817,17 +824,9 @@
 
             // Auto Height Text
             $(document).on('input', '#chatInput', function() {
-
                 this.style.height = 'auto';
-
                 this.style.height = this.scrollHeight + 'px';
             });
-
-            $(window).on('beforeunload', function () {
-
-    ChatWidgetApp.stopBadgePolling();
-
-});
         });
     </script>
 </body>

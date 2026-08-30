@@ -344,6 +344,12 @@ class ChatController extends Controller
             }
         }
 
+        try {
+            broadcast(new \App\Events\ChatMessageSent($message))->toOthers();
+        } catch (\Throwable $e) {
+            Log::warning('Broadcast ChatMessageSent failed: ' . $e->getMessage());
+        }
+
         return response()->json([
             'success' => true,
             'message' => $message
@@ -811,6 +817,12 @@ class ChatController extends Controller
             'need_reply' => true
         ]);
 
+        try {
+            broadcast(new \App\Events\ChatMessageSent($message))->toOthers();
+        } catch (\Throwable $e) {
+            Log::warning('Broadcast ChatMessageSent failed: ' . $e->getMessage());
+        }
+
         return response()->json([
             'success' => true,
             'message' => $message,
@@ -879,6 +891,12 @@ class ChatController extends Controller
             'status' => 'closed'
         ]);
 
+        try {
+            broadcast(new \App\Events\ChatStatusChanged($conversation))->toOthers();
+        } catch (\Throwable $e) {
+            Log::warning('Broadcast ChatStatusChanged failed: ' . $e->getMessage());
+        }
+
         return response()->json([
             'success' => true,
             'status' => 'closed'
@@ -904,10 +922,39 @@ class ChatController extends Controller
             'status' => 'open'
         ]);
 
+        try {
+            broadcast(new \App\Events\ChatStatusChanged($conversation))->toOthers();
+        } catch (\Throwable $e) {
+            Log::warning('Broadcast ChatStatusChanged failed: ' . $e->getMessage());
+        }
+
         return response()->json([
             'success' => true,
             'status' => 'open'
         ]);
+    }
+
+    /**
+     * Mark a specific conversation as read for the current user.
+     * Called via JS when user is inside the room and a new message arrives via WebSocket.
+     */
+    public function markConversationRead(ChatConversation $conversation)
+    {
+        $user = Auth::user();
+
+        if (!$this->isParticipant($conversation->id, $user->id)) {
+            return response()->json(['message' => 'Unauthorized'], 403);
+        }
+
+        $lastMessageId = $conversation->messages()->max('id');
+
+        if ($lastMessageId) {
+            ChatParticipant::where('conversation_id', $conversation->id)
+                ->where('user_id', $user->id)
+                ->update(['last_read_message_id' => $lastMessageId]);
+        }
+
+        return response()->json(['success' => true]);
     }
 
     public function unreadCount()

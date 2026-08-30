@@ -881,37 +881,51 @@ Membuka Percakapan...
 
             }
 
-            // Function Start Polling
-            function startPolling() {
+            function subscribeGuestChannel(ticketNo) {
+                if (!window.Echo || !ticketNo) return;
 
-                if (chatState.isPolling) {
-                    return;
+                window.Echo.channel(`guest-chat.${ticketNo}`)
+                    .listen('.ChatMessageSent', (e) => {
+                        if (e.messageData && e.messageData.sender_user_id) {
+                            appendMessage({
+                                senderName: e.messageData.sender_name || "Admin",
+                                message: e.messageData.message,
+                                createdAt: e.messageData.created_at,
+                                isGuest: false,
+                                senderRole: e.messageData.sender_role,
+                                senderRoleLabel: e.messageData.sender_role_label
+                            });
+                            playNotificationSound();
+                        }
+                    })
+                    .listen('.ChatStatusChanged', (e) => {
+                        updateChatStatus(e.status);
+                    });
+            }
+
+            function unsubscribeGuestChannel() {
+                if (chatState.ticket && window.Echo) {
+                    window.Echo.leave(`guest-chat.${chatState.ticket}`);
                 }
+            }
 
-                chatState.isPolling = true;
-
-                chatState.pollingId = setInterval(() => {
-
-                    checkNewMessages()
-                        .catch(console.error);
-
-                }, 2000);
-
+            // Function Start Polling (Managed via Reverb WebSockets)
+            function startPolling() {
+                if (chatState.ticket) {
+                    subscribeGuestChannel(chatState.ticket);
+                }
             }
 
             // Function Stop Polling
             function stopPolling() {
+                unsubscribeGuestChannel();
 
                 if (chatState.pollingId) {
-
                     clearInterval(chatState.pollingId);
-
                 }
 
                 chatState.pollingId = null;
-
                 chatState.isPolling = false;
-
             }
 
             // Function Handle Visibility Change
@@ -1024,50 +1038,8 @@ Membuka Percakapan...
                         el.chatMessages.scrollHeight;
 
                 } catch (error) {
-
                     console.error(error);
                 }
-            }
-
-            async function checkNewMessages() {
-
-                if (!chatState.conversationId) {
-                    return;
-                }
-
-                const response = await fetch(
-                    `/guest-chat/${chatState.conversationId}/poll?email=${encodeURIComponent(chatState.email)}&last_message_id=${chatState.lastMessageId}`
-                );
-
-                const result = await response.json();
-
-                updateChatStatus(result.status);
-
-                if (!result.messages.length) {
-                    return;
-                }
-
-                result.messages.forEach(msg => {
-
-                    appendMessage({
-
-                        senderName: "Admin",
-
-                        message: msg.message,
-
-                        createdAt: msg.created_at,
-
-                        isGuest: false
-
-                    });
-
-                    playNotificationSound();
-
-                });
-
-                chatState.lastMessageId =
-                    result.messages[result.messages.length - 1].id;
-
             }
 
             document.addEventListener('click', function (e) {

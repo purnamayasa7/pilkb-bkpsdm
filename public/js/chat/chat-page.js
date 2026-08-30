@@ -9,10 +9,7 @@
         activeConversationStatus: 'open',
         activeConversationData: null,
         conversationsData: [],
-        pollingTimer: null,
-        convListPollingTimer: null,
-        isPolling: false,
-        isConvListPolling: false,
+        isUserSubscribed: false,
         isSelectionMode: false,
         selectedConversationIds: new Set(),
         renderedMessageIds: new Set(),
@@ -30,8 +27,177 @@
             this.notificationSound.preload = 'auto';
 
             this.loadConversations();
-            this.startConversationListPolling();
+            this.subscribeUserChannel();
             this.bindEvents();
+        },
+
+        subscribeUserChannel() {
+            if (!window.Echo || !window.ChatAuth?.id || this.isUserSubscribed) return;
+            this.isUserSubscribed = true;
+
+            window.Echo.private(`user.${window.ChatAuth.id}`)
+                .listen('.ChatMessageSent', (e) => {
+                    this.handleIncomingMessageForUser(e);
+                });
+        },
+
+        // Mark room as read on server, lalu sync badge floating
+        markRoomRead(conversationId) {
+            if (!conversationId) return;
+            $.post(`/chat/${conversationId}/mark-read`).done(() => {
+                if (window.ChatWidgetApp) {
+                    window.ChatWidgetApp.loadUnreadBadge();
+                }
+            });
+        },
+
+        handleIncomingMessageForUser(e) {
+            const conv = e.conversationData;
+            if (!conv || !conv.id) return;
+
+            const isActiveRoom = Number(this.activeConversationId) === Number(conv.id);
+            const isFromMe = Number(e.messageData?.sender_user_id) === Number(window.ChatAuth?.id);
+
+            const existingIndex = this.conversationsData.findIndex(item => Number(item.id) === Number(conv.id));
+            if (existingIndex !== -1) {
+                const item = this.conversationsData[existingIndex];
+                item.last_message = conv.last_message;
+                item.last_message_time = conv.last_message_time;
+                item.status = conv.status;
+                item.is_last_from_me = isFromMe;
+                if (!isActiveRoom) {
+                    item.unread = (item.unread || 0) + 1;
+                }
+                this.conversationsData.splice(existingIndex, 1);
+                this.conversationsData.unshift(item);
+            } else {
+                this.conversationsData.unshift({
+                    id: conv.id,
+                    no_tiket: conv.no_tiket,
+                    status: conv.status,
+                    nama_pengirim: conv.nama_pengirim,
+                    sender_role: conv.sender_role,
+                    sender_role_label: conv.sender_role_label,
+                    layanan: conv.layanan,
+                    bidang: conv.bidang,
+                    last_message: conv.last_message,
+                    last_message_time: conv.last_message_time,
+                    unread: isActiveRoom ? 0 : 1,
+                    type: conv.type,
+                    need_reply: conv.need_reply,
+                    is_last_from_me: isFromMe
+                });
+            }
+
+            const currentQuery = $('#waSearchInput').val();
+            if (currentQuery) {
+                this.filterConversations(currentQuery);
+            } else {
+                this.renderConversationList(this.conversationsData);
+            }
+
+            // Hanya mainkan suara & update badge jika bukan room yang sedang aktif
+            if (!isActiveRoom) {
+                if (this.notificationSound) {
+                    this.notificationSound.pause();
+                    this.notificationSound.currentTime = 0;
+                    this.notificationSound.play().catch(() => {});
+                }
+            }
+            // Jika aktif room: markRoomRead() sudah dipanggil di subscribeRoomChannel
+        },
+
+        subscribeRoomChannel(conversationId) {
+            if (!window.Echo || !conversationId) return;
+
+            window.Echo.private(`chat.${conversationId}`)
+                .listen('.ChatMessageSent', (e) => {
+                    if (Number(e.messageData.sender_user_id) !== Number(window.ChatAuth?.id)) {
+                        this.appendNewMessages([e.messageData]);
+                        // Langsung mark-as-read agar badge tidak muncul (user sudah di room ini)
+                        this.markRoomRead(conversationId);
+                        this.hideTypingIndicator();
+                    }
+                })
+                .listen('.ChatStatusChanged', (e) => {
+                    this.activeConversationStatus = e.status;
+                    this.updateChatInput(e.status);
+                    const isClosed = e.status === 'closed';
+                    $('#waRoomStatusBadge')
+                        .removeClass('open closed')
+                        .addClass(isClosed ? 'closed' : 'open')
+                        .text(isClosed ? 'Closed' : 'Open');
+
+                    if (isClosed) {
+                        $('#waLiCloseChat, #waBtnCloseChat').addClass('d-none').hide();
+                        $('#waLiReopenChat, #waBtnReopenChat').removeClass('d-none').show();
+                        $('#waChatClosedNotice').removeClass('d-none');
+                    } else {
+                        $('#waLiCloseChat, #waBtnCloseChat').removeClass('d-none').show();
+                        $('#waLiReopenChat, #waBtnReopenChat').addClass('d-none').hide();
+                        $('#waChatClosedNotice').addClass('d-none');
+                    }
+                })
+                .listenForWhisper('typing', (e) => {
+                    if (Number(e.userId) !== Number(window.ChatAuth?.id)) {
+                        this.showTypingIndicator(e.name);
+                    }
+                });
+        },
+
+        whisperTyping() {
+            if (!this.activeConversationId || !window.Echo || !window.ChatAuth?.id) return;
+            const now = Date.now();
+            if (now - (this._lastWhisperTime || 0) < 2000) return;
+            this._lastWhisperTime = now;
+
+            window.Echo.private(`chat.${this.activeConversationId}`)
+                .whisper('typing', {
+                    userId: window.ChatAuth.id,
+                    name: window.ChatAuth.name || 'Pengguna'
+                });
+        },
+
+        showTypingIndicator(name) {
+            const subtitleEl = $('#waRoomSubtitle');
+            if (subtitleEl.length) {
+                if (!this._originalSubtitle) {
+                    this._originalSubtitle = subtitleEl.text();
+                }
+                subtitleEl.html('<span class="text-success fw-semibold fst-italic"><i data-feather="edit-2" style="width:11px;height:11px;" class="me-1"></i>sedang mengetik...</span>');
+                if (window.feather) feather.replace();
+            }
+
+            const stream = $('#waMessagesBox');
+            if (stream.length && !$('#waChatTypingBubble').length) {
+                stream.append(`
+                    <div class="chat-typing-bubble" id="waChatTypingBubble">
+                        <div class="typing-dots">
+                            <span></span><span></span><span></span>
+                        </div>
+                    </div>
+                `);
+                stream.scrollTop(stream[0].scrollHeight);
+            }
+
+            if (this._typingTimer) {
+                clearTimeout(this._typingTimer);
+            }
+            this._typingTimer = setTimeout(() => {
+                this.hideTypingIndicator();
+            }, 3500);
+        },
+
+        hideTypingIndicator() {
+            if (this._typingTimer) {
+                clearTimeout(this._typingTimer);
+                this._typingTimer = null;
+            }
+            $('#waChatTypingBubble').remove();
+            if (this._originalSubtitle) {
+                $('#waRoomSubtitle').text(this._originalSubtitle);
+                this._originalSubtitle = null;
+            }
         },
 
         escapeHtml(text) {
@@ -215,7 +381,11 @@
 
         // Open Room
         openConversation(conversationId) {
+            this.hideTypingIndicator();
             this.stopPolling();
+            if (this.activeConversationId && window.Echo) {
+                window.Echo.leave(`chat.${this.activeConversationId}`);
+            }
             this.activeConversationId = conversationId;
             this.renderedMessageIds.clear();
             this.lastMessageId = null;
@@ -245,13 +415,18 @@
                     this.renderRoomHeader(res);
                     this.renderMessages(res.messages || []);
                     this.updateChatInput(res.status);
-                    this.startPolling();
+                    this.subscribeRoomChannel(conversationId);
 
                     // Update unread in local state
                     const found = this.conversationsData.find(i => Number(i.id) === Number(conversationId));
                     if (found) {
                         found.unread = 0;
                         this.renderConversationList(this.conversationsData);
+                    }
+
+                    // Sync badge floating button setelah pesan terbaca
+                    if (window.ChatWidgetApp) {
+                        window.ChatWidgetApp.loadUnreadBadge();
                     }
                 })
                 .fail((xhr) => {
@@ -441,66 +616,24 @@
             });
         },
 
-        // Polling Room
+        // Polling Room (Managed via Reverb WebSockets)
         startPolling() {
             this.stopPolling();
-            this.pollingTimer = setInterval(() => {
-                if (!this.activeConversationId || this.isPolling) return;
-                this.isPolling = true;
-
-                $.get(`/chat/${this.activeConversationId}/poll`, {
-                    last_message_id: this.lastMessageId ?? 0
-                })
-                .done((res) => {
-                    if (res.status && res.status !== this.activeConversationStatus) {
-                        this.activeConversationStatus = res.status;
-                        if (this.activeConversationData) {
-                            this.activeConversationData.status = res.status;
-                            this.renderRoomHeader(this.activeConversationData);
-                            this.updateChatInput(res.status);
-                        }
-                    }
-
-                    if (res.messages && res.messages.length) {
-                        this.appendNewMessages(res.messages);
-                    }
-                })
-                .always(() => {
-                    this.isPolling = false;
-                });
-            }, 2500);
         },
 
         stopPolling() {
+            if (this.activeConversationId && window.Echo) {
+                window.Echo.leave(`chat.${this.activeConversationId}`);
+            }
             if (this.pollingTimer) {
                 clearInterval(this.pollingTimer);
                 this.pollingTimer = null;
             }
         },
 
-        // Polling List
+        // Polling List (Managed via Reverb WebSockets)
         startConversationListPolling() {
             this.stopConversationListPolling();
-            this.convListPollingTimer = setInterval(() => {
-                if (this.isConvListPolling) return;
-                this.isConvListPolling = true;
-
-                const role = window.ChatAuth?.role || '';
-                const url = (role === 'admin_bawah' || role === 'bidang') ? '/chat/admin/inbox/poll' : '/chat/my-conversations';
-
-                $.get(url)
-                    .done((res) => {
-                        if (Array.isArray(res) && res.length) {
-                            this.conversationsData = res;
-                            if (!this.isSelectionMode) {
-                                this.renderConversationList(this.conversationsData);
-                            }
-                        }
-                    })
-                    .always(() => {
-                        this.isConvListPolling = false;
-                    });
-            }, 4000);
         },
 
         stopConversationListPolling() {
@@ -694,6 +827,10 @@
                 const isClosed = self.activeConversationStatus === 'closed';
                 const hasText = $(this).val().trim().length > 0;
                 $('#waSendMessage').prop('disabled', isClosed || !hasText);
+
+                if (!isClosed && hasText) {
+                    self.whisperTyping();
+                }
             });
 
             $(document).on('keydown', '#waChatInput', function (e) {
@@ -701,6 +838,11 @@
                     e.preventDefault();
                     if (!$('#waSendMessage').prop('disabled')) {
                         self.sendMessage();
+                    }
+                } else if (e.key !== 'Enter') {
+                    const isClosed = self.activeConversationStatus === 'closed';
+                    if (!isClosed) {
+                        self.whisperTyping();
                     }
                 }
             });
