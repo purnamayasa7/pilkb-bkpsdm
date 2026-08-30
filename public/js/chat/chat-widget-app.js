@@ -169,6 +169,11 @@
                     // Typing Listener
                     window.FirebaseDB.ref(`conversations/${conversationId}/typing`)
                         .on('value', (snapshot) => {
+                            if (!$('#chatDrawer').hasClass('show')) {
+                                this.hideTypingIndicator();
+                                return;
+                            }
+
                             const typingUsers = snapshot.val();
                             if (typingUsers) {
                                 const now = Date.now();
@@ -207,6 +212,12 @@
         },
 
         showTypingIndicator(name) {
+            // Jangan tampilkan jika drawer sedang tertutup
+            if (!$('#chatDrawer').hasClass('show')) {
+                this.hideTypingIndicator();
+                return;
+            }
+
             const subtitleEl = $('#roomSubtitle');
             if (subtitleEl.length) {
                 if (!this._originalSubtitle) {

@@ -513,6 +513,7 @@
 
             $('#closeChatDrawer').on('click', function() {
                 $('#chatDrawer').removeClass('show');
+                ChatWidgetApp.hideTypingIndicator();
                 ChatWidgetApp.stopPolling();
                 ChatWidgetApp.stopInboxPolling();
                 ChatWidgetApp.stopConversationListPolling();
@@ -531,6 +532,7 @@
                     button.has(e.target).length === 0
                 ) {
                     drawer.removeClass('show');
+                    ChatWidgetApp.hideTypingIndicator();
                     ChatWidgetApp.stopPolling();
                     ChatWidgetApp.stopInboxPolling();
                     ChatWidgetApp.stopConversationListPolling();
