@@ -35,6 +35,12 @@
         _userSubscribedTime: 0,
         _roomSubscribedTime: 0,
 
+        isRoomCurrentlyOpen(conversationId) {
+            const isDrawerOpen = $('#chatDrawer').hasClass('show');
+            const hasRoomContainer = $('.chat-room-container').length > 0;
+            return isDrawerOpen && hasRoomContainer && (Number(this.activeConversationId) === Number(conversationId));
+        },
+
         // Subscribe to user private channel / Firebase for realtime inbox updates & unread badges
         subscribeUserChannel() {
             if (!window.ChatAuth?.id || this.isUserSubscribed) return;
@@ -43,16 +49,17 @@
 
             const handleUserEvent = (e, isLive = true) => {
                 if (!e || !e.messageData) return;
-                const isActiveRoom = Number(this.activeConversationId) === Number(e.conversationData?.id);
+                const convId = Number(e.conversationData?.id);
+                const isRoomOpen = this.isRoomCurrentlyOpen(convId);
 
                 this.updateConversationListItem(e);
 
                 // Hanya proses interaksi aktif (suara / mark read / append) jika ini pesan live yang baru masuk
                 if (isLive) {
-                    if (isActiveRoom) {
+                    if (isRoomOpen) {
                         if (Number(e.messageData?.sender_user_id) !== Number(window.ChatAuth?.id)) {
                             this.appendNewMessages([e.messageData]);
-                            this.markRoomRead(e.conversationData?.id);
+                            this.markRoomRead(convId);
                             this.hideTypingIndicator();
                         }
                     } else {
@@ -100,9 +107,11 @@
             const handleRoomMessage = (msgData) => {
                 if (!msgData) return;
                 if (Number(msgData.sender_user_id) !== Number(window.ChatAuth?.id)) {
-                    this.appendNewMessages([msgData]);
-                    this.markRoomRead(conversationId);
-                    this.hideTypingIndicator();
+                    if (this.isRoomCurrentlyOpen(conversationId)) {
+                        this.appendNewMessages([msgData]);
+                        this.markRoomRead(conversationId);
+                        this.hideTypingIndicator();
+                    }
                 }
             };
 

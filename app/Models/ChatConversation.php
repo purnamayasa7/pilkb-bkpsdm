@@ -64,6 +64,10 @@ class ChatConversation extends Model
 
         return $this->messages()
             ->where('id', '>', $lastRead)
+            ->where(function ($q) use ($userId) {
+                $q->whereNull('sender_user_id')
+                    ->orWhere('sender_user_id', '!=', $userId);
+            })
             ->count();
     }
 

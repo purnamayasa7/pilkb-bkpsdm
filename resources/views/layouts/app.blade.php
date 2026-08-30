@@ -513,14 +513,12 @@
             });
 
             $('#closeChatDrawer').on('click', function() {
-
                 $('#chatDrawer').removeClass('show');
-
+                ChatWidgetApp.activeConversationId = null;
                 ChatWidgetApp.stopPolling();
-
                 ChatWidgetApp.stopInboxPolling();
-
                 ChatWidgetApp.stopConversationListPolling();
+                ChatWidgetApp.loadUnreadBadge();
             });
 
             $(document).on('mouseup', function(e) {
@@ -535,9 +533,11 @@
                     button.has(e.target).length === 0
                 ) {
                     drawer.removeClass('show');
+                    ChatWidgetApp.activeConversationId = null;
                     ChatWidgetApp.stopPolling();
                     ChatWidgetApp.stopInboxPolling();
                     ChatWidgetApp.stopConversationListPolling();
+                    ChatWidgetApp.loadUnreadBadge();
                 }
             });
 
