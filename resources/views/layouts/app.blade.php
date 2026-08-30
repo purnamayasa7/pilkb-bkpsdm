@@ -215,13 +215,14 @@
     <script src="https://cdn.jsdelivr.net/npm/laravel-echo@1.16.1/dist/echo.iife.js"></script>
     <script>
         window.Pusher = Pusher;
+        const isHttps = window.location.protocol === 'https:';
         window.Echo = new Echo({
             broadcaster: 'reverb',
-            key: '{{ env("REVERB_APP_KEY", config("reverb.apps.apps.0.key")) }}',
-            wsHost: '{{ env("REVERB_HOST", "localhost") }}',
-            wsPort: {{ env("REVERB_PORT", 8080) }},
-            wssPort: {{ env("REVERB_PORT", 8080) }},
-            forceTLS: ('{{ env("REVERB_SCHEME", "http") }}' === 'https'),
+            key: '{{ config("reverb.apps.apps.0.key", env("REVERB_APP_KEY")) }}',
+            wsHost: isHttps ? window.location.hostname : '{{ env("REVERB_HOST", "localhost") }}',
+            wsPort: isHttps ? (window.location.port || 443) : {{ env("REVERB_PORT", 8080) }},
+            wssPort: isHttps ? (window.location.port || 443) : {{ env("REVERB_PORT", 8080) }},
+            forceTLS: isHttps,
             enabledTransports: ['ws', 'wss'],
             authEndpoint: '/broadcasting/auth',
             auth: {
