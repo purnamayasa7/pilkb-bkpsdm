@@ -43,8 +43,15 @@
 
                     this.updateConversationListItem(e);
 
-                    // Jika pesan untuk room lain (bukan yang sedang dibuka), update badge & suara
-                    if (!isActiveRoom) {
+                    // Jika user sedang berada di dalam room ini, langsung append pesan baru
+                    if (isActiveRoom) {
+                        if (Number(e.messageData?.sender_user_id) !== Number(window.ChatAuth?.id)) {
+                            this.appendNewMessages([e.messageData]);
+                            this.markRoomRead(e.conversationData?.id);
+                            this.hideTypingIndicator();
+                        }
+                    } else {
+                        // Jika pesan untuk room lain, update badge & putar audio notifikasi
                         this.loadUnreadBadge();
 
                         if (this.notificationSound) {
@@ -53,8 +60,6 @@
                             this.notificationSound.play().catch(() => {});
                         }
                     }
-                    // Jika pesan masuk ke room aktif, badge TIDAK boleh naik —
-                    // markRoomRead() di subscribeRoomChannel yang bertanggung jawab
                 });
         },
 

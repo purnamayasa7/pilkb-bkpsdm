@@ -96,15 +96,21 @@
                 this.renderConversationList(this.conversationsData);
             }
 
-            // Hanya mainkan suara & update badge jika bukan room yang sedang aktif
-            if (!isActiveRoom) {
+            // Jika user sedang berada di dalam room ini, langsung append pesan baru
+            if (isActiveRoom) {
+                if (!isFromMe) {
+                    this.appendNewMessages([e.messageData]);
+                    this.markRoomRead(conv.id);
+                    this.hideTypingIndicator();
+                }
+            } else {
+                // Hanya mainkan suara & update badge jika bukan room yang sedang aktif
                 if (this.notificationSound) {
                     this.notificationSound.pause();
                     this.notificationSound.currentTime = 0;
                     this.notificationSound.play().catch(() => {});
                 }
             }
-            // Jika aktif room: markRoomRead() sudah dipanggil di subscribeRoomChannel
         },
 
         subscribeRoomChannel(conversationId) {
