@@ -1687,14 +1687,22 @@
         },
     };
 
+    let _searchConvTimer = null;
     $(document).on('input', '#searchMyConversations', function () {
         const query = $(this).val();
-        window.ChatWidgetApp.filterConversations(query);
+        clearTimeout(_searchConvTimer);
+        _searchConvTimer = setTimeout(() => {
+            window.ChatWidgetApp.filterConversations(query);
+        }, 120);
     });
 
+    let _searchInboxTimer = null;
     $(document).on('input', '#searchAdminInbox', function () {
         const query = $(this).val();
-        window.ChatWidgetApp.filterInbox(query);
+        clearTimeout(_searchInboxTimer);
+        _searchInboxTimer = setTimeout(() => {
+            window.ChatWidgetApp.filterInbox(query);
+        }, 120);
     });
 
     $(document).on('input', '#chatInput', function () {
