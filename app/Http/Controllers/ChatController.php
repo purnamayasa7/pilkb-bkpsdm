@@ -125,7 +125,14 @@ class ChatController extends Controller
                         ? $lastMsg->created_at->format('Y-m-d H:i:s')
                         : ($conversation->updated_at ? $conversation->updated_at->format('Y-m-d H:i:s') : null),
                     'is_last_from_me' => $lastMsg ? (int) $lastMsg->sender_user_id === (int) $user->id : false,
-                    'unread' => $conversation->unreadCount($user->id),
+                    'unread' => (function () use ($conversation, $user) {
+                        $p = $conversation->participants->firstWhere('user_id', $user->id);
+                        $lastRead = $p?->last_read_message_id ?? 0;
+                        return $conversation->messages
+                            ->where('id', '>', $lastRead)
+                            ->filter(fn ($m) => empty($m->sender_user_id) || (int) $m->sender_user_id !== (int) $user->id)
+                            ->count();
+                    })(),
                     'need_reply' => (bool) $conversation->need_reply,
                     'type' => $conversation->type,
                 ];
@@ -613,7 +620,14 @@ class ChatController extends Controller
                         ? $lastMsg->created_at->format('Y-m-d H:i:s')
                         : ($c->updated_at ? $c->updated_at->format('Y-m-d H:i:s') : null),
                     'is_last_from_me' => $lastMsg ? (int) $lastMsg->sender_user_id === (int) $user->id : false,
-                    'unread' => $c->unreadCount($user->id),
+                    'unread' => (function () use ($c, $user) {
+                        $p = $c->participants->firstWhere('user_id', $user->id);
+                        $lastRead = $p?->last_read_message_id ?? 0;
+                        return $c->messages
+                            ->where('id', '>', $lastRead)
+                            ->filter(fn ($m) => empty($m->sender_user_id) || (int) $m->sender_user_id !== (int) $user->id)
+                            ->count();
+                    })(),
                     'need_reply' => (bool) $c->need_reply,
                     'type' => $c->type,
                 ];
@@ -963,34 +977,17 @@ class ChatController extends Controller
     {
         $user = Auth::user();
 
-        $count = 0;
-
-        $participants = ChatParticipant::where(
-            'user_id',
-            $user->id
-        )->get();
-
-        foreach ($participants as $participant) {
-
-            $lastReadId =
-                $participant->last_read_message_id ?? 0;
-
-            $count += ChatMessage::where(
-                'conversation_id',
-                $participant->conversation_id
-            )
-                ->where('id', '>', $lastReadId)
-                ->where(function ($q) use ($user) {
-
-                    $q->whereNull('sender_user_id')
-                        ->orWhere(
-                            'sender_user_id',
-                            '!=',
-                            $user->id
-                        );
-                })
-                ->count();
-        }
+        $count = ChatMessage::query()
+            ->join('chat_participants', function ($join) use ($user) {
+                $join->on('chat_messages.conversation_id', '=', 'chat_participants.conversation_id')
+                    ->where('chat_participants.user_id', '=', $user->id);
+            })
+            ->whereColumn('chat_messages.id', '>', \Illuminate\Support\Facades\DB::raw('COALESCE(chat_participants.last_read_message_id, 0)'))
+            ->where(function ($q) use ($user) {
+                $q->whereNull('chat_messages.sender_user_id')
+                    ->orWhere('chat_messages.sender_user_id', '!=', $user->id);
+            })
+            ->count();
 
         return response()->json([
             'count' => $count

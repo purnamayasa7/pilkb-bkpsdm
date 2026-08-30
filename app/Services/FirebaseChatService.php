@@ -109,19 +109,21 @@ class FirebaseChatService
                 'sent_at'          => (int) (microtime(true) * 1000),
             ];
 
-            // 1. Update room node di Firebase
-            Http::timeout(3)->put("{$this->databaseUrl}/conversations/{$conversation->id}/last_message.json", $payload);
+            $updates = [
+                "conversations/{$conversation->id}/last_message" => $payload,
+            ];
 
-            // 2. Jika guest tiket ada, update guest node
             if (!empty($conversation->no_tiket)) {
-                Http::timeout(3)->put("{$this->databaseUrl}/guest_conversations/{$conversation->no_tiket}/last_message.json", $payload);
+                $updates["guest_conversations/{$conversation->no_tiket}/last_message"] = $payload;
             }
 
-            // 3. Update notification untuk setiap user peserta
             $participantUserIds = $conversation->participants->pluck('user_id')->filter()->unique()->values()->toArray();
             foreach ($participantUserIds as $userId) {
-                Http::timeout(3)->put("{$this->databaseUrl}/users/{$userId}/last_event.json", $payload);
+                $updates["users/{$userId}/last_event"] = $payload;
             }
+
+            // Single atomic HTTP PATCH update for all nodes
+            Http::timeout(3)->patch("{$this->databaseUrl}/.json", $updates);
         } catch (\Throwable $e) {
             Log::warning('Firebase broadcastMessage failed: ' . $e->getMessage());
         }
@@ -140,11 +142,15 @@ class FirebaseChatService
                 'updated_at'     => (int) (microtime(true) * 1000),
             ];
 
-            Http::timeout(3)->put("{$this->databaseUrl}/conversations/{$conversation->id}/status.json", $payload);
+            $updates = [
+                "conversations/{$conversation->id}/status" => $payload,
+            ];
 
             if (!empty($conversation->no_tiket)) {
-                Http::timeout(3)->put("{$this->databaseUrl}/guest_conversations/{$conversation->no_tiket}/status.json", $payload);
+                $updates["guest_conversations/{$conversation->no_tiket}/status"] = $payload;
             }
+
+            Http::timeout(3)->patch("{$this->databaseUrl}/.json", $updates);
         } catch (\Throwable $e) {
             Log::warning('Firebase broadcastStatusChange failed: ' . $e->getMessage());
         }
