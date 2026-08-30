@@ -345,7 +345,7 @@ class ChatController extends Controller
         }
 
         try {
-            broadcast(new \App\Events\ChatMessageSent($message))->toOthers();
+            broadcast(new \App\Events\ChatMessageSent($message));
         } catch (\Throwable $e) {
             Log::warning('Broadcast ChatMessageSent failed: ' . $e->getMessage());
         }
