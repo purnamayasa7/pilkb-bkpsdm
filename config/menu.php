@@ -101,6 +101,15 @@ return [
 
         [
             'type' => 'item',
+            'title' => 'Log Error Sistem',
+            'path' => 'log-viewer',
+            'icon' => 'alert-triangle',
+            'active_key' => 'log-viewer',
+            'target' => '_blank',
+        ],
+
+        [
+            'type' => 'item',
             'title' => 'Laporan',
             'path' => 'root/laporan',
             'icon' => 'bar-chart-2',

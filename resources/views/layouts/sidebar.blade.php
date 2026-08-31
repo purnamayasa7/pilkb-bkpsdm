@@ -34,7 +34,8 @@
                         @endphp
 
                         <a class="nav-link {{ $isActive ? 'active' : '' }}"
-                            href="{{ !empty($menu['path']) ? url($menu['path']) . '?menu=' . ($menu['active_key'] ?? '') : 'javascript:void(0);' }}">
+                            href="{{ !empty($menu['path']) ? url($menu['path']) . ($menu['path'] === 'log-viewer' ? '' : '?menu=' . ($menu['active_key'] ?? '')) : 'javascript:void(0);' }}"
+                            {!! !empty($menu['target']) ? 'target="' . e($menu['target']) . '"' : '' !!}>
 
                             <div class="nav-link-icon">
                                 <i data-feather="{{ $menu['icon'] }}"></i>
