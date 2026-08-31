@@ -711,26 +711,29 @@ class ChatController extends Controller
     public function startGuestChat(Request $request)
     {
         $request->validate([
-            'nip'        => 'required|string|size:18',
+            'nip'        => 'nullable|string|max:30',
             'nama'       => 'required|string|max:100',
             'email'      => 'required|email|max:100',
-            'bidang_id'  => 'required|exists:tb_bidang,id',
+            'bidang_id'  => 'nullable',
             'layanan_id' => 'required|exists:tb_layanan,id',
         ]);
+
+        $layanan = \App\Models\Layanan::find($request->layanan_id);
+        $bidangId = $request->bidang_id ?: ($layanan?->kode_bidang ?? null);
 
         $guest = ChatGuest::updateOrCreate(
             [
                 'email' => $request->email
             ],
             [
-                'nip'  => $request->nip,
+                'nip'  => $request->nip ?: null,
                 'nama' => $request->nama
             ]
         );
 
         $conversation = ChatConversation::create([
             'guest_id'   => $guest->id,
-            'bidang_id'  => $request->bidang_id,
+            'bidang_id'  => $bidangId,
             'layanan_id' => $request->layanan_id,
             'type'       => 'guest',
             'status'     => 'open',
@@ -740,7 +743,7 @@ class ChatController extends Controller
 
         $adminBidang = User::where(
             'bidang_id',
-            $request->bidang_id
+            $bidangId
         )
             ->whereHas('role', function ($q) {
                 $q->where('name', 'bidang');

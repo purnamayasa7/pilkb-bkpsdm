@@ -101,7 +101,8 @@
                 email: null,
                 ticket: null,
                 soundEnabled: false,
-                botMode: 'main_menu', // 'main_menu', 'info_menu', 'awaiting_ticket', 'selecting_bidang', 'selecting_layanan', 'selecting_admin_layanan', 'live_admin'
+                botMode: 'main_menu', // 'main_menu', 'info_menu', 'awaiting_ticket', 'selecting_syarat_layanan', 'selecting_admin_layanan', 'live_admin'
+                pendingAdminMessage: null
             };
 
             const notificationSound = new Audio("/sound/notification.mp3");
@@ -204,6 +205,7 @@
                 chatState.email = null;
                 chatState.ticket = null;
                 chatState.botMode = 'main_menu';
+                chatState.pendingAdminMessage = null;
 
                 if (el.conversationId) el.conversationId.value = '';
                 if (el.roomTicketNo) el.roomTicketNo.innerHTML = '-';
@@ -217,6 +219,9 @@
                 if (el.guestEmail) el.guestEmail.value = '';
                 if (el.roomSubtitle) {
                     el.roomSubtitle.innerText = 'Pusat Bantuan PILKB (Guest)';
+                }
+                if (el.messageInput) {
+                    el.messageInput.placeholder = "Tulis pesan...";
                 }
 
                 window.ChatWidgetLogin.guestSession = null;
@@ -245,7 +250,7 @@
                 if (window.feather) feather.replace();
             }
 
-            // Render gelembung pesan user menggunakan styling standar bubble PILKB (.message-row.me)
+            // Render gelembung pesan user (.message-row.me)
             function appendUserMessageHtml(text) {
                 if (!el.chatMessages) return;
                 const chatTime = formatChatTime(new Date().toISOString());
@@ -269,7 +274,7 @@
             function showBotMainMenu() {
                 chatState.botMode = 'main_menu';
                 if (el.messageInput) {
-                    el.messageInput.placeholder = "Pilih opsi di atas atau ketik pesan...";
+                    el.messageInput.placeholder = "Tulis pesan...";
                 }
                 if (el.roomSubtitle) {
                     el.roomSubtitle.innerHTML = '<span class="text-primary fw-semibold"><i data-feather="cpu" style="width:12px;height:12px;" class="me-1"></i>Asisten Virtual BKPSDM</span>';
@@ -320,7 +325,7 @@
                                     <i data-feather="search" class="text-info"></i>
                                     <span>a. 🔍 Cek Status Tiket</span>
                                 </button>
-                                <button type="button" class="bot-btn-option" data-bot-action="cek_syarat">
+                                <button type="button" class="bot-btn-option" data-bot-action="cek_syarat_langsung">
                                     <i data-feather="file-text" class="text-success"></i>
                                     <span>b. 📋 Cek Syarat Layanan</span>
                                 </button>
@@ -341,7 +346,7 @@
                 appendUserMessageHtml("a. Cek Status Tiket");
 
                 if (el.messageInput) {
-                    el.messageInput.placeholder = "Ketik nomor tiket Anda lalu tekan Enter...";
+                    el.messageInput.placeholder = "Tulis nomor tiket Anda...";
                     el.messageInput.focus();
                 }
 
@@ -371,6 +376,10 @@
                 chatState.botMode = 'info_menu';
                 appendUserMessageHtml(`Cek Tiket: ${ticketNo}`);
                 clearMessageInput();
+
+                if (el.messageInput) {
+                    el.messageInput.placeholder = "Tulis pesan...";
+                }
 
                 const loadingId = 'bot_loading_' + Date.now();
                 appendBotMessageHtml(`
@@ -429,6 +438,7 @@
                                         </div>` : ''}
                                     </div>
                                     
+                                    <p class="mt-2 mb-1 text-muted small fw-semibold">Ada yang bisa dibantu lagi?</p>
                                     <div class="bot-options-grid">
                                         <a href="${d.url_detail}" target="_blank" class="bot-btn-option text-decoration-none">
                                             <i data-feather="external-link" class="text-primary"></i>
@@ -441,6 +451,10 @@
                                         <button type="button" class="bot-btn-option primary" data-bot-action="menu_admin_pilih_layanan">
                                             <i data-feather="message-circle"></i>
                                             <span>💬 Tanya Admin Terkait Tiket Ini</span>
+                                        </button>
+                                        <button type="button" class="bot-btn-option secondary" data-bot-action="selesai_terima_kasih">
+                                            <i data-feather="check"></i>
+                                            <span>👋 Tidak, Terima Kasih</span>
                                         </button>
                                         <button type="button" class="bot-btn-option secondary" data-bot-action="back_main_menu">
                                             <i data-feather="arrow-left"></i>
@@ -461,6 +475,7 @@
                                     <p class="text-danger mb-2">Maaf, nomor tiket <strong>"${escapeHtml(ticketNo)}"</strong> tidak ditemukan di dalam sistem.</p>
                                     <p class="text-muted small mb-0">Silakan pastikan format nomor tiket sudah sesuai, atau tanyakan langsung ke Admin FO.</p>
                                     
+                                    <p class="mt-2 mb-1 text-muted small fw-semibold">Ada yang bisa dibantu lagi?</p>
                                     <div class="bot-options-grid">
                                         <button type="button" class="bot-btn-option" data-bot-action="cek_tiket">
                                             <i data-feather="rotate-cw"></i>
@@ -469,6 +484,10 @@
                                         <button type="button" class="bot-btn-option primary" data-bot-action="menu_admin_pilih_layanan">
                                             <i data-feather="message-circle"></i>
                                             <span>💬 Tanya Admin FO</span>
+                                        </button>
+                                        <button type="button" class="bot-btn-option secondary" data-bot-action="selesai_terima_kasih">
+                                            <i data-feather="check"></i>
+                                            <span>👋 Tidak, Terima Kasih</span>
                                         </button>
                                         <button type="button" class="bot-btn-option secondary" data-bot-action="back_main_menu">
                                             <i data-feather="arrow-left"></i>
@@ -492,9 +511,9 @@
                 }
             }
 
-            // 4. Sub-Flow b: Cek Syarat Layanan (Pilih Bidang)
-            async function loadBotBidangOptions() {
-                chatState.botMode = 'selecting_bidang';
+            // 4. Sub-Flow b: Cek Syarat Layanan (Langsung Daftar Layanan A-Z tanpa Pilih Bidang)
+            async function loadBotSyaratLayananList() {
+                chatState.botMode = 'selecting_syarat_layanan';
                 appendUserMessageHtml("b. Cek Syarat Layanan");
 
                 const loadingId = 'bot_loading_' + Date.now();
@@ -502,22 +521,22 @@
                     <div class="bot-message-wrapper" id="${loadingId}">
                         <div class="bot-bubble text-muted small">
                             <span class="spinner-border spinner-border-sm me-2" role="status"></span>
-                            Memuat daftar bidang & layanan...
+                            Memuat daftar layanan...
                         </div>
                     </div>
                 `);
 
                 try {
-                    const bidangList = await apiRequest('/guest-bot/bidang-layanan');
+                    const list = await apiRequest('/guest-bot/semua-layanan');
                     document.getElementById(loadingId)?.remove();
-                    window._botBidangData = bidangList;
+                    window._allLayananData = list;
 
                     let buttonsHtml = '';
-                    bidangList.forEach(b => {
+                    list.forEach(l => {
                         buttonsHtml += `
-                            <button type="button" class="bot-btn-option" data-bot-action="select_bidang" data-bidang-id="${b.id}">
-                                <i data-feather="folder" class="text-primary"></i>
-                                <span>${escapeHtml(b.nama_bidang)}</span>
+                            <button type="button" class="bot-btn-option" data-bot-action="lihat_syarat_layanan" data-layanan-id="${l.id}">
+                                <i data-feather="file-text" class="text-success"></i>
+                                <span>${escapeHtml(l.nama_layanan)}</span>
                             </button>
                         `;
                     });
@@ -525,18 +544,18 @@
                     buttonsHtml += `
                         <button type="button" class="bot-btn-option secondary" data-bot-action="back_info_menu">
                             <i data-feather="arrow-left"></i>
-                            <span>↩️ Kembali</span>
+                            <span>↩️ Kembali ke Menu Informasi</span>
                         </button>
                     `;
 
                     const html = `
                         <div class="bot-message-wrapper">
                             <div class="bot-badge-header">
-                                <i data-feather="cpu"></i> Asisten Virtual PILKB
+                                <i data-feather="file-text" class="text-success"></i> Pilih Layanan (A-Z)
                             </div>
                             <div class="bot-bubble">
-                                <p class="mb-2">Silakan pilih <strong>Bidang</strong> tujuan layanan yang ingin Anda cek persyaratannya:</p>
-                                <div class="bot-options-grid">
+                                <p class="mb-2">Silakan pilih <strong>Layanan</strong> yang ingin Anda cek persyaratannya:</p>
+                                <div class="bot-options-grid" style="max-height: 280px; overflow-y: auto; padding-right: 4px;">
                                     ${buttonsHtml}
                                 </div>
                             </div>
@@ -549,52 +568,7 @@
                 }
             }
 
-            // 4.1 Pilih Layanan di Bidang Tersebut (Untuk Cek Syarat)
-            function loadBotLayananOptions(bidangId) {
-                chatState.botMode = 'selecting_layanan';
-                const bidang = (window._botBidangData || []).find(b => String(b.id) === String(bidangId));
-                if (!bidang) return;
-
-                appendUserMessageHtml(`Bidang: ${bidang.nama_bidang}`);
-
-                let buttonsHtml = '';
-                if (bidang.layanan && bidang.layanan.length > 0) {
-                    bidang.layanan.forEach(l => {
-                        buttonsHtml += `
-                            <button type="button" class="bot-btn-option" data-bot-action="select_layanan" data-layanan-id="${l.id}">
-                                <i data-feather="file-text" class="text-success"></i>
-                                <span>${escapeHtml(l.nama_layanan)}</span>
-                            </button>
-                        `;
-                    });
-                } else {
-                    buttonsHtml += `<p class="text-muted small mb-2">Belum ada layanan aktif pada bidang ini.</p>`;
-                }
-
-                buttonsHtml += `
-                    <button type="button" class="bot-btn-option secondary" data-bot-action="cek_syarat">
-                        <i data-feather="arrow-left"></i>
-                        <span>↩️ Pilih Bidang Lain</span>
-                    </button>
-                `;
-
-                const html = `
-                    <div class="bot-message-wrapper">
-                        <div class="bot-badge-header">
-                            <i data-feather="cpu"></i> Asisten Virtual PILKB
-                        </div>
-                        <div class="bot-bubble">
-                            <p class="mb-2">Pilih <strong>Layanan</strong> pada <em>${escapeHtml(bidang.nama_bidang)}</em>:</p>
-                            <div class="bot-options-grid">
-                                ${buttonsHtml}
-                            </div>
-                        </div>
-                    </div>
-                `;
-                appendBotMessageHtml(html);
-            }
-
-            // 4.2 Tampilkan Persyaratan Layanan Lengkap
+            // 4.1 Tampilkan Persyaratan Layanan Lengkap
             async function loadBotSyaratLayanan(layananId) {
                 const loadingId = 'bot_loading_' + Date.now();
                 appendBotMessageHtml(`
@@ -644,18 +618,23 @@
                                         </div>
                                     </div>
                                     
+                                    <p class="mt-3 mb-1 text-muted small fw-semibold">Ada yang bisa dibantu lagi?</p>
                                     <div class="bot-options-grid">
                                         <a href="${d.pdf_url}" target="_blank" class="bot-btn-option text-decoration-none">
                                             <i data-feather="download" class="text-primary"></i>
                                             <span>📄 Unduh Format PDF Persyaratan</span>
                                         </a>
-                                        <button type="button" class="bot-btn-option" data-bot-action="cek_syarat">
+                                        <button type="button" class="bot-btn-option" data-bot-action="cek_syarat_langsung">
                                             <i data-feather="grid"></i>
                                             <span>📋 Cek Layanan Lain</span>
                                         </button>
                                         <button type="button" class="bot-btn-option primary" data-bot-action="menu_admin_pilih_layanan">
                                             <i data-feather="message-circle"></i>
                                             <span>💬 Tanya Admin Terkait Layanan Ini</span>
+                                        </button>
+                                        <button type="button" class="bot-btn-option secondary" data-bot-action="selesai_terima_kasih">
+                                            <i data-feather="check"></i>
+                                            <span>👋 Tidak, Terima Kasih</span>
                                         </button>
                                         <button type="button" class="bot-btn-option secondary" data-bot-action="back_main_menu">
                                             <i data-feather="arrow-left"></i>
@@ -673,7 +652,34 @@
                 }
             }
 
-            // 5. PILIH LAYANAN SAJA UNTUK TANYA ADMIN / KONSULTASI
+            // 4.2 Selesai / Terima Kasih
+            function handleBotSelesai() {
+                chatState.botMode = 'main_menu';
+                appendUserMessageHtml("Tidak, terima kasih");
+
+                const html = `
+                    <div class="bot-message-wrapper">
+                        <div class="bot-badge-header">
+                            <i data-feather="smile" class="text-success"></i> Selesai
+                        </div>
+                        <div class="bot-bubble">
+                            <p class="mb-2">Sama-sama, senang bisa membantu Anda! 😊</p>
+                            <p class="mb-2">Jika sewaktu-waktu Anda memerlukan informasi atau bantuan layanan kepegawaian lainnya, jangan ragu untuk kembali menggunakan layanan Pusat Bantuan BKPSDM Kabupaten Buleleng.</p>
+                            <p class="mb-0 text-muted small fst-italic">Semoga hari Anda menyenangkan dan urusan Anda berjalan lancar! ✨</p>
+                            
+                            <div class="bot-options-grid mt-3">
+                                <button type="button" class="bot-btn-option secondary" data-bot-action="back_main_menu">
+                                    <i data-feather="cpu"></i>
+                                    <span>🤖 Buka Menu Utama</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                appendBotMessageHtml(html);
+            }
+
+            // 5. PILIH LAYANAN UNTUK TANYA ADMIN / KONSULTASI
             async function showAdminLayananPicker() {
                 chatState.botMode = 'selecting_admin_layanan';
                 appendUserMessageHtml("2. Tanya Admin / Konsultasi");
@@ -731,7 +737,7 @@
             }
 
             // 5.1 Aktifkan Sesi Live Chat Admin Setelah Pilih Layanan
-            function activateAdminChatForLayanan(layananId, bidangId, layananName) {
+            async function activateAdminChatForLayanan(layananId, bidangId, layananName) {
                 chatState.botMode = 'live_admin';
                 appendUserMessageHtml(`Layanan: ${layananName}`);
 
@@ -745,7 +751,7 @@
                 }
 
                 if (el.messageInput) {
-                    el.messageInput.placeholder = `Tulis pertanyaan tentang ${layananName}...`;
+                    el.messageInput.placeholder = "Tulis pesan...";
                     el.messageInput.focus();
                 }
 
@@ -763,6 +769,64 @@
                                 <button type="button" class="bot-btn-option secondary" data-bot-action="back_main_menu">
                                     <i data-feather="cpu"></i>
                                     <span>🤖 Buka Menu Bot</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                appendBotMessageHtml(html);
+
+                // Jika ada pesan pending dari ketikan bebas sebelumnya, kirimkan langsung!
+                if (chatState.pendingAdminMessage) {
+                    const pendingText = chatState.pendingAdminMessage;
+                    chatState.pendingAdminMessage = null;
+                    try {
+                        let conversationId = await createConversationIfNeeded();
+                        await sendGuestMessage(conversationId, pendingText);
+                        appendMessage({
+                            senderName: "Saya",
+                            message: pendingText,
+                            createdAt: new Date().toISOString(),
+                            isGuest: true
+                        });
+                    } catch (err) {
+                        console.error(err);
+                    }
+                }
+            }
+
+            // 6. Penanganan Cerdas saat User Mengetik Pesan Bebas di Menu Bot
+            function handleFreeformBotMessage(messageText) {
+                appendUserMessageHtml(messageText);
+                clearMessageInput();
+
+                // 1. Deteksi jika teks menyerupai nomor tiket (misal mengandung "TK" atau ada angka dengan tanda strip/panjang > 6)
+                const isLikelyTicket = /^(TK|TKT|REG)[\w\-]+/i.test(messageText) || (/[\d]{4,}/.test(messageText) && messageText.length >= 6);
+                if (isLikelyTicket) {
+                    handleBotTicketSearch(messageText);
+                    return;
+                }
+
+                // 2. Jika bukan tiket, simpan teks sebagai pending message dan tanyakan apakah ingin disambungkan ke Admin FO
+                chatState.pendingAdminMessage = messageText;
+
+                const html = `
+                    <div class="bot-message-wrapper">
+                        <div class="bot-badge-header">
+                            <i data-feather="help-circle" class="text-primary"></i> Bantuan Asisten Virtual
+                        </div>
+                        <div class="bot-bubble">
+                            <p class="mb-2">Halo! Anda saat ini berada di menu Asisten Virtual.</p>
+                            <p class="mb-2">Apakah Anda ingin mengonsultasikan pesan Anda: <em>"${escapeHtml(messageText)}"</em> ini langsung dengan <strong>Admin FO BKPSDM</strong>?</p>
+                            
+                            <div class="bot-options-grid">
+                                <button type="button" class="bot-btn-option primary" data-bot-action="menu_admin_pilih_layanan">
+                                    <i data-feather="message-circle"></i>
+                                    <span>💬 Ya, Hubungkan ke Tanya Admin</span>
+                                </button>
+                                <button type="button" class="bot-btn-option secondary" data-bot-action="back_main_menu">
+                                    <i data-feather="cpu"></i>
+                                    <span>🤖 Buka Pilihan Menu Bot</span>
                                 </button>
                             </div>
                         </div>
@@ -795,22 +859,21 @@
                     case 'cek_tiket':
                         promptTicketInput();
                         break;
-                    case 'cek_syarat':
-                        loadBotBidangOptions();
+                    case 'cek_syarat_langsung':
+                        loadBotSyaratLayananList();
                         break;
-                    case 'select_bidang':
-                        const bidangId = btn.getAttribute('data-bidang-id');
-                        loadBotLayananOptions(bidangId);
-                        break;
-                    case 'select_layanan':
-                        const layananId = btn.getAttribute('data-layanan-id');
-                        loadBotSyaratLayanan(layananId);
+                    case 'lihat_syarat_layanan':
+                        const syaratLayananId = btn.getAttribute('data-layanan-id');
+                        loadBotSyaratLayanan(syaratLayananId);
                         break;
                     case 'back_main_menu':
                         showBotMainMenu();
                         break;
                     case 'back_info_menu':
                         showBotInfoMenu();
+                        break;
+                    case 'selesai_terima_kasih':
+                        handleBotSelesai();
                         break;
                 }
             });
@@ -945,7 +1008,13 @@
                         return;
                     }
 
-                    // 2. Jika sesi live admin (atau user mengirim pesan bebas)
+                    // 2. Jika user mengetik pesan bebas saat berada di menu bot (bukan di sesi live admin)
+                    if (chatState.botMode !== 'live_admin') {
+                        handleFreeformBotMessage(message);
+                        return;
+                    }
+
+                    // 3. Jika sesi live admin aktif
                     if (el.sendButton) el.sendButton.disabled = true;
 
                     try {
@@ -1043,32 +1112,22 @@
                         senderName: isGuest ? "Saya" : (msg.sender_user?.nama || "Admin"),
                         message: msg.message,
                         createdAt: msg.created_at,
-                        isGuest,
-                        senderRole: msg.sender_role,
-                        senderRoleLabel: msg.sender_role_label
+                        isGuest
                     });
                 });
             }
 
-            // Render pesan menggunakan styling chat-bubble standar PILKB
-            function appendMessage({ senderName, message, createdAt, isGuest, senderRole = null, senderRoleLabel = null }) {
+            // Render pesan menggunakan styling chat-bubble standar PILKB (Hanya nama saja, tanpa badge bidang)
+            function appendMessage({ senderName, message, createdAt, isGuest }) {
                 if (!el.chatMessages) return;
 
                 const row = document.createElement('div');
                 row.className = `message-row ${isGuest ? 'me' : 'other'}`;
 
-                let roleBadgeHtml = '';
-                if (!isGuest && senderRole) {
-                    const roleClass = senderRole === 'fo' ? 'badge-fo' : (senderRole === 'bidang' ? 'badge-bidang' : 'badge-opd');
-                    const roleText = senderRoleLabel || (senderRole === 'fo' ? 'FO' : (senderRole === 'bidang' ? 'Bidang' : 'OPD'));
-                    roleBadgeHtml = `<span class="chat-role-badge ${roleClass} ms-1" style="font-size:10px;padding:1px 5px;"><i data-feather="user-check" style="width:10px;height:10px;"></i>${roleText}</span>`;
-                }
-
                 row.innerHTML = `
                     <div class="message-wrapper">
                         <div class="message-info ${isGuest ? 'me' : 'other'}">
                             <span class="sender-name">${escapeHtml(shortName(senderName))}</span>
-                            ${roleBadgeHtml}
                             <span class="message-dot">•</span>
                             <span class="message-time">${formatChatTime(createdAt)}</span>
                         </div>
@@ -1097,9 +1156,7 @@
                                         senderName: data.messageData.sender_name || "Admin",
                                         message: data.messageData.message,
                                         createdAt: data.messageData.created_at,
-                                        isGuest: false,
-                                        senderRole: data.messageData.sender_role,
-                                        senderRoleLabel: data.messageData.sender_role_label
+                                        isGuest: false
                                     });
                                     playNotificationSound();
                                 }
