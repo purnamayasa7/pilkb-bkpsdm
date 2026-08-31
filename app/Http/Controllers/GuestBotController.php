@@ -181,4 +181,22 @@ class GuestBotController extends Controller
             'data'   => $data,
         ]);
     }
+
+    /**
+     * Tanya AI Kepegawaian
+     */
+    public function tanyaAi(Request $request, \App\Services\KepegawaianAiService $aiService)
+    {
+        $request->validate([
+            'pertanyaan' => 'required|string|max:1000',
+            'history'    => 'nullable|array',
+        ]);
+
+        $pertanyaan = $request->input('pertanyaan');
+        $history = $request->input('history', []);
+
+        $result = $aiService->ask($pertanyaan, $history);
+
+        return response()->json($result);
+    }
 }

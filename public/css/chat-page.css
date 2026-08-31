@@ -538,6 +538,30 @@ body.dark-mode .wa-messages-container {
     background-image: radial-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px);
 }
 
+.wa-messages-container .message-row {
+    display: flex;
+    width: 100%;
+}
+
+.wa-messages-container .message-row.me {
+    justify-content: flex-end;
+}
+
+.wa-messages-container .message-row.other {
+    justify-content: flex-start;
+}
+
+.wa-messages-container .message-wrapper {
+    max-width: 72%;
+    min-width: 0;
+}
+
+@media (max-width: 767.98px) {
+    .wa-messages-container .message-wrapper {
+        max-width: 88%;
+    }
+}
+
 /* Date Divider */
 .wa-date-divider {
     display: flex;

@@ -50,4 +50,9 @@ return [
         'app_id' => env('FIREBASE_APP_ID', '1:1064671001480:web:2289b0ea3655eae271583d'),
     ],
 
+    'gemini' => [
+        'api_key' => env('GEMINI_API_KEY'),
+        'model'   => env('GEMINI_MODEL', 'gemini-3.5-flash-lite'),
+    ],
+
 ];

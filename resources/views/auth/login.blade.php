@@ -475,12 +475,21 @@
                 </div>
             </div>
 
-            <button
-                type="button"
-                class="btn-close btn-close-white"
-                id="closeChatDrawer"
-                aria-label="Tutup">
-            </button>
+            <div class="d-flex align-items-center gap-1">
+                <button
+                    type="button"
+                    class="btn-toggle-expand-chat d-none d-md-inline-flex"
+                    id="btnToggleExpandChat"
+                    title="Perbesar / Perkecil Ukuran Layar">
+                    <i data-feather="maximize-2"></i>
+                </button>
+                <button
+                    type="button"
+                    class="btn-close btn-close-white"
+                    id="closeChatDrawer"
+                    aria-label="Tutup">
+                </button>
+            </div>
         </div>
         <div class="chat-body">
 
@@ -608,7 +617,7 @@
                                 type="email"
                                 class="form-control text-dark"
                                 id="guestEmail"
-                                placeholder="Masukkan email aktif Anda">
+                                placeholder="Email otomatis terisi atau masukkan email aktif">
                         </div>
 
                         <button
@@ -683,8 +692,8 @@
             <!-- PAGE 4: ROOM CHAT -->
             <div class="chat-page d-none p-0 d-flex flex-column h-100" id="pageRoom">
 
-                <div class="chat-room-header">
-                    <div class="d-flex align-items-center gap-2 overflow-hidden">
+                <div class="chat-room-header d-flex align-items-center justify-content-between">
+                    <div class="d-flex align-items-center gap-2 overflow-hidden flex-grow-1 me-2">
                         <button
                             class="btn btn-light chat-back-btn"
                             id="btnBackInbox"
@@ -692,22 +701,65 @@
                             <i data-feather="arrow-left"></i>
                         </button>
                         <div class="chat-room-info overflow-hidden">
-                            <div class="d-flex align-items-center gap-1 flex-wrap">
-                                <span class="chat-item-ticket" id="roomTicketBadge">
-                                    <i data-feather="tag"></i>
-                                    <span id="roomTicketNo">-</span>
-                                </span>
-                                <span
-                                    id="chatStatusBadge"
-                                    class="chat-status-pill open">
-                                    Open
-                                </span>
+                            <!-- Header Sesi Bot (Default Saat Belum Ada Tiket) -->
+                            <div id="roomBotHeaderWrap" class="d-flex align-items-center gap-1">
+                                <i data-feather="cpu" class="text-primary" style="width:15px;height:15px;"></i>
+                                <span class="fw-bold text-dark" style="font-size: 13.5px;">Asisten Virtual BKPSDM</span>
                             </div>
-                            <div id="roomSubtitle" class="chat-room-sub text-truncate">
-                                Pusat Bantuan PILKB (Guest)
+
+                            <!-- Header Sesi LILI AI Kepegawaian -->
+                            <div id="roomLiliHeaderWrap" class="d-none">
+                                <div class="d-flex align-items-center gap-1">
+                                    <i data-feather="zap" style="width:15px; height:15px; color:#6366f1;"></i>
+                                    <span class="fw-bold text-dark" style="font-size: 13.5px;">LILI - AI Kepegawaian</span>
+                                </div>
+                                <div class="chat-room-sub text-truncate" style="font-size: 10.5px; color: #64748b;">
+                                    Layanan Informasi &amp; Literasi Kepegawaian
+                                </div>
+                            </div>
+
+                            <!-- Header Sesi Tiket / Tanya Admin (Muncul Saat Sudah Ada Tiket) -->
+                            <div id="roomTicketHeaderWrap" class="d-none">
+                                <div class="d-flex align-items-center gap-1 flex-wrap">
+                                    <span class="chat-item-ticket" id="roomTicketBadge">
+                                        <i data-feather="tag"></i>
+                                        <span id="roomTicketNo">-</span>
+                                    </span>
+                                    <span
+                                        id="chatStatusBadge"
+                                        class="chat-status-pill open">
+                                        Open
+                                    </span>
+                                </div>
+                                <div id="roomSubtitle" class="chat-room-sub text-truncate">
+                                    Pusat Bantuan PILKB (Guest)
+                                </div>
                             </div>
                         </div>
                     </div>
+
+                    <!-- Dropdown Titik Tiga (Hanya Muncul Saat Sudah Ada Nomor Tiket) -->
+                    <div class="dropdown d-none flex-shrink-0" id="roomActionDropdownWrap">
+                        <button class="btn btn-light chat-back-btn" type="button" id="roomActionMenuBtn" data-bs-toggle="dropdown" aria-expanded="false" title="Menu Opsi Chat">
+                            <i data-feather="more-vertical"></i>
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end shadow border-0 py-1" style="border-radius: 12px; font-size: 13px; min-width: 190px;" aria-labelledby="roomActionMenuBtn">
+                            <li>
+                                <a class="dropdown-item py-2 d-flex align-items-center gap-2" href="javascript:void(0)" id="menuActionCopyTicket">
+                                    <i data-feather="copy" style="width: 14px; height: 14px;" class="text-primary"></i>
+                                    <span>Salin No. Tiket</span>
+                                </a>
+                            </li>
+                            <li><hr class="dropdown-divider my-1"></li>
+                            <li>
+                                <a class="dropdown-item py-2 d-flex align-items-center gap-2 text-danger" href="javascript:void(0)" id="menuActionEndChat">
+                                    <i data-feather="power" style="width: 14px; height: 14px;" class="text-danger"></i>
+                                    <span>Tutup / Akhiri Chat</span>
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+
                     <input type="hidden" id="conversationId">
                 </div>
 
@@ -1045,7 +1097,12 @@
                 });
 
                 closeBtn.addEventListener('click', function() {
-                    drawer.classList.remove('show');
+                    drawer.classList.remove('show', 'is-expanded');
+                    const expandBtn = document.getElementById('btnToggleExpandChat');
+                    if (expandBtn) {
+                        expandBtn.innerHTML = '<i data-feather="maximize-2"></i>';
+                        if (window.feather) feather.replace();
+                    }
                     if (typeof resetGuestSession === 'function') {
                         resetGuestSession();
                     }
@@ -1060,7 +1117,12 @@
                         !drawer.contains(e.target) &&
                         !openBtn.contains(e.target)
                     ) {
-                        drawer.classList.remove('show');
+                        drawer.classList.remove('show', 'is-expanded');
+                        const expandBtn = document.getElementById('btnToggleExpandChat');
+                        if (expandBtn) {
+                            expandBtn.innerHTML = '<i data-feather="maximize-2"></i>';
+                            if (window.feather) feather.replace();
+                        }
                     }
                 });
 

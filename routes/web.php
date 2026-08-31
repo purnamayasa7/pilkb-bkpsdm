@@ -54,6 +54,7 @@ Route::post('/guest-bot/cek-tiket', [\App\Http\Controllers\GuestBotController::c
 Route::get('/guest-bot/semua-layanan', [\App\Http\Controllers\GuestBotController::class, 'getSemuaLayanan']);
 Route::get('/guest-bot/bidang-layanan', [\App\Http\Controllers\GuestBotController::class, 'getBidangLayanan']);
 Route::get('/guest-bot/syarat/{layananId}', [\App\Http\Controllers\GuestBotController::class, 'getSyaratLayanan']);
+Route::post('/guest-bot/tanya-ai', [\App\Http\Controllers\GuestBotController::class, 'tanyaAi']);
 // Open & close chat
 Route::post('/chat/{conversation}/close', [ChatController::class, 'closeChat']);
 Route::post('/chat/{conversation}/reopen', [ChatController::class, 'reopenChat']);

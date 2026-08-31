@@ -808,10 +808,11 @@ class ChatController extends Controller
         }
 
         return response()->json([
-            'success' => true,
-            'nip' => $pegawai['nip'],
-            'nama' => $pegawai['nama_lengkap'] ?? $pegawai['nama'],
-            'unit_kerja' => $pegawai['ket_ukerja']
+            'success'    => true,
+            'nip'        => $pegawai['nip'] ?? $nip,
+            'nama'       => $pegawai['nama_lengkap'] ?? $pegawai['nama'] ?? '',
+            'unit_kerja' => $pegawai['ket_ukerja'] ?? '',
+            'email'      => $pegawai['email'] ?? $pegawai['email_dinas'] ?? $pegawai['email_resmi'] ?? $pegawai['email_pribadi'] ?? '',
         ]);
     }
 
