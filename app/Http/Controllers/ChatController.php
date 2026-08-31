@@ -10,10 +10,12 @@ use App\Models\ChatParticipant;
 use App\Models\Layanan;
 use App\Models\Regtiket;
 use App\Models\User;
+use App\Notifications\TiketNotification;
 use App\Services\PegawaiService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Notification;
 
 class ChatController extends Controller
 {
@@ -761,6 +763,29 @@ class ChatController extends Controller
                     'role' => 'responder'
                 ]
             );
+        }
+
+        // Kirim Notifikasi Email ke Pengguna/Tamu berisi Nomor Tiket Obrolan
+        if (!empty($guest->email)) {
+            try {
+                $layananNama = $layanan?->nama_layanan ?? 'Konsultasi Layanan Kepegawaian';
+                $pesanNotifikasi = "Halo {$guest->nama}, percakapan bantuan Anda dengan Admin BKPSDM terkait layanan \"{$layananNama}\" telah berhasil dibuat dengan Nomor Tiket: {$conversation->no_tiket}.\n\nSimpan Nomor Tiket ini bersama alamat email Anda ({$guest->email}). Anda dapat menggunakannya sewaktu-waktu di menu \"Sudah Punya Tiket Chat\" pada halaman login PILKB untuk melanjutkan percakapan atau melihat tanggapan dari Admin BKPSDM.";
+
+                Notification::route('mail', $guest->email)
+                    ->notify(
+                        new TiketNotification(
+                            'Tiket Tanya Admin BKPSDM',
+                            $pesanNotifikasi,
+                            url('/login'),
+                            $conversation->no_tiket,
+                            'guest_chat_created',
+                            $layananNama,
+                            $guest->nama
+                        )
+                    );
+            } catch (\Throwable $e) {
+                Log::warning('Gagal mengirim email notifikasi tiket chat tamu: ' . $e->getMessage());
+            }
         }
 
         return response()->json([

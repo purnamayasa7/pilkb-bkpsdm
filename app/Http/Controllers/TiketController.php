@@ -1434,10 +1434,18 @@ class TiketController extends Controller
             ->where('no_tiket', $no_tiket)
             ->firstOrFail();
 
-        $syarat = Syarat::where(
-            'kode_layanan',
-            $tiket->kode_layanan
-        )->get();
+        $detailTiket = DetailTiket::with('syarat')
+            ->where('no_tiket', $no_tiket)
+            ->get();
+
+        if ($detailTiket->isNotEmpty()) {
+            $syarat = $detailTiket;
+        } else {
+            $syarat = Syarat::where(
+                'kode_layanan',
+                $tiket->kode_layanan
+            )->get();
+        }
 
         /*
      * Nama dan unit kerja dari database.
@@ -1585,10 +1593,24 @@ class TiketController extends Controller
 
         $qr = base64_encode($qrString);
 
+        $pegawai = null;
+        try {
+            $pegawai = $this->pegawaiService->getPegawaiByNip($tiket->nip);
+        } catch (\Throwable $e) {
+            // Ignore API error
+        }
+
+        $data = [
+            'nama'     => $tiket->nama ?? ($pegawai['nama_lengkap'] ?? '-'),
+            'golongan' => $pegawai['ket_gol'] ?? '-',
+            'unit'     => $tiket->nama_ukerja ?? ($pegawai['ket_ukerja'] ?? '-'),
+        ];
+
         return view('pages.public.tiket', [
-            'tiket' => $tiket,
+            'tiket'  => $tiket,
             'syarat' => $syaratGabung,
-            'qr' => $qr
+            'data'   => $data,
+            'qr'     => $qr
         ]);
     }
 

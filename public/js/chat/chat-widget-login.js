@@ -473,7 +473,7 @@
                                 </div>
                                 <div class="bot-bubble">
                                     <p class="text-danger mb-2">Maaf, nomor tiket <strong>"${escapeHtml(ticketNo)}"</strong> tidak ditemukan di dalam sistem.</p>
-                                    <p class="text-muted small mb-0">Silakan pastikan format nomor tiket sudah sesuai, atau tanyakan langsung ke Admin FO.</p>
+                                    <p class="text-muted small mb-0">Silakan pastikan format nomor tiket sudah sesuai, atau tanyakan langsung ke Admin BKPSDM.</p>
                                     
                                     <p class="mt-2 mb-1 text-muted small fw-semibold">Ada yang bisa dibantu lagi?</p>
                                     <div class="bot-options-grid">
@@ -483,7 +483,7 @@
                                         </button>
                                         <button type="button" class="bot-btn-option primary" data-bot-action="menu_admin_pilih_layanan">
                                             <i data-feather="message-circle"></i>
-                                            <span>💬 Tanya Admin FO</span>
+                                            <span>💬 Tanya Admin BKPSDM</span>
                                         </button>
                                         <button type="button" class="bot-btn-option secondary" data-bot-action="selesai_terima_kasih">
                                             <i data-feather="check"></i>
@@ -568,8 +568,77 @@
                 }
             }
 
-            // 4.1 Tampilkan Persyaratan Layanan Lengkap
+            // 4.1 Tampilkan Persyaratan Layanan Lengkap (dengan In-Memory Cache)
             async function loadBotSyaratLayanan(layananId) {
+                window._syaratCache = window._syaratCache || {};
+
+                function renderSyarat(d) {
+                    appendUserMessageHtml(`Layanan: ${d.nama_layanan}`);
+
+                    let listItems = '';
+                    if (d.syarat && d.syarat.length > 0) {
+                        d.syarat.forEach((s, idx) => {
+                            listItems += `<li><strong>${idx + 1}.</strong> ${escapeHtml(s.syarat)}${s.deskripsi ? ` <span class="text-muted">(${escapeHtml(s.deskripsi)})</span>` : ''}</li>`;
+                        });
+                    } else {
+                        listItems = `<li class="text-muted fst-italic">Belum ada rincian persyaratan khusus yang dicantumkan.</li>`;
+                    }
+
+                    const html = `
+                        <div class="bot-message-wrapper">
+                            <div class="bot-badge-header">
+                                <i data-feather="file-text" class="text-success"></i> Syarat Layanan: ${escapeHtml(d.nama_layanan)}
+                            </div>
+                            <div class="bot-bubble">
+                                <div class="bot-syarat-card">
+                                    <div class="bot-syarat-title">${escapeHtml(d.nama_layanan)}</div>
+                                    <div class="text-muted small mb-2"><i data-feather="folder" style="width:11px;height:11px;" class="me-1"></i>${escapeHtml(d.nama_bidang)}</div>
+                                    
+                                    <div class="fw-semibold small text-dark mt-2 mb-1">Daftar Persyaratan Berkas:</div>
+                                    <ul class="bot-syarat-list">
+                                        ${listItems}
+                                    </ul>
+                                    
+                                    <div class="bot-syarat-meta">
+                                        <i data-feather="clock" style="width:12px;height:12px;" class="me-1"></i>
+                                        Estimasi Waktu: <strong>${escapeHtml(d.waktu_penyelesaian)}</strong>
+                                    </div>
+                                </div>
+                                
+                                <p class="mt-3 mb-1 text-muted small fw-semibold">Ada yang bisa dibantu lagi?</p>
+                                <div class="bot-options-grid">
+                                    <a href="${d.pdf_url}" target="_blank" class="bot-btn-option text-decoration-none">
+                                        <i data-feather="download" class="text-primary"></i>
+                                        <span>📄 Unduh Format PDF Persyaratan</span>
+                                    </a>
+                                    <button type="button" class="bot-btn-option" data-bot-action="cek_syarat_langsung">
+                                        <i data-feather="grid"></i>
+                                        <span>📋 Cek Layanan Lain</span>
+                                    </button>
+                                    <button type="button" class="bot-btn-option primary" data-bot-action="menu_admin_pilih_layanan">
+                                        <i data-feather="message-circle"></i>
+                                        <span>💬 Tanya Admin Terkait Layanan Ini</span>
+                                    </button>
+                                    <button type="button" class="bot-btn-option secondary" data-bot-action="selesai_terima_kasih">
+                                        <i data-feather="check"></i>
+                                        <span>👋 Tidak, Terima Kasih</span>
+                                    </button>
+                                    <button type="button" class="bot-btn-option secondary" data-bot-action="back_main_menu">
+                                        <i data-feather="arrow-left"></i>
+                                        <span>↩️ Menu Utama</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    appendBotMessageHtml(html);
+                }
+
+                if (window._syaratCache[layananId]) {
+                    renderSyarat(window._syaratCache[layananId]);
+                    return;
+                }
+
                 const loadingId = 'bot_loading_' + Date.now();
                 appendBotMessageHtml(`
                     <div class="bot-message-wrapper" id="${loadingId}">
@@ -585,66 +654,8 @@
                     document.getElementById(loadingId)?.remove();
 
                     if (res.status === 'success') {
-                        const d = res.data;
-                        appendUserMessageHtml(`Layanan: ${d.nama_layanan}`);
-
-                        let listItems = '';
-                        if (d.syarat && d.syarat.length > 0) {
-                            d.syarat.forEach((s, idx) => {
-                                listItems += `<li><strong>${idx + 1}.</strong> ${escapeHtml(s.syarat)}${s.deskripsi ? ` <span class="text-muted">(${escapeHtml(s.deskripsi)})</span>` : ''}</li>`;
-                            });
-                        } else {
-                            listItems = `<li class="text-muted fst-italic">Belum ada rincian persyaratan khusus yang dicantumkan.</li>`;
-                        }
-
-                        const html = `
-                            <div class="bot-message-wrapper">
-                                <div class="bot-badge-header">
-                                    <i data-feather="file-text" class="text-success"></i> Syarat Layanan: ${escapeHtml(d.nama_layanan)}
-                                </div>
-                                <div class="bot-bubble">
-                                    <div class="bot-syarat-card">
-                                        <div class="bot-syarat-title">${escapeHtml(d.nama_layanan)}</div>
-                                        <div class="text-muted small mb-2"><i data-feather="folder" style="width:11px;height:11px;" class="me-1"></i>${escapeHtml(d.nama_bidang)}</div>
-                                        
-                                        <div class="fw-semibold small text-dark mt-2 mb-1">Daftar Persyaratan Berkas:</div>
-                                        <ul class="bot-syarat-list">
-                                            ${listItems}
-                                        </ul>
-                                        
-                                        <div class="bot-syarat-meta">
-                                            <i data-feather="clock" style="width:12px;height:12px;" class="me-1"></i>
-                                            Estimasi Waktu: <strong>${escapeHtml(d.waktu_penyelesaian)}</strong>
-                                        </div>
-                                    </div>
-                                    
-                                    <p class="mt-3 mb-1 text-muted small fw-semibold">Ada yang bisa dibantu lagi?</p>
-                                    <div class="bot-options-grid">
-                                        <a href="${d.pdf_url}" target="_blank" class="bot-btn-option text-decoration-none">
-                                            <i data-feather="download" class="text-primary"></i>
-                                            <span>📄 Unduh Format PDF Persyaratan</span>
-                                        </a>
-                                        <button type="button" class="bot-btn-option" data-bot-action="cek_syarat_langsung">
-                                            <i data-feather="grid"></i>
-                                            <span>📋 Cek Layanan Lain</span>
-                                        </button>
-                                        <button type="button" class="bot-btn-option primary" data-bot-action="menu_admin_pilih_layanan">
-                                            <i data-feather="message-circle"></i>
-                                            <span>💬 Tanya Admin Terkait Layanan Ini</span>
-                                        </button>
-                                        <button type="button" class="bot-btn-option secondary" data-bot-action="selesai_terima_kasih">
-                                            <i data-feather="check"></i>
-                                            <span>👋 Tidak, Terima Kasih</span>
-                                        </button>
-                                        <button type="button" class="bot-btn-option secondary" data-bot-action="back_main_menu">
-                                            <i data-feather="arrow-left"></i>
-                                            <span>↩️ Menu Utama</span>
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                        `;
-                        appendBotMessageHtml(html);
+                        window._syaratCache[layananId] = res.data;
+                        renderSyarat(res.data);
                     }
                 } catch (err) {
                     document.getElementById(loadingId)?.remove();
@@ -722,7 +733,7 @@
                                 <i data-feather="help-circle" class="text-primary"></i> Pilih Layanan Konsultasi
                             </div>
                             <div class="bot-bubble">
-                                <p class="mb-2">Silakan pilih <strong>Layanan</strong> yang ingin Anda tanyakan atau konsultasikan dengan Admin FO:</p>
+                                <p class="mb-2">Silakan pilih <strong>Layanan</strong> yang ingin Anda tanyakan atau konsultasikan dengan Admin BKPSDM:</p>
                                 <div class="bot-options-grid" style="max-height: 280px; overflow-y: auto; padding-right: 4px;">
                                     ${buttonsHtml}
                                 </div>
@@ -758,12 +769,12 @@
                 const html = `
                     <div class="bot-message-wrapper">
                         <div class="bot-badge-header">
-                            <i data-feather="headphones" class="text-success"></i> Terhubung ke Tanya Admin FO
+                            <i data-feather="headphones" class="text-success"></i> Terhubung ke Tanya Admin BKPSDM
                         </div>
                         <div class="bot-bubble">
-                            <p class="mb-2">Anda terhubung dengan layanan Tanya Admin FO untuk <strong>${escapeHtml(layananName)}</strong>.</p>
+                            <p class="mb-2">Anda terhubung dengan layanan Tanya Admin BKPSDM untuk <strong>${escapeHtml(layananName)}</strong>.</p>
                             <p class="mb-2">Silakan ketik pertanyaan atau kendala Anda pada kolom pesan di bawah. Sistem akan <strong>otomatis membuat nomor tiket resmi</strong> begitu pesan pertama Anda terkirim.</p>
-                            <p class="mb-0 text-muted small fst-italic">Admin FO kami siap merespons percakapan Anda.</p>
+                            <p class="mb-0 text-muted small fst-italic">Admin BKPSDM kami siap merespons percakapan Anda.</p>
                             
                             <div class="bot-options-grid mt-2">
                                 <button type="button" class="bot-btn-option secondary" data-bot-action="back_main_menu">
@@ -807,7 +818,7 @@
                     return;
                 }
 
-                // 2. Jika bukan tiket, simpan teks sebagai pending message dan tanyakan apakah ingin disambungkan ke Admin FO
+                // 2. Jika bukan tiket, simpan teks sebagai pending message dan tanyakan apakah ingin disambungkan ke Admin BKPSDM
                 chatState.pendingAdminMessage = messageText;
 
                 const html = `
@@ -817,7 +828,7 @@
                         </div>
                         <div class="bot-bubble">
                             <p class="mb-2">Halo! Anda saat ini berada di menu Asisten Virtual.</p>
-                            <p class="mb-2">Apakah Anda ingin mengonsultasikan pesan Anda: <em>"${escapeHtml(messageText)}"</em> ini langsung dengan <strong>Admin FO BKPSDM</strong>?</p>
+                            <p class="mb-2">Apakah Anda ingin mengonsultasikan pesan Anda: <em>"${escapeHtml(messageText)}"</em> ini langsung dengan <strong>Admin BKPSDM</strong>?</p>
                             
                             <div class="bot-options-grid">
                                 <button type="button" class="bot-btn-option primary" data-bot-action="menu_admin_pilih_layanan">

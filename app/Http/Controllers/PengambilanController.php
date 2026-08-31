@@ -27,8 +27,6 @@ class PengambilanController extends Controller
 
         $data = collect();
 
-        $pegawaiList = [];
-
         if ($request->has('filter')) {
 
             $query = Regtiket::with([
@@ -56,27 +54,29 @@ class PengambilanController extends Controller
                     $request->tanggal_akhir . ' 23:59:59'
                 ]);
             } elseif ($request->filled('tanggal_awal')) {
-                $query->whereDate('tanggal', '>=', $request->tanggal_awal);
+
+                $query->whereDate(
+                    'tanggal',
+                    '>=',
+                    $request->tanggal_awal
+                );
             } elseif ($request->filled('tanggal_akhir')) {
-                $query->whereDate('tanggal', '<=', $request->tanggal_akhir);
+
+                $query->whereDate(
+                    'tanggal',
+                    '<=',
+                    $request->tanggal_akhir
+                );
             }
 
             $data = $query
                 ->latest('tanggal')
                 ->get();
-
-            $pegawaiList = $this->pegawaiService->getPegawaiByNips(
-                $data->pluck('nip')
-            );
-
-            $simpegAvailable = $this->pegawaiService->isSimpegAvailable();
         }
 
         return view('pages.admin-bawah.archives.index', compact(
             'data',
-            'bidangList',
-            'pegawaiList',
-            'simpegAvailable'
+            'bidangList'
         ));
     }
 
