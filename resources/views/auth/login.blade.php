@@ -736,6 +736,9 @@
                                 <div class="d-flex align-items-center gap-1">
                                     <i data-feather="zap" style="width:15px; height:15px; color:#6366f1;"></i>
                                     <span class="fw-bold text-dark" style="font-size: 13.5px;">LILI - AI Kepegawaian</span>
+                                    <button type="button" id="btnPlayLiliVoice" class="btn btn-sm btn-link p-0 ms-1" title="Putar Ulang Suara LILI" style="line-height:1; vertical-align: middle;">
+                                        <i data-feather="volume-2" style="width:14px; height:14px; color:#6366f1;"></i>
+                                    </button>
                                 </div>
                                 <div class="chat-room-sub text-truncate" style="font-size: 10.5px; color: #64748b;">
                                     Layanan Informasi &amp; Literasi Kepegawaian

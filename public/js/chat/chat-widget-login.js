@@ -347,6 +347,9 @@
                     el.messageInput.focus();
                 }
 
+                // Putar suara sapaan ramah LILI
+                playLiliVoiceGreeting();
+
                 const html = `
                     <div class="bot-message-wrapper">
                         <div class="bot-badge-header">
@@ -373,6 +376,44 @@
                     </div>
                 `;
                 appendBotMessageHtml(html);
+            }
+
+            // Putar Suara Sapaan LILI (File MP3 / Web Speech API Browser Native)
+            function playLiliVoiceGreeting() {
+                const greetingText = "Halo, saya LILI AI Assistant. Ada yang bisa saya bantu?";
+                try {
+                    const audio = new Audio('/sound/lili-greeting.mp3');
+                    const playPromise = audio.play();
+                    if (playPromise !== undefined) {
+                        playPromise.catch(() => {
+                            speakWithBrowserTTS(greetingText);
+                        });
+                    }
+                } catch (e) {
+                    speakWithBrowserTTS(greetingText);
+                }
+            }
+
+            function speakWithBrowserTTS(text) {
+                if ('speechSynthesis' in window) {
+                    try {
+                        window.speechSynthesis.cancel();
+                        const utterance = new SpeechSynthesisUtterance(text);
+                        utterance.lang = 'id-ID';
+                        utterance.rate = 0.95;
+                        utterance.pitch = 1.05;
+
+                        const voices = window.speechSynthesis.getVoices();
+                        const idVoice = voices.find(v => (v.lang && (v.lang === 'id-ID' || v.lang.startsWith('id'))) || (v.name && v.name.toLowerCase().includes('indonesia')));
+                        if (idVoice) {
+                            utterance.voice = idVoice;
+                        }
+
+                        window.speechSynthesis.speak(utterance);
+                    } catch (err) {
+                        console.warn('Speech synthesis error:', err);
+                    }
+                }
             }
 
             // 1.2 Penanganan Pesan Tanya AI Kepegawaian (LILI)
@@ -1062,6 +1103,14 @@
                         const icon = isExpanded ? 'minimize-2' : 'maximize-2';
                         btnToggleExpand.innerHTML = `<i data-feather="${icon}"></i>`;
                         if (window.feather) feather.replace();
+                    });
+                }
+
+                const btnPlayLiliVoice = document.getElementById('btnPlayLiliVoice');
+                if (btnPlayLiliVoice) {
+                    btnPlayLiliVoice.addEventListener('click', function (e) {
+                        e.stopPropagation();
+                        playLiliVoiceGreeting();
                     });
                 }
             }
