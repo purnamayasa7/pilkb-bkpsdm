@@ -122,10 +122,6 @@
                 <i class="bi bi-box-arrow-in-right"></i>
                 Masuk Kembali
             </a>
-            <button onclick="window.location.reload();" class="btn-custom-secondary">
-                <i class="bi bi-arrow-clockwise"></i>
-                Muat Ulang Halaman
-            </button>
         </div>
     </div>
 </body>
