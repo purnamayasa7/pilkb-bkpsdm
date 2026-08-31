@@ -313,7 +313,7 @@
                                 </button>
                                 <button type="button" class="bot-btn-option" data-bot-action="menu_tanya_ai" style="border-color: #c7d2fe; background: #f5f3ff;">
                                     <i data-feather="zap" style="color: #6366f1;"></i>
-                                    <span class="fw-semibold" style="color: #4f46e5;">2. LILI (AI Kepegawaian)</span>
+                                    <span class="fw-semibold" style="color: #4f46e5;">2. Tanya LILI (AI Kepegawaian)</span>
                                 </button>
                                 <button type="button" class="bot-btn-option primary" data-bot-action="menu_admin_pilih_layanan">
                                     <i data-feather="message-circle"></i>
