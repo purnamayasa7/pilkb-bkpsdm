@@ -19,14 +19,14 @@
                             <i class="me-1" data-feather="download"></i>
                             Export
                         </button>
-                        <ul class="dropdown-menu">
+                        <ul class="dropdown-menu dropdown-menu-end">
                             <li>
-                                <a class="dropdown-item" href="#">
+                                <a class="dropdown-item" href="{{ route('adminBidang.perbaikan.exportExcel', request()->query()) }}">
                                     <i class="me-1" data-feather="file-text"></i> Export Excel
                                 </a>
                             </li>
                             <li>
-                                <a class="dropdown-item" href="#">
+                                <a class="dropdown-item" href="{{ route('adminBidang.perbaikan.exportPdf', request()->query()) }}" target="_blank">
                                     <i class="me-1" data-feather="file"></i> Export PDF
                                 </a>
                             </li>

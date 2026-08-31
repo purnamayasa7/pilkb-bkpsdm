@@ -1724,7 +1724,8 @@ class DetailTiketController extends Controller
 
     public function exportExcel(Request $request)
     {
-        $data = $this->getData($request);
+        $isAdminBawah = Auth::user()?->role?->name === 'admin_bawah';
+        $data = $this->getData($request, $isAdminBawah);
 
         $pegawaiList = $this->pegawaiService->getPegawaiByNips(
             $data->pluck('nip')
@@ -1738,7 +1739,8 @@ class DetailTiketController extends Controller
 
     public function exportPdf(Request $request)
     {
-        $data = $this->getData($request);
+        $isAdminBawah = Auth::user()?->role?->name === 'admin_bawah';
+        $data = $this->getData($request, $isAdminBawah);
 
         $pegawaiList = $this->pegawaiService->getPegawaiByNips(
             $data->pluck('nip')
@@ -1755,6 +1757,11 @@ class DetailTiketController extends Controller
         $pdf->setPaper('a4', 'landscape');
 
         return $pdf->stream('perbaikan_usulan.pdf');
+    }
+
+    public function exportPerbaikanPdf(Request $request)
+    {
+        return $this->exportPdf($request);
     }
 
     // EXPORT PDF LIST PERMINTAAN LAYANAN SKPD

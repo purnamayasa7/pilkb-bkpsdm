@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="utf-8">
-    <title>Laporan-Proses-{{ $month }}-{{ $year }}</title>
+    <title>Laporan-Perbaikan-Usulan</title>
     <link rel="stylesheet" href="{{ public_path('css/pdf.css') }}">
 </head>
 
@@ -32,20 +32,20 @@
 
     <!-- JUDUL DOKUMEN -->
     <div class="doc-title-container">
-        <div class="doc-title">LAPORAN PROSES PENGAJUAN USULAN</div>
+        <div class="doc-title">LAPORAN PERBAIKAN USULAN (BTL)</div>
     </div>
 
-    <!-- KARTU INFORMASI PERIODE -->
+    <!-- KARTU INFORMASI -->
     <div class="card-info">
         <table class="data-table">
             <tr>
-                <td class="data-label">Periode</td>
+                <td class="data-label">Kategori Laporan</td>
                 <td class="data-sep">:</td>
-                <td class="data-val">Bulan {{ $month }} {{ $year }}</td>
+                <td class="data-val">Daftar Usulan Perlu Perbaikan Berkas (BTL)</td>
                 <td style="width: 30px;"></td>
                 <td class="data-label" style="width: 80px;">Total Usulan</td>
                 <td class="data-sep">:</td>
-                <td class="data-val">{{ $data->count() }} Permohonan</td>
+                <td class="data-val">{{ $data->count() }} Usulan</td>
             </tr>
         </table>
     </div>
@@ -54,28 +54,33 @@
     <table class="laporan-table">
         <thead>
             <tr>
-                <th style="width: 6%;">No</th>
-                <th style="width: 16%;">No. Tiket</th>
-                <th style="width: 18%;">NIP</th>
-                <th style="width: 32%;">Layanan</th>
-                <th style="width: 13%;">Tgl. Usulan</th>
-                <th style="width: 15%;">Status</th>
+                <th style="width: 4%;">No</th>
+                <th style="width: 12%;">No. Tiket</th>
+                <th style="width: 22%;">Pegawai (NIP &amp; Nama)</th>
+                <th style="width: 20%;">Unit Kerja</th>
+                <th style="width: 22%;">Jenis Layanan</th>
+                <th style="width: 10%;">Status</th>
+                <th style="width: 10%;">Jumlah BTL</th>
             </tr>
         </thead>
         <tbody>
-            @forelse ($data as $d)
+            @forelse ($data as $item)
                 <tr>
                     <td class="text-center">{{ $loop->iteration }}</td>
-                    <td class="text-center">{{ $d->no_tiket }}</td>
-                    <td class="text-center cell-break">{{ $d->nip }}</td>
-                    <td class="cell-break">{{ $d->layanan->nama_layanan ?? '-' }}</td>
-                    <td class="text-center">{{ \Carbon\Carbon::parse($d->tanggal)->translatedFormat('d-m-Y') }}</td>
-                    <td class="text-center">{{ $d->tahapTerakhir->statusRel->status ?? '-' }}</td>
+                    <td class="text-center">{{ $item->no_tiket }}</td>
+                    <td class="cell-break">
+                        <div class="pegawai-nip">{{ $item->nip }}</div>
+                        <div class="pegawai-nama">{{ $pegawaiList[$item->nip]['nama_lengkap'] ?? ($item->nama ?? '-') }}</div>
+                    </td>
+                    <td class="cell-break">{{ $pegawaiList[$item->nip]['ket_ukerja'] ?? ($item->nama_ukerja ?? '-') }}</td>
+                    <td class="cell-break">{{ $item->layanan->nama_layanan ?? '-' }}</td>
+                    <td class="text-center">{{ $item->is_belum ? 'Belum' : 'Sudah' }}</td>
+                    <td class="text-center">{{ $item->jumlah_btl }} Dokumen</td>
                 </tr>
             @empty
                 <tr>
-                    <td colspan="6" class="text-center" style="color: #64748b; padding: 12px;">
-                        Tidak ada data proses pengajuan pada periode ini.
+                    <td colspan="7" class="text-center" style="color: #64748b; padding: 12px;">
+                        Tidak ada data usulan perbaikan (BTL).
                     </td>
                 </tr>
             @endforelse

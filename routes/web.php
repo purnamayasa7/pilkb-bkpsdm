@@ -273,6 +273,8 @@ Route::prefix('adminBidang')
         // PERBAIKAN
         Route::get('perbaikan', [PerbaikanController::class, 'index'])->name('perbaikan.index');
         Route::get('perbaikan/detail/{no_tiket}', [PerbaikanController::class, 'detail'])->name('perbaikan.detail');
+        Route::get('perbaikan/export-pdf', [PerbaikanController::class, 'exportPdf'])->name('perbaikan.exportPdf');
+        Route::get('perbaikan/export-excel', [PerbaikanController::class, 'exportExcel'])->name('perbaikan.exportExcel');
 
         // LAPORAN
         Route::get('laporan', [LaporanController::class, 'indexBidang'])->name('laporan.indexBidang');
