@@ -69,10 +69,8 @@
                 } else {
                     this.loadUnreadBadge();
 
-                    if (this.notificationSound && isLive) {
-                        this.notificationSound.pause();
-                        this.notificationSound.currentTime = 0;
-                        this.notificationSound.play().catch(() => {});
+                    if (isLive) {
+                        this.playNotification();
                     }
                 }
             };
@@ -1177,22 +1175,24 @@
             });
         },
 
-        // Function Notification Sound
+        // Function Notification Sound (Debounced & Single Instance)
         playNotification() {
-
-            // Kalau tab sedang aktif, jangan bunyikan
-            if (!document.hidden) {
+            // Jangan bunyikan jika sedang berada di halaman /chat penuh (karena chat-page.js yang menangani)
+            if ($('.wa-container').length > 0) {
                 return;
             }
 
-            this.notificationSound.pause();
+            const now = Date.now();
+            if (now - (window._lastGlobalChatSoundTime || 0) < 1200) {
+                return;
+            }
+            window._lastGlobalChatSoundTime = now;
 
-            this.notificationSound.currentTime = 0;
-
-            this.notificationSound.play().catch((e) => {
-                console.error(e);
-            });
-
+            if (this.notificationSound) {
+                this.notificationSound.pause();
+                this.notificationSound.currentTime = 0;
+                this.notificationSound.play().catch(() => {});
+            }
         },
 
         // Function Render Chat Layout

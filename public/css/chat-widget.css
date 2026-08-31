@@ -520,6 +520,9 @@ body.dark-mode .chat-item.selected {
     border-radius: 14px;
     border: 1px solid #eef2f7;
     cursor: pointer;
+    user-select: none;
+    -webkit-user-select: none;
+    outline: none;
     transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.02);
     text-decoration: none;

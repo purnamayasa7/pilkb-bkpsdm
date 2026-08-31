@@ -31,6 +31,20 @@
             this.bindEvents();
         },
 
+        playNotificationSound() {
+            const now = Date.now();
+            if (now - (window._lastGlobalChatSoundTime || 0) < 1200) {
+                return;
+            }
+            window._lastGlobalChatSoundTime = now;
+
+            if (this.notificationSound) {
+                this.notificationSound.pause();
+                this.notificationSound.currentTime = 0;
+                this.notificationSound.play().catch(() => {});
+            }
+        },
+
         subscribeUserChannel() {
             if (!window.ChatAuth?.id || this.isUserSubscribed) return;
             this.isUserSubscribed = true;
@@ -112,12 +126,8 @@
                     this.hideTypingIndicator();
                 }
             } else {
-                // Hanya mainkan suara & update badge jika bukan room yang sedang aktif
-                if (this.notificationSound) {
-                    this.notificationSound.pause();
-                    this.notificationSound.currentTime = 0;
-                    this.notificationSound.play().catch(() => {});
-                }
+                // Mainkan suara secara debounced jika bukan room yang sedang aktif
+                this.playNotificationSound();
             }
         },
 
@@ -594,10 +604,8 @@
                 }
             });
 
-            if (shouldPlaySound && this.notificationSound) {
-                this.notificationSound.pause();
-                this.notificationSound.currentTime = 0;
-                this.notificationSound.play().catch(() => {});
+            if (shouldPlaySound) {
+                this.playNotificationSound();
             }
 
             box.scrollTop(box[0].scrollHeight);
