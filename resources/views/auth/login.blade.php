@@ -600,7 +600,7 @@
                                 placeholder="Unit kerja otomatis terisi">
                         </div>
 
-                        <div class="mb-3">
+                        <div class="mb-4">
                             <label class="form-label fw-semibold text-dark small mb-1">
                                 Email Aktif
                             </label>
@@ -609,34 +609,6 @@
                                 class="form-control text-dark"
                                 id="guestEmail"
                                 placeholder="Masukkan email aktif Anda">
-                        </div>
-
-                        <div class="mb-3">
-                            <label class="form-label fw-semibold text-dark small mb-1">
-                                Bidang Tujuan
-                            </label>
-                            <select
-                                class="form-select text-dark"
-                                id="guestBidang">
-                                <option value="">Pilih Bidang</option>
-                                @foreach($bidang as $item)
-                                <option value="{{ $item->id }}">
-                                    {{ $item->nama_bidang }}
-                                </option>
-                                @endforeach
-                            </select>
-                        </div>
-
-                        <div class="mb-4">
-                            <label class="form-label fw-semibold text-dark small mb-1">
-                                Layanan
-                            </label>
-                            <select
-                                class="form-select text-dark"
-                                id="guestLayanan"
-                                disabled>
-                                <option value="">Pilih bidang terlebih dahulu</option>
-                            </select>
                         </div>
 
                         <button

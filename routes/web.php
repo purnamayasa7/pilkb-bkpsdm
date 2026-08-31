@@ -43,14 +43,17 @@ Route::get('/tiket/cetak/{no_tiket}', [TiketController::class, 'cetak'])->name('
 // Guest Chat
 Route::get('/guest-chat/bidang', [ChatController::class, 'getBidang']);
 Route::get('/guest-chat/layanan/{bidang}', [ChatController::class, 'getLayanan']);
-
-
-
 Route::post('/guest-chat/start', [ChatController::class, 'startGuestChat']);
 Route::post('/guest-chat/resume', [ChatController::class, 'resumeGuestChat']);
 Route::get('/guest-chat/{conversation}/messages', [ChatController::class, 'loadGuestMessages']);
 Route::get('/guest-chat/{conversation}/poll', [ChatController::class, 'pollGuestMessages']);
 Route::post('/guest-chat/{conversation}/message', [ChatController::class, 'sendGuestMessage']);
+
+// Guest Chatbot Routes
+Route::post('/guest-bot/cek-tiket', [\App\Http\Controllers\GuestBotController::class, 'cekStatusTiket']);
+Route::get('/guest-bot/semua-layanan', [\App\Http\Controllers\GuestBotController::class, 'getSemuaLayanan']);
+Route::get('/guest-bot/bidang-layanan', [\App\Http\Controllers\GuestBotController::class, 'getBidangLayanan']);
+Route::get('/guest-bot/syarat/{layananId}', [\App\Http\Controllers\GuestBotController::class, 'getSyaratLayanan']);
 // Open & close chat
 Route::post('/chat/{conversation}/close', [ChatController::class, 'closeChat']);
 Route::post('/chat/{conversation}/reopen', [ChatController::class, 'reopenChat']);
