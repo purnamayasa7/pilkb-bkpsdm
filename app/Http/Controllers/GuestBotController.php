@@ -6,6 +6,7 @@ use App\Models\Bidang;
 use App\Models\Layanan;
 use App\Models\Regtiket;
 use App\Models\Syarat;
+use App\Services\KepegawaianAiService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 
@@ -185,7 +186,7 @@ class GuestBotController extends Controller
     /**
      * Tanya AI Kepegawaian
      */
-    public function tanyaAi(Request $request, \App\Services\KepegawaianAiService $aiService)
+    public function tanyaAi(Request $request, KepegawaianAiService $aiService)
     {
         $request->validate([
             'pertanyaan' => 'required|string|max:1000',

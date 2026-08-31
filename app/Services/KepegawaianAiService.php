@@ -90,11 +90,12 @@ EOT;
             ];
 
             $modelsToTry = array_unique([$model, 'gemini-3.5-flash-lite', 'gemini-3.6-flash', 'gemini-3.5-flash']);
+            $lastResponse = null;
 
             foreach ($modelsToTry as $m) {
                 $endpoint = "https://generativelanguage.googleapis.com/v1beta/models/{$m}:generateContent?key={$apiKey}";
 
-                $response = Http::withoutVerifying()
+                $lastResponse = Http::withoutVerifying()
                     ->withOptions([
                         'connect_timeout'  => 3,
                         'timeout'          => 7,
@@ -105,8 +106,8 @@ EOT;
                     ])
                     ->post($endpoint, $payload);
 
-                if ($response->successful()) {
-                    $data = $response->json();
+                if ($lastResponse->successful()) {
+                    $data = $lastResponse->json();
                     $reply = $data['candidates'][0]['content']['parts'][0]['text'] ?? null;
 
                     if (!empty($reply)) {
@@ -120,8 +121,8 @@ EOT;
             }
 
             Log::warning('Semua model Gemini API tidak berhasil.', [
-                'status' => $response->status() ?? 500,
-                'body'   => $response->body() ?? ''
+                'status' => $lastResponse?->status() ?? 500,
+                'body'   => $lastResponse?->body() ?? ''
             ]);
 
             return $this->handleFallbackResponse($question);
@@ -139,7 +140,7 @@ EOT;
      */
     private function handleFallbackResponse(string $question): array
     {
-        $qLower = strtolower($question);
+        $qLower = mb_strtolower(trim($question), 'UTF-8');
 
         // 1. Deteksi sapaan ramah / greeting
         $greetings = ['halo', 'hai', 'hello', 'hey', 'pagi', 'siang', 'sore', 'malam', 'assalam', 'swastiastu', 'tes', 'test'];

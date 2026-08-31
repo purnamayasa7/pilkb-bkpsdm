@@ -141,7 +141,7 @@ body:has(#chatDrawer.show.is-expanded) #chatFloatingButton,
     /*
      * Ukuran normal
      */
-    width: 400px;
+    width: 420px;
     height: 600px;
 
     /*
@@ -162,13 +162,20 @@ body:has(#chatDrawer.show.is-expanded) #chatFloatingButton,
     visibility: hidden;
     opacity: 0;
 
-    transform: translateY(20px);
-    will-change: transform, opacity;
+    transform: scale(0.92) translateY(18px);
+    transform-origin: bottom right;
+    will-change: transform, opacity, top, left, right, bottom, width, height;
 
     transition:
-        opacity .25s ease,
-        transform .25s ease,
-        visibility .25s ease;
+        opacity .28s ease,
+        transform .28s cubic-bezier(0.16, 1, 0.3, 1),
+        visibility .28s ease,
+        top .28s cubic-bezier(0.16, 1, 0.3, 1),
+        bottom .28s cubic-bezier(0.16, 1, 0.3, 1),
+        left .28s cubic-bezier(0.16, 1, 0.3, 1),
+        right .28s cubic-bezier(0.16, 1, 0.3, 1),
+        width .28s cubic-bezier(0.16, 1, 0.3, 1),
+        height .28s cubic-bezier(0.16, 1, 0.3, 1);
 
     box-shadow:
         0 15px 45px rgba(0, 0, 0, .12);
@@ -177,7 +184,7 @@ body:has(#chatDrawer.show.is-expanded) #chatFloatingButton,
 #chatDrawer.show {
     visibility: visible;
     opacity: 1;
-    transform: translateY(0);
+    transform: scale(1) translateY(0);
 }
 
 /* Mode Perbesar (Expanded / Full Responsive Window Sesuai Layar Pengguna) */
@@ -193,13 +200,13 @@ body:has(#chatDrawer.show.is-expanded) #chatFloatingButton,
     border-radius: 20px !important;
     box-shadow: 0 25px 80px rgba(0, 0, 0, .32) !important;
     transition:
-        top .25s cubic-bezier(0.16, 1, 0.3, 1),
-        bottom .25s cubic-bezier(0.16, 1, 0.3, 1),
-        left .25s cubic-bezier(0.16, 1, 0.3, 1),
-        right .25s cubic-bezier(0.16, 1, 0.3, 1),
-        opacity .25s ease,
-        transform .25s ease,
-        visibility .25s ease !important;
+        top .28s cubic-bezier(0.16, 1, 0.3, 1),
+        bottom .28s cubic-bezier(0.16, 1, 0.3, 1),
+        left .28s cubic-bezier(0.16, 1, 0.3, 1),
+        right .28s cubic-bezier(0.16, 1, 0.3, 1),
+        opacity .28s ease,
+        transform .28s cubic-bezier(0.16, 1, 0.3, 1),
+        visibility .28s ease !important;
 }
 
 #chatDrawer.is-expanded .chat-body {

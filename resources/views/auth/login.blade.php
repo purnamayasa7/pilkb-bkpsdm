@@ -512,7 +512,7 @@
                             <i data-feather="message-square"></i>
                         </div>
                         <div class="flex-grow-1">
-                            <div class="fw-semibold text-dark">Tanya Admin</div>
+                            <div class="fw-semibold text-dark">Tanya Admin & AI Assistant</div>
                             <small class="text-muted">Mulai konsultasi & percakapan baru</small>
                         </div>
                         <i data-feather="chevron-right" class="text-muted"></i>
