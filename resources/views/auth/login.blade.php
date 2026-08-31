@@ -277,6 +277,30 @@
                                 <h4 class="form-title">Selamat Datang</h4>
                                 <p class="form-subtitle">Masukkan akun Anda untuk mengakses sistem</p>
 
+                                @if (session('warning'))
+                                    <div class="alert alert-warning alert-dismissible fade show d-flex align-items-center mb-3 rounded-3 border-0 shadow-sm" role="alert">
+                                        <i data-feather="alert-triangle" class="me-2 flex-shrink-0 text-warning"></i>
+                                        <div class="small fw-medium">{{ session('warning') }}</div>
+                                        <button type="button" class="btn-close ms-auto" data-bs-dismiss="alert" aria-label="Close"></button>
+                                    </div>
+                                @endif
+
+                                @if (session('status'))
+                                    <div class="alert alert-success alert-dismissible fade show d-flex align-items-center mb-3 rounded-3 border-0 shadow-sm" role="alert">
+                                        <i data-feather="check-circle" class="me-2 flex-shrink-0 text-success"></i>
+                                        <div class="small fw-medium">{{ session('status') }}</div>
+                                        <button type="button" class="btn-close ms-auto" data-bs-dismiss="alert" aria-label="Close"></button>
+                                    </div>
+                                @endif
+
+                                @if (session('error'))
+                                    <div class="alert alert-danger alert-dismissible fade show d-flex align-items-center mb-3 rounded-3 border-0 shadow-sm" role="alert">
+                                        <i data-feather="alert-circle" class="me-2 flex-shrink-0 text-danger"></i>
+                                        <div class="small fw-medium">{{ session('error') }}</div>
+                                        <button type="button" class="btn-close ms-auto" data-bs-dismiss="alert" aria-label="Close"></button>
+                                    </div>
+                                @endif
+
                                 <form id="formLogin" class="user" method="POST" action="{{ route('login') }}">
                                     @csrf
 
