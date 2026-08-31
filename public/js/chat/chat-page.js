@@ -48,6 +48,7 @@
         subscribeUserChannel() {
             if (!window.ChatAuth?.id || this.isUserSubscribed) return;
             this.isUserSubscribed = true;
+            this._userSubscribedTime = Date.now();
 
             // 1. Firebase Listener
             if (window.FirebaseDB) {
@@ -56,7 +57,10 @@
                         .on('value', (snapshot) => {
                             const data = snapshot.val();
                             if (data && data.messageData) {
-                                this.handleIncomingMessageForUser(data);
+                                const isLive = (data.sent_at || 0) >= (this._userSubscribedTime - 1000);
+                                if (isLive) {
+                                    this.handleIncomingMessageForUser(data);
+                                }
                             }
                         });
                 } catch (err) {}
@@ -133,6 +137,7 @@
 
         subscribeRoomChannel(conversationId) {
             if (!conversationId) return;
+            this._roomSubscribedTime = Date.now();
 
             const handleRoomMessage = (msgData) => {
                 if (!msgData) return;
@@ -170,7 +175,10 @@
                         .on('value', (snapshot) => {
                             const val = snapshot.val();
                             if (val && val.messageData) {
-                                handleRoomMessage(val.messageData);
+                                const isLive = (val.sent_at || 0) >= (this._roomSubscribedTime - 1000);
+                                if (isLive) {
+                                    handleRoomMessage(val.messageData);
+                                }
                             }
                         });
 
@@ -478,17 +486,15 @@
                     this.updateChatInput(res.status);
                     this.subscribeRoomChannel(conversationId);
 
-                    // Update unread in local state
+                    // Update unread in local state & server
                     const found = this.conversationsData.find(i => Number(i.id) === Number(conversationId));
                     if (found) {
                         found.unread = 0;
                         this.renderConversationList(this.conversationsData);
                     }
 
-                    // Sync badge floating button setelah pesan terbaca
-                    if (window.ChatWidgetApp) {
-                        window.ChatWidgetApp.loadUnreadBadge();
-                    }
+                    // Tandai pesan sudah dibaca di server agar tersimpan permanen di database
+                    this.markRoomRead(conversationId);
                 })
                 .fail((xhr) => {
                     console.error('Gagal memuat pesan:', xhr.responseText);
