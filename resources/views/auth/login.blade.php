@@ -819,7 +819,7 @@
                             <!-- Header Sesi Bot (Default Saat Belum Ada Tiket) -->
                             <div id="roomBotHeaderWrap" class="d-flex align-items-center gap-1">
                                 <i data-feather="cpu" class="text-primary" style="width:15px;height:15px;"></i>
-                                <span class="fw-bold text-dark" style="font-size: 13.5px;">Asisten Virtual BKPSDM</span>
+                                <span class="fw-bold text-dark" style="font-size: 13.5px;">Asisten Virtual PILKB</span>
                             </div>
 
                             <!-- Header Sesi LILI AI Kepegawaian -->
