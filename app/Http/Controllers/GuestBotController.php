@@ -18,20 +18,19 @@ class GuestBotController extends Controller
     public function cekStatusTiket(Request $request)
     {
         $request->validate([
-            'no_tiket' => 'required|string|max:100',
+            'no_tiket' => 'required|string|min:5|max:100',
         ]);
 
         $noTiket = trim($request->no_tiket);
 
         $tiket = Regtiket::with(['layanan.bidang', 'tahapTerakhir.statusRel'])
             ->where('no_tiket', $noTiket)
-            ->orWhere('no_tiket', 'LIKE', '%' . $noTiket . '%')
             ->first();
 
         if (!$tiket) {
             return response()->json([
                 'status'  => 'not_found',
-                'message' => "Nomor tiket \"{$noTiket}\" tidak ditemukan di sistem. Pastikan nomor tiket yang Anda masukkan sudah benar.",
+                'message' => "Nomor tiket \"{$noTiket}\" tidak ditemukan di sistem. Pastikan nomor tiket yang Anda masukkan sudah lengkap dan benar.",
             ]);
         }
 
