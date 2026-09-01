@@ -540,7 +540,19 @@
                         <div class="chat-welcome-icon">
                             <span class="wave-hand">👋</span>
                         </div>
-                        <h6 class="fw-bold mb-1">Halo!</h6>
+                        @php
+                            $hourWita = (int) now()->setTimezone('Asia/Makassar')->format('G');
+                            if ($hourWita >= 5 && $hourWita < 11) {
+                                $salamWita = 'Halo, Selamat Pagi!';
+                            } elseif ($hourWita >= 11 && $hourWita < 15) {
+                                $salamWita = 'Halo, Selamat Siang!';
+                            } elseif ($hourWita >= 15 && $hourWita < 19) {
+                                $salamWita = 'Halo, Selamat Sore!';
+                            } else {
+                                $salamWita = 'Halo, Selamat Malam!';
+                            }
+                        @endphp
+                        <h6 class="fw-bold mb-1" id="chatHomeGreeting">{{ $salamWita }}</h6>
                         <p class="text-muted small mb-0">
                             Silakan pilih layanan bantuan yang Anda butuhkan di bawah ini:
                         </p>

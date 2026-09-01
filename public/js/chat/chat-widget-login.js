@@ -150,6 +150,37 @@
                 el.pageRoom
             ];
 
+            function getWitaGreeting() {
+                try {
+                    const now = new Date();
+                    const formatter = new Intl.DateTimeFormat('id-ID', {
+                        timeZone: 'Asia/Makassar',
+                        hour: 'numeric',
+                        hour12: false
+                    });
+                    const hour = parseInt(formatter.format(now), 10);
+                    if (hour >= 5 && hour < 11) return 'Halo, Selamat Pagi!';
+                    if (hour >= 11 && hour < 15) return 'Halo, Selamat Siang!';
+                    if (hour >= 15 && hour < 19) return 'Halo, Selamat Sore!';
+                    return 'Halo, Selamat Malam!';
+                } catch (e) {
+                    const now = new Date();
+                    const utcHours = now.getUTCHours();
+                    const witaHour = (utcHours + 8) % 24;
+                    if (witaHour >= 5 && witaHour < 11) return 'Halo, Selamat Pagi!';
+                    if (witaHour >= 11 && witaHour < 15) return 'Halo, Selamat Siang!';
+                    if (witaHour >= 15 && witaHour < 19) return 'Halo, Selamat Sore!';
+                    return 'Halo, Selamat Malam!';
+                }
+            }
+
+            function updateWitaGreeting() {
+                const greetingEl = document.getElementById('chatHomeGreeting');
+                if (greetingEl) {
+                    greetingEl.innerText = getWitaGreeting();
+                }
+            }
+
             function triggerWaveAnimation() {
                 document.querySelectorAll('.wave-hand').forEach(wave => {
                     wave.classList.remove('is-waving');
@@ -167,6 +198,7 @@
                 if (activePage) {
                     activePage.classList.remove('d-none');
                     if (activePage === el.pageHome) {
+                        updateWitaGreeting();
                         triggerWaveAnimation();
                     }
                 }
