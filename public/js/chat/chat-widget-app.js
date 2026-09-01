@@ -1506,7 +1506,7 @@
             }
 
             // 1. Instant UI Clear & Disable
-            input.val('').css('height', 'auto');
+            input.val('').css('height', '48px');
             $('#sendMessage, #sendChatBtn').prop('disabled', true);
 
             // 2. Instant Optimistic Render (0 millisecond delay)
@@ -1709,6 +1709,13 @@
         const isClosed = window.ChatWidgetApp.activeConversationStatus === 'closed';
         const hasText = $(this).val().trim().length > 0;
         $('#sendMessage, #sendChatBtn').prop('disabled', isClosed || !hasText);
+
+        // Auto-Growing Textarea (48px - 85px)
+        this.style.height = '48px';
+        const scrollH = this.scrollHeight;
+        if (scrollH > 48) {
+            this.style.height = Math.min(scrollH, 85) + 'px';
+        }
 
         if (!isClosed && hasText) {
             window.ChatWidgetApp.whisperTyping();

@@ -951,10 +951,65 @@
                             <i data-feather="navigation"></i>
                         </button>
                     </div>
+                    <div id="liliAiDisclaimerWrap" class="text-center mt-1 px-1 d-none" style="font-size: 10.5px; color: #94a3b8; line-height: 1.3;">
+                        Jawaban LILI bersifat literasi &amp; informasi awal. <a href="javascript:void(0)" id="btnOpenLiliPrivacy" class="text-decoration-underline text-secondary">Kebijakan Privasi</a>
+                    </div>
                 </div>
 
             </div>
 
+        </div>
+    </div>
+
+    <!-- MODAL KEBIJAKAN PRIVASI & DISCLAIMER AI LILI -->
+    <div class="modal fade" id="modalLiliPrivacy" tabindex="-1" aria-labelledby="modalLiliPrivacyLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable" style="max-width: 480px;">
+            <div class="modal-content border-0 shadow-lg" style="border-radius: 20px;">
+                <div class="modal-header bg-light border-0 py-3 px-4" style="border-radius: 20px 20px 0 0;">
+                    <div class="d-flex align-items-center gap-2">
+                        <div class="d-flex align-items-center justify-content-center" style="width: 34px; height: 34px; border-radius: 10px; background: rgba(99, 102, 241, 0.12); color: #6366f1;">
+                            <i data-feather="shield" style="width: 18px; height: 18px;"></i>
+                        </div>
+                        <div>
+                            <h6 class="modal-title fw-bold text-dark mb-0" id="modalLiliPrivacyLabel" style="font-size: 14px;">Kebijakan Privasi &amp; Batasan Layanan AI</h6>
+                            <small class="text-muted" style="font-size: 11px;">LILI - BKPSDM Kabupaten Buleleng</small>
+                        </div>
+                    </div>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-4" style="font-size: 12.5px; color: #475569; line-height: 1.6;">
+                    <div class="mb-3">
+                        <div class="fw-bold text-dark mb-1" style="font-size: 13px;">1. Asisten Virtual Berbasis AI</div>
+                        <p class="mb-0">
+                            <strong>LILI</strong> <em>(Layanan Informasi &amp; Literasi Kepegawaian Interaktif)</em> adalah asisten virtual berbasis Generative AI yang dirancang untuk membantu pencarian informasi regulasi ASN dan SOP layanan di BKPSDM Kabupaten Buleleng.
+                        </p>
+                    </div>
+
+                    <div class="mb-3">
+                        <div class="fw-bold text-dark mb-1" style="font-size: 13px;">2. Perlindungan Data Pribadi (UU No. 27/2022)</div>
+                        <p class="mb-0">
+                            Pengguna diimbau untuk <strong>TIDAK mengirimkan informasi rahasia</strong> seperti kata sandi (password), PIN, data rekening, maupun rahasia jabatan.
+                        </p>
+                    </div>
+
+                    <div class="mb-3">
+                        <div class="fw-bold text-dark mb-1" style="font-size: 13px;">3. Batasan Tanggung Jawab &amp; Akurasi Informasi</div>
+                        <p class="mb-0">
+                            Jawaban yang dihasilkan oleh LILI bersifat <strong>informasi &amp; literasi awal</strong>. Jawaban ini <strong>tidak menggantikan</strong> Surat Keputusan (SK) resmi atau penetapan tertulis dari Pejabat Pembina Kepegawaian (PPK) BKPSDM Kabupaten Buleleng.
+                        </p>
+                    </div>
+
+                    <div class="alert alert-light border d-flex align-items-center gap-2 p-2 mb-0 rounded-3" style="background: #f8fafc; font-size: 11.5px;">
+                        <i data-feather="check-circle" class="text-success flex-shrink-0" style="width: 16px; height: 16px;"></i>
+                        <span>Dengan menggunakan LILI, Anda memahami dan menyetujui ketentuan layanan ini.</span>
+                    </div>
+                </div>
+                <div class="modal-footer bg-light border-0 py-2 px-4 justify-content-end" style="border-radius: 0 0 20px 20px;">
+                    <button type="button" class="btn btn-primary px-4 btn-sm fw-semibold" data-bs-dismiss="modal" style="border-radius: 10px;">
+                        Saya Mengerti
+                    </button>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -1251,12 +1306,16 @@
                     const clickedInsideDrawer = (e.composedPath && e.composedPath().includes(drawer)) || drawer.contains(e.target);
                     const clickedOpenBtn = (e.composedPath && e.composedPath().includes(openBtn)) || openBtn.contains(e.target);
                     const clickedCardHelpBtn = document.getElementById('btnOpenPusatBantuanFromCard')?.contains(e.target);
+                    const clickedModal = e.target.closest('.modal') || e.target.closest('.modal-backdrop') || document.getElementById('modalLiliPrivacy')?.contains(e.target);
+                    const isAnyModalOpen = document.body.classList.contains('modal-open') || document.querySelector('.modal.show');
 
                     if (
                         drawer.classList.contains('show') &&
                         !clickedInsideDrawer &&
                         !clickedOpenBtn &&
-                        !clickedCardHelpBtn
+                        !clickedCardHelpBtn &&
+                        !clickedModal &&
+                        !isAnyModalOpen
                     ) {
                         drawer.classList.remove('show', 'is-expanded');
                         const expandBtn = document.getElementById('btnToggleExpandChat');
@@ -1324,13 +1383,6 @@
             }
         }
 
-        // Auto Height Text
-        document.addEventListener('input', function(e) {
-            if (e.target.id === 'chatInput') {
-                e.target.style.height = 'auto';
-                e.target.style.height = e.target.scrollHeight + 'px';
-            }
-        });
     </script>
 </body>
 

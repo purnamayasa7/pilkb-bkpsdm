@@ -224,6 +224,13 @@
                     if (el.sendButton) {
                         el.sendButton.disabled = isClosed || !hasText;
                     }
+
+                    // Auto-Growing Textarea (48px - 85px)
+                    this.style.height = '48px';
+                    const scrollH = this.scrollHeight;
+                    if (scrollH > 48) {
+                        this.style.height = Math.min(scrollH, 85) + 'px';
+                    }
                 });
             }
 
@@ -271,6 +278,7 @@
                 if (el.guestEmail) el.guestEmail.value = '';
                 if (el.messageInput) {
                     el.messageInput.placeholder = "Tulis pesan...";
+                    el.messageInput.style.height = '48px';
                 }
 
                 const roomDropdown = document.getElementById('roomActionDropdownWrap');
@@ -285,6 +293,10 @@
                 if (ticketHeader) {
                     ticketHeader.classList.add('d-none');
                 }
+                const aiDisclaimer = document.getElementById('liliAiDisclaimerWrap');
+                if (aiDisclaimer) {
+                    aiDisclaimer.classList.add('d-none');
+                }
 
                 window.ChatWidgetLogin.guestSession = null;
             }
@@ -292,11 +304,19 @@
             function clearMessageInput() {
                 if (el.messageInput) {
                     el.messageInput.value = "";
-                    el.messageInput.style.height = "auto";
+                    el.messageInput.style.height = "48px";
                 }
                 if (el.sendButton) {
                     el.sendButton.disabled = true;
                 }
+            }
+
+            function scrollToBottom(smooth = true) {
+                if (!el.chatMessages) return;
+                el.chatMessages.scrollTo({
+                    top: el.chatMessages.scrollHeight,
+                    behavior: smooth ? 'smooth' : 'auto'
+                });
             }
 
             // =========================================================
@@ -308,7 +328,7 @@
                 const wrapper = document.createElement('div');
                 wrapper.innerHTML = htmlContent;
                 el.chatMessages.appendChild(wrapper.firstElementChild || wrapper);
-                el.chatMessages.scrollTop = el.chatMessages.scrollHeight;
+                scrollToBottom(true);
                 if (window.feather) feather.replace();
             }
 
@@ -329,7 +349,7 @@
                     </div>
                 `;
                 el.chatMessages.appendChild(bubble);
-                el.chatMessages.scrollTop = el.chatMessages.scrollHeight;
+                scrollToBottom(true);
             }
 
             // 1. Menu Utama Bot Interaktif
@@ -341,6 +361,7 @@
                 document.getElementById('roomLiliHeaderWrap')?.classList.add('d-none');
                 document.getElementById('roomTicketHeaderWrap')?.classList.add('d-none');
                 document.getElementById('roomActionDropdownWrap')?.classList.add('d-none');
+                document.getElementById('liliAiDisclaimerWrap')?.classList.add('d-none');
 
                 if (el.messageInput) {
                     el.messageInput.placeholder = "Tulis pesan...";
@@ -387,11 +408,12 @@
                     el.chatMessages.innerHTML = '';
                 }
 
-                // Update Navbar Header khusus LILI
+                // Update Navbar Header khusus LILI & tampilkan disclaimer AI
                 document.getElementById('roomBotHeaderWrap')?.classList.add('d-none');
                 document.getElementById('roomLiliHeaderWrap')?.classList.remove('d-none');
                 document.getElementById('roomTicketHeaderWrap')?.classList.add('d-none');
                 document.getElementById('roomActionDropdownWrap')?.classList.add('d-none');
+                document.getElementById('liliAiDisclaimerWrap')?.classList.remove('d-none');
 
                 if (el.messageInput) {
                     el.messageInput.placeholder = "Tanya LILI seputar kepegawaian...";
@@ -503,7 +525,7 @@
                             <div class="bot-message-wrapper">
                                 <div class="bot-badge-header">
                                     <img src="/images/lili-avatar.png" alt="LILI" style="width: 20px; height: 20px; border-radius: 50%; object-fit: cover; vertical-align: middle; margin-right: 4px; box-shadow: 0 1px 3px rgba(0,0,0,0.15);">
-                                    <span>LILI - AI Kepegawaian</span>
+                                    <span>LILI - AI Asisten Kepegawaian</span>
                                 </div>
                                 <div class="bot-bubble">
                                     <div class="ai-reply-content mb-2">${formattedReply}</div>
@@ -1743,6 +1765,19 @@
                 }
                 chatState.isPolling = false;
             }
+
+            // Privacy Policy Modal Trigger for LILI AI
+            document.addEventListener('click', function (e) {
+                const btnPrivacy = e.target.closest('#btnOpenLiliPrivacy');
+                if (btnPrivacy) {
+                    e.preventDefault();
+                    const modalEl = document.getElementById('modalLiliPrivacy');
+                    if (modalEl && window.bootstrap) {
+                        const modal = window.bootstrap.Modal.getOrCreateInstance(modalEl);
+                        modal.show();
+                    }
+                }
+            });
 
             // Copy Ticket Button
             document.addEventListener('click', function (e) {

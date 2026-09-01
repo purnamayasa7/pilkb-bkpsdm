@@ -644,7 +644,7 @@
             }
 
             // 1. Instant UI Clear & Disable
-            input.val('');
+            input.val('').css('height', '44px');
             $('#waSendMessage').prop('disabled', true);
 
             // 2. Instant Optimistic Render
@@ -907,6 +907,13 @@
                 const isClosed = self.activeConversationStatus === 'closed';
                 const hasText = $(this).val().trim().length > 0;
                 $('#waSendMessage').prop('disabled', isClosed || !hasText);
+
+                // Auto-Growing Textarea (44px - 120px)
+                this.style.height = '44px';
+                const scrollH = this.scrollHeight;
+                if (scrollH > 44) {
+                    this.style.height = Math.min(scrollH, 120) + 'px';
+                }
 
                 if (!isClosed && hasText) {
                     self.whisperTyping();

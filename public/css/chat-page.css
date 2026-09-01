@@ -615,7 +615,7 @@ body.dark-mode .wa-input-footer {
     width: 100%;
     min-height: 44px;
     max-height: 120px;
-    padding: 10px 48px 10px 16px;
+    padding: 10px 52px 10px 16px !important;
     border: 1px solid #e2e8f0;
     border-radius: 22px;
     background: #ffffff;
@@ -624,6 +624,10 @@ body.dark-mode .wa-input-footer {
     resize: none;
     line-height: 1.4;
     transition: all 0.2s ease;
+    box-sizing: border-box !important;
+    word-break: break-word !important;
+    overflow-wrap: anywhere !important;
+    white-space: pre-wrap !important;
 }
 
 .wa-textarea:focus {
