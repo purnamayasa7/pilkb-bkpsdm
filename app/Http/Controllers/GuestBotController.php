@@ -75,8 +75,9 @@ class GuestBotController extends Controller
             $layanan = Layanan::with(['bidang' => function ($q) {
                 $q->select('id', 'nama_bidang');
             }])
-                ->where(function ($q) {
-                    $q->where('aktif', 1)->orWhereNull('aktif');
+                ->where('aktif', 1)
+                ->whereHas('bidang', function ($q) {
+                    $q->where('aktif', 1);
                 })
                 ->orderBy('nama_layanan')
                 ->get(['id', 'nama_layanan', 'kode_bidang']);
@@ -100,13 +101,15 @@ class GuestBotController extends Controller
     public function getBidangLayanan()
     {
         $data = Cache::remember('guest_bot_bidang_layanan', 600, function () {
-            $bidangList = Bidang::with(['layanan' => function ($q) {
-                $q->select('id', 'nama_layanan', 'kode_bidang')
-                    ->where(function ($sub) {
-                        $sub->where('aktif', 1)->orWhereNull('aktif');
-                    })
-                    ->orderBy('nama_layanan');
-            }])
+            $bidangList = Bidang::where('aktif', 1)
+                ->with(['layanan' => function ($q) {
+                    $q->select('id', 'nama_layanan', 'kode_bidang')
+                        ->where('aktif', 1)
+                        ->orderBy('nama_layanan');
+                }])
+                ->whereHas('layanan', function ($q) {
+                    $q->where('aktif', 1);
+                })
                 ->orderBy('nama_bidang')
                 ->get(['id', 'nama_bidang']);
 
@@ -145,6 +148,7 @@ class GuestBotController extends Controller
                     }
                 ])
                 ->where('id', $layananId)
+                ->where('aktif', 1)
                 ->first();
 
             if (!$layanan) {

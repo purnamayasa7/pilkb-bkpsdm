@@ -117,9 +117,14 @@
                 nipError: document.getElementById('nipError'),
 
                 pageHome: document.getElementById('pageHome'),
+                pageCekUsulan: document.getElementById('pageCekUsulan'),
                 pageNewChat: document.getElementById('pageNewChat'),
                 pageTicket: document.getElementById('pageTicket'),
                 pageRoom: document.getElementById('pageRoom'),
+
+                inputDrawerTiketUsulan: document.getElementById('inputDrawerTiketUsulan'),
+                formDrawerCekUsulan: document.getElementById('formDrawerCekUsulan'),
+                drawerCekTiketFeedback: document.getElementById('drawerCekTiketFeedback'),
 
                 chatMessages: document.getElementById('chatMessages'),
                 conversationId: document.getElementById('conversationId'),
@@ -139,6 +144,7 @@
 
             const pages = [
                 el.pageHome,
+                el.pageCekUsulan,
                 el.pageNewChat,
                 el.pageTicket,
                 el.pageRoom
@@ -313,7 +319,7 @@
                                 </button>
                                 <button type="button" class="bot-btn-option" data-bot-action="menu_tanya_ai" style="border-color: #c7d2fe; background: #f5f3ff;">
                                     <img src="/images/lili-avatar.png" alt="LILI" class="bot-option-avatar" style="border-radius: 50%; object-fit: cover; box-shadow: 0 1px 3px rgba(99,102,241,0.25);">
-                                    <span class="fw-semibold" style="color: #4f46e5;">2. Tanya LILI (AI Assistant)</span>
+                                    <span class="fw-semibold" style="color: #4f46e5;">2. Tanya LILI (AI Asisten)</span>
                                 </button>
                                 <button type="button" class="bot-btn-option primary" data-bot-action="menu_admin_pilih_layanan">
                                     <i data-feather="message-circle"></i>
@@ -1125,10 +1131,72 @@
             // =========================================================
 
             function bindNavigationEvents() {
+                document.getElementById('btnDirectCekUsulan')?.addEventListener('click', () => {
+                    showPage(el.pageCekUsulan);
+                    if (el.drawerCekTiketFeedback) {
+                        el.drawerCekTiketFeedback.classList.add('d-none');
+                        el.drawerCekTiketFeedback.innerHTML = '';
+                    }
+                    if (el.inputDrawerTiketUsulan) {
+                        el.inputDrawerTiketUsulan.value = '';
+                        setTimeout(() => el.inputDrawerTiketUsulan.focus(), 150);
+                    }
+                });
+                document.getElementById('backHomeCekUsulan')?.addEventListener('click', () => showPage(el.pageHome));
                 document.getElementById('btnNewChat')?.addEventListener('click', () => showPage(el.pageNewChat));
                 document.getElementById('btnOpenTicket')?.addEventListener('click', () => showPage(el.pageTicket));
                 document.getElementById('backHome1')?.addEventListener('click', () => showPage(el.pageHome));
                 document.getElementById('backHome2')?.addEventListener('click', () => showPage(el.pageHome));
+
+                // Submit Form Cek Tiket di Tab Baru
+                el.formDrawerCekUsulan?.addEventListener('submit', async function (e) {
+                    e.preventDefault();
+                    const ticketNo = el.inputDrawerTiketUsulan?.value?.trim();
+                    if (!ticketNo) return;
+
+                    const btn = document.getElementById('btnCekTiketTabBaru');
+                    const normalSpan = btn?.querySelector('.cek-normal');
+                    const loadingSpan = btn?.querySelector('.cek-loading');
+                    const feedback = el.drawerCekTiketFeedback;
+
+                    if (btn) btn.disabled = true;
+                    if (normalSpan) normalSpan.classList.add('d-none');
+                    if (loadingSpan) loadingSpan.classList.remove('d-none');
+                    if (feedback) {
+                        feedback.className = 'small mt-2 text-primary';
+                        feedback.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Memeriksa nomor tiket...';
+                        feedback.classList.remove('d-none');
+                    }
+
+                    try {
+                        const res = await apiRequest('/guest-bot/cek-tiket', 'POST', { no_tiket: ticketNo });
+                        if (res.status === 'found') {
+                            if (feedback) {
+                                feedback.className = 'small mt-2 text-success fw-semibold';
+                                feedback.innerHTML = '<i data-feather="check-circle" class="me-1"></i> Nomor tiket ditemukan! Membuka halaman tiket di tab baru...';
+                                if (window.feather) feather.replace();
+                            }
+                            const targetUrl = res.data.url_detail || ('/cek-tiket/' + encodeURIComponent(res.data.no_tiket));
+                            window.open(targetUrl, '_blank');
+                        } else {
+                            if (feedback) {
+                                feedback.className = 'small mt-2 text-danger fw-semibold';
+                                feedback.innerHTML = '<i data-feather="alert-circle" class="me-1"></i> Nomor tiket tidak ditemukan. Pastikan nomor tiket sudah benar.';
+                                if (window.feather) feather.replace();
+                            }
+                        }
+                    } catch (err) {
+                        if (feedback) {
+                            feedback.className = 'small mt-2 text-danger fw-semibold';
+                            feedback.innerHTML = '<i data-feather="alert-circle" class="me-1"></i> Nomor tiket tidak ditemukan.';
+                            if (window.feather) feather.replace();
+                        }
+                    } finally {
+                        if (btn) btn.disabled = false;
+                        if (normalSpan) normalSpan.classList.remove('d-none');
+                        if (loadingSpan) loadingSpan.classList.add('d-none');
+                    }
+                });
 
                 const btnToggleExpand = document.getElementById('btnToggleExpandChat');
                 if (btnToggleExpand) {
@@ -1367,6 +1435,61 @@
                 });
             }
 
+            function bindEmojiPicker() {
+                const emojiBtn = document.getElementById('chatEmojiBtn');
+                const emojiPicker = document.getElementById('chatEmojiPicker');
+                const closePickerBtn = document.getElementById('closeEmojiPicker');
+
+                if (emojiBtn) {
+                    emojiBtn.addEventListener('click', function (e) {
+                        e.stopPropagation();
+                        if (!emojiPicker) return;
+                        emojiPicker.classList.toggle('d-none');
+                        if (!emojiPicker.classList.contains('d-none') && window.feather) {
+                            feather.replace();
+                        }
+                    });
+                }
+
+                if (closePickerBtn) {
+                    closePickerBtn.addEventListener('click', function (e) {
+                        e.stopPropagation();
+                        emojiPicker?.classList.add('d-none');
+                    });
+                }
+
+                // Delegasi klik emoji item & click-outside
+                document.addEventListener('click', function (e) {
+                    const emojiItem = e.target.closest('.emoji-item');
+                    if (emojiItem) {
+                        e.stopPropagation();
+                        const emoji = emojiItem.getAttribute('data-emoji') || emojiItem.innerText.trim();
+                        const input = el.messageInput || document.getElementById('chatInput');
+                        if (input) {
+                            const start = input.selectionStart || input.value.length;
+                            const end = input.selectionEnd || input.value.length;
+                            const text = input.value;
+                            input.value = text.substring(0, start) + emoji + text.substring(end);
+                            input.focus();
+                            input.selectionStart = input.selectionEnd = start + emoji.length;
+
+                            const isClosed = el.chatStatusBadge?.innerText?.trim().toLowerCase() === 'closed';
+                            const hasText = input.value.trim().length > 0;
+                            if (el.sendButton) {
+                                el.sendButton.disabled = isClosed || !hasText;
+                            }
+                        }
+                        return;
+                    }
+
+                    if (emojiPicker && !emojiPicker.classList.contains('d-none')) {
+                        if (!e.target.closest('#chatEmojiPicker') && !e.target.closest('#chatEmojiBtn')) {
+                            emojiPicker.classList.add('d-none');
+                        }
+                    }
+                });
+            }
+
             bindKeyboardEvents();
             bindNavigationEvents();
             bindNipLookup();
@@ -1374,6 +1497,7 @@
             bindResumeConversation();
             bindSendMessage();
             bindRoomHeaderActions();
+            bindEmojiPicker();
 
             // =========================================================
             // CONVERSATION & FIREBASE SYNC

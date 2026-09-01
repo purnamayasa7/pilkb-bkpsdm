@@ -349,15 +349,24 @@
                                             </span>
                                             Memproses...
                                         </span>
-
                                     </button>
 
-                                    <!-- CEK TIKET BUTTON -->
+                                    <!-- DIVIDER -->
+                                    <div class="d-flex align-items-center my-3">
+                                        <hr class="flex-grow-1 my-0 text-muted opacity-25">
+                                        <span class="px-2 text-muted small fw-medium" style="font-size: 11.5px; letter-spacing: 0.5px;">LAYANAN BANTUAN</span>
+                                        <hr class="flex-grow-1 my-0 text-muted opacity-25">
+                                    </div>
+
+                                    <!-- PUSAT LAYANAN BANTUAN & CEK STATUS TIKET (TERPUSAT DI CHAT WIDGET) -->
                                     <button type="button"
-                                        onclick="showRegister()"
-                                        class="btn-login-outline">
-                                        <span>Cek Tiket & Pusat Bantuan</span>
-                                        <i data-feather="arrow-right" class="ms-1"></i>
+                                        id="btnOpenPusatBantuanFromCard"
+                                        class="btn-login-outline w-100 d-flex align-items-center justify-content-between">
+                                        <span class="d-flex align-items-center">
+                                            <i data-feather="message-square" class="me-2 text-primary" style="width: 16px; height: 16px;"></i>
+                                            <span class="fw-semibold text-dark" style="font-size: 13px;">Pusat Bantuan &amp; Informasi Tiket</span>
+                                        </span>
+                                        <i data-feather="arrow-right" class="text-primary" style="width: 15px; height: 15px;"></i>
                                     </button>
                                 </form>
                             </div>
@@ -518,199 +527,269 @@
         <div class="chat-body">
 
             <!-- PAGE 1: HOME -->
-            <div class="chat-page" id="pageHome">
-
-                <div class="chat-welcome-card mb-3">
-                    <div class="chat-welcome-icon">
-                        <span class="wave-hand">👋</span>
-                    </div>
-                    <h6 class="fw-bold mb-1">Halo!</h6>
-                    <p class="text-muted small mb-0">
-                        Silakan pilih menu bantuan di bawah untuk berkonsultasi dengan tim BKPSDM.
-                    </p>
-                </div>
-
-                <div class="d-flex flex-column gap-2">
-                    <div class="help-card" id="btnNewChat">
-                        <div class="help-card-icon bg-primary-soft text-primary">
-                            <i data-feather="message-square"></i>
-                        </div>
-                        <div class="flex-grow-1">
-                            <div class="fw-semibold text-dark">Tanya Admin atau AI Assistant</div>
-                            <small class="text-muted">Mulai konsultasi & percakapan baru</small>
-                        </div>
-                        <i data-feather="chevron-right" class="text-muted"></i>
-                    </div>
-
-                    <div class="help-card" id="btnOpenTicket">
-                        <div class="help-card-icon bg-success-soft text-success">
-                            <i data-feather="tag"></i>
-                        </div>
-                        <div class="flex-grow-1">
-                            <div class="fw-semibold text-dark">Sudah Punya Tiket</div>
-                            <small class="text-muted">Lanjutkan percakapan dengan nomor tiket</small>
-                        </div>
-                        <i data-feather="chevron-right" class="text-muted"></i>
+            <div class="chat-page p-0 d-flex flex-column h-100" id="pageHome">
+                <div class="chat-room-header d-flex align-items-center">
+                    <div class="d-flex align-items-center gap-2">
+                        <i data-feather="grid" class="text-primary" style="width:16px;height:16px;"></i>
+                        <span class="fw-bold text-dark" style="font-size: 13.5px;">Menu Bantuan &amp; Layanan</span>
                     </div>
                 </div>
 
+                <div class="chat-page-body flex-grow-1 overflow-y-auto">
+                    <div class="chat-welcome-card mb-3">
+                        <div class="chat-welcome-icon">
+                            <span class="wave-hand">👋</span>
+                        </div>
+                        <h6 class="fw-bold mb-1">Halo!</h6>
+                        <p class="text-muted small mb-0">
+                            Silakan pilih layanan bantuan yang Anda butuhkan di bawah ini:
+                        </p>
+                    </div>
+
+                    <div class="d-flex flex-column gap-2">
+                        <!-- OPSI 1: CEK STATUS USULAN -->
+                        <div class="help-card" id="btnDirectCekUsulan">
+                            <div class="help-card-icon" style="background:#eff6ff; color:#2563eb;">
+                                <i data-feather="search"></i>
+                            </div>
+                            <div class="flex-grow-1">
+                                <div class="fw-semibold text-dark">Cek Status Usulan</div>
+                                <small class="text-muted">Cek progres pengajuan layanan</small>
+                            </div>
+                            <i data-feather="chevron-right" class="help-card-chevron"></i>
+                        </div>
+
+                        <!-- OPSI 2: PUSAT BANTUAN -->
+                        <div class="help-card" id="btnNewChat">
+                            <div class="help-card-icon" style="background:#f5f3ff; color:#6366f1;">
+                                <i data-feather="message-circle"></i>
+                            </div>
+                            <div class="flex-grow-1">
+                                <div class="fw-semibold text-dark">Pusat Bantuan</div>
+                                <small class="text-muted">Informasi Layanan, Konsultasi ke Admin BKPSDM atau AI Asisten</small>
+                            </div>
+                            <i data-feather="chevron-right" class="help-card-chevron"></i>
+                        </div>
+
+                        <!-- OPSI 3: LANJUTKAN PERCAKAPAN CHAT -->
+                        <div class="help-card" id="btnOpenTicket">
+                            <div class="help-card-icon" style="background:#ecfdf5; color:#059669;">
+                                <i data-feather="tag"></i>
+                            </div>
+                            <div class="flex-grow-1">
+                                <div class="fw-semibold text-dark">Lanjutkan Percakapan Chat</div>
+                                <small class="text-muted">Buka kembali obrolan dengan nomor tiket</small>
+                            </div>
+                            <i data-feather="chevron-right" class="help-card-chevron"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- PAGE: CEK STATUS USULAN (OPSI 1) -->
+            <div class="chat-page d-none p-0 d-flex flex-column h-100" id="pageCekUsulan">
+                <div class="chat-room-header d-flex align-items-center">
+                    <button
+                        class="btn btn-light chat-back-btn me-2"
+                        id="backHomeCekUsulan"
+                        title="Kembali ke Menu Awal">
+                        <i data-feather="arrow-left"></i>
+                    </button>
+                    <div class="d-flex align-items-center gap-1">
+                        <i data-feather="search" class="text-primary" style="width:15px;height:15px;"></i>
+                        <span class="fw-bold text-dark" style="font-size: 13.5px;">Cek Status Usulan Layanan</span>
+                    </div>
+                </div>
+
+                <div class="chat-page-body flex-grow-1 overflow-y-auto">
+                    <div class="card border-0 shadow-sm" style="border-radius: 16px;">
+                        <div class="card-body p-3">
+                            <form id="formDrawerCekUsulan">
+                                <div class="mb-3">
+                                    <label class="form-label fw-semibold text-dark small mb-1">
+                                        Masukkan Nomor Tiket
+                                    </label>
+                                    <div class="input-group">
+                                        <input
+                                            type="text"
+                                            class="form-control text-dark font-monospace text-uppercase"
+                                            id="inputDrawerTiketUsulan"
+                                            placeholder="Contoh: 010126ABCD"
+                                            autocomplete="off"
+                                            required>
+                                        <button
+                                            class="btn btn-gradient-search px-3"
+                                            type="submit"
+                                            id="btnSubmitDrawerCekUsulan"
+                                            title="Cari Tiket">
+                                            <i data-feather="search"></i>
+                                        </button>
+                                    </div>
+                                    <div id="drawerCekTiketFeedback" class="small mt-2 d-none"></div>
+                                </div>
+
+                                <button
+                                    type="submit"
+                                    id="btnCekTiketTabBaru"
+                                    class="btn chat-gradient-btn w-100 d-flex align-items-center justify-content-center">
+                                    <span class="cek-normal d-flex align-items-center">
+                                        <i data-feather="external-link" class="me-2"></i>
+                                        Cek &amp; Buka Halaman Tiket
+                                    </span>
+                                    <span class="cek-loading d-none">
+                                        <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                                        Memeriksa Tiket...
+                                    </span>
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
             </div>
 
             <!-- PAGE 2: CHAT BARU -->
-            <div class="chat-page d-none" id="pageNewChat">
-
-                <!-- Header -->
-                <div class="chat-list-header mb-3">
-                    <div class="d-flex align-items-center gap-2">
-                        <button
-                            class="btn btn-light chat-back-btn"
-                            id="backHome1"
-                            title="Kembali">
-                            <i data-feather="arrow-left"></i>
-                        </button>
-                        <div>
-                            <div class="chat-header-title">Mulai Percakapan</div>
-                            <div class="chat-header-subtitle">Lengkapi data untuk memulai chat</div>
-                        </div>
+            <div class="chat-page d-none p-0 d-flex flex-column h-100" id="pageNewChat">
+                <div class="chat-room-header d-flex align-items-center">
+                    <button
+                        class="btn btn-light chat-back-btn me-2"
+                        id="backHome1"
+                        title="Kembali ke Menu Awal">
+                        <i data-feather="arrow-left"></i>
+                    </button>
+                    <div class="d-flex align-items-center gap-1">
+                        <i data-feather="user" class="text-primary" style="width:15px;height:15px;"></i>
+                        <span class="fw-bold text-dark" style="font-size: 13.5px;">Mulai Percakapan / Data Diri</span>
                     </div>
                 </div>
 
-                <!-- Form -->
-                <div class="card border-0 shadow-sm" style="border-radius: 16px;">
-                    <div class="card-body p-3">
+                <div class="chat-page-body flex-grow-1 overflow-y-auto">
+                    <div class="card border-0 shadow-sm" style="border-radius: 16px;">
+                        <div class="card-body p-3">
+                            <div class="mb-2">
+                                <label class="form-label fw-semibold text-dark small mb-1">
+                                    NIP Pegawai
+                                </label>
+                                <div class="input-group">
+                                    <input
+                                        type="text"
+                                        class="form-control text-dark"
+                                        id="guestNip"
+                                        maxlength="18"
+                                        placeholder="Masukkan 18 digit NIP">
+                                    <button
+                                        class="btn btn-gradient-search px-3"
+                                        type="button"
+                                        id="btnCariNip"
+                                        title="Cari NIP">
+                                        <i data-feather="search"></i>
+                                    </button>
+                                </div>
+                                <div
+                                    id="nipLoading"
+                                    class="small text-primary mt-1 d-none">
+                                    <span class="spinner-border spinner-border-sm me-1"></span> Mencari data pegawai...
+                                </div>
+                                <div
+                                    id="nipError"
+                                    class="small text-danger mt-1 d-none">
+                                </div>
+                            </div>
 
-                        <div class="mb-3">
-                            <label class="form-label fw-semibold text-dark small mb-1">
-                                NIP Pegawai
-                            </label>
-                            <div class="input-group">
+                            <div class="mb-2">
+                                <label class="form-label fw-semibold text-dark small mb-1">
+                                    Nama Lengkap
+                                </label>
                                 <input
                                     type="text"
+                                    class="form-control text-dark bg-light"
+                                    id="guestNama"
+                                    readonly
+                                    placeholder="Nama otomatis terisi">
+                            </div>
+
+                            <div class="mb-2">
+                                <label class="form-label fw-semibold text-dark small mb-1">
+                                    Unit Kerja / Instansi
+                                </label>
+                                <input
+                                    type="text"
+                                    class="form-control text-dark bg-light"
+                                    id="guestUnitKerja"
+                                    readonly
+                                    placeholder="Unit kerja otomatis terisi">
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label fw-semibold text-dark small mb-1">
+                                    Email Aktif
+                                </label>
+                                <input
+                                    type="email"
                                     class="form-control text-dark"
-                                    id="guestNip"
-                                    maxlength="18"
-                                    placeholder="Masukkan 18 digit NIP">
-                                <button
-                                    class="btn btn-gradient-search px-3"
-                                    type="button"
-                                    id="btnCariNip"
-                                    title="Cari NIP">
-                                    <i data-feather="search"></i>
-                                </button>
+                                    id="guestEmail"
+                                    placeholder="Email otomatis terisi atau masukkan email aktif">
                             </div>
-                            <div
-                                id="nipLoading"
-                                class="small text-primary mt-2 d-none">
-                                <span class="spinner-border spinner-border-sm me-1"></span> Mencari data pegawai...
-                            </div>
-                            <div
-                                id="nipError"
-                                class="small text-danger mt-2 d-none">
-                            </div>
+
+                            <button
+                                class="btn chat-gradient-btn w-100 d-flex align-items-center justify-content-center"
+                                id="btnStartChat">
+                                <i data-feather="message-square" class="me-2"></i>
+                                Mulai Percakapan
+                            </button>
                         </div>
-
-                        <div class="mb-3">
-                            <label class="form-label fw-semibold text-dark small mb-1">
-                                Nama Lengkap
-                            </label>
-                            <input
-                                type="text"
-                                class="form-control text-dark bg-light"
-                                id="guestNama"
-                                readonly
-                                placeholder="Nama otomatis terisi">
-                        </div>
-
-                        <div class="mb-3">
-                            <label class="form-label fw-semibold text-dark small mb-1">
-                                Unit Kerja / Instansi
-                            </label>
-                            <input
-                                type="text"
-                                class="form-control text-dark bg-light"
-                                id="guestUnitKerja"
-                                readonly
-                                placeholder="Unit kerja otomatis terisi">
-                        </div>
-
-                        <div class="mb-4">
-                            <label class="form-label fw-semibold text-dark small mb-1">
-                                Email Aktif
-                            </label>
-                            <input
-                                type="email"
-                                class="form-control text-dark"
-                                id="guestEmail"
-                                placeholder="Email otomatis terisi atau masukkan email aktif">
-                        </div>
-
-                        <button
-                            class="btn chat-gradient-btn w-100 d-flex align-items-center justify-content-center"
-                            id="btnStartChat">
-                            <i data-feather="message-square" class="me-2"></i>
-                            Mulai Percakapan
-                        </button>
-
                     </div>
                 </div>
-
             </div>
 
             <!-- PAGE 3: TIKET -->
-            <div class="chat-page d-none" id="pageTicket">
-
-                <!-- Header -->
-                <div class="chat-list-header mb-3">
-                    <div class="d-flex align-items-center gap-2">
-                        <button
-                            class="btn btn-light chat-back-btn"
-                            id="backHome2"
-                            title="Kembali">
-                            <i data-feather="arrow-left"></i>
-                        </button>
-                        <div>
-                            <div class="chat-header-title">Buka Tiket Percakapan</div>
-                            <div class="chat-header-subtitle">Lanjutkan obrolan yang sudah tersimpan</div>
-                        </div>
+            <div class="chat-page d-none p-0 d-flex flex-column h-100" id="pageTicket">
+                <div class="chat-room-header d-flex align-items-center">
+                    <button
+                        class="btn btn-light chat-back-btn me-2"
+                        id="backHome2"
+                        title="Kembali ke Menu Awal">
+                        <i data-feather="arrow-left"></i>
+                    </button>
+                    <div class="d-flex align-items-center gap-1">
+                        <i data-feather="tag" class="text-primary" style="width:15px;height:15px;"></i>
+                        <span class="fw-bold text-dark" style="font-size: 13.5px;">Buka Tiket Percakapan</span>
                     </div>
                 </div>
 
-                <!-- Form -->
-                <div class="card border-0 shadow-sm" style="border-radius: 16px;">
-                    <div class="card-body p-3">
+                <div class="chat-page-body flex-grow-1 overflow-y-auto">
+                    <div class="card border-0 shadow-sm" style="border-radius: 16px;">
+                        <div class="card-body p-3">
+                            <div class="mb-2">
+                                <label class="form-label fw-semibold text-dark small mb-1">
+                                    Nomor Tiket
+                                </label>
+                                <input
+                                    type="text"
+                                    class="form-control text-dark"
+                                    id="guestTicket"
+                                    placeholder="Contoh: TK-2026-0001">
+                            </div>
 
-                        <div class="mb-3">
-                            <label class="form-label fw-semibold text-dark small mb-1">
-                                Nomor Tiket
-                            </label>
-                            <input
-                                type="text"
-                                class="form-control text-dark"
-                                id="guestTicket"
-                                placeholder="Contoh: TK-2026-0001">
+                            <div class="mb-3">
+                                <label class="form-label fw-semibold text-dark small mb-1">
+                                    Email Terdaftar
+                                </label>
+                                <input
+                                    type="email"
+                                    class="form-control text-dark"
+                                    id="guestTicketEmail"
+                                    placeholder="nama@email.com">
+                            </div>
+
+                            <button
+                                class="btn chat-gradient-btn w-100 d-flex align-items-center justify-content-center"
+                                id="btnOpenConversation">
+                                <i data-feather="message-square" class="me-2"></i>
+                                Buka Percakapan
+                            </button>
                         </div>
-
-                        <div class="mb-4">
-                            <label class="form-label fw-semibold text-dark small mb-1">
-                                Email Terdaftar
-                            </label>
-                            <input
-                                type="email"
-                                class="form-control text-dark"
-                                id="guestTicketEmail"
-                                placeholder="nama@email.com">
-                        </div>
-
-                        <button
-                            class="btn chat-gradient-btn w-100 d-flex align-items-center justify-content-center"
-                            id="btnOpenConversation">
-                            <i data-feather="message-square" class="me-2"></i>
-                            Buka Percakapan
-                        </button>
-
                     </div>
                 </div>
-
             </div>
 
             <!-- PAGE 4: ROOM CHAT -->
@@ -1146,10 +1225,15 @@
                 });
 
                 document.addEventListener('click', function(e) {
+                    const clickedInsideDrawer = (e.composedPath && e.composedPath().includes(drawer)) || drawer.contains(e.target);
+                    const clickedOpenBtn = (e.composedPath && e.composedPath().includes(openBtn)) || openBtn.contains(e.target);
+                    const clickedCardHelpBtn = document.getElementById('btnOpenPusatBantuanFromCard')?.contains(e.target);
+
                     if (
                         drawer.classList.contains('show') &&
-                        !drawer.contains(e.target) &&
-                        !openBtn.contains(e.target)
+                        !clickedInsideDrawer &&
+                        !clickedOpenBtn &&
+                        !clickedCardHelpBtn
                     ) {
                         drawer.classList.remove('show', 'is-expanded');
                         const expandBtn = document.getElementById('btnToggleExpandChat');
@@ -1160,19 +1244,40 @@
                     }
                 });
 
+                // Trigger Pusat Bantuan dari Tombol Card Login
+                const btnCardHelp = document.getElementById('btnOpenPusatBantuanFromCard');
+                if (btnCardHelp) {
+                    btnCardHelp.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        drawer.classList.add('show');
+                        if (typeof showPage === 'function' && typeof el !== 'undefined' && el.pageHome) {
+                            showPage(el.pageHome);
+                        }
+                    });
+                }
+
                 ChatWidgetLogin.init();
             }
         });
 
-        // Slider Navigation
+        // Slider Navigation & Fallback Helper
         function showRegister() {
-            document.getElementById('formSlider').classList.add('active');
-            feather.replace();
+            const drawer = document.getElementById('chatDrawer');
+            if (drawer) {
+                drawer.classList.add('show');
+                if (typeof showPage === 'function' && typeof el !== 'undefined' && el.pageHome) {
+                    showPage(el.pageHome);
+                }
+            } else {
+                document.getElementById('formSlider')?.classList.add('active');
+            }
+            if (window.feather) feather.replace();
         }
 
         function showLogin() {
-            document.getElementById('formSlider').classList.remove('active');
-            feather.replace();
+            document.getElementById('formSlider')?.classList.remove('active');
+            if (window.feather) feather.replace();
         }
 
         // Show - Hide Password Toggle

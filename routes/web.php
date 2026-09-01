@@ -40,28 +40,28 @@ Route::get('/syarat/export-pdf', [SyaratController::class, 'exportPdf'])->name('
 // Cetak PDF
 Route::get('/tiket/cetak/{no_tiket}', [TiketController::class, 'cetak'])->name('tiket.cetak');
 
-// Guest Chat
-Route::get('/guest-chat/bidang', [ChatController::class, 'getBidang']);
-Route::get('/guest-chat/layanan/{bidang}', [ChatController::class, 'getLayanan']);
-Route::post('/guest-chat/start', [ChatController::class, 'startGuestChat']);
-Route::post('/guest-chat/resume', [ChatController::class, 'resumeGuestChat']);
-Route::get('/guest-chat/{conversation}/messages', [ChatController::class, 'loadGuestMessages']);
-Route::get('/guest-chat/{conversation}/poll', [ChatController::class, 'pollGuestMessages']);
-Route::post('/guest-chat/{conversation}/message', [ChatController::class, 'sendGuestMessage']);
+// Guest Chat (Public with Rate-Limiting Security)
+Route::get('/guest-chat/bidang', [ChatController::class, 'getBidang'])->middleware('throttle:60,1');
+Route::get('/guest-chat/layanan/{bidang}', [ChatController::class, 'getLayanan'])->middleware('throttle:60,1');
+Route::post('/guest-chat/start', [ChatController::class, 'startGuestChat'])->middleware('throttle:15,1');
+Route::post('/guest-chat/resume', [ChatController::class, 'resumeGuestChat'])->middleware('throttle:20,1');
+Route::get('/guest-chat/{conversation}/messages', [ChatController::class, 'loadGuestMessages'])->middleware('throttle:60,1');
+Route::get('/guest-chat/{conversation}/poll', [ChatController::class, 'pollGuestMessages'])->middleware('throttle:120,1');
+Route::post('/guest-chat/{conversation}/message', [ChatController::class, 'sendGuestMessage'])->middleware('throttle:60,1');
 
-// Guest Chatbot Routes
-Route::post('/guest-bot/cek-tiket', [\App\Http\Controllers\GuestBotController::class, 'cekStatusTiket']);
-Route::get('/guest-bot/semua-layanan', [\App\Http\Controllers\GuestBotController::class, 'getSemuaLayanan']);
-Route::get('/guest-bot/bidang-layanan', [\App\Http\Controllers\GuestBotController::class, 'getBidangLayanan']);
-Route::get('/guest-bot/syarat/{layananId}', [\App\Http\Controllers\GuestBotController::class, 'getSyaratLayanan']);
-Route::post('/guest-bot/tanya-ai', [\App\Http\Controllers\GuestBotController::class, 'tanyaAi']);
+// Guest Chatbot Routes (AI & Knowledge Protected)
+Route::post('/guest-bot/cek-tiket', [\App\Http\Controllers\GuestBotController::class, 'cekStatusTiket'])->middleware('throttle:30,1');
+Route::get('/guest-bot/semua-layanan', [\App\Http\Controllers\GuestBotController::class, 'getSemuaLayanan'])->middleware('throttle:60,1');
+Route::get('/guest-bot/bidang-layanan', [\App\Http\Controllers\GuestBotController::class, 'getBidangLayanan'])->middleware('throttle:60,1');
+Route::get('/guest-bot/syarat/{layananId}', [\App\Http\Controllers\GuestBotController::class, 'getSyaratLayanan'])->middleware('throttle:60,1');
+Route::post('/guest-bot/tanya-ai', [\App\Http\Controllers\GuestBotController::class, 'tanyaAi'])->middleware('throttle:15,1');
 // Open & close chat
 Route::post('/chat/{conversation}/close', [ChatController::class, 'closeChat']);
 Route::post('/chat/{conversation}/reopen', [ChatController::class, 'reopenChat']);
 // Total Unread Count
 Route::get('/chat/unread-count', [ChatController::class, 'unreadCount']);
 // Check NIP Tanya Admin
-Route::get('/guest-chat/pegawai/{nip}', [ChatController::class, 'getPegawaiByNip']);
+Route::get('/guest-chat/pegawai/{nip}', [ChatController::class, 'getPegawaiByNip'])->middleware('throttle:30,1');
 
 /* Authenticated */
 

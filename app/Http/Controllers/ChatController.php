@@ -839,25 +839,40 @@ class ChatController extends Controller
     public function sendGuestMessage(Request $request, ChatConversation $conversation)
     {
         $request->validate([
-            'message' => 'required|string'
+            'message' => 'required|string|max:3000',
+            'email'   => 'nullable|email'
         ]);
 
         if ($conversation->status === 'closed') {
-
             return response()->json([
                 'message' => 'Chat sudah ditutup'
             ], 422);
         }
 
+        if ($conversation->type !== 'guest') {
+            return response()->json([
+                'message' => 'Tipe percakapan tidak valid'
+            ], 403);
+        }
+
+        if ($request->filled('email')) {
+            $conversation->loadMissing('guest');
+            if ($conversation->guest && strtolower($conversation->guest->email) !== strtolower($request->email)) {
+                return response()->json([
+                    'message' => 'Unauthorized'
+                ], 403);
+            }
+        }
+
         $message = ChatMessage::create([
             'conversation_id' => $conversation->id,
             'sender_guest_id' => $conversation->guest_id,
-            'message'         => $request->message,
+            'message'         => trim($request->message),
         ]);
 
         $conversation->update([
             'last_message_id' => $message->id,
-            'need_reply' => true
+            'need_reply'      => true
         ]);
 
         try {
@@ -867,9 +882,9 @@ class ChatController extends Controller
         }
 
         return response()->json([
-            'success' => true,
-            'message' => $message,
-            'message_id' => $message->id,
+            'success'       => true,
+            'message'       => $message,
+            'message_id'    => $message->id,
             'ticket_number' => $conversation->no_tiket
         ]);
     }
