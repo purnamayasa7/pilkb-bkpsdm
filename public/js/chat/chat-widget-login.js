@@ -312,8 +312,8 @@
                                     <span>1. Informasi</span>
                                 </button>
                                 <button type="button" class="bot-btn-option" data-bot-action="menu_tanya_ai" style="border-color: #c7d2fe; background: #f5f3ff;">
-                                    <i data-feather="zap" style="color: #6366f1;"></i>
-                                    <span class="fw-semibold" style="color: #4f46e5;">2. Tanya LILI (AI Kepegawaian)</span>
+                                    <img src="/images/lili-avatar.png" alt="LILI" class="bot-option-avatar" style="border-radius: 50%; object-fit: cover; box-shadow: 0 1px 3px rgba(99,102,241,0.25);">
+                                    <span class="fw-semibold" style="color: #4f46e5;">2. Tanya LILI (AI Assistant)</span>
                                 </button>
                                 <button type="button" class="bot-btn-option primary" data-bot-action="menu_admin_pilih_layanan">
                                     <i data-feather="message-circle"></i>
@@ -353,7 +353,8 @@
                 const html = `
                     <div class="bot-message-wrapper">
                         <div class="bot-badge-header">
-                            <i data-feather="zap" style="color: #6366f1;"></i> LILI - Layanan Informasi &amp; Literasi Kepegawaian Interaktif
+                            <img src="/images/lili-avatar.png" alt="LILI" style="width: 20px; height: 20px; border-radius: 50%; object-fit: cover; vertical-align: middle; margin-right: 4px; box-shadow: 0 1px 3px rgba(0,0,0,0.15);">
+                            <span>LILI - Layanan Informasi &amp; Literasi Kepegawaian Interaktif</span>
                         </div>
                         <div class="bot-bubble">
                             <p class="mb-2">Halo! Saya <strong>LILI</strong> (<em>Layanan Informasi &amp; Literasi Kepegawaian Interaktif</em>) BKPSDM Kabupaten Buleleng. 😊</p>
@@ -428,7 +429,7 @@
                     <div class="bot-message-wrapper" id="${loadingId}">
                         <div class="bot-bubble text-muted small d-flex align-items-center gap-2" style="background:#f5f3ff; border:1px solid #e0e7ff; color:#4f46e5;">
                             <span class="spinner-border spinner-border-sm" style="color:#6366f1; width: 0.9rem; height: 0.9rem;" role="status"></span>
-                            <span>AI sedang mengetik...</span>
+                            <span>Lili sedang mengetik...</span>
                         </div>
                     </div>
                 `);
@@ -445,13 +446,13 @@
                     if (res && res.reply) {
                         chatState.aiHistory.push({ role: 'user', text: messageText });
                         chatState.aiHistory.push({ role: 'model', text: res.reply });
-
                         const formattedReply = formatAiReply(res.reply);
 
                         const html = `
                             <div class="bot-message-wrapper">
                                 <div class="bot-badge-header">
-                                    <i data-feather="zap" style="color: #6366f1;"></i> LILI - AI Kepegawaian
+                                    <img src="/images/lili-avatar.png" alt="LILI" style="width: 20px; height: 20px; border-radius: 50%; object-fit: cover; vertical-align: middle; margin-right: 4px; box-shadow: 0 1px 3px rgba(0,0,0,0.15);">
+                                    <span>LILI - AI Kepegawaian</span>
                                 </div>
                                 <div class="bot-bubble">
                                     <div class="ai-reply-content mb-2">${formattedReply}</div>
@@ -551,7 +552,7 @@
                         </div>
                         <div class="bot-bubble">
                             <p class="mb-2">Silakan ketikkan <strong>Nomor Tiket</strong> Anda pada kolom pesan di bawah lalu tekan Kirim (Enter).</p>
-                            <p class="mb-0 text-muted small fst-italic">Contoh: TKT-20260831-001</p>
+                            <p class="mb-0 text-muted small fst-italic">Contoh: 010126ABCD</p>
                             
                             <div class="bot-options-grid mt-2">
                                 <button type="button" class="bot-btn-option secondary" data-bot-action="back_info_menu">
@@ -642,7 +643,7 @@
                                             <i data-feather="search"></i>
                                             <span>Cek Tiket Lain</span>
                                         </button>
-                                        <button type="button" class="bot-btn-option primary" data-bot-action="menu_admin_pilih_layanan">
+                                        <button type="button" class="bot-btn-option primary" data-bot-action="pilih_layanan_admin" data-layanan-id="${d.layanan_id || ''}" data-bidang-id="${d.bidang_id || ''}" data-layanan-name="${escapeHtml(d.layanan)}" data-nama-bidang="${escapeHtml(d.bidang)}" data-ticket-no="${escapeHtml(d.no_tiket)}" data-guest-nama="${escapeHtml(d.nama || '')}" data-guest-email="${escapeHtml(d.email || '')}" data-guest-nip="${escapeHtml(d.nip !== '-' ? d.nip : '')}" data-guest-ukerja="${escapeHtml(d.unit_kerja !== '-' ? d.unit_kerja : '')}">
                                             <i data-feather="message-circle"></i>
                                             <span>Tanya Admin Terkait Tiket Ini</span>
                                         </button>
@@ -809,7 +810,7 @@
                                         <i data-feather="grid"></i>
                                         <span>Cek Layanan Lain</span>
                                     </button>
-                                    <button type="button" class="bot-btn-option primary" data-bot-action="menu_admin_pilih_layanan">
+                                    <button type="button" class="bot-btn-option primary" data-bot-action="pilih_layanan_admin" data-layanan-id="${d.id}" data-bidang-id="${d.kode_bidang || ''}" data-layanan-name="${escapeHtml(d.nama_layanan)}" data-nama-bidang="${escapeHtml(d.nama_bidang)}">
                                         <i data-feather="message-circle"></i>
                                         <span>Tanya Admin Terkait Layanan Ini</span>
                                     </button>
@@ -870,7 +871,7 @@
                         <div class="bot-bubble">
                             <p class="mb-2">Sama-sama, senang bisa membantu Anda! 😊</p>
                             <p class="mb-2">Jika sewaktu-waktu Anda memerlukan informasi atau bantuan layanan kepegawaian lainnya, jangan ragu untuk kembali menggunakan layanan Pusat Bantuan BKPSDM Kabupaten Buleleng.</p>
-                            <p class="mb-0 text-muted small fst-italic">Semoga hari Anda menyenangkan dan urusan Anda berjalan lancar! ✨</p>
+                            <p class="mb-0 text-muted small fst-italic">Semoga hari Anda menyenangkan perkerjaan Anda berjalan lancar! ✨</p>
                             
                             <div class="bot-options-grid mt-3">
                                 <button type="button" class="bot-btn-option secondary" data-bot-action="back_main_menu">
@@ -942,7 +943,7 @@
             }
 
             // 5.1 Aktifkan Sesi Live Chat Admin Setelah Pilih Layanan
-            async function activateAdminChatForLayanan(layananId, bidangId, layananName) {
+            async function activateAdminChatForLayanan(layananId, bidangId, layananName, ticketNo = null, namaBidang = '', guestData = null) {
                 chatState.botMode = 'live_admin';
                 
                 // Bersihkan riwayat chat bot sebelumnya agar tampilan ruang obrolan bersih & fokus
@@ -950,19 +951,49 @@
                     el.chatMessages.innerHTML = '';
                 }
 
-                if (window.ChatWidgetLogin.guestSession) {
-                    window.ChatWidgetLogin.guestSession.layanan_id = layananId;
+                if (!window.ChatWidgetLogin.guestSession) {
+                    window.ChatWidgetLogin.guestSession = {
+                        nip: guestData?.nip || el.guestNip?.value?.trim() || '',
+                        nama: guestData?.nama || el.guestNama?.value?.trim() || 'Tamu',
+                        unit_kerja: guestData?.unit_kerja || el.guestUnitKerja?.value?.trim() || '',
+                        email: guestData?.email || el.guestEmail?.value?.trim() || '',
+                        bidang_id: bidangId || '',
+                        layanan_id: layananId ? (parseInt(layananId) || layananId) : ''
+                    };
+                } else {
+                    if (guestData?.nama && (!window.ChatWidgetLogin.guestSession.nama || window.ChatWidgetLogin.guestSession.nama === 'Tamu')) {
+                        window.ChatWidgetLogin.guestSession.nama = guestData.nama;
+                    }
+                    if (guestData?.email && !window.ChatWidgetLogin.guestSession.email) {
+                        window.ChatWidgetLogin.guestSession.email = guestData.email;
+                    }
+                    if (guestData?.nip && !window.ChatWidgetLogin.guestSession.nip) {
+                        window.ChatWidgetLogin.guestSession.nip = guestData.nip;
+                    }
+                    if (guestData?.unit_kerja && !window.ChatWidgetLogin.guestSession.unit_kerja) {
+                        window.ChatWidgetLogin.guestSession.unit_kerja = guestData.unit_kerja;
+                    }
+                    window.ChatWidgetLogin.guestSession.layanan_id = layananId ? (parseInt(layananId) || layananId) : '';
                     window.ChatWidgetLogin.guestSession.bidang_id = bidangId || '';
                 }
 
+                const displaySub = namaBidang && namaBidang !== '-' ? `${layananName} • ${namaBidang}` : layananName;
                 if (el.roomSubtitle) {
-                    el.roomSubtitle.innerHTML = `<span class="text-primary fw-semibold"><i data-feather="user-check" style="width:12px;height:12px;" class="me-1"></i>Tanya Admin: ${escapeHtml(layananName)}</span>`;
+                    el.roomSubtitle.innerHTML = `<span class="text-primary fw-semibold"><i data-feather="user-check" style="width:12px;height:12px;" class="me-1"></i>Tanya Admin: ${escapeHtml(displaySub)}</span>`;
                 }
 
                 if (el.messageInput) {
-                    el.messageInput.placeholder = "Tulis pesan...";
+                    if (ticketNo) {
+                        el.messageInput.placeholder = `Tulis pesan konsultasi tiket #${ticketNo}...`;
+                    } else {
+                        el.messageInput.placeholder = "Tulis pesan...";
+                    }
                     el.messageInput.focus();
                 }
+
+                const ticketIntro = ticketNo
+                    ? `<p class="mb-2">Anda terhubung ke <strong>${escapeHtml(namaBidang && namaBidang !== '-' ? namaBidang : 'Bidang Terkait')}</strong> untuk layanan <strong>${escapeHtml(layananName)}</strong> seputar nomor tiket <strong>#${escapeHtml(ticketNo)}</strong>.</p>`
+                    : `<p class="mb-2">Anda terhubung dengan layanan Tanya Admin BKPSDM untuk <strong>${escapeHtml(layananName)}</strong>${namaBidang && namaBidang !== '-' ? ` (<strong>${escapeHtml(namaBidang)}</strong>)` : ''}.</p>`;
 
                 const html = `
                     <div class="bot-message-wrapper">
@@ -970,8 +1001,8 @@
                             <i data-feather="headphones" class="text-success"></i> Terhubung ke Tanya Admin BKPSDM
                         </div>
                         <div class="bot-bubble">
-                            <p class="mb-2">Anda terhubung dengan layanan Tanya Admin BKPSDM untuk <strong>${escapeHtml(layananName)}</strong>.</p>
-                            <p class="mb-2">Silakan ketik pertanyaan atau kendala Anda pada kolom pesan di bawah. Sistem akan <strong>otomatis membuat nomor tiket resmi</strong> begitu pesan pertama Anda terkirim.</p>
+                            ${ticketIntro}
+                            <p class="mb-2">Silakan ketik pertanyaan atau kendala Anda pada kolom pesan di bawah. Sistem akan <strong>otomatis menghubungkan ke Admin bidang yang menangani</strong> begitu pesan pertama Anda terkirim.</p>
                             <p class="mb-0 text-muted small fst-italic">Admin BKPSDM kami siap merespons percakapan Anda.</p>
                         </div>
                     </div>
@@ -1059,7 +1090,13 @@
                         const lId = btn.getAttribute('data-layanan-id');
                         const bId = btn.getAttribute('data-bidang-id');
                         const lName = btn.getAttribute('data-layanan-name');
-                        activateAdminChatForLayanan(lId, bId, lName);
+                        const nBidang = btn.getAttribute('data-nama-bidang') || '';
+                        const tNo = btn.getAttribute('data-ticket-no') || null;
+                        const gNama = btn.getAttribute('data-guest-nama') || '';
+                        const gEmail = btn.getAttribute('data-guest-email') || '';
+                        const gNip = btn.getAttribute('data-guest-nip') || '';
+                        const gUkerja = btn.getAttribute('data-guest-ukerja') || '';
+                        activateAdminChatForLayanan(lId, bId, lName, tNo, nBidang, { nama: gNama, email: gEmail, nip: gNip, unit_kerja: gUkerja });
                         break;
                     case 'cek_tiket':
                         promptTicketInput();
@@ -1363,6 +1400,36 @@
                 if (el.sendButton) el.sendButton.disabled = true;
 
                 try {
+                    if (!window.ChatWidgetLogin.guestSession) {
+                        window.ChatWidgetLogin.guestSession = {
+                            nip: el.guestNip?.value?.trim() || '',
+                            nama: el.guestNama?.value?.trim() || 'Tamu',
+                            unit_kerja: el.guestUnitKerja?.value?.trim() || '',
+                            email: el.guestEmail?.value?.trim() || '',
+                            bidang_id: '',
+                            layanan_id: ''
+                        };
+                    }
+
+                    if (!window.ChatWidgetLogin.guestSession.layanan_id) {
+                        const fallbackLayanan = el.layanan?.value || (window._allLayananData && window._allLayananData[0]?.id);
+                        if (fallbackLayanan) {
+                            window.ChatWidgetLogin.guestSession.layanan_id = parseInt(fallbackLayanan) || fallbackLayanan;
+                        }
+                    }
+
+                    if (!window.ChatWidgetLogin.guestSession.email) {
+                        const fallbackEmail = el.guestEmail?.value?.trim();
+                        if (fallbackEmail) {
+                            window.ChatWidgetLogin.guestSession.email = fallbackEmail;
+                        } else {
+                            const promptedEmail = prompt("Silakan masukkan alamat email aktif Anda untuk menerima nomor tiket & riwayat percakapan:");
+                            if (promptedEmail && promptedEmail.trim()) {
+                                window.ChatWidgetLogin.guestSession.email = promptedEmail.trim();
+                            }
+                        }
+                    }
+
                     const result = await apiRequest("/guest-chat/start", "POST", window.ChatWidgetLogin.guestSession);
 
                     conversationId = result.conversation_id;

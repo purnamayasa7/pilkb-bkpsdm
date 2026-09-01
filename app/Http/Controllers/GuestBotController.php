@@ -42,6 +42,10 @@ class GuestBotController extends Controller
             : ($tiket->tanggal ? date('d M Y', strtotime($tiket->tanggal)) : '-');
         $catatan = $tahapTerakhir?->comment ?? '-';
 
+        $layananId = $tiket->kode_layanan ?: ($tiket->layanan?->id ?? null);
+        $bidangId = $tiket->layanan?->kode_bidang ?? $tiket->layanan?->bidang_id ?? '';
+        $bidangNama = $tiket->layanan?->bidang?->nama_bidang ?? '-';
+
         return response()->json([
             'status' => 'found',
             'data'   => [
@@ -49,8 +53,11 @@ class GuestBotController extends Controller
                 'nama'           => $tiket->nama,
                 'nip'            => $tiket->nip ?: '-',
                 'unit_kerja'     => $tiket->nama_ukerja ?: '-',
+                'email'          => $tiket->email ?: '',
+                'layanan_id'     => $layananId,
+                'bidang_id'      => $bidangId,
                 'layanan'        => $tiket->layanan?->nama_layanan ?? '-',
-                'bidang'         => $tiket->layanan?->bidang?->nama_bidang ?? '-',
+                'bidang'         => $bidangNama,
                 'status_nama'    => $statusNama,
                 'tanggal_update' => $tanggalUpdate,
                 'catatan'        => $catatan,

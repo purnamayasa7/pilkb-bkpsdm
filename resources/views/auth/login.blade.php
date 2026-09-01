@@ -536,7 +536,7 @@
                             <i data-feather="message-square"></i>
                         </div>
                         <div class="flex-grow-1">
-                            <div class="fw-semibold text-dark">Tanya Admin & AI Assistant</div>
+                            <div class="fw-semibold text-dark">Tanya Admin atau AI Assistant</div>
                             <small class="text-muted">Mulai konsultasi & percakapan baru</small>
                         </div>
                         <i data-feather="chevron-right" class="text-muted"></i>
@@ -733,15 +733,22 @@
 
                             <!-- Header Sesi LILI AI Kepegawaian -->
                             <div id="roomLiliHeaderWrap" class="d-none">
-                                <div class="d-flex align-items-center gap-1">
-                                    <i data-feather="zap" style="width:15px; height:15px; color:#6366f1;"></i>
-                                    <span class="fw-bold text-dark" style="font-size: 13.5px;">LILI - AI Kepegawaian</span>
-                                    <button type="button" id="btnPlayLiliVoice" class="btn btn-sm btn-link p-0 ms-1" title="Putar Ulang Suara LILI" style="line-height:1; vertical-align: middle;">
-                                        <i data-feather="volume-2" style="width:14px; height:14px; color:#6366f1;"></i>
-                                    </button>
-                                </div>
-                                <div class="chat-room-sub text-truncate" style="font-size: 10.5px; color: #64748b;">
-                                    Layanan Informasi &amp; Literasi Kepegawaian
+                                <div class="d-flex align-items-center gap-2">
+                                    <div class="position-relative flex-shrink-0">
+                                        <img src="{{ asset('images/lili-avatar.png') }}" alt="LILI" style="width: 34px; height: 34px; border-radius: 50%; object-fit: cover; border: 1.5px solid #6366f1; box-shadow: 0 2px 6px rgba(99,102,241,0.25);">
+                                        <span style="position: absolute; bottom: 0; right: 0; width: 8px; height: 8px; background: #10b981; border: 1.5px solid #fff; border-radius: 50%;"></span>
+                                    </div>
+                                    <div class="overflow-hidden">
+                                        <div class="d-flex align-items-center gap-1">
+                                            <span class="fw-bold text-dark text-truncate" style="font-size: 13.5px;">LILI - AI Kepegawaian</span>
+                                            <button type="button" id="btnPlayLiliVoice" class="btn btn-sm btn-link p-0 ms-1" title="Putar Ulang Suara LILI" style="line-height:1; vertical-align: middle;">
+                                                <i data-feather="volume-2" style="width:14px; height:14px; color:#6366f1;"></i>
+                                            </button>
+                                        </div>
+                                        <div class="chat-room-sub text-truncate" style="font-size: 10.5px; color: #64748b;">
+                                            Layanan Informasi &amp; Literasi Kepegawaian
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
 

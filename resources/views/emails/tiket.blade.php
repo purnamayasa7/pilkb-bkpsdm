@@ -70,7 +70,7 @@
                                 <tr>
                                     <td align="center" style="padding-top: 8px;">
                                         <p style="margin: 0; color: rgba(255,255,255,0.8); font-size: 13px; font-family: Arial, Helvetica, sans-serif;">
-                                            BKPSDM &ndash; Badan Kepegawaian dan Pengembangan SDM
+                                            Badan Kepegawaian dan Pengembangan Sumber Daya Manusia
                                         </p>
                                     </td>
                                 </tr>

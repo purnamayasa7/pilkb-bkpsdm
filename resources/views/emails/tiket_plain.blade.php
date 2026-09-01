@@ -25,11 +25,11 @@ Silakan akses tautan berikut untuk melihat detail:
 PENTING: Jika tombol atau tautan di atas tidak berfungsi, salin dan tempelkan ke browser Anda.
 
 --------------------------------------------------
-Email ini dikirim secara otomatis oleh sistem PILKB BKPSDM.
+Email ini dikirim secara otomatis oleh sistem PILKB.
 Mohon untuk TIDAK membalas email ini.
 --------------------------------------------------
 
 Hormat kami,
-Sistem PILKB - BKPSDM
+Sistem PILKB
 Badan Kepegawaian dan Pengembangan Sumber Daya Manusia
 (c) {{ now()->year }} BKPSDM. Seluruh hak cipta dilindungi.
