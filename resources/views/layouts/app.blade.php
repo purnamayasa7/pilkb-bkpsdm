@@ -167,26 +167,28 @@
     class="{{ optional(Auth::user()->role)->name === 'admin_opd' ? 'chat-drawer-admin-opd' : '' }}">
         <!-- Header -->
         <div class="chat-header">
-            <div class="chat-header-info">
-                <!-- <div class="chat-avatar">
-                    <i data-feather="message-square"></i>
-                </div> -->
-
+            <div class="chat-header-info d-flex align-items-center gap-2">
+                <div class="position-relative flex-shrink-0">
+                    <div class="chat-header-avatar">
+                        <i data-feather="message-circle"></i>
+                    </div>
+                    <span class="chat-header-live-dot" title="Layanan Bantuan &amp; AI Aktif"></span>
+                </div>
                 <div>
-                    <div class="fw-bold">
+                    <div class="chat-header-main-title">
                         Pusat Bantuan PILKB
                     </div>
-
-                    <small class="text-white-50">
+                    <div class="chat-header-sub-title">
                         BKPSDM Kabupaten Buleleng
-                    </small>
+                    </div>
                 </div>
             </div>
 
             <button
                 type="button"
                 class="btn-close btn-close-white"
-                id="closeChatDrawer">
+                id="closeChatDrawer"
+                aria-label="Tutup">
             </button>
         </div>
 

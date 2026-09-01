@@ -435,7 +435,7 @@
                     <div class="bot-message-wrapper" id="${loadingId}">
                         <div class="bot-bubble text-muted small d-flex align-items-center gap-2" style="background:#f5f3ff; border:1px solid #e0e7ff; color:#4f46e5;">
                             <span class="spinner-border spinner-border-sm" style="color:#6366f1; width: 0.9rem; height: 0.9rem;" role="status"></span>
-                            <span>Lili sedang mengetik...</span>
+                            <span>LILI sedang mengetik...</span>
                         </div>
                     </div>
                 `);

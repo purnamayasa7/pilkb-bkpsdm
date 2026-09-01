@@ -361,12 +361,9 @@
                                     <!-- PUSAT LAYANAN BANTUAN & CEK STATUS TIKET (TERPUSAT DI CHAT WIDGET) -->
                                     <button type="button"
                                         id="btnOpenPusatBantuanFromCard"
-                                        class="btn-login-outline w-100 d-flex align-items-center justify-content-between">
-                                        <span class="d-flex align-items-center">
-                                            <i data-feather="message-square" class="me-2 text-primary" style="width: 16px; height: 16px;"></i>
-                                            <span class="fw-semibold text-dark" style="font-size: 13px;">Pusat Bantuan &amp; Informasi Tiket</span>
-                                        </span>
-                                        <i data-feather="arrow-right" class="text-primary" style="width: 15px; height: 15px;"></i>
+                                        class="btn-login-outline w-100 d-flex align-items-center justify-content-center gap-2">
+                                        <i data-feather="message-square" class="text-primary" style="width: 16px; height: 16px;"></i>
+                                        <span class="fw-semibold text-dark" style="font-size: 13px;">Pusat Bantuan &amp; Informasi Tiket</span>
                                     </button>
                                 </form>
                             </div>
@@ -494,17 +491,20 @@
     <!-- Live Chat Drawer Widget -->
     <div id="chatDrawer">
         <div class="chat-header">
-            <div class="chat-header-info">
-                <div class="chat-header-avatar">
-                    <i data-feather="message-circle"></i>
+            <div class="chat-header-info d-flex align-items-center gap-2">
+                <div class="position-relative flex-shrink-0">
+                    <div class="chat-header-avatar">
+                        <i data-feather="message-circle"></i>
+                    </div>
+                    <span class="chat-header-live-dot" title="Layanan Bantuan &amp; AI Aktif"></span>
                 </div>
                 <div>
-                    <div class="fw-bold fs-6">
+                    <div class="chat-header-main-title">
                         Pusat Bantuan PILKB
                     </div>
-                    <small class="text-white-50">
+                    <div class="chat-header-sub-title">
                         BKPSDM Kabupaten Buleleng
-                    </small>
+                    </div>
                 </div>
             </div>
 
@@ -577,7 +577,7 @@
                                 <i data-feather="tag"></i>
                             </div>
                             <div class="flex-grow-1">
-                                <div class="fw-semibold text-dark">Lanjutkan Percakapan Chat</div>
+                                <div class="fw-semibold text-dark">Lanjutkan Percakapan</div>
                                 <small class="text-muted">Buka kembali obrolan dengan nomor tiket</small>
                             </div>
                             <i data-feather="chevron-right" class="help-card-chevron"></i>
@@ -658,7 +658,7 @@
                     </button>
                     <div class="d-flex align-items-center gap-1">
                         <i data-feather="user" class="text-primary" style="width:15px;height:15px;"></i>
-                        <span class="fw-bold text-dark" style="font-size: 13.5px;">Mulai Percakapan / Data Diri</span>
+                        <span class="fw-bold text-dark" style="font-size: 13.5px;">Mulai Percakapan</span>
                     </div>
                 </div>
 
