@@ -819,7 +819,7 @@
                                     </div>
                                     <div class="overflow-hidden">
                                         <div class="d-flex align-items-center gap-1">
-                                            <span class="fw-bold text-dark text-truncate" style="font-size: 13.5px;">LILI - AI Kepegawaian</span>
+                                            <span class="fw-bold text-dark text-truncate" style="font-size: 13.5px;">LILI - AI Asisten Kepegawaian</span>
                                             <button type="button" id="btnPlayLiliVoice" class="btn btn-sm btn-link p-0 ms-1" title="Putar Ulang Suara LILI" style="line-height:1; vertical-align: middle;">
                                                 <i data-feather="volume-2" style="width:14px; height:14px; color:#6366f1;"></i>
                                             </button>
