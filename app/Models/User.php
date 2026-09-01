@@ -78,6 +78,20 @@ class User extends Authenticatable
             ?? $this->bidang_id;
     }
 
+    public function getNamaRoleAttribute()
+    {
+        $map = [
+            'root' => 'Root',
+            'admin_bawah' => 'Admin Bawah',
+            'admin_opd' => 'Admin OPD',
+            'bidang' => 'Bidang',
+            'pimpinan' => 'Pimpinan',
+        ];
+
+        return $map[$this->role->name ?? '']
+            ?? (isset($this->role->name) ? ucwords(str_replace('_', ' ', $this->role->name)) : '-');
+    }
+
     public function conversationsCreated()
     {
         return $this->hasMany(

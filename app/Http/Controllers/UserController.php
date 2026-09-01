@@ -11,6 +11,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use App\Services\PegawaiService;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Maatwebsite\Excel\Facades\Excel;
 
 class UserController extends Controller
@@ -416,5 +417,17 @@ class UserController extends Controller
     public function exportExcel(Request $request)
     {
         return Excel::download(new LaporanUserExport($request), 'laporan-user.xlsx');
+    }
+
+    public function exportPdf(Request $request)
+    {
+        $data = User::with(['role', 'bidang'])
+            ->orderBy('nama')
+            ->get();
+
+        $pdf = Pdf::loadView('pages.admin.user.export.export-pdf', compact('data'))
+            ->setPaper('a4', 'landscape');
+
+        return $pdf->stream('laporan-data-user.pdf');
     }
 }

@@ -1578,39 +1578,37 @@ body.dark-mode .chat-role-badge.badge-fo {
 .wave-hand {
     display: inline-block;
     transform-origin: 70% 70%;
-    animation: waveHand 2s ease-in-out 2;
+}
+
+#chatDrawer.show .wave-hand,
+.wave-hand.is-waving {
+    animation: waveHand 1.6s ease-in-out 2;
+}
+
+.chat-welcome-card:hover .wave-hand {
+    animation: waveHand 1.4s ease-in-out 2;
 }
 
 @keyframes waveHand {
     0% {
         transform: rotate(0deg);
     }
-
     10% {
         transform: rotate(14deg);
     }
-
     20% {
         transform: rotate(-8deg);
     }
-
     30% {
         transform: rotate(14deg);
     }
-
     40% {
         transform: rotate(-4deg);
     }
-
     50% {
         transform: rotate(10deg);
     }
-
-    60% {
-        transform: rotate(0deg);
-    }
-
-    100% {
+    60%, 100% {
         transform: rotate(0deg);
     }
 }

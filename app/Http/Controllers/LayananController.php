@@ -445,4 +445,18 @@ class LayananController extends Controller
     {
         return Excel::download(new LaporanLayananExport($request), 'laporan-layanan.xlsx');
     }
+
+    //Export PDF Master Data Layanan - Root
+    public function exportPdfList(Request $request)
+    {
+        $data = Layanan::with('bidang')
+            ->orderBy('kode_bidang', 'asc')
+            ->orderBy('nama_layanan', 'asc')
+            ->get();
+
+        $pdf = Pdf::loadView('pages.admin.layanan.export.export-pdf', compact('data'))
+            ->setPaper('a4', 'landscape');
+
+        return $pdf->stream('laporan-master-layanan.pdf');
+    }
 }

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Exports\RootLayananTiketExport;
 use App\Models\Bidang;
 use App\Models\DetailTiket;
 use App\Models\Layanan;
@@ -14,6 +15,7 @@ use App\Services\ActivityLogService;
 use App\Services\KelengkapanService;
 use App\Services\PegawaiService;
 use Barryvdh\DomPDF\Facade\Pdf;
+use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -114,6 +116,42 @@ class TiketController extends Controller
             'start',
             'end'
         ));
+    }
+
+    public function exportExcelRoot(Request $request)
+    {
+        return Excel::download(new RootLayananTiketExport($request), 'laporan-permintaan-layanan.xlsx');
+    }
+
+    public function exportPdfRoot(Request $request)
+    {
+        $query = Regtiket::with([
+            'layanan.bidang',
+            'tahapTerakhir.statusRel'
+        ]);
+
+        if ($request->filled('bidang')) {
+            $query->whereHas('layanan', function ($q) use ($request) {
+                $q->where('kode_bidang', $request->bidang);
+            });
+        }
+
+        if ($request->filled('start_date') && $request->filled('end_date')) {
+            $query->whereBetween('tanggal', [
+                $request->start_date . ' 00:00:00',
+                $request->end_date . ' 23:59:59'
+            ]);
+        }
+
+        $data = $query->orderBy('tanggal', 'desc')->get();
+        $bidang = $request->filled('bidang') ? Bidang::find($request->bidang) : null;
+        $start = $request->start_date;
+        $end = $request->end_date;
+
+        $pdf = Pdf::loadView('pages.all.layanan.export.export-pdf', compact('data', 'bidang', 'start', 'end'))
+            ->setPaper('a4', 'landscape');
+
+        return $pdf->stream('laporan-permintaan-layanan.pdf');
     }
 
     public function indexProses(Request $request)

@@ -1206,7 +1206,18 @@
 
                 openBtn.addEventListener('click', function(e) {
                     e.stopPropagation();
+                    const willShow = !drawer.classList.contains('show');
                     drawer.classList.toggle('show');
+                    if (willShow) {
+                        if (typeof showPage === 'function' && typeof el !== 'undefined' && el.pageHome) {
+                            showPage(el.pageHome);
+                        }
+                        document.querySelectorAll('.wave-hand').forEach(w => {
+                            w.classList.remove('is-waving');
+                            void w.offsetWidth;
+                            w.classList.add('is-waving');
+                        });
+                    }
                 });
 
                 closeBtn.addEventListener('click', function() {
@@ -1254,6 +1265,11 @@
                         if (typeof showPage === 'function' && typeof el !== 'undefined' && el.pageHome) {
                             showPage(el.pageHome);
                         }
+                        document.querySelectorAll('.wave-hand').forEach(w => {
+                            w.classList.remove('is-waving');
+                            void w.offsetWidth;
+                            w.classList.add('is-waving');
+                        });
                     });
                 }
 

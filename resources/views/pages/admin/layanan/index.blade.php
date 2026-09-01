@@ -26,7 +26,7 @@
                                 </a>
                             </li>
                             <li>
-                                <a class="dropdown-item" href="#">
+                                <a class="dropdown-item" href="{{ route('root.layanan.exportPdfList') }}" target="_blank">
                                     <i class="me-1" data-feather="file"></i> Export PDF
                                 </a>
                             </li>

@@ -24,7 +24,7 @@
                 <td>'{{ $item->username }}</td>
                 <td>{{ $item->nama }}</td>
                 <td>{{ $item->nama_bidang }}</td>
-                <td>{{ $item->role->nama_role ?? '-' }}</td>
+                <td>{{ $item->nama_role }}</td>
                 <td>{{ $item->email ?? '-' }}</td>
                 <td>{{ $item->aktif == 1 ? 'Aktif' : 'Tidak Aktif' }}</td>
             </tr>

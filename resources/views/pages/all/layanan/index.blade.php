@@ -21,12 +21,12 @@
                         </button>
                         <ul class="dropdown-menu">
                             <li>
-                                <a class="dropdown-item" href="#">
+                                <a class="dropdown-item" href="{{ route('root.tiket.exportExcel', request()->query()) }}">
                                     <i class="me-1" data-feather="file-text"></i> Export Excel
                                 </a>
                             </li>
                             <li>
-                                <a class="dropdown-item" href="#">
+                                <a class="dropdown-item" href="{{ route('root.tiket.exportPdf', request()->query()) }}" target="_blank">
                                     <i class="me-1" data-feather="file"></i> Export PDF
                                 </a>
                             </li>

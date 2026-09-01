@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="utf-8">
+    <title>Laporan-Data-Pengguna</title>
+    <link rel="stylesheet" href="{{ public_path('css/pdf.css') }}">
+</head>
+
+<body>
+
+    <!-- KOP HEADER (PERSIS SESUAI STANDAR INSTANSI) -->
+    <div class="header">
+        <table style="border:none; width:auto; margin:0 auto;">
+            <tr>
+                {{-- LOGO --}}
+                <td style="border:none; vertical-align:middle;">
+                    <img src="{{ public_path('images/KabBuleleng.png') }}">
+                </td>
+
+                {{-- TEXT --}}
+                <td class="title-header" style="border:none; text-align:center; line-height:1.5;">
+                    <div><strong>PEMERINTAH KABUPATEN BULELENG</strong></div>
+                    <div><strong>BADAN KEPEGAWAIAN DAN PENGEMBANGAN SUMBER DAYA MANUSIA</strong></div>
+                    <div style="font-size: 11px; font-weight: normal;">Alamat: Jalan Laksamana (LC) Baktiseraga, Singaraja, Bali</div>
+                </td>
+            </tr>
+        </table>
+    </div>
+
+    <hr>
+
+    <!-- JUDUL DOKUMEN -->
+    <div class="doc-title-container">
+        <div class="doc-title">LAPORAN MASTER DATA PENGGUNA (USER)</div>
+    </div>
+
+    <!-- KARTU INFORMASI -->
+    <div class="card-info">
+        <table class="data-table">
+            <tr>
+                <td class="data-label">Kategori Laporan</td>
+                <td class="data-sep">:</td>
+                <td class="data-val">Data Pengguna Sistem PILKB</td>
+                <td style="width: 30px;"></td>
+                <td class="data-label" style="width: 95px;">Total Pengguna</td>
+                <td class="data-sep">:</td>
+                <td class="data-val">{{ $data->count() }} Pengguna Terdaftar</td>
+            </tr>
+        </table>
+    </div>
+
+    <!-- TABEL DATA LAPORAN USER -->
+    <table class="laporan-table">
+        <thead>
+            <tr>
+                <th style="width: 4%;">No</th>
+                <th style="width: 14%;">Username / NIP</th>
+                <th style="width: 22%;">Nama Lengkap</th>
+                <th style="width: 18%;">Bidang</th>
+                <th style="width: 16%;">Jabatan</th>
+                <th style="width: 14%;">Role Akun</th>
+                <th style="width: 12%;">Status</th>
+            </tr>
+        </thead>
+        <tbody>
+            @forelse ($data as $item)
+                <tr>
+                    <td class="text-center">{{ $loop->iteration }}</td>
+                    <td class="text-center cell-break">{{ $item->username }}</td>
+                    <td class="cell-break">{{ $item->nama }}</td>
+                    <td class="cell-break">{{ $item->nama_bidang ?? '-' }}</td>
+                    <td class="cell-break">{{ $item->jabatan ?? '-' }}</td>
+                    <td class="text-center">{{ $item->nama_role }}</td>
+                    <td class="text-center">{{ $item->aktif == 1 ? 'Aktif' : 'Nonaktif' }}</td>
+                </tr>
+            @empty
+                <tr>
+                    <td colspan="7" class="text-center" style="color: #64748b; padding: 12px;">
+                        Tidak ada data pengguna terdaftar.
+                    </td>
+                </tr>
+            @endforelse
+        </tbody>
+    </table>
+
+    <!-- FOOTER CETAK -->
+    <table class="footer-table">
+        <tr>
+            <td width="60%">Dicetak secara elektronik melalui Sistem PILKB</td>
+            <td width="40%" style="text-align: right;">{{ now()->translatedFormat('d-m-Y H:i') }} WITA</td>
+        </tr>
+    </table>
+
+</body>
+
+</html>

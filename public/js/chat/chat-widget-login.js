@@ -150,13 +150,26 @@
                 el.pageRoom
             ];
 
+            function triggerWaveAnimation() {
+                document.querySelectorAll('.wave-hand').forEach(wave => {
+                    wave.classList.remove('is-waving');
+                    void wave.offsetWidth; // Force DOM reflow to restart 2-iteration animation
+                    wave.classList.add('is-waving');
+                });
+            }
+
             // Show Page helper
             function showPage(activePage) {
                 pages.forEach(page => {
                     if (page) page.classList.add('d-none');
                 });
 
-                if (activePage) activePage.classList.remove('d-none');
+                if (activePage) {
+                    activePage.classList.remove('d-none');
+                    if (activePage === el.pageHome) {
+                        triggerWaveAnimation();
+                    }
+                }
                 if (window.feather) {
                     window.feather.replace();
                 }

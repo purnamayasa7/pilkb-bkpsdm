@@ -157,6 +157,7 @@ Route::prefix('root')
         Route::get('layanan/create', [LayananController::class, 'create'])->name('layanan.create');
         Route::post('layanan', [LayananController::class, 'store'])->name('layanan.store');
         Route::get('layanan/export-excel', [LayananController::class, 'exportExcelList'])->name('layanan.exportExcelList');
+        Route::get('layanan/export-pdf', [LayananController::class, 'exportPdfList'])->name('layanan.exportPdfList');
         Route::get('layanan/{id}', [LayananController::class, 'edit'])->name('layanan.edit');
         Route::put('layanan/{id}', [LayananController::class, 'update'])->name('layanan.update');
         Route::put('layanan/{id}/toggle-aktif', [LayananController::class, 'toggleAktif'])->name('layanan.toggle-aktif');
@@ -181,6 +182,8 @@ Route::prefix('root')
 
         // TIKET
         Route::get('tiket', [TiketController::class, 'index'])->name('tiket');
+        Route::get('tiket/export-excel', [TiketController::class, 'exportExcelRoot'])->name('tiket.exportExcel');
+        Route::get('tiket/export-pdf', [TiketController::class, 'exportPdfRoot'])->name('tiket.exportPdf');
         Route::get('filter', [TiketController::class, 'filter'])->name('filter');
         Route::get('/tiket/history/{no_tiket}', [TiketController::class, 'getHistory'])->name('tiket.getHistory');
 
