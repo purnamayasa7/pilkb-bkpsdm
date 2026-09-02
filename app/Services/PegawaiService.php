@@ -142,6 +142,12 @@ class PegawaiService
                 return null;
             }
 
+            // Pastikan foto_url tersedia di response data pegawai
+            if (empty($json['data']['foto_url']) && !empty($json['data']['nip'])) {
+                $baseUrl = preg_replace('/\/api.*$/i', '', $url);
+                $json['data']['foto_url'] = "{$baseUrl}/pegawai/foto/{$json['data']['nip']}";
+            }
+
             // SIMPEG kembali normal
             $this->clearOffline();
 
@@ -166,6 +172,24 @@ class PegawaiService
 
             return null;
         }
+    }
+
+    /**
+     * Dapatkan URL foto pegawai dari SIMPEG.
+     */
+    public function getFotoUrl(?string $nip): string
+    {
+        if (blank($nip)) {
+            return asset('templatepro/assets/img/demo/user-placeholder.svg');
+        }
+
+        $url = rtrim((string) config('services.simpeg.url'), '/');
+        if ($url) {
+            $baseUrl = preg_replace('/\/api.*$/i', '', $url);
+            return "{$baseUrl}/pegawai/foto/{$nip}";
+        }
+
+        return "https://simpegdev.bllkom.site/pegawai/foto/{$nip}";
     }
 
     /**

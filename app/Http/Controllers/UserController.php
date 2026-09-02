@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use App\Services\PegawaiService;
 use Barryvdh\DomPDF\Facade\Pdf;
+use Carbon\Carbon;
 use Maatwebsite\Excel\Facades\Excel;
 
 class UserController extends Controller
@@ -93,13 +94,24 @@ class UserController extends Controller
                 ]);
             }
 
+            $tmp_lahir = $pegawai['tmp_lahir'] ?? null;
+            $tgl_lahir = !empty($pegawai['tgl_lahir']) ? Carbon::parse($pegawai['tgl_lahir'])->translatedFormat('d-F-Y') : null;
+            $ttl = ($tmp_lahir || $tgl_lahir) ? trim("{$tmp_lahir}" . ($tmp_lahir && $tgl_lahir ? ', ' : '') . "{$tgl_lahir}") : '-';
+
             return response()->json([
                 'status' => true,
                 'data' => [
                     'nama_lengkap' => $pegawai['nama_lengkap'] ?? '',
-                    'ket_ukerja' => $pegawai['ket_ukerja'] ?? '',
-                    'kode_ukerja' => $pegawai['kode_opd'] ?? '',
-                    'foto' => $pegawai['foto'] ?? null,
+                    'ket_ukerja'   => $pegawai['ket_ukerja'] ?? '',
+                    'kode_ukerja'  => $pegawai['kode_opd'] ?? '',
+                    'email'        => $pegawai['email'] ?? '',
+                    'foto_url'     => $pegawai['foto_url'] ?? $this->pegawaiService->getFotoUrl($nip),
+                    'tmp_lahir'    => $pegawai['tmp_lahir'] ?? '',
+                    'tgl_lahir'    => $tgl_lahir ?? '',
+                    'ttl'          => $ttl,
+                    'ket_gol'      => $pegawai['ket_gol'] ?? '-',
+                    'nama_jab'     => $pegawai['nama_jab'] ?? '-',
+                    'ket_agama'    => $pegawai['ket_agama'] ?? '-',
                 ]
             ]);
         } catch (\Exception $e) {
@@ -292,8 +304,15 @@ class UserController extends Controller
             ->getPegawaiByNip($profile->username);
 
         $nama_lengkap = $pegawai['nama_lengkap'] ?? $profile->nama;
-
         $ket_ukerja = $pegawai['ket_ukerja'] ?? '-';
+        $foto_url = $pegawai['foto_url'] ?? $this->pegawaiService->getFotoUrl($profile->username);
+
+        $tmp_lahir = $pegawai['tmp_lahir'] ?? null;
+        $tgl_lahir = !empty($pegawai['tgl_lahir']) ? Carbon::parse($pegawai['tgl_lahir'])->translatedFormat('d-F-Y') : null;
+        $ttl = ($tmp_lahir || $tgl_lahir) ? trim("{$tmp_lahir}" . ($tmp_lahir && $tgl_lahir ? ', ' : '') . "{$tgl_lahir}") : '-';
+        $ket_gol = $pegawai['ket_gol'] ?? '-';
+        $nama_jab = $pegawai['nama_jab'] ?? '-';
+        $ket_agama = $pegawai['ket_agama'] ?? '-';
 
         return view(
             'pages.admin.user.edit',
@@ -301,7 +320,12 @@ class UserController extends Controller
                 'profile',
                 'bidang',
                 'ket_ukerja',
-                'nama_lengkap'
+                'nama_lengkap',
+                'foto_url',
+                'ttl',
+                'ket_gol',
+                'nama_jab',
+                'ket_agama'
             )
         );
     }
@@ -342,8 +366,15 @@ class UserController extends Controller
             ->getPegawaiByNip($user->username);
 
         $nama_lengkap = $pegawai['nama_lengkap'] ?? $user->nama;
-
         $ket_ukerja = $pegawai['ket_ukerja'] ?? '-';
+        $foto_url = $pegawai['foto_url'] ?? $this->pegawaiService->getFotoUrl($user->username);
+
+        $tmp_lahir = $pegawai['tmp_lahir'] ?? null;
+        $tgl_lahir = !empty($pegawai['tgl_lahir']) ? Carbon::parse($pegawai['tgl_lahir'])->translatedFormat('d-F-Y') : null;
+        $ttl = ($tmp_lahir || $tgl_lahir) ? trim("{$tmp_lahir}" . ($tmp_lahir && $tgl_lahir ? ', ' : '') . "{$tgl_lahir}") : '-';
+        $ket_gol = $pegawai['ket_gol'] ?? '-';
+        $nama_jab = $pegawai['nama_jab'] ?? '-';
+        $ket_agama = $pegawai['ket_agama'] ?? '-';
 
         $tiket = Regtiket::with([
             'layanan',
@@ -360,6 +391,11 @@ class UserController extends Controller
                 'bidang',
                 'nama_lengkap',
                 'ket_ukerja',
+                'foto_url',
+                'ttl',
+                'ket_gol',
+                'nama_jab',
+                'ket_agama',
                 'tiket'
             )
         );

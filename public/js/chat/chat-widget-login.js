@@ -376,7 +376,7 @@
                             <i data-feather="cpu"></i> Asisten Virtual PILKB
                         </div>
                         <div class="bot-bubble">
-                            <p class="mb-2">Halo <strong>${guestName}</strong>, Selamat Datang di Layanan Bantuan Virtual BKPSDM Kabupaten Buleleng.</p>
+                            <p class="mb-2">Halo <strong>${guestName}</strong>, Selamat Datang di Layanan Bantuan Virtual PILKB.</p>
                             <p class="mb-0 text-muted small">Anda dapat memilih opsi menu yang dibutuhkan di bawah ini:</p>
                             
                             <div class="bot-options-grid">

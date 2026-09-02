@@ -294,7 +294,7 @@
             <div class="modal-body py-3">
                 <div class="mb-3">
                     <label class="form-label fw-semibold text-dark small">Nomor Tiket</label>
-                    <input type="text" class="form-control text-dark" id="waModalTicketInput" placeholder="Contoh: TK-2026-0001">
+                    <input type="text" class="form-control text-dark" id="waModalTicketInput" placeholder="Contoh: 010126ABCD">
                 </div>
             </div>
             <div class="modal-footer border-top-0 pt-0">

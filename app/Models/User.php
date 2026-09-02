@@ -92,6 +92,21 @@ class User extends Authenticatable
             ?? (isset($this->role->name) ? ucwords(str_replace('_', ' ', $this->role->name)) : '-');
     }
 
+    public function getFotoUrlAttribute()
+    {
+        if ($this->foto) {
+            return asset('storage/' . $this->foto);
+        }
+
+        $url = rtrim((string) config('services.simpeg.url'), '/');
+        if ($url && $this->username) {
+            $baseUrl = preg_replace('/\/api.*$/i', '', $url);
+            return "{$baseUrl}/pegawai/foto/{$this->username}";
+        }
+
+        return "https://simpegdev.bllkom.site/pegawai/foto/{$this->username}";
+    }
+
     public function conversationsCreated()
     {
         return $this->hasMany(

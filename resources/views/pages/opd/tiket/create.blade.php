@@ -138,7 +138,7 @@ $stepHeader = [
                                 </div>
 
                                 {{-- Unit Kerja --}}
-                                <div class="d-flex justify-content-between align-items-center pt-2">
+                                <div class="d-flex justify-content-between align-items-center py-2 border-bottom">
 
                                     <span>
                                         <i data-feather="home" class="me-2 text-warning"></i>
@@ -147,6 +147,22 @@ $stepHeader = [
 
                                     <span
                                         id="detailUkerja"
+                                        class="fw-semibold text-end">
+                                        -
+                                    </span>
+
+                                </div>
+
+                                {{-- Email --}}
+                                <div class="d-flex justify-content-between align-items-center pt-2">
+
+                                    <span>
+                                        <i data-feather="mail" class="me-2 text-info"></i>
+                                        Email SIMPEG
+                                    </span>
+
+                                    <span
+                                        id="detailEmail"
                                         class="fw-semibold text-end">
                                         -
                                     </span>
@@ -566,6 +582,7 @@ $stepHeader = [
                                     <i data-feather="mail" style="width: 16px; height: 16px;"></i>
                                 </span>
                                 <input type="email" name="email" id="emailInput" class="form-control"
+                                    value="{{ old('email', session('pengajuan.email')) }}"
                                     placeholder="nama@email.com" required>
                             </div>
                             <div class="form-text text-muted small">
@@ -1238,6 +1255,7 @@ $stepHeader = [
             null;
 
         let nipValid = false;
+        let currentPegawai = null;
 
         // CEK DATA PEGAWAI
 
@@ -1323,6 +1341,7 @@ $stepHeader = [
                     }
 
                     const pegawai = result.data;
+                    currentPegawai = pegawai;
 
                     nipValid = true;
 
@@ -1343,6 +1362,16 @@ $stepHeader = [
                     document.getElementById('detailUkerja').innerText =
                         pegawai.ket_ukerja ?? '-';
 
+                    const detailEmail = document.getElementById('detailEmail');
+                    if (detailEmail) {
+                        detailEmail.innerText = pegawai.email ?? '-';
+                    }
+
+                    // Auto-fill input email dari API jika tersedia
+                    if (emailInput && pegawai.email) {
+                        emailInput.value = pegawai.email;
+                    }
+
                     // FOTO PEGAWAI
 
                     const foto =
@@ -1350,7 +1379,7 @@ $stepHeader = [
 
                     if (foto) {
 
-                        foto.src =
+                        foto.src = pegawai.foto_url ||
                             `https://simpegdev.bllkom.site/pegawai/foto/${pegawai.nip}`;
 
                         foto.onerror = function() {
@@ -1416,6 +1445,11 @@ $stepHeader = [
                     emailWrapper.classList.remove('d-none');
                 }
 
+                // Isi email jika belum terisi dan data pegawai memiliki email
+                if (emailInput && currentPegawai && currentPegawai.email && !emailInput.value) {
+                    emailInput.value = currentPegawai.email;
+                }
+
             });
 
         }
@@ -1439,6 +1473,7 @@ $stepHeader = [
                 }
 
                 nipValid = false;
+                currentPegawai = null;
 
                 if (emailWrapper) {
                     emailWrapper.classList.add('d-none');

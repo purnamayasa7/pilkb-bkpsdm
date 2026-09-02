@@ -53,21 +53,64 @@
     <div class="row">
         <div class="col-xl-4">
             <!-- Profile picture card-->
-            <div class="card mb-4 mb-xl-0">
-                <div class="card-header bg-gradient-primary-to-secondary text-white">Foto Profil</div>
-                <div class="card-body text-center">
+            <div class="card mb-4 mb-xl-0 shadow-sm border">
+                <div class="card-header bg-gradient-primary-to-secondary text-white">Foto &amp; Data Pegawai</div>
+                <div class="card-body text-center p-4">
                     <!-- Profile picture image-->
                     <img id="fotoPreview"
-                        class="img-account-profile rounded-circle mb-2 shadow"
-                        src="https://simpegdev.bllkom.info/pegawai/foto/{{ $profile->username }}"
+                        class="img-account-profile rounded-circle mb-3 shadow border border-3 border-white"
+                        src="{{ $foto_url ?? $profile->foto_url }}"
+                        onerror="this.src='{{ asset('templatepro/assets/img/demo/user-placeholder.svg') }}'"
                         alt="Foto Profil"
-                        style="width: 180px; height: 180px; object-fit: cover;" />
-                    <!-- Profile picture help block-->
-                    <div class="small font-italic text-muted mb-4">JPG or PNG tidak lebih dari 2 MB</div>
-                    <!-- Profile picture upload button-->
-                    <button class="btn btn-primary" type="button">
-                        <i data-feather="upload" class="me-1"></i> Upload Foto
-                    </button>
+                        style="width: 140px; height: 140px; object-fit: cover;" />
+
+                    <h5 class="fw-bold text-dark mb-1">{{ $nama_lengkap ?? $profile->nama ?? '-' }}</h5>
+                    <div class="badge bg-light text-primary border mb-3 fw-semibold px-3 py-2">
+                        NIP: {{ $profile->username ?? '-' }}
+                    </div>
+
+                    <!-- Detail Keterangan Pegawai SIMPEG -->
+                    <div class="text-start mt-2 pt-3 border-top">
+                        <div class="d-flex align-items-start mb-2 pb-2 border-bottom">
+                            <div class="text-muted small me-2" style="width: 120px;">
+                                <i data-feather="calendar" class="me-1 text-primary" style="width: 14px; height: 14px;"></i>
+                                TTL
+                            </div>
+                            <div class="fw-semibold small text-dark flex-grow-1 text-end">
+                                {{ $ttl ?? '-' }}
+                            </div>
+                        </div>
+
+                        <div class="d-flex align-items-start mb-2 pb-2 border-bottom">
+                            <div class="text-muted small me-2" style="width: 120px;">
+                                <i data-feather="award" class="me-1 text-success" style="width: 14px; height: 14px;"></i>
+                                Golongan
+                            </div>
+                            <div class="fw-semibold small text-dark flex-grow-1 text-end">
+                                {{ $ket_gol ?? '-' }}
+                            </div>
+                        </div>
+
+                        <div class="d-flex align-items-start mb-2 pb-2 border-bottom">
+                            <div class="text-muted small me-2" style="width: 120px;">
+                                <i data-feather="briefcase" class="me-1 text-secondary" style="width: 14px; height: 14px;"></i>
+                                Jabatan
+                            </div>
+                            <div class="fw-semibold small text-dark flex-grow-1 text-end">
+                                {{ $nama_jab ?? '-' }}
+                            </div>
+                        </div>
+
+                        <div class="d-flex align-items-start">
+                            <div class="text-muted small me-2" style="width: 120px;">
+                                <i data-feather="book-open" class="me-1 text-warning" style="width: 14px; height: 14px;"></i>
+                                Agama
+                            </div>
+                            <div class="fw-semibold small text-dark flex-grow-1 text-end">
+                                {{ $ket_agama ?? '-' }}
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
