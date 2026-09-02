@@ -1558,17 +1558,29 @@ body.dark-mode .chat-role-badge.badge-fo {
 }
 
 .chat-welcome-card h6 {
-    font-size: 14px;
+    font-size: 15px;
     font-weight: 700;
-    margin-bottom: 3px;
-    color: #1e293b;
+    margin-bottom: 4px;
+    color: #0f172a;
+    letter-spacing: -0.2px;
 }
 
 .chat-welcome-card p {
     margin: 0;
-    color: #64748b;
-    font-size: 12px;
-    line-height: 1.45;
+    color: #334155;
+    font-size: 12.5px;
+    line-height: 1.55;
+    font-weight: 400;
+}
+
+.chat-welcome-card p strong {
+    color: #4338ca;
+    font-weight: 700;
+}
+
+.chat-welcome-card p em {
+    color: #475569;
+    font-style: italic;
 }
 
 @keyframes fadeUp {
@@ -3141,4 +3153,89 @@ body.dark-mode .ai-action-chip.chip-prompt:hover {
     background: #6366f1;
     color: #ffffff;
     border-color: #6366f1;
+}
+
+/* Interactive Welcome LILI Avatar Button */
+.chat-welcome-avatar-btn {
+    cursor: pointer;
+    position: relative;
+    display: inline-block;
+    user-select: none;
+    outline: none;
+}
+
+.chat-welcome-avatar-btn:hover .welcome-lili-img {
+    transform: scale(1.08);
+    box-shadow: 0 6px 20px rgba(99, 102, 241, 0.45) !important;
+    border-color: #4f46e5 !important;
+}
+
+.chat-welcome-avatar-btn:active .welcome-lili-img {
+    transform: scale(0.96);
+}
+
+.chat-welcome-live-dot {
+    position: absolute;
+    bottom: 2px;
+    right: 2px;
+    width: 13px;
+    height: 13px;
+    background-color: #10b981;
+    border: 2px solid #ffffff;
+    border-radius: 50%;
+    box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.35);
+    animation: livePulse 2s infinite ease-in-out;
+}
+
+.welcome-lili-badge-hover {
+    position: absolute;
+    bottom: -10px;
+    left: 50%;
+    transform: translateX(-50%) translateY(4px);
+    background: linear-gradient(135deg, #4f46e5 0%, #6366f1 100%);
+    color: #ffffff;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.3px;
+    padding: 2px 9px;
+    border-radius: 20px;
+    white-space: nowrap;
+    opacity: 0;
+    pointer-events: none;
+    transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    box-shadow: 0 3px 8px rgba(79, 70, 229, 0.35);
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    z-index: 10;
+}
+
+.welcome-lili-badge-hover svg,
+.welcome-lili-badge-hover i {
+    width: 11px;
+    height: 11px;
+    stroke-width: 2.5px;
+    vertical-align: middle;
+}
+
+.chat-welcome-avatar-btn:hover .welcome-lili-badge-hover {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+}
+
+body.dark-mode .chat-welcome-live-dot {
+    border-color: #1e293b;
+}
+
+body.dark-mode .chat-welcome-card h6 {
+    color: #f8fafc;
+}
+body.dark-mode .chat-welcome-card p {
+    color: #cbd5e1;
+}
+body.dark-mode .chat-welcome-card p strong {
+    color: #a5b4fc;
+}
+body.dark-mode .chat-welcome-card p em {
+    color: #94a3b8;
 }

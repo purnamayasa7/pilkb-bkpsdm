@@ -492,11 +492,8 @@
     <div id="chatDrawer">
         <div class="chat-header">
             <div class="chat-header-info d-flex align-items-center gap-2">
-                <div class="position-relative flex-shrink-0">
-                    <div class="chat-header-avatar">
-                        <i data-feather="message-circle"></i>
-                    </div>
-                    <span class="chat-header-live-dot" title="Layanan Bantuan &amp; AI Aktif"></span>
+                <div class="chat-header-avatar">
+                    <i data-feather="message-circle"></i>
                 </div>
                 <div>
                     <div class="chat-header-main-title">
@@ -528,17 +525,15 @@
 
             <!-- PAGE 1: HOME -->
             <div class="chat-page p-0 d-flex flex-column h-100" id="pageHome">
-                <div class="chat-room-header d-flex align-items-center">
-                    <div class="d-flex align-items-center gap-2">
-                        <i data-feather="grid" class="text-primary" style="width:16px;height:16px;"></i>
-                        <span class="fw-bold text-dark" style="font-size: 13.5px;">Menu Bantuan &amp; Layanan</span>
-                    </div>
-                </div>
-
                 <div class="chat-page-body flex-grow-1 overflow-y-auto">
                     <div class="chat-welcome-card mb-3">
-                        <div class="chat-welcome-icon">
-                            <span class="wave-hand">👋</span>
+                        <div class="chat-welcome-avatar-btn position-relative d-inline-block mb-1" id="btnWelcomeLiliAvatar" role="button" tabindex="0" title="Klik untuk Tanya LILI (AI Asisten)">
+                            <img src="{{ asset('images/lili-avatar.png') }}" alt="LILI" class="welcome-lili-img" style="width: 52px; height: 52px; border-radius: 50%; object-fit: cover; border: 2.5px solid #6366f1; box-shadow: 0 4px 12px rgba(99,102,241,0.28); transition: transform 0.2s ease, box-shadow 0.2s ease;">
+                            <span class="chat-welcome-live-dot" title="LILI Online"></span>
+                            <span class="welcome-lili-badge-hover">
+                                <i data-feather="message-circle" style="width: 11px; height: 11px;"></i>
+                                <span>Tanya LILI</span>
+                            </span>
                         </div>
                         @php
                             $hourWita = (int) now()->setTimezone('Asia/Makassar')->format('G');
@@ -552,9 +547,9 @@
                                 $salamWita = 'Halo, Selamat Malam!';
                             }
                         @endphp
-                        <h6 class="fw-bold mb-1" id="chatHomeGreeting">{{ $salamWita }}</h6>
-                        <p class="text-muted small mb-0">
-                            Silakan pilih layanan bantuan yang Anda butuhkan di bawah ini:
+                        <h6 class="fw-bold mb-1 mt-1" id="chatHomeGreeting">{{ $salamWita }}</h6>
+                        <p class="mb-0">
+                            Saya <strong>LILI</strong> <em>(Layanan Informasi &amp; Literasi Kepegawaian Interaktif)</em>, Asisten Kepegawaian siap membantu kebutuhan layanan Anda di BKPSDM Buleleng.
                         </p>
                     </div>
 

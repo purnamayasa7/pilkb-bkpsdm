@@ -1260,7 +1260,24 @@
                     }
                 });
                 document.getElementById('backHomeCekUsulan')?.addEventListener('click', () => showPage(el.pageHome));
-                document.getElementById('btnNewChat')?.addEventListener('click', () => showPage(el.pageNewChat));
+                document.getElementById('btnNewChat')?.addEventListener('click', () => {
+                    chatState.directAiMode = false;
+                    if (window.ChatWidgetLogin.guestSession?.nama) {
+                        showPage(el.pageRoom);
+                        showBotMainMenu();
+                    } else {
+                        showPage(el.pageNewChat);
+                    }
+                });
+                document.getElementById('btnWelcomeLiliAvatar')?.addEventListener('click', () => {
+                    chatState.directAiMode = true;
+                    if (window.ChatWidgetLogin.guestSession?.nama) {
+                        showPage(el.pageRoom);
+                        startAiKepegawaianMode();
+                    } else {
+                        showPage(el.pageNewChat);
+                    }
+                });
                 document.getElementById('btnOpenTicket')?.addEventListener('click', () => showPage(el.pageTicket));
                 document.getElementById('backHome1')?.addEventListener('click', () => showPage(el.pageHome));
                 document.getElementById('backHome2')?.addEventListener('click', () => showPage(el.pageHome));
@@ -1399,8 +1416,14 @@
 
                     enableSound();
 
-                    // Tampilkan Menu Utama Chat Bot!
-                    showBotMainMenu();
+                    // Jika pengguna masuk dari klik Avatar LILI, langsung masuk ke mode AI LILI (tanpa 3 opsi menu)
+                    if (chatState.directAiMode) {
+                        startAiKepegawaianMode();
+                        chatState.directAiMode = false;
+                    } else {
+                        // Tampilkan Menu Utama Chat Bot (3 Opsi)
+                        showBotMainMenu();
+                    }
                 });
             }
 
