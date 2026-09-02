@@ -3169,7 +3169,7 @@ body.dark-mode .ai-action-chip.chip-prompt:hover {
     position: absolute;
     inset: -6px;
     border-radius: 50%;
-    background: radial-gradient(circle, rgba(99, 102, 241, 0.45) 0%, rgba(99, 102, 241, 0) 70%);
+    background: radial-gradient(circle, rgba(26, 108, 255, 0.42) 0%, rgba(10, 88, 202, 0) 70%);
     animation: auraPulse 2.8s infinite ease-in-out;
     pointer-events: none;
 }
@@ -3195,8 +3195,8 @@ body.dark-mode .ai-action-chip.chip-prompt:hover {
     align-items: center;
     justify-content: center;
     padding: 2.5px;
-    background: conic-gradient(from 0deg, #4f46e5, #8b5cf6, #06b6d4, #ec4899, #4f46e5);
-    box-shadow: 0 0 16px rgba(99, 102, 241, 0.35);
+    background: conic-gradient(from 0deg, #1a6cff, #38bdf8, #0a58ca, #60a5fa, #1a6cff);
+    box-shadow: 0 0 16px rgba(10, 88, 202, 0.35);
     animation: spinLightRing 6s linear infinite;
     z-index: 2;
     transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s ease;
@@ -3233,7 +3233,7 @@ body.dark-mode .ai-action-chip.chip-prompt:hover {
 
 .chat-welcome-avatar-btn:hover .welcome-avatar-ring {
     transform: scale(1.08);
-    box-shadow: 0 0 24px rgba(99, 102, 241, 0.6) !important;
+    box-shadow: 0 0 24px rgba(10, 88, 202, 0.6) !important;
     animation-duration: 3s;
 }
 
@@ -3259,12 +3259,12 @@ body.dark-mode .ai-action-chip.chip-prompt:hover {
     z-index: 3;
 }
 
-/* Bubble Tanya LILI muncul elegan di pojok kanan atas avatar setelah semua komponen terbuka */
+/* Bubble Tanya LILI mengadopsi warna biru floating chat agar serasi */
 .welcome-lili-bubble-pill {
     position: absolute;
     top: -2px;
     left: calc(100% - 10px);
-    background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+    background: linear-gradient(135deg, #1a6cff 0%, #0a58ca 100%);
     color: #ffffff;
     font-size: 11px;
     font-weight: 700;
@@ -3272,7 +3272,7 @@ body.dark-mode .ai-action-chip.chip-prompt:hover {
     padding: 3px 10px 3px 8px;
     border-radius: 20px;
     white-space: nowrap;
-    box-shadow: 0 4px 12px rgba(79, 70, 229, 0.38);
+    box-shadow: 0 4px 12px rgba(10, 88, 202, 0.4);
     display: inline-flex;
     align-items: center;
     gap: 4px;
@@ -3299,7 +3299,7 @@ body.dark-mode .ai-action-chip.chip-prompt:hover {
 
 .chat-welcome-avatar-btn:hover .welcome-lili-bubble-pill {
     transform: translateY(-2px) scale(1.06);
-    box-shadow: 0 6px 18px rgba(79, 70, 229, 0.55);
+    box-shadow: 0 6px 18px rgba(10, 88, 202, 0.58);
 }
 
 @keyframes popInPill {
