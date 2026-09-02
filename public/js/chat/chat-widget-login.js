@@ -431,11 +431,12 @@
                         </div>
                         <div class="bot-bubble">
                             <p class="mb-2">Halo! Saya <strong>LILI</strong> (<em>Layanan Informasi &amp; Literasi Kepegawaian Interaktif</em>) BKPSDM Kabupaten Buleleng. 😊</p>
-                            <p class="mb-2">Anda dapat berkonsultasi mengenai regulasi ASN (PNS &amp; PPPK), aturan disiplin pegawai, kenaikan pangkat, cuti, mutasi, pensiun, atau izin/tugas belajar.</p>
+                            <p class="mb-2">Anda dapat berkonsultasi seputar regulasi ASN, cek status usulan tiket, serta persyaratan layanan kepegawaian di BKPSDM Buleleng.</p>
                             <p class="mb-1 text-muted small fw-semibold">Contoh pertanyaan yang bisa Anda tanyakan kepada LILI:</p>
                             <ul class="mb-3 small ps-3 text-muted">
+                                <li><em>"Tolong cek status tiket usulan saya 010126ABCD"</em></li>
+                                <li><em>"Apa saja syarat usulan kenaikan pangkat di BKPSDM Buleleng?"</em></li>
                                 <li><em>"Bagaimana aturan disiplin dan sanksi jam kerja ASN?"</em></li>
-                                <li><em>"Apa saja syarat pengajuan cuti tahunan bagi ASN?"</em></li>
                                 <li><em>"Apa perbedaan izin belajar dan tugas belajar?"</em></li>
                             </ul>
                             <p class="mb-0 text-muted small fst-italic">Silakan ketik pertanyaan Anda pada kolom pesan di bawah lalu tekan Kirim (Enter).</p>
@@ -521,14 +522,52 @@
                         chatState.aiHistory.push({ role: 'model', text: res.reply });
                         const formattedReply = formatAiReply(res.reply);
 
+                        // Render Action Chips jika ada tindakan cepat (Unduh PDF Syarat, Cek Tiket, dll)
+                        let actionChipsHtml = '';
+                        if (res.actions && Array.isArray(res.actions) && res.actions.length > 0) {
+                            actionChipsHtml += '<div class="ai-action-chips d-flex flex-wrap gap-2 my-2 pt-1">';
+                            res.actions.forEach(action => {
+                                if (action.type === 'pdf') {
+                                    actionChipsHtml += `
+                                        <a href="${escapeHtml(action.url)}" target="_blank" class="ai-action-chip chip-pdf">
+                                            <i data-feather="file-text" style="width:13px;height:13px;"></i>
+                                            <span>${escapeHtml(action.label)}</span>
+                                        </a>
+                                    `;
+                                } else if (action.type === 'ticket') {
+                                    actionChipsHtml += `
+                                        <a href="${escapeHtml(action.url)}" target="_blank" class="ai-action-chip chip-ticket">
+                                            <i data-feather="search" style="width:13px;height:13px;"></i>
+                                            <span>${escapeHtml(action.label)}</span>
+                                        </a>
+                                    `;
+                                } else if (action.type === 'prompt') {
+                                    actionChipsHtml += `
+                                        <button type="button" class="ai-action-chip chip-prompt" data-ai-prompt="${escapeHtml(action.prompt || action.label)}">
+                                            <span>${escapeHtml(action.label)}</span>
+                                        </button>
+                                    `;
+                                } else if (action.type === 'admin') {
+                                    actionChipsHtml += `
+                                        <button type="button" class="ai-action-chip chip-admin" data-bot-action="menu_admin_pilih_layanan">
+                                            <i data-feather="message-square" style="width:13px;height:13px;"></i>
+                                            <span>${escapeHtml(action.label)}</span>
+                                        </button>
+                                    `;
+                                }
+                            });
+                            actionChipsHtml += '</div>';
+                        }
+
                         const html = `
                             <div class="bot-message-wrapper">
                                 <div class="bot-badge-header">
                                     <img src="/images/lili-avatar.png" alt="LILI" style="width: 20px; height: 20px; border-radius: 50%; object-fit: cover; vertical-align: middle; margin-right: 4px; box-shadow: 0 1px 3px rgba(0,0,0,0.15);">
-                                    <span>LILI - AI Asisten Kepegawaian</span>
+                                    <span>LILI - AI Asisten</span>
                                 </div>
                                 <div class="bot-bubble">
                                     <div class="ai-reply-content mb-2">${formattedReply}</div>
+                                    ${actionChipsHtml}
                                     
                                     <p class="mt-3 mb-1 text-muted small fw-semibold">Langkah selanjutnya:</p>
                                     <div class="bot-options-grid">
@@ -569,8 +608,19 @@
 
             function formatAiReply(text) {
                 let safe = escapeHtml(text);
-                safe = safe.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
-                safe = safe.replace(/\*(.*?)\*/g, '<em>$1</em>');
+                // 1. Bold: **text** (tanpa memotong teks atau karakter lain)
+                safe = safe.replace(/\*\*([^*\n\r]+?)\*\*/g, '<strong>$1</strong>');
+                // 2. Italic: _text_
+                safe = safe.replace(/_([^_\n\r]+?)_/g, '<em>$1</em>');
+                // 3. Links: [title](url)
+                safe = safe.replace(/\[(.*?)\]\((.*?)\)/g, function (match, title, url) {
+                    const cleanUrl = url.trim();
+                    // Sanitasi keamanan link URL (Hanya izinkan https, http, atau relative path)
+                    if (/^(https?:\/\/|\/|mailto:)/i.test(cleanUrl)) {
+                        return `<a href="${cleanUrl}" target="_blank" rel="noopener noreferrer">${title}</a>`;
+                    }
+                    return title;
+                });
                 safe = safe.replace(/\n/g, '<br>');
                 return safe;
             }
@@ -1765,6 +1815,18 @@
                 }
                 chatState.isPolling = false;
             }
+
+            // Interactive Action Chip Prompt Trigger (LILI AI)
+            document.addEventListener('click', function (e) {
+                const chipPrompt = e.target.closest('.chip-prompt');
+                if (chipPrompt) {
+                    e.preventDefault();
+                    const prompt = chipPrompt.getAttribute('data-ai-prompt');
+                    if (prompt && typeof handleAiKepegawaianMessage === 'function') {
+                        handleAiKepegawaianMessage(prompt);
+                    }
+                }
+            });
 
             // Privacy Policy Modal Trigger for LILI AI
             document.addEventListener('click', function (e) {

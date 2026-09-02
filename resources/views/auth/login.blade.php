@@ -831,7 +831,7 @@
                                     </div>
                                     <div class="overflow-hidden">
                                         <div class="d-flex align-items-center gap-1">
-                                            <span class="fw-bold text-dark text-truncate" style="font-size: 13.5px;">LILI - AI Asisten Kepegawaian</span>
+                                            <span class="fw-bold text-dark text-truncate" style="font-size: 13.5px;">LILI - AI Asisten</span>
                                             <button type="button" id="btnPlayLiliVoice" class="btn btn-sm btn-link p-0 ms-1" title="Putar Ulang Suara LILI" style="line-height:1; vertical-align: middle;">
                                                 <i data-feather="volume-2" style="width:14px; height:14px; color:#6366f1;"></i>
                                             </button>
@@ -1326,13 +1326,18 @@
                     }
                 });
 
-                // Trigger Pusat Bantuan dari Tombol Card Login
+                // Trigger Pusat Bantuan dari Tombol Card Login (Langsung Layar Penuh)
                 const btnCardHelp = document.getElementById('btnOpenPusatBantuanFromCard');
                 if (btnCardHelp) {
                     btnCardHelp.addEventListener('click', function(e) {
                         e.preventDefault();
                         e.stopPropagation();
-                        drawer.classList.add('show');
+                        drawer.classList.add('show', 'is-expanded');
+                        const expandBtn = document.getElementById('btnToggleExpandChat');
+                        if (expandBtn) {
+                            expandBtn.innerHTML = '<i data-feather="minimize-2"></i>';
+                            if (window.feather) feather.replace();
+                        }
                         if (typeof showPage === 'function' && typeof el !== 'undefined' && el.pageHome) {
                             showPage(el.pageHome);
                         }
@@ -1352,7 +1357,12 @@
         function showRegister() {
             const drawer = document.getElementById('chatDrawer');
             if (drawer) {
-                drawer.classList.add('show');
+                drawer.classList.add('show', 'is-expanded');
+                const expandBtn = document.getElementById('btnToggleExpandChat');
+                if (expandBtn) {
+                    expandBtn.innerHTML = '<i data-feather="minimize-2"></i>';
+                    if (window.feather) feather.replace();
+                }
                 if (typeof showPage === 'function' && typeof el !== 'undefined' && el.pageHome) {
                     showPage(el.pageHome);
                 }
