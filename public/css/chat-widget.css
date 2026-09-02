@@ -3196,7 +3196,7 @@ body.dark-mode .ai-action-chip.chip-prompt:hover {
     justify-content: center;
     padding: 2.5px;
     background: conic-gradient(from 0deg, #1a6cff, #38bdf8, #0a58ca, #60a5fa, #1a6cff);
-    box-shadow: 0 0 16px rgba(10, 88, 202, 0.35);
+    box-shadow: 0 2px 8px rgba(10, 88, 202, 0.16);
     animation: spinLightRing 6s linear infinite;
     z-index: 2;
     transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s ease;
@@ -3232,8 +3232,8 @@ body.dark-mode .ai-action-chip.chip-prompt:hover {
 }
 
 .chat-welcome-avatar-btn:hover .welcome-avatar-ring {
-    transform: scale(1.08);
-    box-shadow: 0 0 24px rgba(10, 88, 202, 0.6) !important;
+    transform: scale(1.06);
+    box-shadow: 0 4px 14px rgba(10, 88, 202, 0.28) !important;
     animation-duration: 3s;
 }
 
@@ -3272,7 +3272,7 @@ body.dark-mode .ai-action-chip.chip-prompt:hover {
     padding: 3px 10px 3px 8px;
     border-radius: 20px;
     white-space: nowrap;
-    box-shadow: 0 4px 12px rgba(10, 88, 202, 0.4);
+    box-shadow: 0 2px 8px rgba(10, 88, 202, 0.22);
     display: inline-flex;
     align-items: center;
     gap: 4px;
@@ -3298,8 +3298,8 @@ body.dark-mode .ai-action-chip.chip-prompt:hover {
 }
 
 .chat-welcome-avatar-btn:hover .welcome-lili-bubble-pill {
-    transform: translateY(-2px) scale(1.06);
-    box-shadow: 0 6px 18px rgba(10, 88, 202, 0.58);
+    transform: translateY(-2px) scale(1.05);
+    box-shadow: 0 4px 12px rgba(10, 88, 202, 0.32);
 }
 
 @keyframes popInPill {

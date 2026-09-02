@@ -528,7 +528,6 @@
                 <div class="chat-page-body flex-grow-1 overflow-y-auto">
                     <div class="chat-welcome-card mb-3">
                         <div class="chat-welcome-avatar-btn position-relative d-inline-block my-2" id="btnWelcomeLiliAvatar" role="button" tabindex="0" title="Klik untuk Tanya LILI (AI Asisten)">
-                            <div class="welcome-avatar-aura"></div>
                             <div class="welcome-avatar-ring">
                                 <img src="{{ asset('images/lili-avatar.png') }}" alt="LILI" class="welcome-lili-img">
                             </div>
@@ -576,7 +575,7 @@
                             </div>
                             <div class="flex-grow-1">
                                 <div class="fw-semibold text-dark">Pusat Bantuan</div>
-                                <small class="text-muted">Informasi Layanan, Konsultasi ke Admin BKPSDM atau AI Asisten</small>
+                                <small class="text-muted">Informasi Layanan, Konsultasi ke Admin BKPSDM atau Tanya AI Asisten</small>
                             </div>
                             <i data-feather="chevron-right" class="help-card-chevron"></i>
                         </div>
@@ -588,7 +587,7 @@
                             </div>
                             <div class="flex-grow-1">
                                 <div class="fw-semibold text-dark">Lanjutkan Percakapan</div>
-                                <small class="text-muted">Buka kembali obrolan dengan nomor tiket</small>
+                                <small class="text-muted">Buka kembali percapakan dengan nomor tiket</small>
                             </div>
                             <i data-feather="chevron-right" class="help-card-chevron"></i>
                         </div>
@@ -777,7 +776,7 @@
                                     type="text"
                                     class="form-control text-dark"
                                     id="guestTicket"
-                                    placeholder="Contoh: TK-2026-0001">
+                                    placeholder="Contoh: CH01012026-ABCD1234">
                             </div>
 
                             <div class="mb-3">
