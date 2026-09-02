@@ -3162,22 +3162,93 @@ body.dark-mode .ai-action-chip.chip-prompt:hover {
     display: inline-block;
     user-select: none;
     outline: none;
+    margin-right: 32px; /* Memberi ruang untuk bubble pill di sisi kanan */
+}
+
+.welcome-avatar-aura {
+    position: absolute;
+    inset: -6px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(99, 102, 241, 0.45) 0%, rgba(99, 102, 241, 0) 70%);
+    animation: auraPulse 2.8s infinite ease-in-out;
+    pointer-events: none;
+}
+
+@keyframes auraPulse {
+    0%, 100% {
+        transform: scale(1);
+        opacity: 0.5;
+    }
+    50% {
+        transform: scale(1.2);
+        opacity: 0.95;
+    }
+}
+
+/* Rotating Gradient Light Border around LILI */
+.welcome-avatar-ring {
+    position: relative;
+    width: 58px;
+    height: 58px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2.5px;
+    background: conic-gradient(from 0deg, #4f46e5, #8b5cf6, #06b6d4, #ec4899, #4f46e5);
+    box-shadow: 0 0 16px rgba(99, 102, 241, 0.35);
+    animation: spinLightRing 6s linear infinite;
+    z-index: 2;
+    transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s ease;
+}
+
+@keyframes spinLightRing {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+.welcome-lili-img {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid #ffffff;
+    background: #ffffff;
+    /* Counter-rotate so avatar face stays upright while the light border spins */
+    animation: counterSpin 6s linear infinite;
+}
+
+@keyframes counterSpin {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(-360deg);
+    }
+}
+
+.chat-welcome-avatar-btn:hover .welcome-avatar-ring {
+    transform: scale(1.08);
+    box-shadow: 0 0 24px rgba(99, 102, 241, 0.6) !important;
+    animation-duration: 3s;
 }
 
 .chat-welcome-avatar-btn:hover .welcome-lili-img {
-    transform: scale(1.08);
-    box-shadow: 0 6px 20px rgba(99, 102, 241, 0.45) !important;
-    border-color: #4f46e5 !important;
+    animation-duration: 3s;
 }
 
-.chat-welcome-avatar-btn:active .welcome-lili-img {
+.chat-welcome-avatar-btn:active .welcome-avatar-ring {
     transform: scale(0.96);
 }
 
 .chat-welcome-live-dot {
     position: absolute;
-    bottom: 2px;
-    right: 2px;
+    bottom: 1px;
+    right: 1px;
     width: 13px;
     height: 13px;
     background-color: #10b981;
@@ -3185,42 +3256,70 @@ body.dark-mode .ai-action-chip.chip-prompt:hover {
     border-radius: 50%;
     box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.35);
     animation: livePulse 2s infinite ease-in-out;
+    z-index: 3;
 }
 
-.welcome-lili-badge-hover {
+/* Bubble Tanya LILI muncul elegan di pojok kanan atas avatar setelah semua komponen terbuka */
+.welcome-lili-bubble-pill {
     position: absolute;
-    bottom: -10px;
-    left: 50%;
-    transform: translateX(-50%) translateY(4px);
-    background: linear-gradient(135deg, #4f46e5 0%, #6366f1 100%);
+    top: -2px;
+    left: calc(100% - 10px);
+    background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
     color: #ffffff;
-    font-size: 10px;
+    font-size: 11px;
     font-weight: 700;
-    letter-spacing: 0.3px;
-    padding: 2px 9px;
+    letter-spacing: 0.2px;
+    padding: 3px 10px 3px 8px;
     border-radius: 20px;
     white-space: nowrap;
-    opacity: 0;
-    pointer-events: none;
-    transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
-    box-shadow: 0 3px 8px rgba(79, 70, 229, 0.35);
+    box-shadow: 0 4px 12px rgba(79, 70, 229, 0.38);
     display: inline-flex;
     align-items: center;
-    gap: 3px;
-    z-index: 10;
+    gap: 4px;
+    z-index: 4;
+    opacity: 0;
+    transform: scale(0.6) translateY(8px);
+    pointer-events: none;
+    transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s ease;
 }
 
-.welcome-lili-badge-hover svg,
-.welcome-lili-badge-hover i {
+#chatDrawer.show .welcome-lili-bubble-pill,
+.welcome-lili-bubble-pill.is-animating {
+    pointer-events: auto;
+    animation: popInPill 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) 0.5s forwards, gentleFloat 3s ease-in-out infinite 1.05s;
+}
+
+.welcome-lili-bubble-pill svg,
+.welcome-lili-bubble-pill i {
     width: 11px;
     height: 11px;
     stroke-width: 2.5px;
     vertical-align: middle;
 }
 
-.chat-welcome-avatar-btn:hover .welcome-lili-badge-hover {
-    opacity: 1;
-    transform: translateX(-50%) translateY(0);
+.chat-welcome-avatar-btn:hover .welcome-lili-bubble-pill {
+    transform: translateY(-2px) scale(1.06);
+    box-shadow: 0 6px 18px rgba(79, 70, 229, 0.55);
+}
+
+@keyframes popInPill {
+    0% {
+        opacity: 0;
+        transform: scale(0.6) translateY(8px);
+    }
+    100% {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+}
+
+@keyframes gentleFloat {
+    0%, 100% {
+        transform: translateY(0);
+    }
+    50% {
+        transform: translateY(-3px);
+    }
 }
 
 body.dark-mode .chat-welcome-live-dot {

@@ -308,10 +308,13 @@ EOT;
         }
 
         $stopWords = [
-            'syarat', 'persyaratan', 'layanan', 'bkpsdm', 'buleleng', 'apakah', 'anda', 'tahu', 'tau',
-            'apa', 'saja', 'bagaimana', 'usulan', 'pengajuan', 'dokumen', 'berkas', 'tambahan', 'mohon',
-            'bisa', 'tolong', 'info', 'informasi', 'ada', 'yang', 'dan', 'di', 'ke', 'dari', 'untuk',
-            'nya', 'ini', 'itu', 'pada', 'tentang', 'terkait', 'seputar', 'kami', 'saya', 'kita'
+            'syarat' => true, 'persyaratan' => true, 'layanan' => true, 'bkpsdm' => true, 'buleleng' => true,
+            'apakah' => true, 'anda' => true, 'tahu' => true, 'tau' => true, 'apa' => true, 'saja' => true,
+            'bagaimana' => true, 'usulan' => true, 'pengajuan' => true, 'dokumen' => true, 'berkas' => true,
+            'tambahan' => true, 'mohon' => true, 'bisa' => true, 'tolong' => true, 'info' => true,
+            'informasi' => true, 'ada' => true, 'yang' => true, 'dan' => true, 'di' => true, 'ke' => true,
+            'dari' => true, 'untuk' => true, 'nya' => true, 'ini' => true, 'itu' => true, 'pada' => true,
+            'tentang' => true, 'terkait' => true, 'seputar' => true, 'kami' => true, 'saya' => true, 'kita' => true
         ];
 
         $bestMatch = null;
@@ -320,12 +323,12 @@ EOT;
         foreach ($layananList as $layanan) {
             $namaLower = mb_strtolower($layanan->nama_layanan, 'UTF-8');
 
-            // Hitung kecocokan kata tanpa stop words
+            // Hitung kecocokan kata tanpa stop words (O(1) Hash Map)
             $score = 0;
             $keywords = preg_split('/[\s,\-\/]+/', $namaLower, -1, PREG_SPLIT_NO_EMPTY);
 
             foreach ($keywords as $kw) {
-                if (strlen($kw) >= 3 && !in_array($kw, $stopWords, true) && str_contains($qLower, $kw)) {
+                if (strlen($kw) >= 3 && !isset($stopWords[$kw]) && str_contains($qLower, $kw)) {
                     $score += strlen($kw);
                 }
             }

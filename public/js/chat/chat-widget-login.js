@@ -181,12 +181,13 @@
                 }
             }
 
-            function triggerWaveAnimation() {
-                document.querySelectorAll('.wave-hand').forEach(wave => {
-                    wave.classList.remove('is-waving');
-                    void wave.offsetWidth; // Force DOM reflow to restart 2-iteration animation
-                    wave.classList.add('is-waving');
-                });
+            function triggerLiliBubbleAnimation() {
+                const pill = document.querySelector('.welcome-lili-bubble-pill');
+                if (pill) {
+                    pill.classList.remove('is-animating');
+                    void pill.offsetWidth; // Force DOM reflow to re-trigger popIn delay
+                    pill.classList.add('is-animating');
+                }
             }
 
             // Show Page helper
@@ -199,7 +200,7 @@
                     activePage.classList.remove('d-none');
                     if (activePage === el.pageHome) {
                         updateWitaGreeting();
-                        triggerWaveAnimation();
+                        triggerLiliBubbleAnimation();
                     }
                 }
                 if (window.feather) {
@@ -437,7 +438,6 @@
                                 <li><em>"Tolong cek status tiket usulan saya 010126ABCD"</em></li>
                                 <li><em>"Apa saja syarat usulan kenaikan pangkat di BKPSDM Buleleng?"</em></li>
                                 <li><em>"Bagaimana aturan disiplin dan sanksi jam kerja ASN?"</em></li>
-                                <li><em>"Apa perbedaan izin belajar dan tugas belajar?"</em></li>
                             </ul>
                             <p class="mb-0 text-muted small fst-italic">Silakan ketik pertanyaan Anda pada kolom pesan di bawah lalu tekan Kirim (Enter).</p>
                             
