@@ -147,7 +147,6 @@ class GuestBotController extends Controller
                     }
                 ])
                 ->where('id', $layananId)
-                ->where('aktif', 1)
                 ->first();
 
             if (!$layanan) {

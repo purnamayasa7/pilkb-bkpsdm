@@ -62,7 +62,7 @@
     <link rel="icon" type="image/png" href="{{ asset('images/KabBuleleng.png') }}">
     <link rel="stylesheet"
         href="https://cdn.jsdelivr.net/npm/bootstrap-datepicker@1.10.0/dist/css/bootstrap-datepicker.min.css">
-    <link rel="stylesheet" href="{{ asset('css/chat-widget.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/chat-widget.css') }}?v={{ filemtime(public_path('css/chat-widget.css')) }}">
     <link rel="stylesheet" href="{{ asset('css/index.css') }}">
     <script data-search-pseudo-elements defer src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.3.0/js/all.min.js"
         crossorigin="anonymous"></script>
@@ -194,9 +194,73 @@
 
         <!-- Body -->
         <div class="chat-body">
-            <div class="text-center text-muted p-4">
-                Loading...
-            </div>
+            @if(optional(Auth::user()->role)->name !== 'admin_bawah' && optional(Auth::user()->role)->name !== 'bidang')
+                <div class="chat-page">
+                    <div class="chat-welcome-card mb-3">
+                        <div class="chat-welcome-avatar-btn position-relative d-inline-block my-2" id="btnAppLiliAvatar" role="button" tabindex="0" title="Klik untuk Tanya LILI (Asisten AI)">
+                            <div class="welcome-avatar-ring">
+                                <img src="/images/lili-avatar.png" alt="LILI" class="welcome-lili-img">
+                            </div>
+                            <span class="chat-welcome-live-dot" title="LILI Online"></span>
+                            <div class="welcome-lili-bubble-pill">
+                                <i data-feather="message-circle"></i>
+                                <span>Klik Tanya LILI</span>
+                            </div>
+                        </div>
+
+                        <h6 class="fw-bold mb-1 mt-1 text-dark">Hai, {{ optional(Auth::user())->nama ? trim(explode(',', Auth::user()->nama)[0]) : 'Pengguna' }}!</h6>
+
+                        <p class="mb-0">
+                            Saya <strong>LILI</strong> <em>(Layanan Informasi &amp; Literasi Kepegawaian Interaktif)</em>, Asisten Kepegawaian siap membantu kebutuhan layanan Anda.
+                        </p>
+
+                        <button class="btn btn-outline-primary btn-sm rounded-pill w-100 py-2 fw-semibold d-flex align-items-center justify-content-center gap-1 mt-3 shadow-sm" id="btnStartLiliAiAuth" style="font-size: 12.5px; border-color: #6366f1; color: #4f46e5; background: #f5f3ff;">
+                            <i data-feather="zap" style="width:13px;height:13px;"></i>
+                            <span>Tanya LILI (Asisten AI)</span>
+                        </button>
+                    </div>
+
+                    <div class="card border-0 shadow-sm p-3 mb-2" style="border-radius: 14px; background: #ffffff;">
+                        <div class="fw-semibold text-dark small mb-2 d-flex align-items-center gap-1">
+                            <i data-feather="search" style="width:13px;height:13px;color:#2563eb;"></i>
+                            <span>Konsultasi Tiket ke Bidang</span>
+                        </div>
+
+                        <div class="mb-2">
+                            <label class="form-label text-muted small mb-1" style="font-size: 11px;">
+                                Nomor Tiket
+                            </label>
+                            <input
+                                type="text"
+                                class="form-control text-dark font-monospace text-uppercase"
+                                id="ticketNumber"
+                                placeholder="Masukkan nomor tiket">
+                        </div>
+
+                        <button
+                            class="btn chat-gradient-btn w-100 d-flex align-items-center justify-content-center"
+                            id="searchTicket">
+                            <i data-feather="search" class="me-2"></i>
+                            <span>Cari Tiket</span>
+                        </button>
+
+                        <button
+                            class="btn chat-secondary-btn w-100 d-flex align-items-center justify-content-center position-relative mt-2"
+                            id="btnConversationList">
+                            <i data-feather="message-square" class="me-2 text-primary"></i>
+                            <span class="fw-semibold">List Percakapan</span>
+                            <span class="badge bg-danger rounded-pill chat-btn-unread-badge position-absolute d-none"
+                                style="top: 50%; right: 16px; transform: translateY(-50%); font-size: 11px; font-weight: 700; padding: 4px 8px; box-shadow: 0 2px 6px rgba(220,53,69,0.35);">
+                                0
+                            </span>
+                        </button>
+                    </div>
+                </div>
+            @else
+                <div class="text-center text-muted p-4">
+                    <span class="spinner-border spinner-border-sm text-primary me-2"></span> Memuat kotak masuk...
+                </div>
+            @endif
         </div>
     </div>
 
@@ -209,8 +273,7 @@
     <script src="{{ asset('templatepro/assets/demo/chart-bar-demo.js') }}"></script>
     <script src="{{ asset('templatepro/assets/demo/chart-pie-demo.js') }}"></script> --}}
     <script src="https://cdn.jsdelivr.net/npm/litepicker/dist/bundle.js" crossorigin="anonymous"></script>
-    <script src="{{ asset('templatepro/js/litepicker.js') }}"></script>
-    <!-- <script src="https://unpkg.com/feather-icons"></script> -->
+    <script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js"></script>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap-datepicker@1.10.0/dist/js/bootstrap-datepicker.min.js"></script>
     <script>
@@ -237,7 +300,7 @@
         }
         window.FirebaseDB = window.firebase ? window.firebase.database() : null;
     </script>
-    <script src="{{ asset('js/chat/chat-widget-app.js') }}"></script>
+    <script src="{{ asset('js/chat/chat-widget-app.js') }}?v={{ filemtime(public_path('js/chat/chat-widget-app.js')) }}"></script>
     <script src="{{ asset('js/dark-mode.js') }}"></script>
     @stack('scripts')
     <script>
@@ -260,56 +323,65 @@
 
                 renderPage(`
 
-        <div class="chat-welcome-card">
-
-            <div class="chat-welcome-icon">
-                <span class="wave-hand">👋</span>
+        <div class="chat-welcome-card mb-3">
+            <div class="chat-welcome-avatar-btn position-relative d-inline-block my-2" id="btnAppLiliAvatar" role="button" tabindex="0" title="Klik untuk Tanya LILI (Asisten AI)">
+                <div class="welcome-avatar-ring">
+                    <img src="/images/lili-avatar.png" alt="LILI" class="welcome-lili-img">
+                </div>
+                <span class="chat-welcome-live-dot" title="LILI Online"></span>
+                <div class="welcome-lili-bubble-pill">
+                    <i data-feather="message-circle"></i>
+                    <span>Klik Tanya LILI</span>
+                </div>
             </div>
 
-            <h6>Hai, ${ChatWidgetApp.escapeHtml(userName)}!</h6>
+            <h6 class="fw-bold mb-1 mt-1 text-dark">Hai, ${ChatWidgetApp.escapeHtml(userName)}!</h6>
 
-            <p>
-                Silakan masukkan nomor tiket untuk memulai percakapan.
+            <p class="mb-0">
+                Saya <strong>LILI</strong> <em>(Layanan Informasi &amp; Literasi Kepegawaian Interaktif)</em>, Asisten Kepegawaian siap membantu kebutuhan layanan Anda.
             </p>
 
+            <button class="btn btn-outline-primary btn-sm rounded-pill w-100 py-2 fw-semibold d-flex align-items-center justify-content-center gap-1 mt-3 shadow-sm" id="btnStartLiliAiAuth" style="font-size: 12.5px; border-color: #6366f1; color: #4f46e5; background: #f5f3ff;">
+                <i data-feather="zap" style="width:13px;height:13px;"></i>
+                <span>Tanya LILI (Asisten AI)</span>
+            </button>
         </div>
 
-        <div class="mb-3">
+        <div class="card border-0 shadow-sm p-3 mb-2" style="border-radius: 14px; background: #ffffff;">
+            <div class="fw-semibold text-dark small mb-2 d-flex align-items-center gap-1">
+                <i data-feather="search" style="width:13px;height:13px;color:#2563eb;"></i>
+                <span>Konsultasi Tiket ke Bidang</span>
+            </div>
 
-            <label class="form-label fw-semibold text-dark">
-                Nomor Tiket
-            </label>
+            <div class="mb-2">
+                <label class="form-label text-muted small mb-1" style="font-size: 11px;">
+                    Nomor Tiket
+                </label>
+                <input
+                    type="text"
+                    class="form-control text-dark font-monospace text-uppercase"
+                    id="ticketNumber"
+                    placeholder="Masukkan nomor tiket">
+            </div>
 
-            <input
-                type="text"
-                class="form-control text-dark"
-                id="ticketNumber"
-                placeholder="Masukkan nomor tiket">
+            <button
+                class="btn chat-gradient-btn w-100 d-flex align-items-center justify-content-center"
+                id="searchTicket">
+                <i data-feather="search" class="me-2"></i>
+                <span>Cari Tiket</span>
+            </button>
 
+            <button
+                class="btn chat-secondary-btn w-100 d-flex align-items-center justify-content-center position-relative mt-2"
+                id="btnConversationList">
+                <i data-feather="message-square" class="me-2 text-primary"></i>
+                <span class="fw-semibold">List Percakapan</span>
+                <span class="badge bg-danger rounded-pill chat-btn-unread-badge position-absolute d-none"
+                    style="top: 50%; right: 16px; transform: translateY(-50%); font-size: 11px; font-weight: 700; padding: 4px 8px; box-shadow: 0 2px 6px rgba(220,53,69,0.35);">
+                    0
+                </span>
+            </button>
         </div>
-
-       <button
-            class="btn chat-gradient-btn w-100 d-flex align-items-center justify-content-center"
-            id="searchTicket">
-
-            <i data-feather="search" class="me-2"></i>
-            Cari Tiket
-
-        </button>
-
-        <button
-            class="btn chat-secondary-btn w-100 d-flex align-items-center justify-content-center position-relative mt-2"
-            id="btnConversationList">
-
-            <i data-feather="message-square" class="me-2 text-primary"></i>
-            <span class="fw-semibold">List Percakapan</span>
-
-            <span class="badge bg-danger rounded-pill chat-btn-unread-badge position-absolute d-none"
-                style="top: 50%; right: 16px; transform: translateY(-50%); font-size: 11px; font-weight: 700; padding: 4px 8px; box-shadow: 0 2px 6px rgba(220,53,69,0.35);">
-                0
-            </span>
-
-        </button>
 
     `, direction, animate);
 
@@ -426,7 +498,11 @@
                     });
             }
 
-            $(document).on('click', '#btnBackInbox', function() {
+            $(document).on('click', '#btnBackInbox, #btnBackFromLiliAi', function() {
+
+                if ($('#liliAppChatMessages').length) {
+                    ChatWidgetApp.savedLiliChatHtml = $('#liliAppChatMessages').html();
+                }
 
                 ChatWidgetApp.stopPolling();
 
@@ -449,6 +525,13 @@
                 }
 
                 loadTicketSearch('back');
+            });
+
+            $(document).on('click', '#btnResetLiliChat', function(e) {
+                e.preventDefault();
+                if (confirm('Mulai obrolan baru dengan LILI? Riwayat percakapan saat ini akan dibersihkan.')) {
+                    ChatWidgetApp.startLiliAiMode(ChatWidgetApp.previousView || 'search', true);
+                }
             });
 
             $(document).on('click', '.openConversation', function(e) {
@@ -490,19 +573,13 @@
                     return;
                 }
 
-                // Jika drawer belum pernah me-render halaman apapun, buka halaman awal sesuai role
-                const hasPage = $('.chat-body').find('.chat-page, .chat-room-container').length > 0;
+                const role = @json(optional(Auth::user()->role)->name);
 
-                if (!hasPage) {
-                    const role = @json(optional(Auth::user()->role)->name);
-
-                    if (role === 'admin_bawah' || role === 'bidang') {
-                        loadInboxAdminFo();
-                    } else {
-                        loadTicketSearch('back', false);
-                    }
+                // Jika admin bidang dan belum ada inbox, load inbox
+                if ((role === 'admin_bawah' || role === 'bidang') && !$('.chat-body').find('.chat-page-list, .chat-room-container').length) {
+                    loadInboxAdminFo();
                 } else if (ChatWidgetApp.activeConversationId && $('.chat-room-container').length > 0) {
-                    // Sync pesan terbaru yang mungkin masuk saat drawer tertutup
+                    // Sync pesan terbaru jika sedang di dalam room
                     ChatWidgetApp.fetchConversation(ChatWidgetApp.activeConversationId).done((res) => {
                         if (res && res.messages) {
                             ChatWidgetApp.appendNewMessages(res.messages);
@@ -510,6 +587,10 @@
                         }
                     });
                     ChatWidgetApp.markRoomRead(ChatWidgetApp.activeConversationId);
+                }
+
+                if (typeof feather !== 'undefined') {
+                    feather.replace();
                 }
             });
 
@@ -585,9 +666,7 @@
                     return;
                 }
 
-                btn.prop('disabled', true).html(`
-            <span class="spinner-border spinner-border-sm"></span> Mencari...
-        `);
+                btn.prop('disabled', true);
 
                 $.ajax({
                     url: '/chat/search-ticket',
@@ -599,7 +678,7 @@
                     success: function(res) {
 
                         ChatWidgetApp.isSearching = false;
-                        btn.prop('disabled', false).html('Cari Tiket');
+                        btn.prop('disabled', false);
 
                         if (!res.success) {
                             alert(res.message);
@@ -607,68 +686,50 @@
                         }
 
                         renderPage(`
-                    <button class="btn btn-link p-0 mb-3" id="backToMenu">← Kembali</button>
+                    <div class="chat-room-header d-flex align-items-center mb-3">
+                        <button class="btn btn-light chat-back-btn me-2" id="backToMenu" title="Kembali ke Menu Awal">
+                            <i data-feather="arrow-left"></i>
+                        </button>
+                        <div class="d-flex align-items-center gap-1">
+                            <i data-feather="tag" class="text-primary" style="width:15px;height:15px;"></i>
+                            <span class="fw-bold text-dark" style="font-size: 13.5px;">Tiket Ditemukan</span>
+                        </div>
+                    </div>
 
                     <div class="ticket-result-card mb-3">
+                        <div class="ticket-result-header">
+                            <i data-feather="tag"></i>
+                            <span>Tiket Ditemukan!</span>
+                        </div>
 
-    <div class="ticket-result-header">
+                        <div class="ticket-result-number">
+                            ${ChatWidgetApp.escapeHtml(res.tiket.no_tiket)}
+                        </div>
 
-        <i data-feather="tag"></i>
+                        <div class="ticket-result-service">
+                            ${ChatWidgetApp.escapeHtml(res.tiket.layanan)}
+                        </div>
 
-        <span>
-            Tiket Ditemukan!
-        </span>
-
-    </div>
-
-    <div class="ticket-result-number">
-
-        ${ChatWidgetApp.escapeHtml(res.tiket.no_tiket)}
-
-    </div>
-
-    <div class="ticket-result-service">
-
-        ${ChatWidgetApp.escapeHtml(res.tiket.layanan)}
-
-    </div>
-
-    <div class="ticket-result-status">
-
-        <span class="
-            badge
-            ${res.tiket.status === 'open'
-                ? 'bg-success-soft text-success'
-                : 'bg-danger-soft text-danger'}
-        ">
-
-            ${ChatWidgetApp.escapeHtml(res.tiket.status)}
-
-        </span>
-
-    </div>
-
-</div>
+                        <div class="ticket-result-status">
+                            <span class="badge ${res.tiket.status === 'open' ? 'bg-success-soft text-success' : 'bg-danger-soft text-danger'}">
+                                ${ChatWidgetApp.escapeHtml(res.tiket.status)}
+                            </span>
+                        </div>
+                    </div>
 
                     <button
-    class="btn chat-gradient-btn w-100"
-    id="startChat"
-    data-id="${res.tiket.no_tiket}">
-
-    <i
-        data-feather="message-circle"
-        class="me-2">
-    </i>
-
-    Mulai Chat
-
-</button>
-                `, 'forward');
+                        class="btn chat-gradient-btn w-100 d-flex align-items-center justify-content-center"
+                        id="startChat"
+                        data-id="${res.tiket.no_tiket}">
+                        <i data-feather="message-circle" class="me-2"></i>
+                        <span>Mulai Chat</span>
+                    </button>
+                        `, 'forward');
                     },
                     error: function(xhr) {
 
                         ChatWidgetApp.isSearching = false;
-                        btn.prop('disabled', false).html('Cari Tiket');
+                        btn.prop('disabled', false);
 
                         console.log(xhr.responseText);
                         alert('Gagal mencari tiket');

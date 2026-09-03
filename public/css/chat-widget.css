@@ -162,20 +162,14 @@ body:has(#chatDrawer.show.is-expanded) #chatFloatingButton,
     visibility: hidden;
     opacity: 0;
 
-    transform: scale(0.92) translateY(18px);
+    transform: scale(0.94) translateY(12px);
     transform-origin: bottom right;
-    will-change: transform, opacity, top, left, right, bottom, width, height;
+    will-change: transform, opacity;
 
     transition:
-        opacity .28s ease,
-        transform .28s cubic-bezier(0.16, 1, 0.3, 1),
-        visibility .28s ease,
-        top .28s cubic-bezier(0.16, 1, 0.3, 1),
-        bottom .28s cubic-bezier(0.16, 1, 0.3, 1),
-        left .28s cubic-bezier(0.16, 1, 0.3, 1),
-        right .28s cubic-bezier(0.16, 1, 0.3, 1),
-        width .28s cubic-bezier(0.16, 1, 0.3, 1),
-        height .28s cubic-bezier(0.16, 1, 0.3, 1);
+        opacity .22s ease,
+        transform .22s cubic-bezier(0.16, 1, 0.3, 1),
+        visibility .22s ease;
 
     box-shadow:
         0 15px 45px rgba(0, 0, 0, .12);
@@ -511,9 +505,28 @@ body:has(#chatDrawer.show.is-expanded) #chatFloatingButton,
     transform: scale(.98);
 }
 
-.chat-gradient-btn .feather {
-    width: 18px;
-    height: 18px;
+.btn-gradient-search {
+    background: linear-gradient(135deg, #1a6cff, #0a58ca) !important;
+    color: #fff !important;
+    border: none !important;
+    border-top-right-radius: 10px !important;
+    border-bottom-right-radius: 10px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    transition: all 0.2s ease !important;
+}
+
+.btn-gradient-search:hover {
+    background: linear-gradient(135deg, #0a58ca, #084298) !important;
+    color: #fff !important;
+}
+
+.btn-gradient-search svg,
+.btn-gradient-search i {
+    width: 18px !important;
+    height: 18px !important;
+    stroke: #fff !important;
 }
 
 .chat-secondary-btn {
@@ -747,9 +760,14 @@ body.dark-mode .chat-item.selected {
     gap: 8px;
     padding: 12px;
     padding-bottom: 24px;
-    height: 100%;
+    flex: 1 1 auto;
+    min-height: 0;
     overflow-y: auto;
     overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
+    will-change: scroll-position;
+    transform: translateZ(0); /* Akselerasi GPU untuk scrolling halus */
 }
 
 .chat-item {
@@ -765,15 +783,17 @@ body.dark-mode .chat-item.selected {
     user-select: none;
     -webkit-user-select: none;
     outline: none;
-    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.02);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
     text-decoration: none;
+    transition: border-color 0.15s ease, background-color 0.15s ease;
+    contain: layout style paint;
+    content-visibility: auto;
+    contain-intrinsic-size: auto 82px;
 }
 
 .chat-item:hover {
-    border-color: #1a6cff;
-    box-shadow: 0 6px 18px rgba(26, 108, 255, 0.12);
-    transform: translateY(-2px);
+    border-color: #3b82f6;
+    background-color: #f8fafc;
 }
 
 .chat-item:active {
@@ -797,7 +817,7 @@ body.dark-mode .chat-item.selected {
     display: flex;
     align-items: center;
     justify-content: center;
-    box-shadow: 0 4px 10px rgba(26, 108, 255, 0.2);
+    box-shadow: 0 2px 5px rgba(26, 108, 255, 0.15);
     flex-shrink: 0;
 }
 
@@ -1102,7 +1122,8 @@ body.dark-mode .chat-role-badge.badge-fo {
     position: relative;
 }
 
-#chatInput {
+#chatInput,
+#liliAppInput {
     height: 48px;
     min-height: 48px;
     max-height: 80px;
@@ -1124,16 +1145,19 @@ body.dark-mode .chat-role-badge.badge-fo {
     white-space: pre-wrap !important;
 }
 
-#chatInput::placeholder {
+#chatInput::placeholder,
+#liliAppInput::placeholder {
     line-height: 22px;
     color: #94a3b8;
 }
 
-#chatInput::-webkit-scrollbar {
+#chatInput::-webkit-scrollbar,
+#liliAppInput::-webkit-scrollbar {
     display: none;
 }
 
-#chatInput:focus {
+#chatInput:focus,
+#liliAppInput:focus {
     box-shadow: 0 0 0 3px rgba(26, 108, 255, 0.12);
     border-color: #1a6cff;
 }
@@ -3327,4 +3351,116 @@ body.dark-mode .chat-welcome-card p strong {
 }
 body.dark-mode .chat-welcome-card p em {
     color: #94a3b8;
+}
+
+/* ==========================================
+   Chat Search Input & Icon in List & Inbox
+========================================== */
+.chat-search-wrapper {
+    position: relative !important;
+    width: 100% !important;
+    margin-top: 10px !important;
+    margin-bottom: 8px !important;
+    display: flex !important;
+    align-items: center !important;
+}
+
+.chat-search-wrapper input.chat-search-input,
+.chat-search-wrapper input.form-control {
+    width: 100% !important;
+    height: 38px !important;
+    padding-left: 38px !important;
+    padding-right: 14px !important;
+    border-radius: 20px !important;
+    border: 1px solid #e2e8f0 !important;
+    background-color: #f8fafc !important;
+    font-size: 12.5px !important;
+    color: #1e293b !important;
+    box-sizing: border-box !important;
+    transition: all 0.2s ease !important;
+}
+
+.chat-search-wrapper input.chat-search-input:focus,
+.chat-search-wrapper input.form-control:focus {
+    background-color: #ffffff !important;
+    border-color: #3b82f6 !important;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15) !important;
+    outline: none !important;
+}
+
+.chat-search-wrapper .chat-search-icon,
+.chat-search-wrapper i.chat-search-icon,
+.chat-search-wrapper svg.chat-search-icon {
+    position: absolute !important;
+    left: 14px !important;
+    top: 50% !important;
+    transform: translateY(-50%) !important;
+    width: 14px !important;
+    height: 14px !important;
+    color: #94a3b8 !important;
+    pointer-events: none !important;
+    z-index: 5 !important;
+    margin: 0 !important;
+}
+
+body.dark-mode .chat-search-input {
+    background-color: #1e293b !important;
+    border-color: #334155 !important;
+    color: #f8fafc !important;
+}
+
+body.dark-mode .chat-search-icon {
+    color: #64748b !important;
+}
+
+/* ==========================================
+   Pinned LILI AI Item in Admin Bidang Inbox
+========================================== */
+.chat-item-lili-ai {
+    display: flex !important;
+    align-items: center !important;
+    gap: 12px !important;
+    padding: 12px 14px !important;
+    border-radius: 14px !important;
+    background: linear-gradient(135deg, #f5f3ff 0%, #ffffff 100%) !important;
+    border: 1.5px solid #c7d2fe !important;
+    box-shadow: 0 1px 4px rgba(99, 102, 241, 0.08) !important;
+    margin-bottom: 8px !important;
+    cursor: pointer !important;
+    user-select: none !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+    flex-shrink: 0 !important;
+    transition: border-color 0.15s ease, background 0.15s ease !important;
+    contain: layout style paint;
+    content-visibility: auto;
+    contain-intrinsic-size: auto 88px;
+}
+
+.chat-item-lili-ai:hover {
+    background: linear-gradient(135deg, #ede9fe 0%, #f8fafc 100%) !important;
+    border-color: #818cf8 !important;
+}
+
+.chat-item-lili-ai:active {
+    transform: scale(0.99) translateY(0) !important;
+}
+
+body.dark-mode .chat-item-lili-ai {
+    background: linear-gradient(135deg, #1e1b4b 0%, #0f172a 100%) !important;
+    border-color: #4338ca !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25) !important;
+}
+
+body.dark-mode .chat-item-lili-ai:hover {
+    background: linear-gradient(135deg, #272262 0%, #172033 100%) !important;
+    border-color: #6366f1 !important;
+}
+
+body.dark-mode .chat-item-lili-ai .chat-item-title {
+    color: #f8fafc !important;
+}
+
+body.dark-mode .chat-item-lili-ai .chat-item-sub {
+    color: #94a3b8 !important;
 }

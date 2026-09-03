@@ -58,9 +58,7 @@ class ChatController extends Controller
             'layanan.bidang',
             'bidang',
             'participants.user',
-            'messages' => function ($q) {
-                $q->latest();
-            }
+            'lastMessage'
         ])
             ->whereHas('participants', function ($q) use ($user) {
                 $q->where('user_id', $user->id);
@@ -70,7 +68,7 @@ class ChatController extends Controller
 
         return response()->json(
             $conversations->map(function ($conversation) use ($user) {
-                $lastMsg = $conversation->messages->first();
+                $lastMsg = $conversation->lastMessage;
 
                 $responder = $conversation->participants
                     ->where('user_id', '!=', $user->id)
@@ -127,14 +125,7 @@ class ChatController extends Controller
                         ? $lastMsg->created_at->format('Y-m-d H:i:s')
                         : ($conversation->updated_at ? $conversation->updated_at->format('Y-m-d H:i:s') : null),
                     'is_last_from_me' => $lastMsg ? (int) $lastMsg->sender_user_id === (int) $user->id : false,
-                    'unread' => (function () use ($conversation, $user) {
-                        $p = $conversation->participants->firstWhere('user_id', $user->id);
-                        $lastRead = $p?->last_read_message_id ?? 0;
-                        return $conversation->messages
-                            ->where('id', '>', $lastRead)
-                            ->filter(fn ($m) => empty($m->sender_user_id) || (int) $m->sender_user_id !== (int) $user->id)
-                            ->count();
-                    })(),
+                    'unread' => $conversation->unreadCount($user->id),
                     'need_reply' => (bool) $conversation->need_reply,
                     'type' => $conversation->type,
                 ];
@@ -380,7 +371,7 @@ class ChatController extends Controller
             ], 403);
         }
 
-        $lastMessageId = $conversation
+        $lastMessageId = $conversation->last_message_id ?: $conversation
             ->messages()
             ->max('id');
 
@@ -543,9 +534,7 @@ class ChatController extends Controller
             'layanan.bidang',
             'bidang',
             'participants',
-            'messages' => function ($q) {
-                $q->latest();
-            }
+            'lastMessage'
         ])
             ->whereHas('participants', function ($q) use ($user) {
 
@@ -572,7 +561,7 @@ class ChatController extends Controller
 
         return response()->json(
             $conversations->map(function ($c) use ($user) {
-                $lastMsg = $c->messages->first();
+                $lastMsg = $c->lastMessage;
 
                 $layananNama = $c->tiket?->layanan?->nama_layanan
                     ?? $c->layanan?->nama_layanan
@@ -621,14 +610,7 @@ class ChatController extends Controller
                         ? $lastMsg->created_at->format('Y-m-d H:i:s')
                         : ($c->updated_at ? $c->updated_at->format('Y-m-d H:i:s') : null),
                     'is_last_from_me' => $lastMsg ? (int) $lastMsg->sender_user_id === (int) $user->id : false,
-                    'unread' => (function () use ($c, $user) {
-                        $p = $c->participants->firstWhere('user_id', $user->id);
-                        $lastRead = $p?->last_read_message_id ?? 0;
-                        return $c->messages
-                            ->where('id', '>', $lastRead)
-                            ->filter(fn ($m) => empty($m->sender_user_id) || (int) $m->sender_user_id !== (int) $user->id)
-                            ->count();
-                    })(),
+                    'unread' => $c->unreadCount($user->id),
                     'need_reply' => (bool) $c->need_reply,
                     'type' => $c->type,
                 ];
@@ -1181,9 +1163,7 @@ class ChatController extends Controller
             'layanan.bidang',
             'bidang',
             'participants',
-            'messages' => function ($q) {
-                $q->latest();
-            }
+            'lastMessage'
         ])
             ->whereHas('participants', function ($q) use ($user) {
 
@@ -1215,7 +1195,7 @@ class ChatController extends Controller
 
         return response()->json(
             $conversations->map(function ($c) use ($user) {
-                $lastMsg = $c->messages->first();
+                $lastMsg = $c->lastMessage;
 
                 $layananNama = $c->tiket?->layanan?->nama_layanan
                     ?? $c->layanan?->nama_layanan

@@ -163,9 +163,10 @@ EOT;
             $fullPrompt = self::SYSTEM_INSTRUCTION . $groundingContext . "\n\n";
 
             foreach ($chatHistory as $item) {
-                if (!empty($item['role']) && !empty($item['text'])) {
+                $itemText = $item['text'] ?? $item['content'] ?? '';
+                if (!empty($item['role']) && !empty($itemText)) {
                     $roleLabel = ($item['role'] === 'user') ? 'User' : 'Asisten AI';
-                    $fullPrompt .= "{$roleLabel}: " . trim($item['text']) . "\n\n";
+                    $fullPrompt .= "{$roleLabel}: " . trim($itemText) . "\n\n";
                 }
             }
 
@@ -280,13 +281,11 @@ EOT;
     {
         $qLower = mb_strtolower($question, 'UTF-8');
 
-        // Ambil semua layanan aktif beserta syaratnya (Cache 1 jam)
-        $layananList = Cache::remember('ai_active_layanan_syarat', 3600, function () {
-            return Layanan::with(['syarat', 'bidang'])
-                ->where('aktif', 1)
-                ->whereHas('bidang', function ($q) {
-                    $q->where('aktif', 1);
-                })
+        // Ambil semua layanan yang memiliki syarat resmi (Cache 1 jam)
+        $layananList = Cache::remember('ai_all_layanan_syarat_v2', 3600, function () {
+            return Layanan::has('syarat')
+                ->with(['syarat', 'bidang'])
+                ->orderByDesc('aktif')
                 ->get();
         });
 
@@ -301,7 +300,8 @@ EOT;
             || str_contains($qLower, 'alur')
             || str_contains($qLower, 'prosedur')
             || str_contains($qLower, 'layanan')
-            || str_contains($qLower, 'bkpsdm');
+            || str_contains($qLower, 'bkpsdm')
+            || str_contains($qLower, 'unduh');
 
         if (!$isAskingAboutServices) {
             return null;
@@ -314,7 +314,8 @@ EOT;
             'tambahan' => true, 'mohon' => true, 'bisa' => true, 'tolong' => true, 'info' => true,
             'informasi' => true, 'ada' => true, 'yang' => true, 'dan' => true, 'di' => true, 'ke' => true,
             'dari' => true, 'untuk' => true, 'nya' => true, 'ini' => true, 'itu' => true, 'pada' => true,
-            'tentang' => true, 'terkait' => true, 'seputar' => true, 'kami' => true, 'saya' => true, 'kita' => true
+            'tentang' => true, 'terkait' => true, 'seputar' => true, 'kami' => true, 'saya' => true, 'kita' => true,
+            'unduh' => true, 'download' => true, 'minta' => true
         ];
 
         $bestMatch = null;
@@ -333,19 +334,84 @@ EOT;
                 }
             }
 
-            // Keyword boost spesifik topik layanan
-            if (str_contains($qLower, 'pangkat') && str_contains($namaLower, 'pangkat')) $score += 20;
-            if (str_contains($qLower, 'pensiun') && str_contains($namaLower, 'pensiun')) $score += 20;
-            if (str_contains($qLower, 'cuti') && str_contains($namaLower, 'cuti')) $score += 20;
-            if (str_contains($qLower, 'belajar') && (str_contains($namaLower, 'belajar') || str_contains($namaLower, 'izin belajar') || str_contains($namaLower, 'tugas belajar'))) $score += 20;
-            if (str_contains($qLower, 'mutasi') && str_contains($namaLower, 'mutasi')) $score += 20;
-            if (str_contains($qLower, 'kgb') && str_contains($namaLower, 'gaji berkala')) $score += 20;
-            if (str_contains($qLower, 'karpeg') && str_contains($namaLower, 'kartu pegawai')) $score += 20;
-            if (str_contains($qLower, 'karis') && str_contains($namaLower, 'karis')) $score += 20;
-            if (str_contains($qLower, 'karsu') && str_contains($namaLower, 'karsu')) $score += 20;
-            if (str_contains($qLower, 'gelar') && str_contains($namaLower, 'gelar')) $score += 20;
-            if (str_contains($qLower, 'taspen') && str_contains($namaLower, 'taspen')) $score += 20;
-            if (str_contains($qLower, 'slks') || (str_contains($qLower, 'satya') && str_contains($namaLower, 'satya'))) $score += 20;
+            // Keyword boost spesifik topik & alias layanan resmi di database
+            // 1. Cuti ASN
+            if (str_contains($qLower, 'cuti') && str_contains($namaLower, 'cuti')) {
+                $score += 40;
+            }
+
+            // 2. Mutasi / Pindah Tugas
+            if ((str_contains($qLower, 'mutasi') || str_contains($qLower, 'pindah')) && (str_contains($namaLower, 'mutasi') || str_contains($namaLower, 'pindah tugas') || str_contains($namaLower, 'pindah') || str_contains($namaLower, 'perpindahan'))) {
+                $score += 35;
+                if (str_contains($namaLower, 'pindah tugas')) $score += 15;
+            }
+
+            // 3. Kenaikan Pangkat
+            if ((str_contains($qLower, 'pangkat') || str_contains($qLower, 'kenaikan pangkat')) && str_contains($namaLower, 'pangkat')) {
+                $score += 35;
+                if (str_contains($qLower, 'reguler') && str_contains($namaLower, 'reguler')) $score += 25;
+                if (str_contains($qLower, 'anumerta') && str_contains($namaLower, 'anumerta')) $score += 25;
+                if (str_contains($qLower, 'guru') && str_contains($namaLower, 'guru')) $score += 25;
+            }
+
+            // 4. Pensiun
+            if ((str_contains($qLower, 'pensiun') || str_contains($qLower, 'bup')) && str_contains($namaLower, 'pensiun')) {
+                $score += 35;
+                if (str_contains($qLower, 'bup') && str_contains($namaLower, 'bup')) $score += 25;
+                if ((str_contains($qLower, 'janda') || str_contains($qLower, 'duda') || str_contains($qLower, 'yatim')) && str_contains($namaLower, 'janda')) $score += 25;
+                if ((str_contains($qLower, 'muda') || str_contains($qLower, 'dini')) && str_contains($namaLower, 'muda')) $score += 25;
+                if (str_contains($qLower, 'mpp') && str_contains($namaLower, 'mpp')) $score += 25;
+            }
+
+            // 5. Karis / Karsu (Kartu Istri / Kartu Suami)
+            if ((str_contains($qLower, 'karis') || str_contains($qLower, 'karsu') || str_contains($qLower, 'istri') || str_contains($qLower, 'suami')) && (str_contains($namaLower, 'istri') || str_contains($namaLower, 'suami') || str_contains($namaLower, 'karis') || str_contains($namaLower, 'karsu'))) {
+                $score += 40;
+            }
+
+            // 6. Karpeg (Kartu Pegawai)
+            if ((str_contains($qLower, 'karpeg') || str_contains($qLower, 'kartu pegawai')) && (str_contains($namaLower, 'karpeg') || str_contains($namaLower, 'kartu pegawai'))) {
+                $score += 40;
+            }
+
+            // 7. Taspen
+            if (str_contains($qLower, 'taspen') && str_contains($namaLower, 'taspen')) {
+                $score += 35;
+            }
+
+            // 8. Kenaikan Gaji Berkala (KGB)
+            if ((str_contains($qLower, 'kgb') || str_contains($qLower, 'gaji berkala') || str_contains($qLower, 'berkala')) && (str_contains($namaLower, 'berkala') || str_contains($namaLower, 'gaji'))) {
+                $score += 35;
+            }
+
+            // 9. Tugas Belajar & Izin Belajar
+            if ((str_contains($qLower, 'belajar') || str_contains($qLower, 'beasiswa') || str_contains($qLower, 'kuliah')) && (str_contains($namaLower, 'belajar') || str_contains($namaLower, 'beasiswa') || str_contains($namaLower, 'pendidikan'))) {
+                $score += 35;
+            }
+
+            // 10. Pencantuman Gelar Akademik & Ijazah
+            if ((str_contains($qLower, 'gelar') || str_contains($qLower, 'pencantuman gelar') || str_contains($qLower, 'ijazah')) && str_contains($namaLower, 'gelar')) {
+                $score += 40;
+            }
+
+            // 11. Pengusulan CPNS Menjadi PNS
+            if ((str_contains($qLower, 'cpns') || str_contains($qLower, 'menjadi pns') || str_contains($qLower, 'pra jabatan') || str_contains($qLower, 'latsar')) && str_contains($namaLower, 'cpns')) {
+                $score += 35;
+            }
+
+            // 12. Satya Lencana Karya Satya (SLKS)
+            if ((str_contains($qLower, 'slks') || str_contains($qLower, 'satya') || str_contains($qLower, 'lencana')) && (str_contains($namaLower, 'slks') || str_contains($namaLower, 'satya'))) {
+                $score += 40;
+            }
+
+            // 13. Ujian Dinas
+            if (str_contains($qLower, 'ujian dinas') && str_contains($namaLower, 'ujian dinas')) {
+                $score += 40;
+            }
+
+            // 14. Disiplin Pegawai
+            if (str_contains($qLower, 'hukuman disiplin') && str_contains($namaLower, 'hukuman disiplin')) {
+                $score += 35;
+            }
 
             if ($score > $highestScore && $score >= 6) {
                 $highestScore = $score;
@@ -535,7 +601,7 @@ EOT;
                     "⏱️ **Kewajiban Jam Kerja:**\n" .
                     "Pelanggaran jam kerja tanpa alasan sah secara kumulatif dihitung hariannya dan dapat dikenai sanksi sedang hingga berat.\n\n" .
                     "Apakah ada ketentuan disiplin tertentu yang ingin Anda tanyakan lebih lanjut? 😊",
-                'actions' => [],
+                'actions' => !empty($actions) ? $actions : [],
                 'source'  => 'fallback_disiplin'
             ];
         }
@@ -550,8 +616,8 @@ EOT;
                     "3. **Cuti Melahirkan:** Diberikan selama 3 bulan untuk kelahiran anak pertama s.d. ketiga.\n" .
                     "4. **Cuti Alasan Penting:** Untuk musibah keluarga, perkawinan pertama, dll.\n" .
                     "5. **Cuti Besar & Cuti di Luar Tanggungan Negara (CLTN).**\n\n" .
-                    "Untuk pengajuan cuti di lingkungan Pemkab Buleleng, berkas dapat disiapkan melalui pengelola kepegawaian OPD masing-masing. Ada jenis cuti yang ingin ditanyakan detailnya? 😊",
-                'actions' => [],
+                    "Untuk pengajuan cuti di lingkungan Pemkab Buleleng, berkas dapat disiapkan melalui pengelola kepegawaian OPD masing-masing. Format dan berkas persyaratan dapat diunduh melalui tombol di bawah jika tersedia. Ada jenis cuti yang ingin ditanyakan detailnya? 😊",
+                'actions' => !empty($actions) ? $actions : [],
                 'source'  => 'fallback_cuti'
             ];
         }
@@ -565,8 +631,8 @@ EOT;
                     "- **KP Reguler:** Minimal 4 tahun dalam pangkat terakhir dengan SKP minimal Baik 2 tahun terakhir.\n" .
                     "- **KP Pilihan / Fungsional:** Mengacu pada angka kredit dan jenjang jabatan fungsional.\n" .
                     "- **KP Penyesuaian Ijazah:** Telah lulus ujian penyesuaian ijazah dan terdapat formasi.\n\n" .
-                    "Apakah Anda ingin menanyakan persyaratan spesifik untuk salah satu jenis kenaikan pangkat di atas? 😊",
-                'actions' => [],
+                    "Format persyaratan resmi kenaikan pangkat dapat Anda unduh melalui tombol PDF di bawah jika tersedia. Apakah Anda ingin menanyakan persyaratan spesifik untuk salah satu jenis kenaikan pangkat di atas? 😊",
+                'actions' => !empty($actions) ? $actions : [],
                 'source'  => 'fallback_pangkat'
             ];
         }
@@ -580,8 +646,8 @@ EOT;
                     "- **60 Tahun:** Pejabat Pimpinan Tinggi dan Fungsional Ahli Madya.\n" .
                     "- **65 Tahun:** Fungsional Ahli Utama.\n\n" .
                     "📌 **Pensiun Atas Permintaan Sendiri (APS):** Minimal berusia 50 tahun dan memiliki masa kerja minimal 20 tahun.\n\n" .
-                    "Pengusulan pensiun di BKPSDM Buleleng disarankan dilakukan 6 s.d. 12 bulan sebelum BUP. Ada yang ingin ditanyakan mengenai berkas pensiun? 😊",
-                'actions' => [],
+                    "Pengusulan pensiun di BKPSDM Buleleng disarankan dilakukan 6 s.d. 12 bulan sebelum BUP. Format syarat pensiun dapat diunduh melalui tombol PDF di bawah. Ada yang ingin ditanyakan mengenai berkas pensiun? 😊",
+                'actions' => !empty($actions) ? $actions : [],
                 'source'  => 'fallback_pensiun'
             ];
         }
@@ -597,8 +663,8 @@ EOT;
                     "2. **Izin Belajar (IB):**\n" .
                     "- Biaya mandiri / pribadi.\n" .
                     "- Tidak dibebaskan dari tugas jabatan (kuliah di luar jam dinas).\n\n" .
-                    "Keduanya sah diakui untuk pencantuman gelar / penyesuaian ijazah setelah lulus di BKPSDM Buleleng. 😊",
-                'actions' => [],
+                    "Keduanya sah diakui untuk pencantuman gelar / penyesuaian ijazah setelah lulus di BKPSDM Buleleng. Berkas syarat resmi dapat diunduh melalui tombol PDF di bawah. 😊",
+                'actions' => !empty($actions) ? $actions : [],
                 'source'  => 'fallback_belajar'
             ];
         }

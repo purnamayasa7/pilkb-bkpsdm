@@ -362,6 +362,8 @@
                 document.getElementById('roomLiliHeaderWrap')?.classList.add('d-none');
                 document.getElementById('roomTicketHeaderWrap')?.classList.add('d-none');
                 document.getElementById('roomActionDropdownWrap')?.classList.add('d-none');
+                document.getElementById('btnResetGuestLiliChat')?.classList.add('d-none');
+                document.getElementById('btnResetGuestLiliChat')?.classList.remove('d-flex');
                 document.getElementById('liliAiDisclaimerWrap')?.classList.add('d-none');
 
                 if (el.messageInput) {
@@ -400,13 +402,16 @@
             }
 
             // 1.1 Mode Tanya AI Kepegawaian (LILI)
-            function startAiKepegawaianMode() {
+            function startAiKepegawaianMode(forceReset = false) {
                 chatState.botMode = 'ai_kepegawaian';
-                chatState.aiHistory = [];
 
-                // Reset riwayat chat agar ruang obrolan bersih & fokus ke LILI
-                if (el.chatMessages) {
-                    el.chatMessages.innerHTML = '';
+                if (forceReset) {
+                    chatState.aiHistory = [];
+                    if (el.chatMessages) {
+                        el.chatMessages.innerHTML = '';
+                    }
+                } else {
+                    chatState.aiHistory = chatState.aiHistory || [];
                 }
 
                 // Update Navbar Header khusus LILI & tampilkan disclaimer AI
@@ -414,6 +419,8 @@
                 document.getElementById('roomLiliHeaderWrap')?.classList.remove('d-none');
                 document.getElementById('roomTicketHeaderWrap')?.classList.add('d-none');
                 document.getElementById('roomActionDropdownWrap')?.classList.add('d-none');
+                document.getElementById('btnResetGuestLiliChat')?.classList.remove('d-none');
+                document.getElementById('btnResetGuestLiliChat')?.classList.add('d-flex');
                 document.getElementById('liliAiDisclaimerWrap')?.classList.remove('d-none');
 
                 if (el.messageInput) {
@@ -421,7 +428,13 @@
                     el.messageInput.focus();
                 }
 
-                // Putar suara sapaan ramah LILI
+                // Jika sudah ada pesan sebelumnya dan bukan reset paksa, jangan hapus atau putar audio berulang
+                if (el.chatMessages && el.chatMessages.children.length > 0 && !forceReset) {
+                    scrollToBottom(false);
+                    return;
+                }
+
+                // Putar suara sapaan ramah LILI jika chat pertama kali
                 playLiliVoiceGreeting();
 
                 const html = `
@@ -1264,7 +1277,11 @@
                     chatState.directAiMode = false;
                     if (window.ChatWidgetLogin.guestSession?.nama) {
                         showPage(el.pageRoom);
-                        showBotMainMenu();
+                        if (!el.chatMessages.children.length) {
+                            showBotMainMenu();
+                        } else {
+                            scrollToBottom(false);
+                        }
                     } else {
                         showPage(el.pageNewChat);
                     }
@@ -1273,7 +1290,11 @@
                     chatState.directAiMode = true;
                     if (window.ChatWidgetLogin.guestSession?.nama) {
                         showPage(el.pageRoom);
-                        startAiKepegawaianMode();
+                        if (!el.chatMessages.children.length) {
+                            startAiKepegawaianMode();
+                        } else {
+                            scrollToBottom(false);
+                        }
                     } else {
                         showPage(el.pageNewChat);
                     }
@@ -1559,8 +1580,12 @@
                         `Nomor Tiket Anda (${chatState.ticket}) telah tersimpan dan dapat dibuka kembali sewaktu-waktu melalui menu "Sudah Punya Tiket".`
                     );
                     if (!keluar) return false;
+                    resetGuestSession();
+                    showPage(el.pageHome);
+                    return true;
                 }
-                resetGuestSession();
+                // Jika sedang dalam percakapan AI atau bot (tanpa tiket aktif),
+                // pertahankan riwayat pesan dan session agar pengguna bisa kembali tanpa kehilangan chat!
                 showPage(el.pageHome);
                 return true;
             }
@@ -1594,6 +1619,13 @@
                     }).catch(() => {
                         alert(`Nomor Tiket: ${chatState.ticket}`);
                     });
+                });
+
+                document.getElementById('btnResetGuestLiliChat')?.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    if (confirm('Mulai obrolan baru dengan LILI? Riwayat percakapan saat ini akan dibersihkan.')) {
+                        startAiKepegawaianMode(true);
+                    }
                 });
             }
 

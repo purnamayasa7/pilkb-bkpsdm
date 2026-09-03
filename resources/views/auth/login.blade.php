@@ -17,7 +17,7 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
     <link rel="stylesheet" href="{{ asset('css/login.css') }}">
-    <link rel="stylesheet" href="{{ asset('css/chat-widget.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/chat-widget.css') }}?v={{ filemtime(public_path('css/chat-widget.css')) }}">
 </head>
 
 <body>
@@ -860,6 +860,12 @@
                         </div>
                     </div>
 
+                    <!-- Tombol Reset Obrolan AI (Hanya Muncul Saat Sesi LILI AI) -->
+                    <button type="button" class="btn btn-sm btn-light border-0 py-1 px-2 rounded-pill d-none align-items-center gap-1 text-muted flex-shrink-0" id="btnResetGuestLiliChat" title="Mulai Percakapan Baru" style="font-size: 11px; background: #f1f5f9;">
+                        <i data-feather="rotate-ccw" style="width: 11px; height: 11px;"></i>
+                        <span class="fw-semibold">Baru</span>
+                    </button>
+
                     <!-- Dropdown Titik Tiga (Hanya Muncul Saat Sudah Ada Nomor Tiket) -->
                     <div class="dropdown d-none flex-shrink-0" id="roomActionDropdownWrap">
                         <button class="btn btn-light chat-back-btn" type="button" id="roomActionMenuBtn" data-bs-toggle="dropdown" aria-expanded="false" title="Menu Opsi Chat">
@@ -1030,7 +1036,7 @@
         }
         window.FirebaseDB = window.firebase ? window.firebase.database() : null;
     </script>
-    <script src="{{ asset('js/chat/chat-widget-login.js') }}"></script>
+    <script src="{{ asset('js/chat/chat-widget-login.js') }}?v={{ filemtime(public_path('js/chat/chat-widget-login.js')) }}"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
 

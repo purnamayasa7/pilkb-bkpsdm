@@ -50,17 +50,27 @@ class ChatConversation extends Model
             ->where('role', 'responder');
     }
 
+    public function lastMessage()
+    {
+        return $this->belongsTo(ChatMessage::class, 'last_message_id');
+    }
+
     public function unreadCount($userId)
     {
-        $participant = $this->participants
-            ->where('user_id', $userId)
-            ->first();
+        $participant = $this->relationLoaded('participants')
+            ? $this->participants->firstWhere('user_id', $userId)
+            : $this->participants()->where('user_id', $userId)->first();
 
         if (!$participant) {
             return 0;
         }
 
-        $lastRead = $participant->last_read_message_id ?? 0;
+        $lastRead = (int) ($participant->last_read_message_id ?? 0);
+
+        // Optimasi: jika pesan terakhir sudah terbaca, unread pasti 0 tanpa perlu query
+        if ($this->last_message_id && (int) $this->last_message_id <= $lastRead) {
+            return 0;
+        }
 
         return $this->messages()
             ->where('id', '>', $lastRead)

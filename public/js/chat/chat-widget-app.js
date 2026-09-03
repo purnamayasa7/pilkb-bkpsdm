@@ -513,6 +513,26 @@
 `;
         },
 
+        // Fast Inline SVG Icons for List Items (Eliminates feather.replace layout recalculation)
+        getSvgIcon(name, extraClass = '') {
+            switch (name) {
+                case 'chevron-right':
+                    return `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="chat-item-chevron ${extraClass}"><polyline points="9 18 15 12 9 6"></polyline></svg>`;
+                case 'tag':
+                    return `<svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-tag ${extraClass}"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path><line x1="7" y1="7" x2="7.01" y2="7"></line></svg>`;
+                case 'briefcase':
+                    return `<svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-briefcase ${extraClass}"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path></svg>`;
+                case 'user':
+                    return `<svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-user ${extraClass}"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>`;
+                case 'layers':
+                    return `<svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-layers ${extraClass}"><polygon points="12 2 2 7 12 12 22 7 12 2"></polygon><polyline points="2 17 12 22 22 17"></polyline><polyline points="2 12 12 17 22 12"></polyline></svg>`;
+                case 'user-check':
+                    return `<svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-user-check ${extraClass}"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="8.5" cy="7" r="4"></circle><polyline points="17 11 19 13 23 9"></polyline></svg>`;
+                default:
+                    return `<i data-feather="${name}" class="${extraClass}"></i>`;
+            }
+        },
+
         // Function Render Inbox Item
         renderInboxItem(item) {
             const isUnread = Number(item.unread) > 0;
@@ -529,13 +549,13 @@
             const role = item.sender_role || (item.type === 'guest' ? 'tamu' : 'opd');
             const roleLabel = item.sender_role_label || (role === 'tamu' ? 'Tamu' : 'OPD');
             const roleIcon = role === 'tamu' ? 'user' : (role === 'bidang' ? 'layers' : (role === 'fo' ? 'user-check' : 'briefcase'));
-            const roleBadge = `<span class="chat-role-badge badge-${role}"><i data-feather="${roleIcon}"></i>${roleLabel}</span>`;
+            const roleBadge = `<span class="chat-role-badge badge-${role}">${this.getSvgIcon(roleIcon)}${roleLabel}</span>`;
 
             let ticketBadge = '';
             if (item.no_tiket) {
                 ticketBadge = `
                     <span class="chat-item-ticket">
-                        <i data-feather="tag"></i>
+                        ${this.getSvgIcon('tag')}
                         ${this.escapeHtml(item.no_tiket)}
                     </span>
                 `;
@@ -596,7 +616,7 @@
         <div>
             ${unreadBadge}
         </div>
-        <i data-feather="chevron-right" class="chat-item-chevron"></i>
+        ${this.getSvgIcon('chevron-right')}
     </div>
 </div>
 `;
@@ -618,13 +638,13 @@
             const role = item.sender_role || (item.type === 'guest' ? 'tamu' : 'opd');
             const roleLabel = item.sender_role_label || (role === 'tamu' ? 'Tamu' : 'OPD');
             const roleIcon = role === 'tamu' ? 'user' : (role === 'bidang' ? 'layers' : (role === 'fo' ? 'user-check' : 'briefcase'));
-            const roleBadge = `<span class="chat-role-badge badge-${role}"><i data-feather="${roleIcon}"></i>${roleLabel}</span>`;
+            const roleBadge = `<span class="chat-role-badge badge-${role}">${this.getSvgIcon(roleIcon)}${roleLabel}</span>`;
 
             let ticketBadge = '';
             if (item.no_tiket) {
                 ticketBadge = `
                     <span class="chat-item-ticket">
-                        <i data-feather="tag"></i>
+                        ${this.getSvgIcon('tag')}
                         ${this.escapeHtml(item.no_tiket)}
                     </span>
                 `;
@@ -688,7 +708,7 @@
         <div>
             ${unreadBadge}
         </div>
-        <i data-feather="chevron-right" class="chat-item-chevron"></i>
+        ${this.getSvgIcon('chevron-right')}
     </div>
 </div>
 `;
@@ -762,18 +782,25 @@
                             </div>
                         </div>
                     </div>
-                    <span id="inboxTotalCountBadge" class="chat-count-badge d-none">
-                        0 Chat
-                    </span>
+                    <div class="d-flex align-items-center gap-1">
+                        <button type="button" class="btn btn-sm btn-outline-primary rounded-pill d-inline-flex align-items-center gap-1 py-1 px-2" id="btnOpenLiliFromInbox" title="Tanya LILI (Kamus Regulasi &amp; SOP AI)" style="font-size: 11px; font-weight: 600; border-color: #6366f1; color: #4f46e5; background: #f5f3ff;">
+                            <i data-feather="zap" style="width: 12px; height: 12px;"></i>
+                            <span>Tanya LILI</span>
+                        </button>
+                        <span id="inboxTotalCountBadge" class="chat-count-badge d-none">
+                            0 Chat
+                        </span>
+                    </div>
                 </div>
 
-                <div class="chat-search-wrapper" id="listSearchWrapper">
+                <div class="chat-search-wrapper" id="listSearchWrapper" style="position: relative !important; display: flex !important; align-items: center !important;">
+                    <i data-feather="search" class="chat-search-icon" style="position: absolute !important; left: 14px !important; top: 50% !important; transform: translateY(-50%) !important; width: 14px !important; height: 14px !important; color: #94a3b8 !important; pointer-events: none !important; z-index: 5 !important;"></i>
                     <input
                         type="text"
                         id="searchAdminInbox"
                         class="form-control chat-search-input"
-                        placeholder="Cari nama, tiket, layanan, pesan...">
-                    <i data-feather="search" class="chat-search-icon"></i>
+                        placeholder="Cari nama, tiket, layanan, pesan..."
+                        style="padding-left: 38px !important; border-radius: 20px !important; height: 38px !important; font-size: 12.5px !important;">
                 </div>
 
                 <div class="chat-selection-bar d-none" id="listSelectionBar">
@@ -831,9 +858,47 @@
                 countBadge.addClass('d-none');
             }
 
+            // Kartu Permanen LILI AI di Paling Atas Inbox Admin Bidang
+            const liliPinnedHtml = `
+                <div class="chat-item chat-item-lili-ai" id="btnOpenLiliFromInboxList">
+                    <div class="position-relative flex-shrink-0 me-2" style="width: 44px; height: 44px;">
+                        <img src="/images/lili-avatar.png" alt="LILI" style="width: 44px; height: 44px; border-radius: 50%; object-fit: cover; border: 2px solid #6366f1; box-shadow: 0 2px 6px rgba(99,102,241,0.25);">
+                        <span style="position: absolute; bottom: 0; right: 0; width: 10px; height: 10px; background: #10b981; border: 2px solid #fff; border-radius: 50%;"></span>
+                    </div>
+                    <div class="chat-content flex-grow-1 overflow-hidden">
+                        <div class="chat-item-top d-flex align-items-center justify-content-between mb-1">
+                            <div class="d-flex align-items-center gap-1 overflow-hidden">
+                                <span class="badge" style="background: #e0e7ff; color: #4338ca; font-size: 10px; font-weight: 700; padding: 2px 7px; border-radius: 6px;">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-zap" style="vertical-align: middle; margin-right: 2px;"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>ASISTEN AI
+                                </span>
+                                <span class="badge" style="background: #f1f5f9; color: #475569; font-size: 9.5px; padding: 2px 6px; border-radius: 6px;">
+                                    Standby 24/7
+                                </span>
+                            </div>
+                            <span class="badge bg-success-soft text-success small" style="font-size: 10px;">Online</span>
+                        </div>
+                        <div class="chat-item-title fw-bold text-dark text-truncate" style="font-size: 13.5px;">
+                            LILI - Asisten AI Kepegawaian
+                        </div>
+                        <div class="chat-item-sub text-truncate" style="font-size: 11px; color: #64748b;">
+                            Konsultasi regulasi ASN, literasi SOP &amp; panduan layanan
+                        </div>
+                        <div class="chat-item-last text-truncate small mt-1" style="font-size: 11.5px; color: #4f46e5; font-weight: 600;">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-message-circle" style="vertical-align: middle; margin-right: 3px;"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg>Klik untuk mulai konsultasi bersama LILI →
+                        </div>
+                    </div>
+                    <div class="chat-item-arrow text-muted ms-1">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#6366f1" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                    </div>
+                </div>
+            `;
+
+            const qClean = String(searchTerm || '').toLowerCase().trim();
+            const showLili = !qClean || 'lili'.includes(qClean) || 'ai'.includes(qClean) || 'asisten'.includes(qClean);
+
             if (!items.length) {
                 if (searchTerm) {
-                    list.html(`
+                    list.html((showLili ? liliPinnedHtml : '') + `
                         <div class="chat-empty-state">
                             <div class="chat-empty-icon">
                                 <i data-feather="search"></i>
@@ -843,7 +908,7 @@
                         </div>
                     `);
                 } else {
-                    list.html(`
+                    list.html(liliPinnedHtml + `
                         <div class="chat-empty-state">
                             <div class="chat-empty-icon">
                                 <i data-feather="inbox"></i>
@@ -857,13 +922,15 @@
                 return;
             }
 
-            let html = '';
+            let html = showLili ? liliPinnedHtml : '';
             items.forEach(item => {
                 html += this.renderInboxItem(item);
             });
 
             list.html(html);
-            feather.replace();
+            if (list.find('[data-feather]').length && window.feather) {
+                feather.replace();
+            }
         },
 
         // Function Filter Inbox
@@ -958,13 +1025,14 @@
 
                 </div>
 
-                <div class="chat-search-wrapper" id="listSearchWrapper">
+                <div class="chat-search-wrapper" id="listSearchWrapper" style="position: relative !important; display: flex !important; align-items: center !important;">
+                    <i data-feather="search" class="chat-search-icon" style="position: absolute !important; left: 14px !important; top: 50% !important; transform: translateY(-50%) !important; width: 14px !important; height: 14px !important; color: #94a3b8 !important; pointer-events: none !important; z-index: 5 !important;"></i>
                     <input
                         type="text"
                         id="searchMyConversations"
                         class="form-control chat-search-input"
-                        placeholder="Cari no. tiket, layanan, pesan...">
-                    <i data-feather="search" class="chat-search-icon"></i>
+                        placeholder="Cari no. tiket, layanan, pesan..."
+                        style="padding-left: 38px !important; border-radius: 20px !important; height: 38px !important; font-size: 12.5px !important;">
                 </div>
 
                 <div class="chat-selection-bar d-none" id="listSelectionBar">
@@ -1105,7 +1173,9 @@
             });
 
             list.html(html);
-            feather.replace();
+            if (list.find('[data-feather]').length && window.feather) {
+                feather.replace();
+            }
         },
 
         // Function Filter Conversations
@@ -1685,6 +1755,335 @@
                 console.error('Gagal menghapus percakapan:', xhr.responseText);
             });
         },
+
+        // ==========================================
+        // LILI ASISTEN AI MODE (UNTUK USER AUTH)
+        // ==========================================
+        liliAiHistory: [],
+        isLiliAiLoading: false,
+
+        startLiliAiMode(backSource = 'search', resetChat = false) {
+            this.stopPolling();
+            this.stopConversationListPolling();
+            this.stopInboxPolling();
+            this.activeConversationId = 'lili_ai';
+            this.previousView = backSource;
+            this.isLiliAiLoading = false;
+
+            if (resetChat) {
+                this.liliAiHistory = [];
+                this.savedLiliChatHtml = null;
+            } else {
+                this.liliAiHistory = this.liliAiHistory || [];
+            }
+
+            const defaultWelcomeHtml = `
+                <div class="bot-message-wrapper">
+                    <div class="bot-badge-header">
+                        <img src="/images/lili-avatar.png" alt="LILI" style="width: 20px; height: 20px; border-radius: 50%; object-fit: cover; vertical-align: middle; margin-right: 4px; box-shadow: 0 1px 3px rgba(0,0,0,0.15);">
+                        <span>LILI - Asisten AI</span>
+                    </div>
+                    <div class="bot-bubble">
+                        <p class="mb-2">Halo! Saya <strong>LILI</strong> (<em>Layanan Informasi &amp; Literasi Kepegawaian Interaktif</em>) Asisten AI PILKB. 😊</p>
+                        <p class="mb-2">Anda dapat berkonsultasi seputar regulasi ASN, cek status usulan tiket, serta persyaratan layanan kepegawaian di BKPSDM Buleleng.</p>
+                        <p class="mb-1 text-muted small fw-semibold">Contoh pertanyaan yang bisa Anda tanyakan kepada LILI:</p>
+                        <ul class="mb-3 small ps-3 text-muted">
+                            <li><em>"Apa saja syarat usulan kenaikan pangkat di BKPSDM Buleleng?"</em></li>
+                            <li><em>"Bagaimana aturan jam kerja dan sanksi disiplin ASN (PP 94/2021)?"</em></li>
+                            <li><em>"Bagaimana prosedur pengajuan cuti tahunan dan cuti besar?"</em></li>
+                        </ul>
+                        <div class="ai-action-chips-wrap d-flex flex-wrap gap-1 mt-2 mb-2">
+                            <button type="button" class="ai-action-chip chip-prompt" data-prompt="Apa saja syarat usulan kenaikan pangkat di BKPSDM Buleleng?">🔘 Kenaikan Pangkat</button>
+                            <button type="button" class="ai-action-chip chip-prompt" data-prompt="Bagaimana prosedur pengajuan cuti tahunan ASN?">🔘 Cuti ASN</button>
+                            <button type="button" class="ai-action-chip chip-prompt" data-prompt="Bagaimana aturan jam kerja dan sanksi disiplin ASN?">🔘 Disiplin Pegawai</button>
+                            <button type="button" class="ai-action-chip chip-prompt" data-prompt="Apa syarat mutasi pegawai di BKPSDM Buleleng?">🔘 Mutasi Pegawai</button>
+                            <button type="button" class="ai-action-chip chip-prompt" data-prompt="Apa saja syarat usulan pensiun BUP?">🔘 Pensiun BUP</button>
+                        </div>
+                        <p class="mb-0 text-muted small fst-italic">Silakan ketik pertanyaan Anda pada kolom pesan di bawah lalu tekan Kirim (Enter).</p>
+                    </div>
+                </div>
+            `;
+
+            const initialMessagesHtml = this.savedLiliChatHtml || defaultWelcomeHtml;
+
+            const body = $('.chat-body');
+            body.html(`
+        <div class="chat-room-container">
+            <div class="chat-room-header">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div class="d-flex align-items-center gap-2 flex-grow-1 overflow-hidden">
+                        <button class="btn btn-light chat-back-btn" id="btnBackFromLiliAi" title="Tutup / Kembali">
+                            <i data-feather="arrow-left"></i>
+                        </button>
+                        <div class="chat-room-info overflow-hidden">
+                            <div class="d-flex align-items-center gap-2">
+                                <div class="position-relative flex-shrink-0">
+                                    <img src="/images/lili-avatar.png" alt="LILI" style="width: 34px; height: 34px; border-radius: 50%; object-fit: cover; border: 1.5px solid #6366f1; box-shadow: 0 2px 6px rgba(99,102,241,0.25);">
+                                    <span style="position: absolute; bottom: 0; right: 0; width: 8px; height: 8px; background: #10b981; border: 1.5px solid #fff; border-radius: 50%;"></span>
+                                </div>
+                                <div class="overflow-hidden">
+                                    <div class="d-flex align-items-center gap-1">
+                                        <span class="fw-bold text-dark text-truncate" style="font-size: 13.5px;">LILI - Asisten AI</span>
+                                        <button type="button" id="btnPlayLiliVoiceApp" class="btn btn-sm btn-link p-0 ms-1" title="Putar Ulang Suara LILI" style="line-height:1; vertical-align: middle;">
+                                            <i data-feather="volume-2" style="width:14px; height:14px; color:#6366f1;"></i>
+                                        </button>
+                                    </div>
+                                    <div class="chat-room-sub text-truncate" style="font-size: 10.5px; color: #64748b;">
+                                        Layanan Informasi &amp; Literasi Kepegawaian
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="d-flex align-items-center gap-1">
+                        <button type="button" class="btn btn-sm btn-light border-0 py-1 px-2 rounded-pill d-flex align-items-center gap-1 text-muted" id="btnResetLiliChat" title="Mulai Percakapan Baru" style="font-size: 11px; background: #f1f5f9;">
+                            <i data-feather="rotate-ccw" style="width: 11px; height: 11px;"></i>
+                            <span class="fw-semibold">Baru</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div id="liliAppChatMessages" class="chat-messages flex-grow-1">
+                ${initialMessagesHtml}
+            </div>
+
+            <div class="chat-input-footer position-relative">
+                <div class="chat-input-wrapper">
+                    <textarea
+                        id="liliAppInput"
+                        class="form-control"
+                        placeholder="Tulis pesan..."
+                        rows="1"></textarea>
+                    <button
+                        class="chat-send-btn"
+                        id="btnSendLiliApp"
+                        disabled
+                        title="Kirim pesan">
+                        <i data-feather="navigation"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+            `);
+
+            if (typeof feather !== 'undefined') {
+                feather.replace();
+            }
+
+            if (!this.savedLiliChatHtml) {
+                this.playLiliVoiceGreeting();
+            }
+
+            const messagesEl = document.getElementById('liliAppChatMessages');
+            if (messagesEl) {
+                messagesEl.scrollTop = messagesEl.scrollHeight;
+            }
+
+            $('#liliAppInput').focus();
+        },
+
+        playLiliVoiceGreeting() {
+            try {
+                const audio = new Audio('/sound/lili-greeting.mp3');
+                audio.play().catch(() => {});
+            } catch (err) {}
+        },
+
+        formatLiliAiReply(raw) {
+            if (!raw) return '';
+            let text = String(raw);
+
+            // Escape HTML Dasar
+            text = text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+
+            // Bold: **teks**
+            text = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+
+            // Italic: *teks* atau _teks_
+            text = text.replace(/\*([^\*\n]+)\*/g, '<em>$1</em>');
+            text = text.replace(/_([^_\n]+)_/g, '<em>$1</em>');
+
+            // Link [teks](url) aman
+            text = text.replace(/\[(.*?)\]\((https?:\/\/[^\s\)]+|\/[^\s\)]+)\)/g, (match, label, url) => {
+                const isInternal = url.startsWith('/') || url.includes(window.location.hostname);
+                return `<a href="${url}" target="_blank" rel="noopener noreferrer" class="text-primary fw-semibold text-decoration-underline">${label}</a>`;
+            });
+
+            // List baris baru (- atau *)
+            text = text.replace(/(?:^|\n)[-\*]\s+(.+)/g, '<li class="ms-3 mb-1">$1</li>');
+
+            // Nomor list: 1. 2.
+            text = text.replace(/(?:^|\n)(\d+)\.\s+(.+)/g, '<div class="ms-2 mb-1"><strong>$1.</strong> $2</div>');
+
+            // Paragraf ganda
+            text = text.replace(/\n\n+/g, '</p><p class="mb-2">');
+            text = text.replace(/\n/g, '<br>');
+
+            return `<p class="mb-2">${text}</p>`;
+        },
+
+        sendLiliAiMessage(customPrompt = null) {
+            if (this.isLiliAiLoading) return;
+            const inputEl = $('#liliAppInput');
+            const userMsg = customPrompt ? customPrompt.trim() : inputEl.val().trim();
+            if (!userMsg) return;
+
+            if (!customPrompt) {
+                inputEl.val('');
+                inputEl.css('height', '48px');
+                $('#btnSendLiliApp').prop('disabled', true);
+            }
+
+            const chatMessages = $('#liliAppChatMessages');
+
+            // Append pesan pengguna
+            chatMessages.append(`
+                <div class="user-message-wrapper" style="align-self: flex-end; max-width: 82%;">
+                    <div class="user-bubble" style="background: linear-gradient(135deg, #1a6cff 0%, #0a58ca 100%); color: #fff; padding: 10px 14px; border-radius: 16px 16px 4px 16px; font-size: 13px; line-height: 1.45; box-shadow: 0 2px 8px rgba(10, 88, 202, 0.25);">
+                        <p class="mb-0" style="white-space: pre-wrap;">${this.escapeHtml(userMsg)}</p>
+                    </div>
+                </div>
+            `);
+
+            // Append Loading Indicator
+            const loadingId = 'liliAppLoading_' + Date.now();
+            chatMessages.append(`
+                <div id="${loadingId}" class="bot-message-wrapper">
+                    <div class="bot-badge-header">
+                        <img src="/images/lili-avatar.png" alt="LILI" style="width: 20px; height: 20px; border-radius: 50%; object-fit: cover; vertical-align: middle; margin-right: 4px; box-shadow: 0 1px 3px rgba(0,0,0,0.15);">
+                        <span>LILI - Asisten AI</span>
+                    </div>
+                    <div class="bot-bubble">
+                        <div class="d-flex align-items-center gap-2 text-primary" style="font-size: 12.5px;">
+                            <span class="spinner-border spinner-border-sm"></span>
+                            <span>LILI sedang menganalisis regulasi &amp; data SOP...</span>
+                        </div>
+                    </div>
+                </div>
+            `);
+
+            chatMessages.scrollTop(chatMessages[0]?.scrollHeight || 0);
+
+            this.isLiliAiLoading = true;
+            this.liliAiHistory.push({ role: 'user', content: userMsg });
+
+            // Kirim request ke /guest-bot/tanya-ai
+            $.ajax({
+                url: '/guest-bot/tanya-ai',
+                type: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content'),
+                    'Accept': 'application/json'
+                },
+                contentType: 'application/json',
+                data: JSON.stringify({
+                    pertanyaan: userMsg,
+                    history: this.liliAiHistory.slice(-6)
+                })
+            })
+            .done((res) => {
+                $(`#${loadingId}`).remove();
+                this.isLiliAiLoading = false;
+
+                const replyText = res.reply || 'Maaf, LILI tidak dapat memproses pertanyaan saat ini.';
+                this.liliAiHistory.push({ role: 'assistant', content: replyText });
+
+                let formattedReply = this.formatLiliAiReply(replyText);
+
+                // Lampirkan Chips Aksi (Unduh PDF Syarat, Cek Tiket, dll) identik dengan login.blade
+                let actionChipsHtml = '';
+                const actionsList = res.actions || res.action_chips || [];
+                if (Array.isArray(actionsList) && actionsList.length > 0) {
+                    actionChipsHtml += '<div class="ai-action-chips d-flex flex-wrap gap-2 my-2 pt-1">';
+                    actionsList.forEach(action => {
+                        if (action.type === 'pdf') {
+                            actionChipsHtml += `
+                                <a href="${this.escapeHtml(action.url)}" target="_blank" class="ai-action-chip chip-pdf">
+                                    <i data-feather="file-text" style="width:13px;height:13px;"></i>
+                                    <span>${this.escapeHtml(action.label)}</span>
+                                </a>
+                            `;
+                        } else if (action.type === 'ticket') {
+                            actionChipsHtml += `
+                                <a href="${this.escapeHtml(action.url)}" target="_blank" class="ai-action-chip chip-ticket">
+                                    <i data-feather="search" style="width:13px;height:13px;"></i>
+                                    <span>${this.escapeHtml(action.label)}</span>
+                                </a>
+                            `;
+                        } else if (action.type === 'admin') {
+                            const userRole = (window.ChatAuth && window.ChatAuth.role) ? window.ChatAuth.role : '';
+                            // Hanya Admin OPD yang dapat berkonsultasi ke Admin Bidang. Admin Bidang tidak menampilkan tombol ini.
+                            if (userRole === 'admin_opd') {
+                                actionChipsHtml += `
+                                    <div class="ai-action-chip chip-admin">
+                                        <i data-feather="briefcase" style="width:13px;height:13px;"></i>
+                                        <span>${this.escapeHtml(action.label)}</span>
+                                    </div>
+                                `;
+                            }
+                        } else if (action.type === 'prompt' || action.action === 'send_prompt') {
+                            actionChipsHtml += `
+                                <button type="button" class="ai-action-chip chip-prompt" data-prompt="${this.escapeHtml(action.prompt || action.label)}">
+                                    <span>${this.escapeHtml(action.label)}</span>
+                                </button>
+                            `;
+                        }
+                    });
+                    actionChipsHtml += '</div>';
+                }
+
+                chatMessages.append(`
+                    <div class="bot-message-wrapper">
+                        <div class="bot-badge-header">
+                            <img src="/images/lili-avatar.png" alt="LILI" style="width: 20px; height: 20px; border-radius: 50%; object-fit: cover; vertical-align: middle; margin-right: 4px; box-shadow: 0 1px 3px rgba(0,0,0,0.15);">
+                            <span>LILI - Asisten AI</span>
+                        </div>
+                        <div class="bot-bubble">
+                            <div class="ai-reply-content mb-2">${formattedReply}</div>
+                            ${actionChipsHtml}
+                        </div>
+                    </div>
+                `);
+
+                // Simpan state pesan terbaru agar saat berpindah halaman dan kembali riwayat tidak hilang
+                this.savedLiliChatHtml = chatMessages.html();
+
+                if (typeof feather !== 'undefined') {
+                    feather.replace();
+                }
+
+                chatMessages.scrollTop(chatMessages[0]?.scrollHeight || 0);
+            })
+            .fail((xhr) => {
+                $(`#${loadingId}`).remove();
+                this.isLiliAiLoading = false;
+
+                let errText = 'Mohon maaf, terjadi kendala saat menghubungi server AI. Silakan coba kembali sesaat lagi.';
+                try {
+                    const errJson = JSON.parse(xhr.responseText);
+                    if (errJson.message) errText = errJson.message;
+                } catch (e) {}
+
+                chatMessages.append(`
+                    <div class="bot-message-wrapper">
+                        <div class="bot-badge-header">
+                            <img src="/images/lili-avatar.png" alt="LILI" style="width: 20px; height: 20px; border-radius: 50%; object-fit: cover; vertical-align: middle; margin-right: 4px; box-shadow: 0 1px 3px rgba(0,0,0,0.15);">
+                            <span>LILI - Asisten AI</span>
+                        </div>
+                        <div class="bot-bubble" style="border-color: #fecaca; background: #fff5f5;">
+                            <p class="mb-0 text-danger"><i data-feather="alert-circle" style="width:13px;height:13px;" class="me-1"></i>${this.escapeHtml(errText)}</p>
+                        </div>
+                    </div>
+                `);
+
+                if (typeof feather !== 'undefined') {
+                    feather.replace();
+                }
+
+                chatMessages.scrollTop(chatMessages[0]?.scrollHeight || 0);
+            });
+        },
     };
 
     let _searchConvTimer = null;
@@ -1829,6 +2228,65 @@
             }
         });
         window.ChatWidgetApp.updateSelectionUI();
+    });
+
+    // ==========================================
+    // LILI AI ROOM EVENT LISTENERS (AUTH USERS)
+    // ==========================================
+    $(document).on('click', '#btnOpenLiliFromInbox, #btnOpenLiliFromInboxList', function (e) {
+        e.preventDefault();
+        window.ChatWidgetApp.startLiliAiMode('inbox');
+    });
+
+    $(document).on('click', '#btnStartLiliAiAuth, #btnAppLiliAvatar', function (e) {
+        e.preventDefault();
+        window.ChatWidgetApp.startLiliAiMode('search');
+    });
+
+    $(document).on('click', '.ai-action-chip.chip-prompt, [data-prompt]', function (e) {
+        e.preventDefault();
+        const promptText = $(this).attr('data-prompt') || $(this).text().trim();
+        if (promptText) {
+            window.ChatWidgetApp.sendLiliAiMessage(promptText);
+        }
+    });
+
+    $(document).on('click', '#btnPlayLiliVoiceApp', function (e) {
+        e.stopPropagation();
+        window.ChatWidgetApp.playLiliVoiceGreeting();
+    });
+
+    $(document).on('input', '#liliAppInput', function () {
+        const hasText = $(this).val().trim().length > 0;
+        $('#btnSendLiliApp').prop('disabled', !hasText);
+
+        this.style.height = '48px';
+        const scrollH = this.scrollHeight;
+        if (scrollH > 48) {
+            this.style.height = Math.min(scrollH, 85) + 'px';
+        }
+    });
+
+    $(document).on('keydown', '#liliAppInput', function (e) {
+        if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            if (!$('#btnSendLiliApp').prop('disabled')) {
+                window.ChatWidgetApp.sendLiliAiMessage();
+            }
+        }
+    });
+
+    $(document).on('click', '#btnSendLiliApp', function (e) {
+        e.preventDefault();
+        window.ChatWidgetApp.sendLiliAiMessage();
+    });
+
+    $(document).on('click', '.chip-prompt', function (e) {
+        e.preventDefault();
+        const prompt = $(this).data('prompt');
+        if (prompt) {
+            window.ChatWidgetApp.sendLiliAiMessage(prompt);
+        }
     });
 
 })(window, jQuery);
