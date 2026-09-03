@@ -407,7 +407,7 @@
                                 </button>
                                 <button type="button" class="bot-btn-option" data-bot-action="menu_tanya_ai" style="border-color: #c7d2fe; background: #f5f3ff;">
                                     <img src="/images/lili-avatar.png" alt="LILI" class="bot-option-avatar" style="border-radius: 50%; object-fit: cover; box-shadow: 0 1px 3px rgba(99,102,241,0.25);">
-                                    <span class="fw-semibold" style="color: #4f46e5;">2. Tanya LILI (Asisten AI)</span>
+                                    <span class="fw-semibold" style="color: #4f46e5;">2. Tanya LILI (Asisten Virtual)</span>
                                 </button>
                                 <button type="button" class="bot-btn-option primary" data-bot-action="menu_admin_pilih_layanan">
                                     <i data-feather="message-circle"></i>
@@ -463,7 +463,7 @@
                             <span>LILI - Layanan Informasi &amp; Literasi Kepegawaian Interaktif</span>
                         </div>
                         <div class="bot-bubble">
-                            <p class="mb-2">Halo! Saya <strong>LILI</strong> (<em>Layanan Informasi &amp; Literasi Kepegawaian Interaktif</em>) Asisten AI PILKB. 😊</p>
+                            <p class="mb-2">Halo! Saya <strong>LILI</strong> (<em>Layanan Informasi &amp; Literasi Kepegawaian Interaktif</em>) Asisten Virtual PILKB. 😊</p>
                             <p class="mb-2">Anda dapat berkonsultasi seputar regulasi ASN, cek status usulan tiket, serta persyaratan layanan kepegawaian di BKPSDM Buleleng.</p>
                             <p class="mb-1 text-muted small fw-semibold">Contoh pertanyaan yang bisa Anda tanyakan kepada LILI:</p>
                             <ul class="mb-3 small ps-3 text-muted">
@@ -487,7 +487,7 @@
 
             // Putar Suara Sapaan LILI (File MP3 / Web Speech API Browser Native)
             function playLiliVoiceGreeting() {
-                const greetingText = "Halo, saya LILI Asisten AI. Ada yang bisa saya bantu?";
+                const greetingText = "Halo, saya LILI Asisten Virtual. Ada yang bisa saya bantu?";
                 try {
                     const audio = new Audio('/sound/lili-greeting.mp3');
                     const playPromise = audio.play();
@@ -595,7 +595,7 @@
                             <div class="bot-message-wrapper">
                                 <div class="bot-badge-header">
                                     <img src="/images/lili-avatar.png" alt="LILI" style="width: 20px; height: 20px; border-radius: 50%; object-fit: cover; vertical-align: middle; margin-right: 4px; box-shadow: 0 1px 3px rgba(0,0,0,0.15);">
-                                    <span>LILI - Asisten AI</span>
+                                    <span>LILI - Asisten Virtual</span>
                                 </div>
                                 <div class="bot-bubble">
                                     <div class="ai-reply-content mb-2">${formattedReply}</div>

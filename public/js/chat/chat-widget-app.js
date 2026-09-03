@@ -894,16 +894,13 @@
                         <div class="chat-item-top d-flex align-items-center justify-content-between mb-1">
                             <div class="d-flex align-items-center gap-1 overflow-hidden">
                                 <span class="badge" style="background: #e0e7ff; color: #4338ca; font-size: 10px; font-weight: 700; padding: 2px 7px; border-radius: 6px;">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-zap" style="vertical-align: middle; margin-right: 2px;"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>ASISTEN AI
-                                </span>
-                                <span class="badge" style="background: #f1f5f9; color: #475569; font-size: 9.5px; padding: 2px 6px; border-radius: 6px;">
-                                    Standby 24/7
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-zap" style="vertical-align: middle; margin-right: 2px;"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>ASISTEN VIRTUAL
                                 </span>
                             </div>
                             <span class="badge bg-success-soft text-success small" style="font-size: 10px;">Online</span>
                         </div>
                         <div class="chat-item-title fw-bold text-dark text-truncate" style="font-size: 13.5px;">
-                            LILI - Asisten AI Kepegawaian
+                            LILI - Asisten Virtual Kepegawaian
                         </div>
                         <div class="chat-item-sub text-truncate" style="font-size: 11px; color: #64748b;">
                             Konsultasi regulasi ASN &amp; panduan layanan kepegawaian
@@ -1883,10 +1880,10 @@
                 <div class="bot-message-wrapper">
                     <div class="bot-badge-header">
                         <img src="/images/lili-avatar.png" alt="LILI" style="width: 20px; height: 20px; border-radius: 50%; object-fit: cover; vertical-align: middle; margin-right: 4px; box-shadow: 0 1px 3px rgba(0,0,0,0.15);">
-                        <span>LILI - Asisten AI</span>
+                        <span>LILI - Asisten Virtual</span>
                     </div>
                     <div class="bot-bubble">
-                        <p class="mb-2">Halo! Saya <strong>LILI</strong> (<em>Layanan Informasi &amp; Literasi Kepegawaian Interaktif</em>) Asisten AI PILKB. 😊</p>
+                        <p class="mb-2">Halo! Saya <strong>LILI</strong> (<em>Layanan Informasi &amp; Literasi Kepegawaian Interaktif</em>) Asisten Virtual PILKB. 😊</p>
                         <p class="mb-2">Anda dapat berkonsultasi seputar regulasi ASN, cek status usulan tiket, serta persyaratan layanan kepegawaian di BKPSDM Buleleng.</p>
                         <p class="mb-1 text-muted small fw-semibold">Contoh pertanyaan yang bisa Anda tanyakan kepada LILI:</p>
                         <ul class="mb-3 small ps-3 text-muted">
@@ -1925,7 +1922,7 @@
                                 </div>
                                 <div class="overflow-hidden">
                                     <div class="d-flex align-items-center gap-1">
-                                        <span class="fw-bold text-dark text-truncate" style="font-size: 13.5px;">LILI - Asisten AI</span>
+                                        <span class="fw-bold text-dark text-truncate" style="font-size: 13.5px;">LILI - Asisten Virtual</span>
                                         <button type="button" id="btnPlayLiliVoiceApp" class="btn btn-sm btn-link p-0 ms-1" title="Putar Ulang Suara LILI" style="line-height:1; vertical-align: middle;">
                                             <i data-feather="volume-2" style="width:14px; height:14px; color:#6366f1;"></i>
                                         </button>
@@ -2054,7 +2051,7 @@
                 <div id="${loadingId}" class="bot-message-wrapper">
                     <div class="bot-badge-header">
                         <img src="/images/lili-avatar.png" alt="LILI" style="width: 20px; height: 20px; border-radius: 50%; object-fit: cover; vertical-align: middle; margin-right: 4px; box-shadow: 0 1px 3px rgba(0,0,0,0.15);">
-                        <span>LILI - Asisten AI</span>
+                        <span>LILI - Asisten Virtual</span>
                     </div>
                     <div class="bot-bubble">
                         <div class="d-flex align-items-center gap-2 text-primary" style="font-size: 12.5px;">
@@ -2139,7 +2136,7 @@
                     <div class="bot-message-wrapper">
                         <div class="bot-badge-header">
                             <img src="/images/lili-avatar.png" alt="LILI" style="width: 20px; height: 20px; border-radius: 50%; object-fit: cover; vertical-align: middle; margin-right: 4px; box-shadow: 0 1px 3px rgba(0,0,0,0.15);">
-                            <span>LILI - Asisten AI</span>
+                            <span>LILI - Asisten Virtual</span>
                         </div>
                         <div class="bot-bubble">
                             <div class="ai-reply-content mb-2">${formattedReply}</div>
@@ -2171,7 +2168,7 @@
                     <div class="bot-message-wrapper">
                         <div class="bot-badge-header">
                             <img src="/images/lili-avatar.png" alt="LILI" style="width: 20px; height: 20px; border-radius: 50%; object-fit: cover; vertical-align: middle; margin-right: 4px; box-shadow: 0 1px 3px rgba(0,0,0,0.15);">
-                            <span>LILI - Asisten AI</span>
+                            <span>LILI - Asisten Virtual</span>
                         </div>
                         <div class="bot-bubble" style="border-color: #fecaca; background: #fff5f5;">
                             <p class="mb-0 text-danger"><i data-feather="alert-circle" style="width:13px;height:13px;" class="me-1"></i>${this.escapeHtml(errText)}</p>

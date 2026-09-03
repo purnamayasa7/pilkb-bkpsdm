@@ -371,15 +371,15 @@
                         <div class="wa-item-top">
                             <div class="d-flex align-items-center gap-1 overflow-hidden">
                                 <span class="chat-role-badge badge-ai">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-zap" style="vertical-align: middle; margin-right: 2px;"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>ASISTEN AI
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-zap" style="vertical-align: middle; margin-right: 2px;"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>ASISTEN VIRTUAL
                                 </span>
                             </div>
                             <span class="wa-item-time" style="color: #10b981; font-weight: 600; font-size: 11.5px;">
                                 <span style="display:inline-block; width:6px; height:6px; background:#10b981; border-radius:50%; margin-right:4px; vertical-align:middle;"></span>Online
                             </span>
                         </div>
-                        <div class="wa-item-title" title="LILI - Asisten AI Kepegawaian">
-                            LILI - Asisten AI Kepegawaian
+                        <div class="wa-item-title" title="LILI - Asisten Virtual Kepegawaian">
+                            LILI - Asisten Virtual Kepegawaian
                         </div>
                         <div class="wa-item-sub">
                             Konsultasi regulasi ASN &amp; panduan layanan kepegawaian
@@ -536,12 +536,12 @@
             $('#waEmptyState').addClass('d-none');
             $('#waActiveRoom').removeClass('d-none');
 
-            // Render Room Header for LILI (Badge ASISTEN AI dihilangkan sesuai permintaan)
+            // Render Room Header for LILI
             $('#waRoomAvatar').html(`
                 <img src="/images/lili-avatar.png" alt="LILI" style="width: 38px; height: 38px; border-radius: 50%; object-fit: cover; border: 2px solid #6366f1;">
             `);
-            $('#waRoomTitle').text('LILI - Asisten AI Kepegawaian');
-            $('#waRoomSubtitle').text('Asisten Virtual Literasi Regulasi & Panduan Layanan Kepegawaian');
+            $('#waRoomTitle').text('LILI - Asisten Virtual Kepegawaian');
+            $('#waRoomSubtitle').text('Layanan Informasi & Literasi Kepegawaian');
             $('#waRoomRoleBadge').html('');
             $('#waRoomTicketBadge').addClass('d-none');
             $('#waRoomStatusBadge').addClass('d-none');
@@ -581,7 +581,7 @@
                     <div class="bot-message-wrapper">
                         <div class="bot-badge-header">
                             <img src="/images/lili-avatar.png" alt="LILI" style="width: 22px; height: 22px; border-radius: 50%; object-fit: cover; vertical-align: middle; margin-right: 6px; box-shadow: 0 1px 3px rgba(0,0,0,0.15);">
-                            <span class="fw-bold">LILI - Asisten AI</span>
+                            <span class="fw-bold">LILI - Asisten Virtual</span>
                         </div>
                         <div class="bot-bubble">
                             <p class="mb-2">
@@ -686,7 +686,7 @@
                 <div class="bot-message-wrapper" id="${loadingId}">
                     <div class="bot-badge-header">
                         <img src="/images/lili-avatar.png" alt="LILI" style="width: 20px; height: 20px; border-radius: 50%; object-fit: cover; vertical-align: middle; margin-right: 4px; box-shadow: 0 1px 3px rgba(0,0,0,0.15);">
-                        <span>LILI - Asisten AI</span>
+                        <span>LILI - Asisten Virtual</span>
                     </div>
                     <div class="bot-bubble">
                         <div class="d-flex align-items-center gap-2 text-primary" style="font-size: 12.5px;">
@@ -768,7 +768,7 @@
                     <div class="bot-message-wrapper">
                         <div class="bot-badge-header">
                             <img src="/images/lili-avatar.png" alt="LILI" style="width: 20px; height: 20px; border-radius: 50%; object-fit: cover; vertical-align: middle; margin-right: 4px; box-shadow: 0 1px 3px rgba(0,0,0,0.15);">
-                            <span>LILI - Asisten AI</span>
+                            <span>LILI - Asisten Virtual</span>
                         </div>
                         <div class="bot-bubble">
                             <div class="ai-reply-content mb-2">${formattedReply}</div>
@@ -799,7 +799,7 @@
                     <div class="bot-message-wrapper">
                         <div class="bot-badge-header">
                             <img src="/images/lili-avatar.png" alt="LILI" style="width: 20px; height: 20px; border-radius: 50%; object-fit: cover; vertical-align: middle; margin-right: 4px;">
-                            <span>LILI - Asisten AI</span>
+                            <span>LILI - Asisten Virtual</span>
                         </div>
                         <div class="bot-bubble" style="border-color: #fecaca; background: #fff5f5;">
                             <p class="mb-0 text-danger"><i data-feather="alert-circle" style="width:13px;height:13px;" class="me-1"></i>${this.escapeHtml(errText)}</p>

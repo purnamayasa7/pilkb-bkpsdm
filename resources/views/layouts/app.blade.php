@@ -197,7 +197,7 @@
             @if(optional(Auth::user()->role)->name !== 'admin_bawah' && optional(Auth::user()->role)->name !== 'bidang')
                 <div class="chat-page">
                     <div class="chat-welcome-card mb-3">
-                        <div class="chat-welcome-avatar-btn position-relative d-inline-block my-2" id="btnAppLiliAvatar" role="button" tabindex="0" title="Klik untuk Tanya LILI (Asisten AI)">
+                        <div class="chat-welcome-avatar-btn position-relative d-inline-block my-2" id="btnAppLiliAvatar" role="button" tabindex="0" title="Klik untuk Tanya LILI (Asisten Virtual)">
                             <div class="welcome-avatar-ring">
                                 <img src="/images/lili-avatar.png" alt="LILI" class="welcome-lili-img">
                             </div>
@@ -216,7 +216,7 @@
 
                         <button class="btn btn-outline-primary btn-sm rounded-pill w-100 py-2 fw-semibold d-flex align-items-center justify-content-center gap-1 mt-3 shadow-sm" id="btnStartLiliAiAuth" style="font-size: 12.5px; border-color: #6366f1; color: #4f46e5; background: #f5f3ff;">
                             <i data-feather="zap" style="width:13px;height:13px;"></i>
-                            <span>Tanya LILI (Asisten AI)</span>
+                            <span>Tanya LILI (Asisten Virtual)</span>
                         </button>
                     </div>
 
@@ -343,7 +343,7 @@
 
             <button class="btn btn-outline-primary btn-sm rounded-pill w-100 py-2 fw-semibold d-flex align-items-center justify-content-center gap-1 mt-3 shadow-sm" id="btnStartLiliAiAuth" style="font-size: 12.5px; border-color: #6366f1; color: #4f46e5; background: #f5f3ff;">
                 <i data-feather="zap" style="width:13px;height:13px;"></i>
-                <span>Tanya LILI (Asisten AI)</span>
+                <span>Tanya LILI (Asisten Virtual)</span>
             </button>
         </div>
 

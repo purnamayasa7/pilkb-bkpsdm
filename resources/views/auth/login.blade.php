@@ -527,7 +527,7 @@
             <div class="chat-page p-0 d-flex flex-column h-100" id="pageHome">
                 <div class="chat-page-body flex-grow-1 overflow-y-auto">
                     <div class="chat-welcome-card mb-3">
-                        <div class="chat-welcome-avatar-btn position-relative d-inline-block my-2" id="btnWelcomeLiliAvatar" role="button" tabindex="0" title="Klik untuk Tanya LILI (Asisten AI)">
+                        <div class="chat-welcome-avatar-btn position-relative d-inline-block my-2" id="btnWelcomeLiliAvatar" role="button" tabindex="0" title="Klik untuk Tanya LILI (Asisten Virtual)">
                             <div class="welcome-avatar-ring">
                                 <img src="{{ asset('images/lili-avatar.png') }}" alt="LILI" class="welcome-lili-img">
                             </div>
@@ -828,7 +828,7 @@
                                     </div>
                                     <div class="overflow-hidden">
                                         <div class="d-flex align-items-center gap-1">
-                                            <span class="fw-bold text-dark text-truncate" style="font-size: 13.5px;">LILI - Asisten AI</span>
+                                            <span class="fw-bold text-dark text-truncate" style="font-size: 13.5px;">LILI - Asisten Virtual</span>
                                             <button type="button" id="btnPlayLiliVoice" class="btn btn-sm btn-link p-0 ms-1" title="Putar Ulang Suara LILI" style="line-height:1; vertical-align: middle;">
                                                 <i data-feather="volume-2" style="width:14px; height:14px; color:#6366f1;"></i>
                                             </button>
