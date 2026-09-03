@@ -331,11 +331,13 @@
                 }
             }
 
-            function scrollToBottom(smooth = true) {
+            function scrollToBottom(smooth = false) {
                 if (!el.chatMessages) return;
-                el.chatMessages.scrollTo({
-                    top: el.chatMessages.scrollHeight,
-                    behavior: smooth ? 'smooth' : 'auto'
+                el.chatMessages.scrollTop = el.chatMessages.scrollHeight;
+                requestAnimationFrame(() => {
+                    if (el.chatMessages) {
+                        el.chatMessages.scrollTop = el.chatMessages.scrollHeight;
+                    }
                 });
             }
 
@@ -348,7 +350,7 @@
                 const wrapper = document.createElement('div');
                 wrapper.innerHTML = htmlContent;
                 el.chatMessages.appendChild(wrapper.firstElementChild || wrapper);
-                scrollToBottom(true);
+                scrollToBottom(false);
                 if (window.feather) feather.replace();
             }
 
@@ -369,7 +371,7 @@
                     </div>
                 `;
                 el.chatMessages.appendChild(bubble);
-                scrollToBottom(true);
+                scrollToBottom(false);
             }
 
             // 1. Menu Utama Bot Interaktif
@@ -539,6 +541,8 @@
                         </div>
                     </div>
                 `);
+                scrollToBottom(false);
+                setTimeout(() => scrollToBottom(false), 30);
 
                 try {
                     chatState.aiHistory = chatState.aiHistory || [];
@@ -620,6 +624,8 @@
                             </div>
                         `;
                         appendBotMessageHtml(html);
+                        scrollToBottom(false);
+                        setTimeout(() => scrollToBottom(false), 30);
                     } else {
                         throw new Error('Gagal mendapatkan respon AI.');
                     }
