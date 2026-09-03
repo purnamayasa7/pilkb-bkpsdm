@@ -19,7 +19,7 @@ class PegawaiService
      */
     private const OFFLINE_CACHE_TTL = 60;
 
-    protected function isOffline(): bool
+    public function isOffline(): bool
     {
         return Cache::has('simpeg:offline');
     }

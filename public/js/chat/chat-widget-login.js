@@ -386,7 +386,7 @@
                                 </button>
                                 <button type="button" class="bot-btn-option" data-bot-action="menu_tanya_ai" style="border-color: #c7d2fe; background: #f5f3ff;">
                                     <img src="/images/lili-avatar.png" alt="LILI" class="bot-option-avatar" style="border-radius: 50%; object-fit: cover; box-shadow: 0 1px 3px rgba(99,102,241,0.25);">
-                                    <span class="fw-semibold" style="color: #4f46e5;">2. Tanya LILI (AI Asisten)</span>
+                                    <span class="fw-semibold" style="color: #4f46e5;">2. Tanya LILI (Asisten AI)</span>
                                 </button>
                                 <button type="button" class="bot-btn-option primary" data-bot-action="menu_admin_pilih_layanan">
                                     <i data-feather="message-circle"></i>
@@ -431,7 +431,7 @@
                             <span>LILI - Layanan Informasi &amp; Literasi Kepegawaian Interaktif</span>
                         </div>
                         <div class="bot-bubble">
-                            <p class="mb-2">Halo! Saya <strong>LILI</strong> (<em>Layanan Informasi &amp; Literasi Kepegawaian Interaktif</em>) BKPSDM Kabupaten Buleleng. 😊</p>
+                            <p class="mb-2">Halo! Saya <strong>LILI</strong> (<em>Layanan Informasi &amp; Literasi Kepegawaian Interaktif</em>) Asisten AI PILKB. 😊</p>
                             <p class="mb-2">Anda dapat berkonsultasi seputar regulasi ASN, cek status usulan tiket, serta persyaratan layanan kepegawaian di BKPSDM Buleleng.</p>
                             <p class="mb-1 text-muted small fw-semibold">Contoh pertanyaan yang bisa Anda tanyakan kepada LILI:</p>
                             <ul class="mb-3 small ps-3 text-muted">
@@ -455,7 +455,7 @@
 
             // Putar Suara Sapaan LILI (File MP3 / Web Speech API Browser Native)
             function playLiliVoiceGreeting() {
-                const greetingText = "Halo, saya LILI AI Assistant. Ada yang bisa saya bantu?";
+                const greetingText = "Halo, saya LILI Asisten AI. Ada yang bisa saya bantu?";
                 try {
                     const audio = new Audio('/sound/lili-greeting.mp3');
                     const playPromise = audio.play();
@@ -563,7 +563,7 @@
                             <div class="bot-message-wrapper">
                                 <div class="bot-badge-header">
                                     <img src="/images/lili-avatar.png" alt="LILI" style="width: 20px; height: 20px; border-radius: 50%; object-fit: cover; vertical-align: middle; margin-right: 4px; box-shadow: 0 1px 3px rgba(0,0,0,0.15);">
-                                    <span>LILI - AI Asisten</span>
+                                    <span>LILI - Asisten AI</span>
                                 </div>
                                 <div class="bot-bubble">
                                     <div class="ai-reply-content mb-2">${formattedReply}</div>
@@ -1355,13 +1355,20 @@
             }
 
             function bindNipLookup() {
+                el.guestNip?.addEventListener('input', function () {
+                    el.guestNama.value = '';
+                    el.guestUnitKerja.value = '';
+                    el.nipError.classList.add('d-none');
+                });
+
                 el.btnCariNip?.addEventListener('click', async function () {
                     const nip = el.guestNip.value.trim();
                     el.nipError.classList.add('d-none');
 
                     if (nip.length !== 18) {
-                        el.nipError.innerHTML = 'NIP harus terdiri dari 18 digit';
+                        el.nipError.innerHTML = '<i data-feather="alert-circle" style="width:13px;height:13px;" class="me-1"></i> NIP harus terdiri dari 18 digit angka';
                         el.nipError.classList.remove('d-none');
+                        if (window.feather) feather.replace();
                         return;
                     }
 
@@ -1381,27 +1388,42 @@
                         el.guestNama.value = '';
                         el.guestUnitKerja.value = '';
                         if (el.guestEmail) el.guestEmail.value = '';
-                        el.nipError.innerHTML = 'NIP tidak ditemukan';
+
+                        const errMsg = e.message || 'Data pegawai tidak ditemukan.';
+                        const icon = (errMsg.toLowerCase().includes('api') || errMsg.toLowerCase().includes('koneksi') || errMsg.toLowerCase().includes('server') || errMsg.toLowerCase().includes('offline')) 
+                            ? 'wifi-off' 
+                            : 'alert-circle';
+
+                        el.nipError.innerHTML = `<i data-feather="${icon}" style="width:13px;height:13px;" class="me-1"></i> ${errMsg}`;
                         el.nipError.classList.remove('d-none');
+                        if (window.feather) feather.replace();
                     } finally {
                         el.btnCariNip.disabled = false;
                     }
                 });
             }
 
-            // MULAI PERCAKAPAN (MASUK KE BOT DENGAN DATA DIRI SAJA)
+            // MULAI PERCAKAPAN (WAJIB TERVERIFIKASI DARI SIMPEG)
             function bindStartConversation() {
                 document.getElementById('btnStartChat')?.addEventListener('click', function () {
+                    const nip = el.guestNip.value.trim();
                     const nama = el.guestNama.value.trim();
                     const email = el.guestEmail.value.trim();
 
-                    if (!nama || !email) {
-                        alert('Silakan lengkapi data nama dan email Anda terlebih dahulu.');
+                    if (!nip || !nama) {
+                        alert('Silakan masukkan dan verifikasi NIP Anda terlebih dahulu untuk memulai percakapan.');
+                        el.guestNip.focus();
+                        return;
+                    }
+
+                    if (!email) {
+                        alert('Silakan lengkapi alamat email aktif Anda terlebih dahulu.');
+                        el.guestEmail.focus();
                         return;
                     }
 
                     window.ChatWidgetLogin.guestSession = {
-                        nip: el.guestNip.value.trim(),
+                        nip,
                         nama,
                         unit_kerja: el.guestUnitKerja.value.trim(),
                         email,

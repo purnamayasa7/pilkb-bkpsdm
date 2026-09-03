@@ -797,23 +797,40 @@ class ChatController extends Controller
 
     public function getPegawaiByNip($nip)
     {
-        $pegawai = $this->pegawaiService->getPegawaiByNip($nip);
+        try {
+            $pegawai = $this->pegawaiService->getPegawaiByNip($nip);
 
-        if (!$pegawai) {
+            if ($this->pegawaiService->isOffline()) {
+                return response()->json([
+                    'success' => false,
+                    'status'  => 'api_offline',
+                    'message' => 'Layanan data SIMPEG sedang tidak dapat terhubung. Percakapan hanya dapat dimulai setelah data pegawai terverifikasi. Silakan coba beberapa saat lagi.'
+                ], 503);
+            }
+
+            if (!$pegawai) {
+                return response()->json([
+                    'success' => false,
+                    'status'  => 'not_found',
+                    'message' => 'NIP tidak terdaftar dalam database kepegawaian. Silakan periksa kembali 18 digit NIP Anda.'
+                ], 404);
+            }
 
             return response()->json([
+                'success'    => true,
+                'status'     => 'success',
+                'nip'        => $pegawai['nip'] ?? $nip,
+                'nama'       => $pegawai['nama_lengkap'] ?? $pegawai['nama'] ?? '',
+                'unit_kerja' => $pegawai['ket_ukerja'] ?? '',
+                'email'      => $pegawai['email'] ?? $pegawai['email_dinas'] ?? $pegawai['email_resmi'] ?? $pegawai['email_pribadi'] ?? '',
+            ]);
+        } catch (\Throwable $e) {
+            return response()->json([
                 'success' => false,
-                'message' => 'Pegawai tidak ditemukan'
-            ], 404);
+                'status'  => 'api_error',
+                'message' => 'Gagal terhubung ke server SIMPEG. Percakapan hanya dapat dimulai jika data pegawai terverifikasi.'
+            ], 500);
         }
-
-        return response()->json([
-            'success'    => true,
-            'nip'        => $pegawai['nip'] ?? $nip,
-            'nama'       => $pegawai['nama_lengkap'] ?? $pegawai['nama'] ?? '',
-            'unit_kerja' => $pegawai['ket_ukerja'] ?? '',
-            'email'      => $pegawai['email'] ?? $pegawai['email_dinas'] ?? $pegawai['email_resmi'] ?? $pegawai['email_pribadi'] ?? '',
-        ]);
     }
 
     private function generateGuestTicketNumber()

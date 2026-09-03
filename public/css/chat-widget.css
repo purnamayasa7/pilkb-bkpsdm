@@ -3159,30 +3159,12 @@ body.dark-mode .ai-action-chip.chip-prompt:hover {
 .chat-welcome-avatar-btn {
     cursor: pointer;
     position: relative;
-    display: inline-block;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
     user-select: none;
     outline: none;
-    margin-right: 32px; /* Memberi ruang untuk bubble pill di sisi kanan */
-}
-
-.welcome-avatar-aura {
-    position: absolute;
-    inset: -6px;
-    border-radius: 50%;
-    background: radial-gradient(circle, rgba(26, 108, 255, 0.42) 0%, rgba(10, 88, 202, 0) 70%);
-    animation: auraPulse 2.8s infinite ease-in-out;
-    pointer-events: none;
-}
-
-@keyframes auraPulse {
-    0%, 100% {
-        transform: scale(1);
-        opacity: 0.5;
-    }
-    50% {
-        transform: scale(1.2);
-        opacity: 0.95;
-    }
+    margin: 4px auto 8px auto;
 }
 
 /* Rotating Gradient Light Border around LILI */
@@ -3195,11 +3177,21 @@ body.dark-mode .ai-action-chip.chip-prompt:hover {
     align-items: center;
     justify-content: center;
     padding: 2.5px;
-    background: conic-gradient(from 0deg, #1a6cff, #38bdf8, #0a58ca, #60a5fa, #1a6cff);
     box-shadow: 0 2px 8px rgba(10, 88, 202, 0.16);
-    animation: spinLightRing 6s linear infinite;
     z-index: 2;
-    transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s ease;
+    transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.3s ease;
+    transform-origin: center center;
+}
+
+.welcome-avatar-ring::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    background: conic-gradient(from 0deg, #1a6cff, #38bdf8, #0a58ca, #60a5fa, #1a6cff);
+    animation: spinLightRing 6s linear infinite;
+    z-index: 1;
+    transition: filter 0.3s ease;
 }
 
 @keyframes spinLightRing {
@@ -3218,31 +3210,23 @@ body.dark-mode .ai-action-chip.chip-prompt:hover {
     object-fit: cover;
     border: 2px solid #ffffff;
     background: #ffffff;
-    /* Counter-rotate so avatar face stays upright while the light border spins */
-    animation: counterSpin 6s linear infinite;
+    position: relative;
+    z-index: 2;
 }
 
-@keyframes counterSpin {
-    0% {
-        transform: rotate(0deg);
-    }
-    100% {
-        transform: rotate(-360deg);
-    }
-}
-
+/* Zoom halus khusus pada avatar saat di-hover */
 .chat-welcome-avatar-btn:hover .welcome-avatar-ring {
-    transform: scale(1.06);
-    box-shadow: 0 4px 14px rgba(10, 88, 202, 0.28) !important;
-    animation-duration: 3s;
+    transform: scale(1.15);
+    box-shadow: 0 4px 18px rgba(10, 88, 202, 0.3) !important;
 }
 
-.chat-welcome-avatar-btn:hover .welcome-lili-img {
+.chat-welcome-avatar-btn:hover .welcome-avatar-ring::before {
     animation-duration: 3s;
+    filter: brightness(1.1);
 }
 
 .chat-welcome-avatar-btn:active .welcome-avatar-ring {
-    transform: scale(0.96);
+    transform: scale(0.95);
 }
 
 .chat-welcome-live-dot {
@@ -3256,7 +3240,12 @@ body.dark-mode .ai-action-chip.chip-prompt:hover {
     border-radius: 50%;
     box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.35);
     animation: livePulse 2s infinite ease-in-out;
+    transition: transform 0.3s ease;
     z-index: 3;
+}
+
+.chat-welcome-avatar-btn:hover .chat-welcome-live-dot {
+    transform: scale(1.12);
 }
 
 /* Bubble Tanya LILI mengadopsi warna biru floating chat agar serasi */
@@ -3297,9 +3286,10 @@ body.dark-mode .ai-action-chip.chip-prompt:hover {
     vertical-align: middle;
 }
 
+/* Efek lift halus pada badge tanpa merusak ukuran teks */
 .chat-welcome-avatar-btn:hover .welcome-lili-bubble-pill {
-    transform: translateY(-2px) scale(1.05);
-    box-shadow: 0 4px 12px rgba(10, 88, 202, 0.32);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(10, 88, 202, 0.35);
 }
 
 @keyframes popInPill {
