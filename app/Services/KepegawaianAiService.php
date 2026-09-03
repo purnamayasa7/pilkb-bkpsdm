@@ -30,16 +30,20 @@ KEPRIBADIAN & GAYA KOMUNIKASI:
    - JIKA PENGGUNA MENANYAKAN STATUS TIKET / USULAN:
      Gunakan data tiket aktual yang disuntikkan oleh sistem. Jawab secara jelas dengan menyebutkan nomor tiket, nama pemohon tersamar, NIP tersamar, bidang layanan, tahapan terkini, tanggal update, catatan, serta tautan ke halaman detail tiket.
    - JIKA PENGGUNA MENANYAKAN SYARAT LAYANAN SPESIFIK BKPSDM BULELENG:
-     Gunakan data persyaratan resmi SOP BKPSDM Buleleng yang disuntikkan sistem. Sajikan butir-butir persyaratan secara berurutan dan rapi.
+     Gunakan data persyaratan resmi BKPSDM Buleleng yang disuntikkan sistem. Sajikan butir-butir persyaratan secara berurutan dan rapi.
    - JIKA PENGGUNA MENANYAKAN REGULASI UMUM ASN (tanpa spesifik BKPSDM):
      Jelaskan aturan perundang-undangan nasional (UU 20/2023, PP 94/2021, Perka BKN). Di akhir jawaban, tambahkan catatan ramah bahwa jika ingin mengajukan layanan terkait di lingkungan Pemkab Buleleng, berkas dapat disiapkan melalui portal PILKB BKPSDM.
    - JIKA PENGGUNA LANGSUNG MENANYAKAN TOPIK / PERTANYAAN LAINNYA:
      LANGSUNG jawab inti pertanyaannya secara jelas, padat, dan terstruktur (JANGAN awali dengan 'Tentu saja boleh').
 5. Di akhir penjelasan, berikan kalimat penutup yang ramah dan solutif (misalnya: "Apakah ada bagian dari informasi di atas yang ingin LILI jelaskan lebih lanjut? 😊").
 
+PANTANGAN & KETENTUAN PENTING:
+- HINDARI kata atau singkatan "SOP" dalam semua jawaban Anda. Gunakan istilah "persyaratan layanan", "ketentuan berkas", atau "panduan regulasi kepegawaian".
+- JANGAN PERNAH menyuruh, mengarahkan, atau menyebutkan "Di upload Pada SIMPEG" dalam kalimat pembuka, greeting, maupun kesimpulan Anda.
+
 TOPIK UTAMA KEPEGAWAIAN:
 - UU No. 20 Tahun 2023 tentang ASN (PNS & PPPK).
-- Kenaikan Pangkat (6 periode), Mutasi, Cuti ASN, Pensiun (BUP), KGB, Disiplin ASN (PP 94/2021), Izin Belajar & Tugas Belajar (SE MenPAN-RB 28/2021), serta SOP Layanan BKPSDM Buleleng.
+- Kenaikan Pangkat (6 periode), Mutasi, Cuti ASN, Pensiun (BUP), KGB, Disiplin ASN (PP 94/2021), Izin Belajar & Tugas Belajar (SE MenPAN-RB 28/2021), serta Layanan Kepegawaian BKPSDM Buleleng.
 
 BATASAN:
 - HANYA tolak jika pengguna BENAR-BENAR menanyakan hal di luar kepegawaian (misal: resep masakan, cuaca, politik praktis, dongeng). Saat menolak, tetap gunakan bahasa yang sangat santun dari LILI.
@@ -117,7 +121,7 @@ EOT;
                     }
                 }
             } else {
-                $groundingContext .= "\n\n[DATA SOP PERSYARATAN RESMI BKPSDM KABUPATEN BULELENG]:\n" .
+                $groundingContext .= "\n\n[DATA PERSYARATAN RESMI BKPSDM KABUPATEN BULELENG]:\n" .
                     "- Nama Layanan: " . $serviceData['nama_layanan'] . "\n" .
                     "- Bidang: " . $serviceData['bidang_nama'] . "\n" .
                     "- Waktu Penyelesaian: " . ($serviceData['waktu_penyelesaian'] ?: '-') . "\n" .
@@ -130,7 +134,7 @@ EOT;
 
                 $groundingContext .= "\nPETUNJUK JAWABAN SYARAT LAYANAN:\n" .
                     "- Gunakan butir-butir persyaratan resmi di atas untuk menjawab pertanyaan pengguna secara teratur.\n" .
-                    "- Jelaskan bahwa ini adalah SOP persyaratan resmi di lingkungan BKPSDM Kabupaten Buleleng.\n" .
+                    "- Jelaskan bahwa ini adalah persyaratan resmi di lingkungan BKPSDM Kabupaten Buleleng.\n" .
                     "- Informasikan bahwa format persyaratan dapat diunduh melalui tombol di bawah.";
 
                 if (!empty($serviceData['pdf_url'])) {
@@ -212,7 +216,7 @@ EOT;
                     if (!empty($reply)) {
                         return [
                             'success' => true,
-                            'reply'   => trim($reply),
+                            'reply'   => $this->cleanAiReply($reply),
                             'actions' => $actions,
                             'source'  => 'gemini_ai'
                         ];
@@ -554,10 +558,10 @@ EOT;
 
             return [
                 'success' => true,
-                'reply'   => "Berdasarkan SOP Layanan Resmi di **BKPSDM Kabupaten Buleleng**, berikut adalah persyaratan untuk **{$serviceData['nama_layanan']}** ({$serviceData['bidang_nama']}):\n\n" .
+                'reply'   => "Berdasarkan informasi persyaratan resmi di **BKPSDM Kabupaten Buleleng**, berikut adalah berkas untuk **{$serviceData['nama_layanan']}** ({$serviceData['bidang_nama']}):\n\n" .
                     "📄 **Daftar Berkas Persyaratan:**\n" .
                     $syaratText . "\n" .
-                    "⏱️ **Estimasi Waktu Penyelesaian:** " . ($serviceData['waktu_penyelesaian'] ?: 'Sesuai SOP') . "\n\n" .
+                    "⏱️ **Estimasi Waktu Penyelesaian:** " . ($serviceData['waktu_penyelesaian'] ?: 'Sesuai ketentuan') . "\n\n" .
                     "Anda dapat mengunduh format persyaratan resmi ini dalam bentuk PDF melalui tombol di bawah. Ada hal lain yang ingin LILI bantu? 😊",
                 'actions' => $actions,
                 'source'  => 'fallback_service_syarat'
@@ -688,5 +692,21 @@ EOT;
             'actions' => [],
             'source'  => 'fallback_general'
         ];
+    }
+
+    /**
+     * Bersihkan respons AI dari frasa larangan (seperti SOP atau himbauan upload SIMPEG di kalimat umum).
+     */
+    private function cleanAiReply(string $text): string
+    {
+        // Hilangkan frasa larangan seperti 'di upload pada SIMPEG' jika diucapkan AI di narasi pembuka/penutup
+        $cleaned = preg_replace('/\b(?:silakan\s+)?(?:di[\s\-]?upload|diunggah)\s+pada\s+simpeg\b/i', 'disiapkan pada sistem', $text);
+        // Netralkan kata 'SOP' yang disisipkan AI di narasi
+        $cleaned = preg_replace('/\bSOP\s+Layanan\b/i', 'Layanan', $cleaned);
+        $cleaned = preg_replace('/\bSOP\s+persyaratan\b/i', 'persyaratan', $cleaned);
+        $cleaned = preg_replace('/\bsesuai\s+SOP\b/i', 'sesuai ketentuan', $cleaned);
+        $cleaned = preg_replace('/\bSOP\b/', 'panduan layanan', $cleaned);
+
+        return trim($cleaned);
     }
 }

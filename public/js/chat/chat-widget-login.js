@@ -102,7 +102,9 @@
                 ticket: null,
                 soundEnabled: false,
                 botMode: 'main_menu', // 'main_menu', 'info_menu', 'awaiting_ticket', 'selecting_syarat_layanan', 'selecting_admin_layanan', 'live_admin'
-                pendingAdminMessage: null
+                pendingAdminMessage: null,
+                cachedRooms: new Map(),
+                roomScrollTops: new Map()
             };
 
             const notificationSound = new Audio("/sound/notification.mp3");
@@ -190,8 +192,14 @@
                 }
             }
 
-            // Show Page helper
+            // Show Page helper (WhatsApp Style State & Scroll Preservation)
             function showPage(activePage) {
+                // Simpan posisi scroll sebelum meninggalkan pageRoom
+                if (el.pageRoom && !el.pageRoom.classList.contains('d-none') && el.chatMessages) {
+                    const key = chatState.conversationId ? String(chatState.conversationId) : (chatState.botMode === 'ai_kepegawaian' ? 'lili_ai' : 'default_room');
+                    chatState.roomScrollTops.set(key, el.chatMessages.scrollTop);
+                }
+
                 pages.forEach(page => {
                     if (page) page.classList.add('d-none');
                 });
@@ -201,6 +209,11 @@
                     if (activePage === el.pageHome) {
                         updateWitaGreeting();
                         triggerLiliBubbleAnimation();
+                    } else if (activePage === el.pageRoom && el.chatMessages) {
+                        const key = chatState.conversationId ? String(chatState.conversationId) : (chatState.botMode === 'ai_kepegawaian' ? 'lili_ai' : 'default_room');
+                        if (chatState.roomScrollTops.has(key)) {
+                            el.chatMessages.scrollTop = chatState.roomScrollTops.get(key);
+                        }
                     }
                 }
                 if (window.feather) {
@@ -210,6 +223,12 @@
 
             // Keyboard & Input Events
             function bindKeyboardEvents() {
+                // Scroll tracking pada chat messages container (WhatsApp Style)
+                el.chatMessages?.addEventListener('scroll', function () {
+                    const key = chatState.conversationId ? String(chatState.conversationId) : (chatState.botMode === 'ai_kepegawaian' ? 'lili_ai' : 'default_room');
+                    chatState.roomScrollTops.set(key, this.scrollTop);
+                });
+
                 el.messageInput?.addEventListener('keydown', function (e) {
                     if (e.key === 'Enter' && !e.shiftKey) {
                         e.preventDefault();
@@ -1805,18 +1824,48 @@
             }
 
             async function loadGuestMessages(conversationId, email) {
-                const result = await apiRequest(`/guest-chat/${conversationId}/messages?email=${encodeURIComponent(email)}`);
-                el.chatMessages.innerHTML = '';
+                // WhatsApp Style Room Caching (0ms render jika sudah pernah dimuat)
+                if (chatState.cachedRooms.has(conversationId)) {
+                    const cached = chatState.cachedRooms.get(conversationId);
+                    el.chatMessages.innerHTML = cached.html;
+                    const savedPos = chatState.roomScrollTops.get(String(conversationId));
+                    if (savedPos != null) {
+                        el.chatMessages.scrollTop = savedPos;
+                    } else {
+                        el.chatMessages.scrollTop = el.chatMessages.scrollHeight;
+                    }
+                    if (window.feather) feather.replace();
+                    return;
+                }
 
+                const result = await apiRequest(`/guest-chat/${conversationId}/messages?email=${encodeURIComponent(email)}`);
+                
+                let batchHtml = '';
                 result.messages.forEach(msg => {
                     const isGuest = msg.sender_guest_id !== null;
-                    appendMessage({
-                        senderName: isGuest ? "Saya" : (msg.sender_user?.nama || "Admin"),
-                        message: msg.message,
-                        createdAt: msg.created_at,
-                        isGuest
-                    });
+                    const senderName = isGuest ? "Saya" : (msg.sender_user?.nama || "Admin");
+                    batchHtml += `
+                        <div class="message-row ${isGuest ? 'me' : 'other'}">
+                            <div class="message-wrapper">
+                                <div class="message-info ${isGuest ? 'me' : 'other'}">
+                                    <span class="sender-name">${escapeHtml(shortName(senderName))}</span>
+                                    <span class="message-dot">•</span>
+                                    <span class="message-time">${formatChatTime(msg.created_at)}</span>
+                                </div>
+                                <div class="message-bubble ${isGuest ? 'me' : 'other'}">${escapeHtml(msg.message)}</div>
+                            </div>
+                        </div>
+                    `;
                 });
+
+                el.chatMessages.innerHTML = batchHtml;
+                el.chatMessages.scrollTop = el.chatMessages.scrollHeight;
+
+                chatState.cachedRooms.set(conversationId, {
+                    html: batchHtml,
+                    messages: result.messages
+                });
+                chatState.roomScrollTops.set(String(conversationId), el.chatMessages.scrollHeight);
             }
 
             // Render pesan menggunakan styling chat-bubble standar PILKB (Hanya nama saja, tanpa badge bidang)
@@ -1838,8 +1887,19 @@
                 `;
 
                 el.chatMessages.appendChild(row);
-                el.chatMessages.scrollTop = el.chatMessages.scrollHeight;
-                if (window.feather) feather.replace();
+
+                // Auto-scroll ke bawah jika posisi scroll dekat dasar
+                const scrollDist = el.chatMessages.scrollHeight - el.chatMessages.scrollTop - el.chatMessages.clientHeight;
+                if (scrollDist < 160) {
+                    el.chatMessages.scrollTop = el.chatMessages.scrollHeight;
+                    if (chatState.conversationId) {
+                        chatState.roomScrollTops.set(String(chatState.conversationId), el.chatMessages.scrollHeight);
+                    }
+                }
+
+                if (chatState.conversationId && chatState.cachedRooms.has(chatState.conversationId)) {
+                    chatState.cachedRooms.get(chatState.conversationId).html = el.chatMessages.innerHTML;
+                }
             }
 
             // FIREBASE REALTIME SUBSCRIPTION

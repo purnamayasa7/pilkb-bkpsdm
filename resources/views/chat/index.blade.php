@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @push('styles')
-<link rel="stylesheet" href="{{ asset('css/chat-page.css') }}">
+<link rel="stylesheet" href="{{ asset('css/chat-page.css') }}?v={{ filemtime(public_path('css/chat-page.css')) }}">
 <style>
     /* Sembunyikan floating button saat berada di halaman /chat */
     #chatFloatingButton {
@@ -191,6 +191,12 @@
                         <i data-feather="more-vertical"></i>
                     </button>
                     <ul class="dropdown-menu dropdown-menu-end chat-dropdown-menu">
+                        <li id="waLiResetLili" class="d-none">
+                            <a class="dropdown-item d-flex align-items-center text-primary" href="#" id="waBtnResetLiliChat">
+                                <i data-feather="rotate-cw" class="me-2" style="width:14px;height:14px;"></i>
+                                Mulai Chat Baru
+                            </a>
+                        </li>
                         <li id="waLiCloseChat">
                             <a class="dropdown-item d-flex align-items-center text-danger" href="#" id="waBtnCloseChat">
                                 <i data-feather="check-circle" class="me-2" style="width:14px;height:14px;"></i>
@@ -320,5 +326,5 @@ $chatAuthData = [
 <script>
     window.ChatAuth = {!! json_encode($chatAuthData) !!};
 </script>
-<script src="{{ asset('js/chat/chat-page.js') }}"></script>
+<script src="{{ asset('js/chat/chat-page.js') }}?v={{ filemtime(public_path('js/chat/chat-page.js')) }}"></script>
 @endpush

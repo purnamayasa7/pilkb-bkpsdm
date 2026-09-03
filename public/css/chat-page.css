@@ -183,12 +183,16 @@ body.dark-mode .wa-selection-bar {
     border: 1px solid #253247;
 }
 
-/* Conversation List Scroll */
+/* Conversation List Scroll (GPU Hardware Accelerated 60-120fps) */
 .wa-conv-list {
     flex: 1;
     overflow-y: auto;
     overflow-x: hidden;
     padding: 6px 0;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
+    will-change: scroll-position;
+    transform: translateZ(0);
 }
 
 .wa-conv-item {
@@ -201,9 +205,12 @@ body.dark-mode .wa-selection-bar {
     user-select: none;
     -webkit-user-select: none;
     outline: none;
-    transition: all 0.15s ease;
+    transition: background-color 0.15s ease, border-color 0.15s ease;
     text-decoration: none;
     position: relative;
+    contain: layout style paint;
+    content-visibility: auto;
+    contain-intrinsic-size: auto 76px;
 }
 
 .wa-conv-item:hover {
@@ -313,7 +320,19 @@ body.dark-mode .wa-conv-item.unread-item {
     border: 1px solid #fde68a;
 }
 
+.chat-role-badge.badge-ai {
+    background: #e0e7ff;
+    color: #4338ca;
+    border: 1px solid #c7d2fe;
+}
+
 /* Dark Mode Role Badges */
+body.dark-mode .chat-role-badge.badge-ai {
+    background: rgba(99, 102, 241, 0.2) !important;
+    color: #a5b4fc !important;
+    border-color: rgba(165, 180, 252, 0.3) !important;
+}
+
 body.dark-mode .chat-role-badge.badge-tamu {
     background: rgba(34, 197, 94, 0.15);
     color: #4ade80;
@@ -336,6 +355,10 @@ body.dark-mode .chat-role-badge.badge-fo {
     background: rgba(245, 158, 11, 0.15);
     color: #fbbf24;
     border-color: rgba(245, 158, 11, 0.3);
+}
+
+body.dark-mode .wa-conv-item-lili .wa-item-time {
+    color: #4ade80 !important;
 }
 
 .wa-item-title {
@@ -541,6 +564,8 @@ body.dark-mode .wa-messages-container {
 .wa-messages-container .message-row {
     display: flex;
     width: 100%;
+    content-visibility: auto;
+    contain-intrinsic-size: auto 54px;
 }
 
 .wa-messages-container .message-row.me {
@@ -834,5 +859,188 @@ body.dark-mode .chat-typing-bubble {
         transform: scale(1.15);
         opacity: 1;
     }
+}
+
+/* =========================================================
+   LILI AI PINNED ITEM IN WHATSAPP PAGE SIDEBAR
+   ========================================================= */
+.wa-conv-item-lili {
+    display: flex !important;
+    align-items: stretch !important;
+    gap: 12px !important;
+    padding: 12px 16px !important;
+    margin: 0 !important;
+    border-radius: 0 !important;
+    background: #fbfbfe !important;
+    border-bottom: 1px solid #eef2f7 !important;
+    border-left: 4px solid transparent !important;
+    box-shadow: none !important;
+    cursor: pointer !important;
+    user-select: none !important;
+    transition: background-color 0.15s ease, border-color 0.15s ease !important;
+    text-decoration: none !important;
+    position: relative !important;
+}
+
+.wa-conv-item-lili:hover {
+    background: #f5f3ff !important;
+}
+
+.wa-conv-item-lili.active {
+    background: #ede9fe !important;
+    border-left: 4px solid #6366f1 !important;
+}
+
+body.dark-mode .wa-conv-item-lili {
+    background: #141a2e !important;
+    border-bottom: 1px solid #1e293b !important;
+    border-left-color: transparent !important;
+    box-shadow: none !important;
+}
+
+body.dark-mode .wa-conv-item-lili:hover {
+    background: #1e2238 !important;
+}
+
+body.dark-mode .wa-conv-item-lili.active {
+    background: #25224e !important;
+    border-left: 4px solid #818cf8 !important;
+}
+
+body.dark-mode .wa-conv-item-lili .wa-item-title {
+    color: #f8fafc !important;
+}
+
+body.dark-mode .wa-conv-item-lili .wa-item-sub {
+    color: #94a3b8 !important;
+}
+
+/* Bot Message Styling inside WhatsApp Page */
+.bot-message-wrapper {
+    margin-bottom: 14px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+}
+
+.bot-badge-header {
+    display: flex;
+    align-items: center;
+    font-size: 12px;
+    font-weight: 700;
+    color: #4338ca;
+    margin-bottom: 5px;
+    padding-left: 4px;
+}
+
+body.dark-mode .bot-badge-header {
+    background: rgba(99, 102, 241, 0.18) !important;
+    border: 1px solid rgba(165, 180, 252, 0.28) !important;
+    color: #c7d2fe !important;
+}
+
+.bot-bubble {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 4px 18px 18px 18px;
+    padding: 14px 16px;
+    max-width: 82%;
+    color: #1e293b;
+    font-size: 13.5px;
+    line-height: 1.6;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+
+body.dark-mode .bot-bubble {
+    background: #182235;
+    border-color: #253247;
+    color: #f1f5f9;
+}
+
+.ai-reply-content {
+    word-break: break-word;
+}
+
+.ai-action-chips {
+    margin-top: 8px;
+    margin-bottom: 4px;
+}
+
+.ai-action-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11.5px;
+    font-weight: 600;
+    padding: 5px 12px;
+    border-radius: 20px;
+    text-decoration: none;
+    transition: all 0.15s ease;
+    border: 1px solid transparent;
+    cursor: pointer;
+}
+
+.ai-action-chip.chip-pdf {
+    background: #eff6ff;
+    color: #2563eb;
+    border-color: #bfdbfe;
+}
+
+.ai-action-chip.chip-pdf:hover {
+    background: #2563eb;
+    color: #ffffff;
+    border-color: #2563eb;
+    box-shadow: 0 2px 6px rgba(37, 99, 235, 0.25);
+}
+
+.ai-action-chip.chip-ticket {
+    background: #ecfdf5;
+    color: #059669;
+    border-color: #a7f3d0;
+}
+
+.ai-action-chip.chip-ticket:hover {
+    background: #059669;
+    color: #ffffff;
+    border-color: #059669;
+    box-shadow: 0 2px 6px rgba(5, 150, 105, 0.25);
+}
+
+.ai-action-chip.chip-admin {
+    background: #fdf2f8;
+    color: #db2777;
+    border-color: #fbcfe8;
+}
+
+.ai-action-chip.chip-admin:hover {
+    background: #db2777;
+    color: #ffffff;
+    border-color: #db2777;
+    box-shadow: 0 2px 6px rgba(219, 39, 119, 0.25);
+}
+
+.ai-action-chip.chip-prompt {
+    background: #f8fafc;
+    color: #475569;
+    border-color: #cbd5e1;
+}
+
+.ai-action-chip.chip-prompt:hover {
+    background: #4f46e5;
+    color: #ffffff;
+    border-color: #4f46e5;
+    box-shadow: 0 2px 6px rgba(79, 70, 229, 0.25);
+}
+
+body.dark-mode .ai-action-chip.chip-prompt {
+    background: #0f172a;
+    color: #cbd5e1;
+    border-color: #334155;
+}
+
+body.dark-mode .ai-action-chip.chip-prompt:hover {
+    background: #6366f1;
+    color: #ffffff;
+    border-color: #6366f1;
 }
 

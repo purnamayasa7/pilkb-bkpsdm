@@ -498,10 +498,15 @@
                     });
             }
 
-            $(document).on('click', '#btnBackInbox, #btnBackFromLiliAi', function() {
+            $(document).on('click', '#btnBackInbox, #btnBackFromLiliAi', function(e) {
+                e.preventDefault();
 
                 if ($('#liliAppChatMessages').length) {
                     ChatWidgetApp.savedLiliChatHtml = $('#liliAppChatMessages').html();
+                }
+
+                if (window.ChatWidgetApp && typeof window.ChatWidgetApp.saveCurrentRoomState === 'function') {
+                    window.ChatWidgetApp.saveCurrentRoomState();
                 }
 
                 ChatWidgetApp.stopPolling();

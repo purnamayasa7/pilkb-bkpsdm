@@ -15,6 +15,12 @@
         renderedMessageIds: new Set(),
         lastMessageId: null,
         notificationSound: null,
+        liliAiHistory: [],
+        savedLiliChatHtml: '',
+        isLiliAiLoading: false,
+        hasPlayedLiliVoice: false,
+        cachedRooms: new Map(),
+        roomScrollTops: new Map(),
 
         init() {
             $.ajaxSetup({
@@ -130,6 +136,15 @@
                     this.hideTypingIndicator();
                 }
             } else {
+                // Jika room ada di background tapi sudah di-cache di memori, selipkan pesan baru tanpa merusak scroll
+                if (this.cachedRooms.has(Number(conv.id))) {
+                    const cached = this.cachedRooms.get(Number(conv.id));
+                    if (e.messageData && !cached.renderedMessageIds.has(e.messageData.id)) {
+                        cached.renderedMessageIds.add(e.messageData.id);
+                        cached.$bucket.append(this.renderMessageItem(e.messageData));
+                        cached.lastMessageId = e.messageData.id;
+                    }
+                }
                 // Mainkan suara secara debounced jika bukan room yang sedang aktif
                 this.playNotificationSound();
             }
@@ -342,17 +357,52 @@
                 totalCount.addClass('d-none');
             }
 
+            const qClean = String(searchTerm || '').toLowerCase().trim();
+            const showLili = !qClean || 'lili'.includes(qClean) || 'ai'.includes(qClean) || 'asisten'.includes(qClean);
+            const isLiliActive = this.activeConversationId === 'lili_ai';
+
+            const liliPinnedHtml = `
+                <div class="wa-conv-item wa-conv-item-lili ${isLiliActive ? 'active' : ''}" id="waBtnOpenLiliFromList">
+                    <div class="wa-item-avatar position-relative" style="background: transparent; box-shadow: none;">
+                        <img src="/images/lili-avatar.png" alt="LILI" style="width: 44px; height: 44px; border-radius: 50%; object-fit: cover; border: 2px solid #6366f1; box-shadow: 0 2px 6px rgba(99,102,241,0.25);">
+                        <span style="position: absolute; bottom: 0; right: 0; width: 10px; height: 10px; background: #10b981; border: 2px solid #fff; border-radius: 50%;"></span>
+                    </div>
+                    <div class="wa-item-body">
+                        <div class="wa-item-top">
+                            <div class="d-flex align-items-center gap-1 overflow-hidden">
+                                <span class="chat-role-badge badge-ai">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-zap" style="vertical-align: middle; margin-right: 2px;"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>ASISTEN AI
+                                </span>
+                            </div>
+                            <span class="wa-item-time" style="color: #10b981; font-weight: 600; font-size: 11.5px;">
+                                <span style="display:inline-block; width:6px; height:6px; background:#10b981; border-radius:50%; margin-right:4px; vertical-align:middle;"></span>Online
+                            </span>
+                        </div>
+                        <div class="wa-item-title" title="LILI - Asisten AI Kepegawaian">
+                            LILI - Asisten AI Kepegawaian
+                        </div>
+                        <div class="wa-item-sub">
+                            Konsultasi regulasi ASN &amp; panduan layanan kepegawaian
+                        </div>
+                        <div class="wa-item-preview" style="color: #4f46e5; font-weight: 600;">
+                            Klik untuk mulai konsultasi bersama LILI →
+                        </div>
+                    </div>
+                </div>
+            `;
+
             if (!items.length) {
+                let emptyContent = '';
                 if (searchTerm) {
-                    list.html(`
+                    emptyContent = `
                         <div class="p-4 text-center text-muted">
                             <i data-feather="search" class="mb-2" style="width:28px;height:28px;opacity:0.5;"></i>
                             <div class="fw-semibold">Tidak Ditemukan</div>
                             <div class="small">Tidak ada chat dengan kata kunci "${this.escapeHtml(searchTerm)}"</div>
                         </div>
-                    `);
+                    `;
                 } else {
-                    list.html(`
+                    emptyContent = `
                         <div class="p-4 text-center text-muted">
                             <i data-feather="message-square" class="mb-2" style="width:32px;height:32px;opacity:0.5;"></i>
                             <div class="fw-semibold">Belum Ada Percakapan</div>
@@ -361,13 +411,14 @@
                                 <i data-feather="search" class="me-1"></i> Cari Tiket
                             </button>
                         </div>
-                    `);
+                    `;
                 }
+                list.html((showLili ? liliPinnedHtml : '') + emptyContent);
                 if (window.feather) feather.replace();
                 return;
             }
 
-            let html = '';
+            let html = showLili ? liliPinnedHtml : '';
             items.forEach((item) => {
                 const isUnread = Number(item.unread) > 0;
                 const isActive = Number(item.id) === Number(this.activeConversationId);
@@ -448,29 +499,384 @@
             this.renderConversationList(filtered, query);
         },
 
-        // Open Room
-        openConversation(conversationId) {
+        // Save current active room scroll & state
+        saveCurrentRoomState() {
+            if (!this.activeConversationId) return;
+            const box = $('#waMessagesBox');
+            if (!box.length) return;
+            const scrollPos = box.scrollTop();
+            this.roomScrollTops.set(String(this.activeConversationId), scrollPos);
+
+            if (this.activeConversationId === 'lili_ai') {
+                const $liliBucket = box.find('#waBucket_lili_ai');
+                if ($liliBucket.length) {
+                    this.savedLiliChatHtml = $liliBucket.html();
+                }
+            } else if (this.cachedRooms.has(Number(this.activeConversationId))) {
+                const cached = this.cachedRooms.get(Number(this.activeConversationId));
+                cached.scrollTop = scrollPos;
+            }
+        },
+
+        // Open LILI AI Dedicated Room
+        openLiliAiRoom(reset = false) {
             this.hideTypingIndicator();
             this.stopPolling();
-            if (this.activeConversationId && window.Echo) {
-                window.Echo.leave(`chat.${this.activeConversationId}`);
-            }
-            this.activeConversationId = conversationId;
-            this.renderedMessageIds.clear();
-            this.lastMessageId = null;
+            this.saveCurrentRoomState();
+
+            this.activeConversationId = 'lili_ai';
+            this.activeConversationStatus = 'open';
 
             // Highlight in list
             $('.wa-conv-item').removeClass('active');
-            $(`.wa-conv-item[data-id="${conversationId}"]`).addClass('active');
+            $('#waBtnOpenLiliFromList').addClass('active');
 
             // Show mobile room panel
             $('.wa-main').addClass('show-room');
             $('#waEmptyState').addClass('d-none');
             $('#waActiveRoom').removeClass('d-none');
 
-            // Show skeleton / loading
-            $('#waMessagesBox').html(`
-                <div class="chat-skeleton-wrapper p-4">
+            // Render Room Header for LILI (Badge ASISTEN AI dihilangkan sesuai permintaan)
+            $('#waRoomAvatar').html(`
+                <img src="/images/lili-avatar.png" alt="LILI" style="width: 38px; height: 38px; border-radius: 50%; object-fit: cover; border: 2px solid #6366f1;">
+            `);
+            $('#waRoomTitle').text('LILI - Asisten AI Kepegawaian');
+            $('#waRoomSubtitle').text('Asisten Virtual Literasi Regulasi & Panduan Layanan Kepegawaian');
+            $('#waRoomRoleBadge').html('');
+            $('#waRoomTicketBadge').addClass('d-none');
+            $('#waRoomStatusBadge').addClass('d-none');
+
+            // Dropdown Menu options
+            $('#waLiResetLili').removeClass('d-none').show();
+            $('#waLiCloseChat, #waLiReopenChat').addClass('d-none').hide();
+            $('#waChatClosedNotice').addClass('d-none');
+
+            // Input Textarea
+            $('#waChatInput')
+                .prop('disabled', false)
+                .attr('placeholder', 'Tanya apa saja seputar kepegawaian kepada LILI...')
+                .val('')
+                .css('height', '44px');
+            $('#waSendMessage').prop('disabled', true);
+            $('#waChatEmojiBtn').prop('disabled', false);
+
+            const box = $('#waMessagesBox');
+            // Sembunyikan semua bucket percakapan tiket
+            box.find('.wa-room-bucket').addClass('d-none');
+
+            let $liliBucket = box.find('#waBucket_lili_ai');
+            if (reset && $liliBucket.length) {
+                $liliBucket.remove();
+                $liliBucket = $();
+                this.savedLiliChatHtml = '';
+                this.liliAiHistory = [];
+                this.roomScrollTops.delete('lili_ai');
+            }
+
+            if (!$liliBucket.length) {
+                $liliBucket = $(`<div class="wa-room-bucket" id="waBucket_lili_ai" data-conv-id="lili_ai"></div>`);
+                box.append($liliBucket);
+
+                $liliBucket.html(`
+                    <div class="bot-message-wrapper">
+                        <div class="bot-badge-header">
+                            <img src="/images/lili-avatar.png" alt="LILI" style="width: 22px; height: 22px; border-radius: 50%; object-fit: cover; vertical-align: middle; margin-right: 6px; box-shadow: 0 1px 3px rgba(0,0,0,0.15);">
+                            <span class="fw-bold">LILI - Asisten AI</span>
+                        </div>
+                        <div class="bot-bubble">
+                            <p class="mb-2">
+                                Halo Rekan ASN! 👋 Saya <strong>LILI</strong>, Asisten Virtual Kepegawaian BKPSDM Kabupaten Buleleng.
+                            </p>
+                            <p class="mb-3">
+                                Saya siap membantu Anda memberikan literasi regulasi kepegawaian ASN, persyaratan layanan (Kenaikan Pangkat, Cuti, Mutasi, Pensiun, Karis/Karsu), serta unduhan dokumen persyaratan resmi.
+                            </p>
+                            <p class="small text-muted mb-2 fw-semibold">Pilih topik pertanyaan di bawah atau ketik di kolom pesan:</p>
+                            <div class="ai-action-chips d-flex flex-wrap gap-2 pt-1">
+                                <button type="button" class="ai-action-chip chip-prompt" data-prompt="Syarat Kenaikan Pangkat Reguler">
+                                    <span>Syarat Kenaikan Pangkat</span>
+                                </button>
+                                <button type="button" class="ai-action-chip chip-prompt" data-prompt="Syarat Pengusulan Cuti Melahirkan">
+                                    <span>Syarat Cuti Melahirkan</span>
+                                </button>
+                                <button type="button" class="ai-action-chip chip-prompt" data-prompt="Syarat Pensiun BUP">
+                                    <span>Syarat Pensiun BUP</span>
+                                </button>
+                                <button type="button" class="ai-action-chip chip-prompt" data-prompt="Bagaimana Alur Pengusulan Karis/Karsu?">
+                                    <span>Alur Karis / Karsu</span>
+                                </button>
+                                <button type="button" class="ai-action-chip chip-prompt" data-prompt="Bagaimana pengajuan izin belajar atau tugas belajar?">
+                                    <span>Izin / Tugas Belajar</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `);
+                box.scrollTop(box[0].scrollHeight);
+            } else {
+                $liliBucket.removeClass('d-none');
+                const savedPos = this.roomScrollTops.get('lili_ai');
+                if (savedPos != null) {
+                    box.scrollTop(savedPos);
+                }
+            }
+
+            // Langsung putar suara sapaan LILI hanya saat pertama kali dibuka (session)
+            if (!this.hasPlayedLiliVoice) {
+                this.playLiliVoiceGreeting();
+                this.hasPlayedLiliVoice = true;
+            }
+
+            if (window.feather) feather.replace();
+        },
+
+        playLiliVoiceGreeting() {
+            if (!this._liliVoiceAudio) {
+                this._liliVoiceAudio = new Audio('/sound/lili-greeting.mp3');
+            }
+            this._liliVoiceAudio.currentTime = 0;
+            this._liliVoiceAudio.play().catch(e => console.log('Autoplay audio blocked:', e));
+        },
+
+        formatLiliAiReply(text) {
+            let safe = this.escapeHtml(text);
+            safe = safe.replace(/\*\*([^*\n\r]+?)\*\*/g, '<strong>$1</strong>');
+            safe = safe.replace(/_([^_\n\r]+?)_/g, '<em>$1</em>');
+            safe = safe.replace(/\[(.*?)\]\((.*?)\)/g, (match, title, url) => {
+                const cleanUrl = url.trim();
+                if (/^(https?:\/\/|\/|mailto:)/i.test(cleanUrl)) {
+                    return `<a href="${cleanUrl}" target="_blank" rel="noopener noreferrer">${title}</a>`;
+                }
+                return title;
+            });
+            safe = safe.replace(/\n/g, '<br>');
+            return safe;
+        },
+
+        sendLiliAiMessage(customPrompt = null) {
+            const input = $('#waChatInput');
+            const message = customPrompt || input.val().trim();
+            if (!message || this.isLiliAiLoading) return;
+
+            input.val('').css('height', '44px');
+            $('#waSendMessage').prop('disabled', true);
+
+            const nowIso = new Date().toISOString();
+            const box = $('#waMessagesBox');
+            let targetBucket = box.find('#waBucket_lili_ai');
+            if (!targetBucket.length) {
+                targetBucket = box;
+            }
+
+            // 1. Render User Message Bubble
+            targetBucket.append(this.renderMessageItem({
+                id: 'lili_user_' + Date.now(),
+                sender_user_id: window.ChatAuth?.id,
+                sender_name: window.ChatAuth?.name,
+                message: message,
+                created_at: nowIso
+            }));
+
+            this.liliAiHistory = this.liliAiHistory || [];
+            this.liliAiHistory.push({ role: 'user', content: message });
+
+            // 2. Render Loading Indicator Bubble
+            this.isLiliAiLoading = true;
+            const loadingId = 'lili_loading_' + Date.now();
+            targetBucket.append(`
+                <div class="bot-message-wrapper" id="${loadingId}">
+                    <div class="bot-badge-header">
+                        <img src="/images/lili-avatar.png" alt="LILI" style="width: 20px; height: 20px; border-radius: 50%; object-fit: cover; vertical-align: middle; margin-right: 4px; box-shadow: 0 1px 3px rgba(0,0,0,0.15);">
+                        <span>LILI - Asisten AI</span>
+                    </div>
+                    <div class="bot-bubble">
+                        <div class="d-flex align-items-center gap-2 text-primary" style="font-size: 12.5px;">
+                            <span class="spinner-border spinner-border-sm" style="width: 14px; height: 14px; color: #6366f1;"></span>
+                            <span style="color: #4f46e5;">LILI sedang menganalisis regulasi &amp; panduan layanan...</span>
+                        </div>
+                    </div>
+                </div>
+            `);
+
+            box.scrollTop(box[0].scrollHeight);
+
+            // 3. Send Ajax request to /guest-bot/tanya-ai
+            $.ajax({
+                url: '/guest-bot/tanya-ai',
+                type: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content'),
+                    'Accept': 'application/json'
+                },
+                contentType: 'application/json',
+                data: JSON.stringify({
+                    pertanyaan: message,
+                    history: this.liliAiHistory.slice(-6)
+                })
+            })
+            .done((res) => {
+                $(`#${loadingId}`).remove();
+                this.isLiliAiLoading = false;
+
+                const replyText = res.reply || 'Maaf, LILI tidak dapat memproses pertanyaan saat ini.';
+                this.liliAiHistory.push({ role: 'assistant', content: replyText });
+
+                const formattedReply = this.formatLiliAiReply(replyText);
+
+                // Lampirkan Action Chips (PDF, Tiket, Konsultasi Bidang)
+                let actionChipsHtml = '';
+                const actionsList = res.actions || res.action_chips || [];
+                if (Array.isArray(actionsList) && actionsList.length > 0) {
+                    actionChipsHtml += '<div class="ai-action-chips d-flex flex-wrap gap-2 my-2 pt-1">';
+                    actionsList.forEach(action => {
+                        if (action.type === 'pdf') {
+                            actionChipsHtml += `
+                                <a href="${this.escapeHtml(action.url)}" target="_blank" class="ai-action-chip chip-pdf">
+                                    <i data-feather="file-text" style="width:13px;height:13px;"></i>
+                                    <span>${this.escapeHtml(action.label)}</span>
+                                </a>
+                            `;
+                        } else if (action.type === 'ticket') {
+                            actionChipsHtml += `
+                                <a href="${this.escapeHtml(action.url)}" target="_blank" class="ai-action-chip chip-ticket">
+                                    <i data-feather="search" style="width:13px;height:13px;"></i>
+                                    <span>${this.escapeHtml(action.label)}</span>
+                                </a>
+                            `;
+                        } else if (action.type === 'admin') {
+                            const userRole = (window.ChatAuth && window.ChatAuth.role) ? window.ChatAuth.role : '';
+                            // Hanya Admin OPD yang dapat berkonsultasi ke Admin Bidang. Admin Bidang tidak menampilkan tombol konsultasi ini.
+                            if (userRole === 'admin_opd') {
+                                actionChipsHtml += `
+                                    <div class="ai-action-chip chip-admin" id="waChipConsultAdmin">
+                                        <i data-feather="briefcase" style="width:13px;height:13px;"></i>
+                                        <span>${this.escapeHtml(action.label)}</span>
+                                    </div>
+                                `;
+                            }
+                        } else if (action.type === 'prompt' || action.action === 'send_prompt') {
+                            actionChipsHtml += `
+                                <button type="button" class="ai-action-chip chip-prompt" data-prompt="${this.escapeHtml(action.prompt || action.label)}">
+                                    <span>${this.escapeHtml(action.label)}</span>
+                                </button>
+                            `;
+                        }
+                    });
+                    actionChipsHtml += '</div>';
+                }
+
+                targetBucket.append(`
+                    <div class="bot-message-wrapper">
+                        <div class="bot-badge-header">
+                            <img src="/images/lili-avatar.png" alt="LILI" style="width: 20px; height: 20px; border-radius: 50%; object-fit: cover; vertical-align: middle; margin-right: 4px; box-shadow: 0 1px 3px rgba(0,0,0,0.15);">
+                            <span>LILI - Asisten AI</span>
+                        </div>
+                        <div class="bot-bubble">
+                            <div class="ai-reply-content mb-2">${formattedReply}</div>
+                            ${actionChipsHtml}
+                        </div>
+                    </div>
+                `);
+
+                this.savedLiliChatHtml = targetBucket.html();
+
+                if (window.feather) {
+                    feather.replace();
+                }
+
+                box.scrollTop(box[0].scrollHeight);
+            })
+            .fail((xhr) => {
+                $(`#${loadingId}`).remove();
+                this.isLiliAiLoading = false;
+
+                let errText = 'Mohon maaf, terjadi kendala saat menghubungi server AI. Silakan coba kembali sesaat lagi.';
+                try {
+                    const errJson = JSON.parse(xhr.responseText);
+                    if (errJson.message) errText = errJson.message;
+                } catch (e) {}
+
+                targetBucket.append(`
+                    <div class="bot-message-wrapper">
+                        <div class="bot-badge-header">
+                            <img src="/images/lili-avatar.png" alt="LILI" style="width: 20px; height: 20px; border-radius: 50%; object-fit: cover; vertical-align: middle; margin-right: 4px;">
+                            <span>LILI - Asisten AI</span>
+                        </div>
+                        <div class="bot-bubble" style="border-color: #fecaca; background: #fff5f5;">
+                            <p class="mb-0 text-danger"><i data-feather="alert-circle" style="width:13px;height:13px;" class="me-1"></i>${this.escapeHtml(errText)}</p>
+                        </div>
+                    </div>
+                `);
+
+                if (window.feather) {
+                    feather.replace();
+                }
+
+                box.scrollTop(box[0].scrollHeight);
+            });
+        },
+
+        // Open Room (Pola WhatsApp Web: Render Sekali, Multi-Room Bucket Cache, Scroll Preservation)
+        openConversation(conversationId) {
+            conversationId = Number(conversationId);
+            this.hideTypingIndicator();
+            this.saveCurrentRoomState();
+
+            this.activeConversationId = conversationId;
+
+            // Highlight in list
+            $('.wa-conv-item').removeClass('active');
+            $('#waBtnOpenLiliFromList').removeClass('active');
+            $(`.wa-conv-item[data-id="${conversationId}"]`).addClass('active');
+
+            // Hide LILI reset from menu
+            $('#waLiResetLili').addClass('d-none').hide();
+
+            // Show mobile room panel
+            $('.wa-main').addClass('show-room');
+            $('#waEmptyState').addClass('d-none');
+            $('#waActiveRoom').removeClass('d-none');
+
+            const box = $('#waMessagesBox');
+
+            // Sembunyikan semua bucket percakapan yang ada
+            box.find('.wa-room-bucket').addClass('d-none');
+
+            // Cek apakah room ini SUDAH PERNAH DI-RENDER (In-Memory Cache)
+            if (this.cachedRooms.has(conversationId)) {
+                const cached = this.cachedRooms.get(conversationId);
+                this.activeConversationStatus = cached.res.status || 'open';
+                this.activeConversationData = cached.res;
+                this.renderedMessageIds = cached.renderedMessageIds;
+                this.lastMessageId = cached.lastMessageId;
+
+                this.renderRoomHeader(cached.res);
+                this.updateChatInput(cached.res.status);
+
+                // Tampilkan bucket yang sudah ada tanpa re-render (0ms)
+                cached.$bucket.removeClass('d-none');
+
+                // Kembalikan posisi scroll persis di tempat pengguna tinggalkan
+                const savedPos = this.roomScrollTops.get(String(conversationId));
+                if (savedPos != null) {
+                    box.scrollTop(savedPos);
+                } else {
+                    box.scrollTop(box[0].scrollHeight);
+                }
+
+                // Update unread in local state & DOM without full list re-render
+                const found = this.conversationsData.find(i => Number(i.id) === Number(conversationId));
+                if (found && found.unread > 0) {
+                    found.unread = 0;
+                    $(`#conv_${conversationId}`).find('.wa-item-unread').remove();
+                }
+                this.markRoomRead(conversationId);
+                return;
+            }
+
+            // Jika belum di-cache, tampilkan skeleton sementara & fetch sekali dari server
+            const skeletonId = 'wa_skeleton_' + conversationId;
+            box.append(`
+                <div id="${skeletonId}" class="chat-skeleton-wrapper p-4">
                     <div class="chat-skeleton-item"></div>
                     <div class="chat-skeleton-item"></div>
                     <div class="chat-skeleton-item"></div>
@@ -479,26 +885,66 @@
 
             $.get(`/chat/${conversationId}/messages`)
                 .done((res) => {
+                    $(`#${skeletonId}`).remove();
                     this.activeConversationStatus = res.status || 'open';
                     this.activeConversationData = res;
                     this.renderRoomHeader(res);
-                    this.renderMessages(res.messages || []);
                     this.updateChatInput(res.status);
-                    this.subscribeRoomChannel(conversationId);
 
-                    // Update unread in local state & server
-                    const found = this.conversationsData.find(i => Number(i.id) === Number(conversationId));
-                    if (found) {
-                        found.unread = 0;
-                        this.renderConversationList(this.conversationsData);
+                    // Buat bucket permanen untuk percakapan ini
+                    const $bucket = $(`<div class="wa-room-bucket" id="waBucket_${conversationId}" data-conv-id="${conversationId}"></div>`);
+                    box.append($bucket);
+
+                    const renderedIds = new Set();
+                    let lastMsgId = null;
+
+                    const messages = res.messages || [];
+                    if (!messages.length) {
+                        $bucket.html(`
+                            <div class="text-center text-muted my-auto p-4">
+                                <div class="wa-date-pill mb-2">Mulai Percakapan</div>
+                                <p class="small">Kirim pesan pertama Anda di bawah ini.</p>
+                            </div>
+                        `);
+                    } else {
+                        let batchHtml = '';
+                        messages.forEach((msg) => {
+                            renderedIds.add(msg.id);
+                            batchHtml += this.renderMessageItem(msg);
+                            lastMsgId = msg.id;
+                        });
+                        $bucket.html(batchHtml);
                     }
 
-                    // Tandai pesan sudah dibaca di server agar tersimpan permanen di database
+                    this.renderedMessageIds = renderedIds;
+                    this.lastMessageId = lastMsgId;
+
+                    // Simpan di cache
+                    this.cachedRooms.set(conversationId, {
+                        $bucket: $bucket,
+                        res: res,
+                        renderedMessageIds: renderedIds,
+                        lastMessageId: lastMsgId
+                    });
+
+                    this.subscribeRoomChannel(conversationId);
+
+                    // Set scroll awal ke paling bawah
+                    box.scrollTop(box[0].scrollHeight);
+                    this.roomScrollTops.set(String(conversationId), box[0].scrollHeight);
+
+                    // Update unread in local state & DOM without full list re-render
+                    const found = this.conversationsData.find(i => Number(i.id) === Number(conversationId));
+                    if (found && found.unread > 0) {
+                        found.unread = 0;
+                        $(`#conv_${conversationId}`).find('.wa-item-unread').remove();
+                    }
                     this.markRoomRead(conversationId);
                 })
                 .fail((xhr) => {
+                    $(`#${skeletonId}`).remove();
                     console.error('Gagal memuat pesan:', xhr.responseText);
-                    $('#waMessagesBox').html(`
+                    box.append(`
                         <div class="text-center text-danger p-4">
                             <i data-feather="alert-circle" class="mb-2" style="width:28px;height:28px;"></i>
                             <div>Gagal memuat ruang percakapan.</div>
@@ -532,7 +978,8 @@
             }
 
             $('#waRoomStatusBadge')
-                .removeClass('open closed')
+                .removeClass('d-none open closed')
+                .removeAttr('style')
                 .addClass(isClosed ? 'closed' : 'open')
                 .text(isClosed ? 'Closed' : 'Open');
 
@@ -564,11 +1011,13 @@
                 return;
             }
 
+            let html = '';
             messages.forEach((msg) => {
                 this.renderedMessageIds.add(msg.id);
-                box.append(this.renderMessageItem(msg));
+                html += this.renderMessageItem(msg);
                 this.lastMessageId = msg.id;
             });
+            box.html(html);
 
             box.scrollTop(box[0].scrollHeight);
             if (window.feather) feather.replace();
@@ -597,12 +1046,17 @@
             const box = $('#waMessagesBox');
             if (!box.length || !messages.length) return;
 
+            let targetBucket = box.find(`#waBucket_${this.activeConversationId}`);
+            if (!targetBucket.length) {
+                targetBucket = box;
+            }
+
             let shouldPlaySound = false;
 
             messages.forEach((msg) => {
                 if (this.renderedMessageIds.has(msg.id)) return;
                 this.renderedMessageIds.add(msg.id);
-                box.append(this.renderMessageItem(msg));
+                targetBucket.append(this.renderMessageItem(msg));
                 this.lastMessageId = msg.id;
 
                 if (Number(msg.sender_user_id) !== Number(window.ChatAuth?.id)) {
@@ -614,7 +1068,12 @@
                 this.playNotificationSound();
             }
 
-            box.scrollTop(box[0].scrollHeight);
+            // Jika user sedang berada di dekat dasar, auto-scroll ke bawah
+            const scrollDist = box[0].scrollHeight - box.scrollTop() - box.innerHeight();
+            if (scrollDist < 180) {
+                box.scrollTop(box[0].scrollHeight);
+                this.roomScrollTops.set(String(this.activeConversationId), box[0].scrollHeight);
+            }
         },
 
         updateChatInput(status) {
@@ -635,6 +1094,10 @@
 
         // Function Send Message (Optimistic 0ms Instant Feedback)
         sendMessage() {
+            if (this.activeConversationId === 'lili_ai') {
+                this.sendLiliAiMessage();
+                return;
+            }
             if (this.activeConversationStatus === 'closed') return;
             const input = $('#waChatInput');
             const message = input.val().trim();
@@ -651,6 +1114,11 @@
             const tempId = 'temp_' + Date.now();
             const nowIso = new Date().toISOString();
             const box = $('#waMessagesBox');
+            let targetBucket = box.find(`#waBucket_${this.activeConversationId}`);
+            if (!targetBucket.length) {
+                targetBucket = box;
+            }
+
             const optimisticBubble = $(this.renderMessageItem({
                 id: tempId,
                 sender_user_id: window.ChatAuth?.id,
@@ -659,8 +1127,9 @@
                 created_at: nowIso
             }));
 
-            box.append(optimisticBubble);
+            targetBucket.append(optimisticBubble);
             box.scrollTop(box[0].scrollHeight);
+            this.roomScrollTops.set(String(this.activeConversationId), box[0].scrollHeight);
 
             // 3. Clear typing on send
             if (window.FirebaseDB && this.activeConversationId && window.ChatAuth?.id) {
@@ -821,8 +1290,50 @@
                 self.filterConversations($(this).val());
             });
 
+            // Open LILI AI Room from sidebar
+            $(document).on('click', '#waBtnOpenLiliFromList', function (e) {
+                e.preventDefault();
+                self.openLiliAiRoom();
+            });
+
+            // Reset LILI AI session from dropdown menu
+            $(document).on('click', '#waBtnResetLiliChat', function (e) {
+                e.preventDefault();
+                self.openLiliAiRoom(true);
+            });
+
+            // Click prompt chips in LILI chat
+            $(document).on('click', '.chip-prompt, [data-prompt]', function (e) {
+                e.preventDefault();
+                const prompt = $(this).attr('data-prompt') || $(this).text().trim();
+                if (prompt) {
+                    self.sendLiliAiMessage(prompt);
+                }
+            });
+
+            // Click play audio greeting in LILI chat
+            $(document).on('click', '#btnPlayLiliVoicePage', function (e) {
+                e.preventDefault();
+                e.stopPropagation();
+                self.playLiliVoiceGreeting();
+            });
+
+            // Click consult admin in LILI chat (for admin OPD)
+            $(document).on('click', '#waChipConsultAdmin', function (e) {
+                e.preventDefault();
+                $('#modalSearchTicket').modal('show');
+            });
+
+            // Scroll tracking per room (WhatsApp Web Style Scroll Preservation)
+            $('#waMessagesBox').on('scroll', function () {
+                if (self.activeConversationId) {
+                    self.roomScrollTops.set(String(self.activeConversationId), $(this).scrollTop());
+                }
+            });
+
             // Open Conversation Item Click
             $(document).on('click', '.wa-conv-item', function (e) {
+                if ($(this).hasClass('wa-conv-item-lili')) return;
                 if (self.isSelectionMode) {
                     if ($(e.target).is('.wa-item-checkbox')) return;
                     const checkbox = $(this).find('.wa-item-checkbox');

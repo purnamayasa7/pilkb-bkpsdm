@@ -984,7 +984,7 @@
                     <div class="mb-3">
                         <div class="fw-bold text-dark mb-1" style="font-size: 13px;">1. Asisten Virtual Berbasis AI</div>
                         <p class="mb-0">
-                            <strong>LILI</strong> <em>(Layanan Informasi &amp; Literasi Kepegawaian Interaktif)</em> adalah asisten virtual berbasis Generative AI yang dirancang untuk membantu pencarian informasi regulasi ASN dan SOP layanan di BKPSDM Kabupaten Buleleng.
+                            <strong>LILI</strong> <em>(Layanan Informasi &amp; Literasi Kepegawaian Interaktif)</em> adalah asisten virtual berbasis Generative AI yang dirancang untuk membantu pencarian informasi regulasi ASN dan persyaratan layanan di BKPSDM Kabupaten Buleleng.
                         </p>
                     </div>
 

@@ -17,6 +17,8 @@
         lastMessageId: null,
         renderedMessageIds: new Set(),
         notificationSound: null,
+        cachedRooms: new Map(),
+        roomScrollTops: new Map(),
 
         init() {
             $.ajaxSetup({
@@ -331,6 +333,16 @@
                     }
                 }
             }
+
+            // Background sync ke memory cache room jika ada pesan baru tanpa merusak scroll
+            if (!isActiveRoom && this.cachedRooms && this.cachedRooms.has(convId) && e.messageData) {
+                const cached = this.cachedRooms.get(convId);
+                if (!cached.renderedMessageIds.has(e.messageData.id)) {
+                    cached.renderedMessageIds.add(e.messageData.id);
+                    cached.html += this.renderMessageItem(e.messageData);
+                    cached.lastMessageId = e.messageData.id;
+                }
+            }
         },
 
         escapeHtml(text) {
@@ -424,32 +436,23 @@
 
         // Function Render Messages
         renderMessages(messages) {
-
             let box = $('#chatMessages');
-
             if (!box.length) return;
 
-            box.html('');
-
+            let html = '';
             messages.forEach(msg => {
                 this.renderedMessageIds.add(msg.id);
-
-                box.append(
-                    this.renderMessageItem(msg)
-                );
+                html += this.renderMessageItem(msg);
             });
 
+            box.html(html);
             box.scrollTop(box[0].scrollHeight);
-
             this.updateLastMessageId(messages);
-
         },
 
         // Function Append New Message
         appendNewMessages(messages) {
-
             let box = $('#chatMessages');
-
             if (!box.length || !messages.length) {
                 return;
             }
@@ -457,31 +460,37 @@
             let shouldPlaySound = false;
 
             messages.forEach(msg => {
-
                 if (this.renderedMessageIds.has(msg.id)) {
                     return;
                 }
 
                 this.renderedMessageIds.add(msg.id);
-
                 box.append(this.renderMessageItem(msg));
-
                 this.lastMessageId = msg.id;
 
                 if (Number(msg.sender_user_id) !== Number(window.ChatAuth.id)) {
                     shouldPlaySound = true;
                 }
-
             });
 
             if (shouldPlaySound) {
-
                 this.playNotification();
-
             }
 
-            box.scrollTop(box[0].scrollHeight);
+            // Update memory cache
+            if (this.cachedRooms && this.cachedRooms.has(Number(this.activeConversationId))) {
+                const cached = this.cachedRooms.get(Number(this.activeConversationId));
+                cached.html = box.html();
+                cached.lastMessageId = this.lastMessageId;
+                cached.renderedMessageIds = new Set(this.renderedMessageIds);
+            }
 
+            // Jika user dekat dasar, auto-scroll ke bawah
+            const scrollDist = box[0].scrollHeight - box.scrollTop() - box.innerHeight();
+            if (scrollDist < 160) {
+                box.scrollTop(box[0].scrollHeight);
+                this.roomScrollTops.set(String(this.activeConversationId), box[0].scrollHeight);
+            }
         },
 
         // Function Update Last Message Id
@@ -738,6 +747,22 @@
             }
         },
 
+        // Function Load Inbox from Server
+        loadInbox(callback = null) {
+            this.stopPolling();
+            this.activeConversationId = null;
+            this.previousView = 'inbox';
+
+            $.get('/chat/admin/inbox')
+                .done((res) => {
+                    this.renderInboxList(res);
+                    if (typeof callback === 'function') callback(res);
+                })
+                .fail(() => {
+                    console.error("Gagal memuat inbox");
+                });
+        },
+
         // Function Render Inbox List
         renderInboxList(items) {
             this.stopPolling();
@@ -783,7 +808,7 @@
                         </div>
                     </div>
                     <div class="d-flex align-items-center gap-1">
-                        <button type="button" class="btn btn-sm btn-outline-primary rounded-pill d-inline-flex align-items-center gap-1 py-1 px-2" id="btnOpenLiliFromInbox" title="Tanya LILI (Kamus Regulasi &amp; SOP AI)" style="font-size: 11px; font-weight: 600; border-color: #6366f1; color: #4f46e5; background: #f5f3ff;">
+                        <button type="button" class="btn btn-sm btn-outline-primary rounded-pill d-inline-flex align-items-center gap-1 py-1 px-2" id="btnOpenLiliFromInbox" title="Tanya LILI (Kamus Regulasi &amp; Panduan Layanan AI)" style="font-size: 11px; font-weight: 600; border-color: #6366f1; color: #4f46e5; background: #f5f3ff;">
                             <i data-feather="zap" style="width: 12px; height: 12px;"></i>
                             <span>Tanya LILI</span>
                         </button>
@@ -881,10 +906,10 @@
                             LILI - Asisten AI Kepegawaian
                         </div>
                         <div class="chat-item-sub text-truncate" style="font-size: 11px; color: #64748b;">
-                            Konsultasi regulasi ASN, literasi SOP &amp; panduan layanan
+                            Konsultasi regulasi ASN &amp; panduan layanan kepegawaian
                         </div>
                         <div class="chat-item-last text-truncate small mt-1" style="font-size: 11.5px; color: #4f46e5; font-weight: 600;">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-message-circle" style="vertical-align: middle; margin-right: 3px;"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg>Klik untuk mulai konsultasi bersama LILI →
+                            Klik untuk mulai konsultasi bersama LILI →
                         </div>
                     </div>
                     <div class="chat-item-arrow text-muted ms-1">
@@ -1485,9 +1510,29 @@
             sendBtn.prop('disabled', isClosed || !hasText);
         },
 
-        // Function Load Chat
+        // Simpan posisi scroll sebelum meninggalkan room
+        saveCurrentRoomState() {
+            if (this.activeConversationId) {
+                const msgs = $('#chatMessages');
+                if (msgs.length) {
+                    const scrollPos = msgs.scrollTop();
+                    this.roomScrollTops.set(String(this.activeConversationId), scrollPos);
+                    if (this.cachedRooms && this.cachedRooms.has(Number(this.activeConversationId))) {
+                        const cached = this.cachedRooms.get(Number(this.activeConversationId));
+                        cached.html = msgs.html();
+                        cached.scrollTop = scrollPos;
+                        cached.lastMessageId = this.lastMessageId;
+                        cached.renderedMessageIds = new Set(this.renderedMessageIds);
+                    }
+                }
+            }
+        },
+
+        // Function Load Chat (WhatsApp Style In-Memory Room Caching & Scroll Preservation)
         loadChat(conversationId, source = null) {
+            conversationId = Number(conversationId);
             this.hideTypingIndicator();
+            this.saveCurrentRoomState();
             this.stopInboxPolling();
             this.stopConversationListPolling();
 
@@ -1499,14 +1544,59 @@
                 this.previousView = source;
             }
 
+            this.activeConversationId = conversationId;
+
+            // Cek apakah room sudah pernah di-load di memori (0ms instant render)
+            if (this.cachedRooms && this.cachedRooms.has(conversationId)) {
+                const cached = this.cachedRooms.get(conversationId);
+                this.activeConversationStatus = cached.res.status;
+                this.renderedMessageIds = new Set(cached.renderedMessageIds);
+                this.lastMessageId = cached.lastMessageId;
+
+                const layoutHtml = this.renderChatLayout();
+                $('.chat-body').html(layoutHtml);
+                $('#chatMessages').html(cached.html);
+
+                this.updateChatHeader(cached.res);
+                this.updateChatActionsButtons(cached.res.status);
+                this.updateChatInput(cached.res.status);
+                feather.replace();
+
+                // Kembalikan posisi scroll persis di tempat pengguna tinggalkan
+                const savedPos = this.roomScrollTops.get(String(conversationId));
+                if (savedPos != null) {
+                    $('#chatMessages').scrollTop(savedPos);
+                } else {
+                    $('#chatMessages').scrollTop($('#chatMessages')[0].scrollHeight);
+                }
+
+                // Reset unread count di lokal state agar badge list hilang
+                const inConvData = this.conversationsData.find(i => Number(i.id) === Number(conversationId));
+                if (inConvData) inConvData.unread = 0;
+                const inInboxData = this.inboxData.find(i => Number(i.id) === Number(conversationId));
+                if (inInboxData) inInboxData.unread = 0;
+                this.loadUnreadBadge();
+                return;
+            }
+
             this.lastMessageId = null;
             this.renderedMessageIds.clear();
-            this.activeConversationId = conversationId;
 
             this.fetchConversation(conversationId)
                 .done((res) => {
                     this.activeConversationStatus = res.status;
                     this.renderChatPage(res);
+
+                    // Simpan di cache
+                    this.cachedRooms.set(conversationId, {
+                        res: res,
+                        html: $('#chatMessages').html(),
+                        renderedMessageIds: new Set(this.renderedMessageIds),
+                        lastMessageId: this.lastMessageId,
+                        scrollTop: $('#chatMessages')[0]?.scrollHeight || 0
+                    });
+                    this.roomScrollTops.set(String(conversationId), $('#chatMessages')[0]?.scrollHeight || 0);
+
                     this.subscribeRoomChannel(conversationId);
 
                     // Reset unread count di lokal state agar badge list hilang
@@ -1531,13 +1621,16 @@
                 return;
             }
 
+            if (this.cachedRooms) {
+                this.cachedRooms.delete(Number(this.activeConversationId));
+            }
+
             $.post(
                 `/chat/${this.activeConversationId}/close`,
                 {
                     _token: $('meta[name="csrf-token"]').attr('content')
                 },
                 () => {
-
                     this.loadChat(
                         this.activeConversationId
                     );
@@ -1547,13 +1640,16 @@
 
         // Function Reopen Chat
         reopenChat() {
+            if (this.cachedRooms) {
+                this.cachedRooms.delete(Number(this.activeConversationId));
+            }
+
             $.post(
                 `/chat/${this.activeConversationId}/reopen`,
                 {
                     _token: $('meta[name="csrf-token"]').attr('content')
                 },
                 () => {
-
                     this.loadChat(
                         this.activeConversationId
                     );
@@ -1592,6 +1688,12 @@
 
             $('#chatMessages').append(optimisticBubble);
             $('#chatMessages').scrollTop($('#chatMessages')[0].scrollHeight);
+            this.roomScrollTops.set(String(this.activeConversationId), $('#chatMessages')[0].scrollHeight);
+            if (this.cachedRooms && this.cachedRooms.has(Number(this.activeConversationId))) {
+                const cached = this.cachedRooms.get(Number(this.activeConversationId));
+                cached.html = $('#chatMessages').html();
+                cached.scrollTop = $('#chatMessages')[0].scrollHeight;
+            }
 
             // 3. Clear typing indicator on send
             if (window.FirebaseDB && this.activeConversationId && window.ChatAuth?.id) {
@@ -1957,7 +2059,7 @@
                     <div class="bot-bubble">
                         <div class="d-flex align-items-center gap-2 text-primary" style="font-size: 12.5px;">
                             <span class="spinner-border spinner-border-sm"></span>
-                            <span>LILI sedang menganalisis regulasi &amp; data SOP...</span>
+                            <span>LILI sedang menganalisis regulasi &amp; panduan layanan...</span>
                         </div>
                     </div>
                 </div>
@@ -2286,6 +2388,13 @@
         const prompt = $(this).data('prompt');
         if (prompt) {
             window.ChatWidgetApp.sendLiliAiMessage(prompt);
+        }
+    });
+
+    // Scroll tracking on chat messages container (WhatsApp Style Scroll Preservation)
+    $(document).on('scroll', '#chatMessages', function () {
+        if (window.ChatWidgetApp.activeConversationId) {
+            window.ChatWidgetApp.roomScrollTops.set(String(window.ChatWidgetApp.activeConversationId), $(this).scrollTop());
         }
     });
 
