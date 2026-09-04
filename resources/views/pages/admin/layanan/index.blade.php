@@ -167,6 +167,20 @@
 <div class="container-fluid px-4 mt-4">
     <div class="card">
         <div class="card-body">
+            <form method="GET" action="{{ route('root.layanan') }}" id="filterForm" class="mb-3">
+                <div class="row">
+                    <div class="col-md-5">
+                        <select name="bidang" id="bidangSelect" class="form-select">
+                            <option value="all" {{ empty($bidangId) || $bidangId === 'all' ? 'selected' : '' }}>Semua Bidang</option>
+                            @foreach ($bidang as $b)
+                            <option value="{{ $b->id }}" {{ (isset($bidangId) && $bidangId == $b->id) ? 'selected' : '' }}>
+                                {{ $b->nama_bidang }}
+                            </option>
+                            @endforeach
+                        </select>
+                    </div>
+                </div>
+            </form>
             <div class="position-relative">
                 <div id="tableLoading" class="table-loading">
                     <div class="loading-content">
@@ -175,6 +189,130 @@
                         </div>
                     </div>
                 </div>
+                <div id="tableContainer">
+                    <table id="datatablesSimple">
+                        <thead>
+                            <tr>
+                                <th>No</th>
+                                <th>Nama Bidang</th>
+                                <th>Nama Layanan</th>
+                                <th>Waktu Penyelesaian</th>
+                                <th>Deskripsi</th>
+                                <th>Status</th>
+                                <th>Aksi</th>
+                            </tr>
+                        </thead>
+                        <tfoot>
+                            <tr>
+                                <th>No</th>
+                                <th>Nama Bidang</th>
+                                <th>Nama Layanan</th>
+                                <th>Waktu Penyelesaian</th>
+                                <th>Deskripsi</th>
+                                <th>Status</th>
+                                <th>Aksi</th>
+                            </tr>
+                        </tfoot>
+                        <tbody>
+                            @foreach ($layanan as $item)
+                            <tr>
+                                <td>{{ $loop->iteration }}</td>
+                                <td>{{ $item->bidang->nama_bidang ?? '-' }}</td>
+                                <td>{{ $item->nama_layanan }}</td>
+                                <td>{{ $item->waktu_penyelesaian ?? '-' }}</td>
+                                <td>
+                                    <div class="d-flex align-items-center justify-content-center">
+                                        <a class="btn btn-datatable btn-icon btn-transparent-dark me-1 btnDeskripsi"
+                                            href="#"
+                                            data-nama="{{ $item->nama_layanan }}"
+                                            data-deskripsi="{{ $item->deskripsi }}"
+                                            data-bs-toggle="tooltip"
+                                            title="Lihat deskripsi">
+
+                                            <i data-feather="eye" class="text-primary"></i>
+                                        </a>
+                                    </div>
+                                </td>
+                                <td>
+                                    @if ($item->aktif === 1)
+                                    <span class="badge bg-green-soft text-green">Aktif</span>
+                                    @elseif ($item->aktif === 0)
+                                    <span class="badge bg-red-soft text-red">Tidak Aktif</span>
+                                    @endif
+                                </td>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <a class="btn btn-datatable btn-icon btn-transparent-dark me-1"
+                                            href="{{ route('root.layanan.edit', $item->id) }}" data-bs-toggle="tooltip"
+                                            title="Edit layanan"><i data-feather="edit" class="text-warning"></i></a>
+                                        <a class="btn btn-datatable btn-icon btn-transparent-dark me-1 btnToggle"
+                                            href="#" data-id="{{ $item->id }}"
+                                            data-nama="{{ $item->nama_layanan }}" data-status="{{ $item->aktif }}"
+                                            data-bs-toggle="tooltip" title="Aktif/Nonaktif">
+
+                                            <i data-feather="slash"
+                                                class="{{ $item->aktif ? 'text-success' : 'text-danger' }}"></i>
+                                        </a>
+                                    </div>
+
+                                </td>
+                            </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/simple-datatables@7.1.2/dist/umd/simple-datatables.min.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+
+        feather.replace();
+
+        const tableLoading = document.getElementById('tableLoading');
+        if (tableLoading) tableLoading.classList.add('d-none');
+
+        const initialTable = document.getElementById('datatablesSimple');
+        if (initialTable && typeof simpleDatatables !== 'undefined') {
+            window.dataTable = new simpleDatatables.DataTable(initialTable);
+        }
+
+        const bidangSelect = document.getElementById('bidangSelect');
+        const filterForm = document.getElementById('filterForm');
+
+        if (filterForm) {
+            filterForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+            });
+        }
+
+        function escapeHtml(text) {
+            if (!text) return '';
+            const map = {
+                '&': '&amp;',
+                '<': '&lt;',
+                '>': '&gt;',
+                '"': '&quot;',
+                "'": '&#039;'
+            };
+            return String(text).replace(/[&<>"']/g, function(m) { return map[m]; });
+        }
+
+        function renderTable(rowsHtml = '') {
+            if (window.dataTable) {
+                try {
+                    window.dataTable.destroy();
+                } catch (e) {}
+                window.dataTable = null;
+            }
+
+            const container = document.getElementById('tableContainer');
+            if (!container) return;
+
+            container.innerHTML = `
                 <table id="datatablesSimple">
                     <thead>
                         <tr>
@@ -199,76 +337,110 @@
                         </tr>
                     </tfoot>
                     <tbody>
-                        @foreach ($layanan as $item)
-                        <tr>
-                            <td>{{ $loop->iteration }}</td>
-                            <td>{{ $item->bidang->nama_bidang }}</td>
-                            <td>{{ $item->nama_layanan }}</td>
-                            <td>{{ $item->waktu_penyelesaian }}</td>
-                            <td>
-                                <div class="d-flex align-items-center justify-content-center">
-                                    <a class="btn btn-datatable btn-icon btn-transparent-dark me-1 btnDeskripsi"
-                                        href="#"
-                                        data-nama="{{ $item->nama_layanan }}"
-                                        data-deskripsi="{{ $item->deskripsi }}"
-                                        data-bs-toggle="tooltip"
-                                        title="Lihat deskripsi">
-
-                                        <i data-feather="eye" class="text-primary"></i>
-                                    </a>
-                                </div>
-                            </td>
-                            <td>
-                                @if ($item->aktif === 1)
-                                <span class="badge bg-green-soft text-green">Aktif</span>
-                                @elseif ($item->aktif === 0)
-                                <span class="badge bg-red-soft text-red">Tidak Aktif</span>
-                                @endif
-                            </td>
-                            <td>
-                                <div class="d-flex align-items-center">
-                                    <a class="btn btn-datatable btn-icon btn-transparent-dark me-1"
-                                        href="{{ route('root.layanan.edit', $item->id) }}" data-bs-toggle="tooltip"
-                                        title="Edit layanan"><i data-feather="edit" class="text-warning"></i></a>
-                                    <a class="btn btn-datatable btn-icon btn-transparent-dark me-1 btnToggle"
-                                        href="#" data-id="{{ $item->id }}"
-                                        data-nama="{{ $item->nama_layanan }}" data-status="{{ $item->aktif }}"
-                                        data-bs-toggle="tooltip" title="Aktif/Nonaktif">
-
-                                        <i data-feather="slash"
-                                            class="{{ $item->aktif ? 'text-success' : 'text-danger' }}"></i>
-                                    </a>
-                                </div>
-
-                            </td>
-                        </tr>
-                        @endforeach
+                        ${rowsHtml}
                     </tbody>
                 </table>
-            </div>
-        </div>
-    </div>
-</div>
+            `;
 
-<script src="https://cdn.jsdelivr.net/npm/simple-datatables@7.1.2/dist/umd/simple-datatables.min.js"></script>
-<script src="{{ asset('templatepro/js/datatables/datatables-simple-demo.js') }}"></script>
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
+            const newTable = document.getElementById('datatablesSimple');
+            if (newTable && typeof simpleDatatables !== 'undefined') {
+                window.dataTable = new simpleDatatables.DataTable(newTable);
+            }
 
-        feather.replace();
+            feather.replace();
+        }
 
-        //Modal Aktif
+        function loadLayanan(bidangId) {
+            if (tableLoading) tableLoading.classList.remove('d-none');
+
+            const targetUrl = (!bidangId || bidangId === 'all')
+                ? `/root/get-layanan-by-bidang/all`
+                : `/root/get-layanan-by-bidang/${bidangId}`;
+
+            fetch(targetUrl)
+                .then(res => res.json())
+                .then(data => {
+                    let rowsHtml = '';
+
+                    data.forEach((item, index) => {
+                        const namaBidang = item.bidang ? item.bidang.nama_bidang : '-';
+                        const namaLayanan = item.nama_layanan || '-';
+                        const waktu = item.waktu_penyelesaian || '-';
+                        const deskripsi = item.deskripsi || '';
+
+                        const statusBadge = item.aktif === 1
+                            ? '<span class="badge bg-green-soft text-green">Aktif</span>'
+                            : '<span class="badge bg-red-soft text-red">Tidak Aktif</span>';
+
+                        const slashClass = item.aktif ? 'text-success' : 'text-danger';
+
+                        rowsHtml += `
+                            <tr>
+                                <td>${index + 1}</td>
+                                <td>${escapeHtml(namaBidang)}</td>
+                                <td>${escapeHtml(namaLayanan)}</td>
+                                <td>${escapeHtml(waktu)}</td>
+                                <td>
+                                    <div class="d-flex align-items-center justify-content-center">
+                                        <a class="btn btn-datatable btn-icon btn-transparent-dark me-1 btnDeskripsi"
+                                            href="#"
+                                            data-nama="${escapeHtml(namaLayanan)}"
+                                            data-deskripsi="${escapeHtml(deskripsi)}"
+                                            data-bs-toggle="tooltip"
+                                            title="Lihat deskripsi">
+                                            <i data-feather="eye" class="text-primary"></i>
+                                        </a>
+                                    </div>
+                                </td>
+                                <td>${statusBadge}</td>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <a class="btn btn-datatable btn-icon btn-transparent-dark me-1"
+                                            href="/root/layanan/${item.id}"
+                                            data-bs-toggle="tooltip"
+                                            title="Edit layanan">
+                                            <i data-feather="edit" class="text-warning"></i>
+                                        </a>
+                                        <a class="btn btn-datatable btn-icon btn-transparent-dark me-1 btnToggle"
+                                            href="#"
+                                            data-id="${item.id}"
+                                            data-nama="${escapeHtml(namaLayanan)}"
+                                            data-status="${item.aktif}"
+                                            data-bs-toggle="tooltip"
+                                            title="Aktif/Nonaktif">
+                                            <i data-feather="slash" class="${slashClass}"></i>
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                        `;
+                    });
+
+                    renderTable(rowsHtml);
+                    if (tableLoading) tableLoading.classList.add('d-none');
+                })
+                .catch(err => {
+                    console.error('Gagal mengambil data layanan:', err);
+                    if (tableLoading) tableLoading.classList.add('d-none');
+                });
+        }
+
+        // GANTI BIDANG -> LOAD TANPA RELOAD
+        bidangSelect?.addEventListener('change', function() {
+            loadLayanan(this.value);
+        });
+
+        // Modal Aktif/Nonaktif
         const modalAktifEl = document.getElementById('modalAktif');
-        const modalAktif = new bootstrap.Modal(modalAktifEl);
+        const modalAktif = modalAktifEl ? new bootstrap.Modal(modalAktifEl) : null;
 
         const textModal = document.getElementById('textModal');
-        const form = document.getElementById('formToggle');
+        const formToggle = document.getElementById('formToggle');
         const btnConfirmToggle = document.getElementById('btnConfirmToggle');
 
         document.addEventListener('click', function(e) {
-
             const btn = e.target.closest('.btnToggle');
-            if (!btn) return;
+            if (!btn || !modalAktif) return;
 
             e.preventDefault();
 
@@ -278,34 +450,39 @@
 
             let actionText = status == 1 ? 'menonaktifkan' : 'mengaktifkan';
 
-            textModal.innerHTML =
-                `Apakah anda yakin ingin <b>${actionText}</b> layanan <b>${nama}</b>?`;
+            if (textModal) {
+                textModal.innerHTML =
+                    `Apakah anda yakin ingin <b>${actionText}</b> layanan <b>${escapeHtml(nama)}</b>?`;
+            }
 
-            form.action = `/root/layanan/${id}/toggle-aktif`;
+            if (formToggle) {
+                formToggle.action = `/root/layanan/${id}/toggle-aktif`;
+            }
 
             modalAktif.show();
         });
 
-        form.addEventListener('submit', function() {
-            btnConfirmToggle.disabled = true;
-            btnConfirmToggle.querySelector('.btn-toggle-text')?.classList.add('d-none');
-            btnConfirmToggle.querySelector('.btn-toggle-loading')?.classList.remove('d-none');
+        formToggle?.addEventListener('submit', function() {
+            if (btnConfirmToggle) {
+                btnConfirmToggle.disabled = true;
+                btnConfirmToggle.querySelector('.btn-toggle-text')?.classList.add('d-none');
+                btnConfirmToggle.querySelector('.btn-toggle-loading')?.classList.remove('d-none');
+            }
         });
 
-        //Modal Detail
+        // Modal Detail
         const modalDetailEl = document.getElementById('modalDetail');
-        const modalDetail = new bootstrap.Modal(modalDetailEl);
+        const modalDetail = modalDetailEl ? new bootstrap.Modal(modalDetailEl) : null;
 
         document.addEventListener('click', function(e) {
-
             const btn = e.target.closest('.btnDetail');
-            if (!btn) return;
+            if (!btn || !modalDetail) return;
 
             e.preventDefault();
 
-            document.getElementById('detailBidang').innerText = btn.dataset.bidang;
-            document.getElementById('detailNama').innerText = btn.dataset.nama;
-            document.getElementById('detailWaktu').innerText = btn.dataset.waktu;
+            document.getElementById('detailBidang').innerText = btn.dataset.bidang || '-';
+            document.getElementById('detailNama').innerText = btn.dataset.nama || '-';
+            document.getElementById('detailWaktu').innerText = btn.dataset.waktu || '-';
 
             let status = btn.dataset.status == 1 ? 'Aktif' : 'Nonaktif';
             document.getElementById('detailStatus').innerText = status;
@@ -315,12 +492,11 @@
 
         // Modal Deskripsi
         const modalDeskripsiEl = document.getElementById('modalDeskripsi');
-        const modalDeskripsi = new bootstrap.Modal(modalDeskripsiEl);
+        const modalDeskripsi = modalDeskripsiEl ? new bootstrap.Modal(modalDeskripsiEl) : null;
 
         document.addEventListener('click', function(e) {
-
             const btn = e.target.closest('.btnDeskripsi');
-            if (!btn) return;
+            if (!btn || !modalDeskripsi) return;
 
             e.preventDefault();
 

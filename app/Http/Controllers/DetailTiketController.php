@@ -120,6 +120,29 @@ class DetailTiketController extends Controller
         ]);
     }
 
+    public function getPerbaikanData(Request $request)
+    {
+        $isAdminBawah = Auth::user()?->role?->name === 'admin_bawah';
+        $data = $this->getData($request, $isAdminBawah);
+
+        $result = $data->map(function ($item) {
+            return [
+                'no_tiket' => $item->no_tiket,
+                'nip' => $item->nip ?? '-',
+                'nama' => $item->nama ?? '-',
+                'nama_ukerja' => $item->nama_ukerja ?? '-',
+                'nama_layanan' => $item->layanan->nama_layanan ?? '-',
+                'jumlah_btl' => $item->jumlah_btl ?? 0,
+                'jumlah_tahap' => $item->jumlah_tahap ?? 0,
+                'diperbaiki' => (int) ($item->diperbaiki ?? 0),
+                'url_edit' => route('adminOpd.perbaikan.edit', $item->no_tiket),
+                'url_review' => route('adminBawah.perbaikan.review', $item->no_tiket),
+            ];
+        });
+
+        return response()->json($result);
+    }
+
     // Generate QR
     private function generateQr($url)
     {

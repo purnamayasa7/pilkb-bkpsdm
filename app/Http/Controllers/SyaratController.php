@@ -458,6 +458,15 @@ class SyaratController extends Controller
         );
     }
 
+    public function getByLayanan($layananId)
+    {
+        $syarat = Syarat::with(['layanan.bidang'])
+            ->where('kode_layanan', $layananId)
+            ->get();
+
+        return response()->json($syarat);
+    }
+
     // Cetak Syarat Menu Admin OPD
     public function indexCetak(Request $request)
     {

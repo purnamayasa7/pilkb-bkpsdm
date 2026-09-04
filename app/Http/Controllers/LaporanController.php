@@ -180,13 +180,79 @@ class LaporanController extends Controller
         ));
     }
 
-    public function getLayananByBidang(Request $request)
+    public function getDataBidang(Request $request)
     {
-        $layanan = Layanan::where('kode_bidang', $request->bidang_id)
-            ->orderBy('nama_layanan')
+        $start = $request->start_date;
+        $end = $request->end_date;
+
+        if (!$start || !$end) {
+            return response()->json([]);
+        }
+
+        $user = Auth::user();
+
+        $tiket = Regtiket::with([
+            'layanan.bidang',
+            'tahapTerakhir.statusRel'
+        ])
+            ->visibleBy($user)
+            ->whereBetween('tanggal', [
+                $start . ' 00:00:00',
+                $end . ' 23:59:59'
+            ])
+            ->latest('tanggal')
             ->get();
 
+        return response()->json($tiket);
+    }
+
+    public function getLayananByBidang(Request $request)
+    {
+        $bidangId = $request->bidang_id;
+        if (!$bidangId || $bidangId === 'all') {
+            $layanan = Layanan::orderBy('nama_layanan')->get();
+        } else {
+            $layanan = Layanan::where('kode_bidang', $bidangId)
+                ->orderBy('nama_layanan')
+                ->get();
+        }
+
         return response()->json($layanan);
+    }
+
+    public function getData(Request $request)
+    {
+        $tglAwal = $request->tanggal_awal;
+        $tglAkhir = $request->tanggal_akhir;
+
+        if (!$tglAwal || !$tglAkhir) {
+            return response()->json([]);
+        }
+
+        $query = Regtiket::with([
+            'layanan.bidang',
+            'tahapTerakhir.statusRel'
+        ])
+        ->whereBetween('tanggal', [
+            $tglAwal . ' 00:00:00',
+            $tglAkhir . ' 23:59:59'
+        ]);
+
+        // FILTER BIDANG
+        if ($request->filled('bidang') && $request->bidang != 'all') {
+            $query->whereHas('layanan', function ($q) use ($request) {
+                $q->where('kode_bidang', $request->bidang);
+            });
+        }
+
+        // FILTER LAYANAN
+        if ($request->filled('layanan') && $request->layanan != 'all') {
+            $query->where('kode_layanan', $request->layanan);
+        }
+
+        $data = $query->latest('tanggal')->get();
+
+        return response()->json($data);
     }
 
     public function exportPdf(Request $request)

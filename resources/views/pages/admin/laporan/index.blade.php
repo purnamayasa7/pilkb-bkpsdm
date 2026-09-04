@@ -15,8 +15,11 @@
                 </div>
                 <div class="col-12 col-xl-auto mb-3">
                     <div class="btn-group">
-                        <a class="btn btn-sm btn-light text-success" href="{{ route('root.laporan.exportPdf', request()->query()) }}"
-                            target="_blank">
+                        <a class="btn btn-sm btn-light text-success {{ request('tanggal_awal') && request('tanggal_akhir') ? '' : 'disabled' }}" 
+                           id="btnExportPdf" 
+                           href="{{ request('tanggal_awal') && request('tanggal_akhir') ? route('root.laporan.exportPdf', request()->query()) : 'javascript:void(0)' }}"
+                           target="_blank"
+                           {!! !request('tanggal_awal') || !request('tanggal_akhir') ? 'style="pointer-events: none; opacity: 0.6;" title="Pilih rentang tanggal terlebih dahulu"' : '' !!}>
                             <i class="me-1" data-feather="download"></i>
                             Export PDF
                         </a>
@@ -30,12 +33,12 @@
 <div class="container-fluid px-4 mt-4">
     <div class="card">
         <div class="card-body">
-            <form method="GET" action="{{ route('root.laporan.index') }}" id="laporanFilterForm">
+            <form id="laporanFilterForm" onsubmit="event.preventDefault()">
                 <div class="bg-white p-3 rounded-3 border mb-4">
                     <div class="row g-3 align-items-end">
 
                         <!-- BIDANG -->
-                        <div class="col-xl-3 col-md-6">
+                        <div class="col-xl-4 col-md-6">
                             <label class="small mb-1">
                                 Bidang
                             </label>
@@ -54,7 +57,7 @@
                         </div>
 
                         <!-- LAYANAN -->
-                        <div class="col-xl-3 col-md-6">
+                        <div class="col-xl-4 col-md-6">
                             <label class="small mb-1">
                                 Layanan
                             </label>
@@ -73,44 +76,177 @@
                             </select>
                         </div>
 
-                        <!-- TANGGAL AWAL -->
-                        <div class="col-xl-2 col-md-4 col-sm-6">
+                        <!-- RENTANG TANGGAL -->
+                        <div class="col-xl-4 col-md-12">
                             <label class="small mb-1">
-                                Tanggal Awal <span class="text-danger">*</span>
+                                Rentang Tanggal
                             </label>
-
-                            <input type="date" name="tanggal_awal" id="tanggalAwal" class="form-control"
-                                value="{{ request('tanggal_awal') }}" required>
-                        </div>
-
-                        <!-- TANGGAL AKHIR -->
-                        <div class="col-xl-2 col-md-4 col-sm-6">
-                            <label class="small mb-1">
-                                Tanggal Akhir <span class="text-danger">*</span>
-                            </label>
-                            <input type="date" name="tanggal_akhir" id="tanggalAkhir" class="form-control"
-                                value="{{ request('tanggal_akhir') }}" required>
-                        </div>
-
-                        <!-- BUTTON -->
-                        <div class="col-xl-2 col-md-4 col-sm-12">
-                            <button type="submit" name="filter" value="1" class="btn btn-primary w-100">
-                                <i data-feather="search" class="me-1"></i>
-                                Tampilkan
-                            </button>
+                            <div class="input-group input-group-joined border-1">
+                                <span class="input-group-text"><i data-feather="calendar"></i></span>
+                                <input class="form-control ps-0 pointer" id="myCustomDateRange"
+                                    value="{{ request('tanggal_awal') && request('tanggal_akhir') ? request('tanggal_awal') . ' - ' . request('tanggal_akhir') : '' }}"
+                                    placeholder="Pilih rentang tanggal laporan" />
+                            </div>
+                            <input type="hidden" name="tanggal_awal" id="tanggalAwal" value="{{ request('tanggal_awal') }}">
+                            <input type="hidden" name="tanggal_akhir" id="tanggalAkhir" value="{{ request('tanggal_akhir') }}">
                         </div>
 
                     </div>
                 </div>
             </form>
             <div class="position-relative">
-                <div id="tableLoading" class="table-loading">
+                <div id="tableLoading" class="table-loading d-none">
                     <div class="loading-content">
                         <div class="spinner-border text-primary" role="status">
                             <span class="visually-hidden">Loading...</span>
                         </div>
                     </div>
                 </div>
+                <div id="tableContainer">
+                    @if (request('tanggal_awal') && request('tanggal_akhir') && count($data) > 0)
+                    <table id="datatablesSimple">
+                        <thead>
+                            <tr>
+                                <th>No</th>
+                                <th>No Tiket</th>
+                                <th>NIP</th>
+                                <th>Unit Kerja</th>
+                                <th>Nama Layanan</th>
+                                <th>Tanggal Masuk</th>
+                                <th>Status Terakhir</th>
+                                <th>Nama Penerima</th>
+                            </tr>
+                        </thead>
+                        <tfoot>
+                            <tr>
+                                <th>No</th>
+                                <th>No Tiket</th>
+                                <th>NIP</th>
+                                <th>Unit Kerja</th>
+                                <th>Nama Layanan</th>
+                                <th>Tanggal Masuk</th>
+                                <th>Status Terakhir</th>
+                                <th>Nama Penerima</th>
+                            </tr>
+                        </tfoot>
+                        <tbody>
+                            @foreach ($data as $item)
+                            <tr>
+                                <td>{{ $loop->iteration }}</td>
+                                <td>{{ $item->no_tiket }}</td>
+                                <td>
+                                    {{ $item->nip }} <br>
+                                    <small class="text-muted">
+                                        {{ $item->nama ?? '-' }}
+                                    </small>
+                                </td>
+                                <td>
+                                    {{ $item->nama_ukerja ?? '-' }}
+                                </td>
+                                <td>
+                                    {{ $item->layanan->nama_layanan ?? '-' }}
+                                </td>
+                                <td>
+                                    {{ \Carbon\Carbon::parse($item->tanggal)->translatedFormat('d F Y H:i') }}
+                                </td>
+                                <td>{{ $item->tahapTerakhir->statusRel->status ?? '-' }}</td>
+                                <td>{{ $item->nama_penerima }}</td>
+                            </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                    @else
+                    <div class="text-center py-5 text-muted">
+                        <i data-feather="calendar" class="mb-3" style="width: 48px; height: 48px; opacity: 0.5;"></i>
+                        <h5 class="fw-bold text-dark">Rentang Tanggal Belum Dipilih</h5>
+                        <p class="mb-0 text-muted">Silakan pilih rentang tanggal pada filter di atas untuk memuat data laporan.</p>
+                    </div>
+                    @endif
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/simple-datatables@7.1.2/dist/umd/simple-datatables.min.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+
+        feather.replace();
+
+        const tableLoading = document.getElementById('tableLoading');
+        const bidangSelect = document.getElementById('bidangSelect');
+        const layananSelect = document.getElementById('layananSelect');
+        const startInput = document.getElementById('tanggalAwal');
+        const endInput = document.getElementById('tanggalAkhir');
+        const btnExportPdf = document.getElementById('btnExportPdf');
+
+        // Initial datatable if table exists on load
+        const initialTable = document.getElementById('datatablesSimple');
+        if (initialTable && typeof simpleDatatables !== 'undefined') {
+            window.dataTable = new simpleDatatables.DataTable(initialTable);
+        }
+
+        function escapeHtml(text) {
+            if (!text) return '';
+            const map = {
+                '&': '&amp;',
+                '<': '&lt;',
+                '>': '&gt;',
+                '"': '&quot;',
+                "'": '&#039;'
+            };
+            return String(text).replace(/[&<>"']/g, function(m) { return map[m]; });
+        }
+
+        function formatDateTime(isoString) {
+            if (!isoString) return '-';
+            const date = new Date(isoString);
+            if (isNaN(date.getTime())) return isoString;
+            const months = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+            const day = String(date.getDate()).padStart(2, '0');
+            const month = months[date.getMonth()];
+            const year = date.getFullYear();
+            const hours = String(date.getHours()).padStart(2, '0');
+            const minutes = String(date.getMinutes()).padStart(2, '0');
+            return `${day} ${month} ${year} ${hours}:${minutes}`;
+        }
+
+        function updateExportLink(bidang, layanan, tglAwal, tglAkhir) {
+            if (!btnExportPdf) return;
+            if (!tglAwal || !tglAkhir) {
+                btnExportPdf.classList.add('disabled');
+                btnExportPdf.style.pointerEvents = 'none';
+                btnExportPdf.style.opacity = '0.6';
+                btnExportPdf.href = 'javascript:void(0)';
+                return;
+            }
+
+            btnExportPdf.classList.remove('disabled');
+            btnExportPdf.style.pointerEvents = '';
+            btnExportPdf.style.opacity = '';
+
+            const params = new URLSearchParams();
+            if (bidang) params.append('bidang', bidang);
+            if (layanan) params.append('layanan', layanan);
+            params.append('tanggal_awal', tglAwal);
+            params.append('tanggal_akhir', tglAkhir);
+
+            btnExportPdf.href = `{{ route('root.laporan.exportPdf') }}?${params.toString()}`;
+        }
+
+        function renderTable(rowsHtml = '') {
+            if (window.dataTable) {
+                try {
+                    window.dataTable.destroy();
+                } catch (e) {}
+                window.dataTable = null;
+            }
+
+            const container = document.getElementById('tableContainer');
+            if (!container) return;
+
+            container.innerHTML = `
                 <table id="datatablesSimple">
                     <thead>
                         <tr>
@@ -137,87 +273,156 @@
                         </tr>
                     </tfoot>
                     <tbody>
-                        @foreach ($data as $item)
-                        <tr>
-                            <td>{{ $loop->iteration }}</td>
-                            <td>{{ $item->no_tiket }}</td>
-                            <td>
-                                {{ $item->nip }} <br>
-                                <small class="text-muted">
-                                    {{ $item->nama ?? '-' }}
-                                </small>
-                            </td>
-                            <td>
-                                {{ $item->nama_ukerja ?? '-' }}
-                            </td>
-                            <td>
-                                {{ $item->layanan->nama_layanan ?? '-' }}
-                            </td>
-                            <td>
-                                {{ \Carbon\Carbon::parse($item->tanggal)->translatedFormat('d F Y H:i') }}
-                            </td>
-                            <td>{{ $item->tahapTerakhir->statusRel->status ?? '-' }}</td>
-                            <td>{{ $item->nama_penerima }}</td>
-                        </tr>
-                        @endforeach
+                        ${rowsHtml}
                     </tbody>
                 </table>
-            </div>
-        </div>
-    </div>
-</div>
+            `;
 
-<script src="https://cdn.jsdelivr.net/npm/simple-datatables@7.1.2/dist/umd/simple-datatables.min.js"></script>
-<script src="{{ asset('templatepro/js/datatables/datatables-simple-demo.js') }}"></script>
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-
-        feather.replace();
-
-        window.addEventListener('load', function() {
-            document.getElementById('tableLoading').classList.add('d-none');
-        });
-
-        const bidangSelect = document.getElementById('bidangSelect');
-        const layananSelect = document.getElementById('layananSelect');
-        const tglAwal = document.getElementById('tanggalAwal');
-        const tglAkhir = document.getElementById('tanggalAkhir');
-
-        // Sinkronisasi batas tanggal
-        if (tglAwal && tglAkhir) {
-            tglAwal.addEventListener('change', function() {
-                tglAkhir.min = this.value;
-                if (tglAkhir.value && tglAkhir.value < this.value) {
-                    tglAkhir.value = this.value;
-                }
-            });
-
-            if (tglAwal.value) {
-                tglAkhir.min = tglAwal.value;
+            const newTable = document.getElementById('datatablesSimple');
+            if (newTable && typeof simpleDatatables !== 'undefined') {
+                window.dataTable = new simpleDatatables.DataTable(newTable);
             }
+
+            feather.replace();
         }
 
-        bidangSelect.addEventListener('change', function() {
-            const bidangId = this.value;
-            layananSelect.innerHTML =
-                '<option value="all">Semua Layanan</option>';
-            if (bidangId) {
-                fetch(
-                        `{{ route('root.laporan.getLayananByBidang') }}?bidang_id=${bidangId}`
-                    )
+        function loadLaporan() {
+            const bidang = bidangSelect ? bidangSelect.value : 'all';
+            const layanan = layananSelect ? layananSelect.value : 'all';
+            const tglAwal = startInput ? startInput.value : '';
+            const tglAkhir = endInput ? endInput.value : '';
 
-                    .then(response => response.json())
-                    .then(data => {
+            if (!tglAwal || !tglAkhir) {
+                if (window.dataTable) {
+                    try { window.dataTable.destroy(); } catch (e) {}
+                    window.dataTable = null;
+                }
+                const container = document.getElementById('tableContainer');
+                if (container) {
+                    container.innerHTML = `
+                        <div class="text-center py-5 text-muted">
+                            <i data-feather="calendar" class="mb-3" style="width: 48px; height: 48px; opacity: 0.5;"></i>
+                            <h5 class="fw-bold text-dark">Rentang Tanggal Belum Dipilih</h5>
+                            <p class="mb-0 text-muted">Silakan pilih rentang tanggal pada filter di atas untuk memuat data laporan.</p>
+                        </div>
+                    `;
+                    feather.replace();
+                }
+                updateExportLink(bidang, layanan, '', '');
+                return;
+            }
+
+            updateExportLink(bidang, layanan, tglAwal, tglAkhir);
+
+            if (tableLoading) tableLoading.classList.remove('d-none');
+
+            const params = new URLSearchParams();
+            if (bidang) params.append('bidang', bidang);
+            if (layanan) params.append('layanan', layanan);
+            params.append('tanggal_awal', tglAwal);
+            params.append('tanggal_akhir', tglAkhir);
+
+            fetch(`/root/laporan/get-data?${params.toString()}`)
+                .then(res => res.json())
+                .then(data => {
+                    let rowsHtml = '';
+
+                    data.forEach((item, index) => {
+                        const noTiket = item.no_tiket || '-';
+                        const nip = item.nip || '-';
+                        const nama = item.nama || '-';
+                        const ukerja = item.nama_ukerja || '-';
+                        const namaLayanan = item.layanan ? item.layanan.nama_layanan : '-';
+                        const tgl = formatDateTime(item.tanggal);
+                        const status = (item.tahap_terakhir && item.tahap_terakhir.status_rel)
+                            ? item.tahap_terakhir.status_rel.status
+                            : '-';
+                        const penerima = item.nama_penerima || '-';
+
+                        rowsHtml += `
+                            <tr>
+                                <td>${index + 1}</td>
+                                <td>${escapeHtml(noTiket)}</td>
+                                <td>
+                                    ${escapeHtml(nip)} <br>
+                                    <small class="text-muted">${escapeHtml(nama)}</small>
+                                </td>
+                                <td>${escapeHtml(ukerja)}</td>
+                                <td>${escapeHtml(namaLayanan)}</td>
+                                <td>${escapeHtml(tgl)}</td>
+                                <td>${escapeHtml(status)}</td>
+                                <td>${escapeHtml(penerima)}</td>
+                            </tr>
+                        `;
+                    });
+
+                    renderTable(rowsHtml);
+                    if (tableLoading) tableLoading.classList.add('d-none');
+                })
+                .catch(err => {
+                    console.error('Gagal mengambil data laporan:', err);
+                    if (tableLoading) tableLoading.classList.add('d-none');
+                });
+        }
+
+        // GANTI BIDANG
+        bidangSelect?.addEventListener('change', function() {
+            const bidangId = this.value;
+            if (layananSelect) {
+                layananSelect.innerHTML = '<option value="all">Semua Layanan</option>';
+            }
+
+            fetch(`{{ route('root.laporan.getLayananByBidang') }}?bidang_id=${bidangId}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (layananSelect) {
                         data.forEach(item => {
                             layananSelect.innerHTML += `
-                        <option value="${item.id}">
-                            ${item.nama_layanan}
-                        </option>
-                    `;
+                                <option value="${item.id}">
+                                    ${item.nama_layanan}
+                                </option>
+                            `;
                         });
-                    });
+                    }
+                    if (startInput?.value && endInput?.value) {
+                        loadLaporan();
+                    }
+                })
+                .catch(() => {
+                    if (startInput?.value && endInput?.value) {
+                        loadLaporan();
+                    }
+                });
+        });
+
+        // GANTI LAYANAN
+        layananSelect?.addEventListener('change', function() {
+            if (startInput?.value && endInput?.value) {
+                loadLaporan();
             }
         });
+
+        // DATE RANGE PICKER
+        new Litepicker({
+            element: document.getElementById('myCustomDateRange'),
+            singleMode: false,
+            format: 'YYYY-MM-DD',
+            autoApply: true,
+            setup: (picker) => {
+                picker.on('selected', (startDate, endDate) => {
+                    if (!startDate || !endDate) return;
+
+                    const sDate = startDate.format('YYYY-MM-DD');
+                    const eDate = endDate.format('YYYY-MM-DD');
+
+                    if (startInput) startInput.value = sDate;
+                    if (endInput) endInput.value = eDate;
+
+                    loadLaporan();
+                });
+            }
+        });
+
     });
 </script>
 @endsection

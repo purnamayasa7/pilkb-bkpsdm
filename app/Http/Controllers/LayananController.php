@@ -23,13 +23,33 @@ class LayananController extends Controller
         protected PegawaiService $pegawaiService
     ) {}
 
-    public function index()
+    public function index(Request $request)
     {
+        $bidang = Bidang::all();
+        $bidangId = $request->bidang;
+
         $layanan = Layanan::with('bidang')
+            ->when($bidangId && $bidangId !== 'all', function ($query) use ($bidangId) {
+                $query->where('kode_bidang', $bidangId);
+            })
             ->orderBy('kode_bidang', 'asc')
+            ->orderBy('nama_layanan', 'asc')
             ->get();
 
-        return view('pages.admin.layanan.index', compact('layanan'));
+        return view('pages.admin.layanan.index', compact('layanan', 'bidang', 'bidangId'));
+    }
+
+    public function getByBidang($bidangId = null)
+    {
+        $layanan = Layanan::with('bidang')
+            ->when($bidangId && $bidangId !== 'all', function ($query) use ($bidangId) {
+                $query->where('kode_bidang', $bidangId);
+            })
+            ->orderBy('kode_bidang', 'asc')
+            ->orderBy('nama_layanan', 'asc')
+            ->get();
+
+        return response()->json($layanan);
     }
 
     public function indexBidang()
@@ -319,6 +339,43 @@ class LayananController extends Controller
             'start',
             'end'
         ));
+    }
+
+    public function getDataLaporan(Request $request)
+    {
+        $start = $request->start_date;
+        $end = $request->end_date;
+
+        if (!$start || !$end) {
+            return response()->json([]);
+        }
+
+        $user = Auth::user();
+
+        $tiket = Regtiket::with([
+            'layanan.bidang',
+            'tahapTerakhir.statusRel'
+        ])
+            ->whereBetween('tanggal', [
+                $start . ' 00:00:00',
+                $end . ' 23:59:59'
+            ])
+            ->where('kode_ukerja', $user->kode_ukerja)
+            ->orderByDesc('tanggal')
+            ->get();
+
+        $result = $tiket->map(function ($item) {
+            return [
+                'no_tiket' => $item->no_tiket,
+                'nip' => $item->nip ?? '-',
+                'nama' => $item->nama ?? '-',
+                'nama_layanan' => $item->layanan->nama_layanan ?? '-',
+                'tanggal' => $item->tanggal ? Carbon::parse($item->tanggal)->format('d-m-Y') : '-',
+                'status' => $item->tahapTerakhir->statusRel->status ?? '-',
+            ];
+        });
+
+        return response()->json($result);
     }
 
     // Export PDF Master Data Layanan - Admin Bidang

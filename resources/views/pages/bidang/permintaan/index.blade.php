@@ -17,7 +17,7 @@
                     Konfirmasi Layanan Selesai
                 </h5>
 
-                <button class="btn-close" data-bs-dismiss="modal"></button>
+                <button class="btn-close" data-bs-dismiss="modal" type="button"></button>
             </div>
 
             <div class="modal-body">
@@ -25,7 +25,7 @@
             </div>
 
             <div class="modal-footer">
-                <button class="btn btn-light" data-bs-dismiss="modal">
+                <button class="btn btn-light" data-bs-dismiss="modal" type="button">
                     <i data-feather="arrow-left" class="me-1"></i>
                     Batal
                 </button>
@@ -61,89 +61,44 @@
                         List Permintaan - {{ auth()->user()->nama_bidang }}
                     </h1>
                 </div>
-                <div class="col-12 col-xl-auto mb-3">
-                    <!-- Dropdown Export -->
-                    {{-- <div class="btn-group">
-                            <button class="btn btn-sm btn-light text-success dropdown-toggle" type="button"
-                                data-bs-toggle="dropdown" aria-expanded="false">
-                                <i class="me-1" data-feather="download"></i>
-                                Export
-                            </button>
-                            <ul class="dropdown-menu">
-                                <li>
-                                    <a class="dropdown-item"
-                                        href="{{ route('adminOpd.tiket.exportExcel', ['month' => $month, 'year' => $year]) }}">
-                    <i class="me-1" data-feather="file-text"></i> Export Excel
-                    </a>
-                    </li>
-                    <li>
-                        <a class="dropdown-item"
-                            href="{{ route('adminOpd.tiket.exportPdf', ['month' => $month, 'year' => $year]) }}" target="_blank">
-                            <i class="me-1" data-feather="file"></i> Export PDF
-                        </a>
-                    </li>
-                    </ul>
-                </div> --}}
             </div>
         </div>
     </div>
-    </div>
 </header>
 
-{{-- <div class="container-xl px-4 mt-4"> --}}
 <div class="container-fluid px-4 mt-4">
     <div class="card">
         <div class="card-body">
-            <form method="GET" action="{{ route('adminBidang.permintaan.index') }}" id="filterForm">
+            <form id="filterForm" onsubmit="event.preventDefault()">
                 <div class="bg-white p-3 rounded-3 mb-4 border">
                     <div class="row align-items-end">
                         {{-- Bulan --}}
                         <div class="col-md-4">
-                            <label class="form-label">Bulan</label>
-                            <select name="month" class="form-select">
+                            <label class="form-label small mb-1">Bulan</label>
+                            <select name="month" id="monthSelect" class="form-select">
                                 @for ($m = 1; $m <= 12; $m++)
                                     <option value="{{ $m }}" {{ $month == $m ? 'selected' : '' }}>
                                     {{ \Carbon\Carbon::create()->month($m)->translatedFormat('F') }}
                                     </option>
-                                    @endfor
+                                @endfor
                             </select>
                         </div>
 
                         {{-- Tahun --}}
                         <div class="col-md-4">
-                            <label class="form-label">Tahun</label>
-                            <select name="year" class="form-select">
+                            <label class="form-label small mb-1">Tahun</label>
+                            <select name="year" id="yearSelect" class="form-select">
                                 @for ($y = date('Y') - 10; $y <= date('Y'); $y++)
                                     <option value="{{ $y }}" {{ $year == $y ? 'selected' : '' }}>
                                     {{ $y }}
                                     </option>
-                                    @endfor
+                                @endfor
                             </select>
                         </div>
-
-                        {{-- Tombol --}}
-                        <div class="col-md-4">
-                            <label class="form-label d-block">&nbsp;</label>
-                            <button type="submit" class="btn btn-primary" id="btnTampilkan">
-
-                                <span class="btn-tampilkan-text">
-                                    <i data-feather="search" class="me-1"></i>
-                                    Tampilkan
-                                </span>
-
-                                <span class="btn-tampilkan-loading d-none">
-                                    <span class="spinner-border spinner-border-sm me-1"
-                                        role="status"
-                                        aria-hidden="true"></span>
-                                    Memuat...
-                                </span>
-
-                            </button>
-                        </div>
                     </div>
-
                 </div>
             </form>
+
             <div class="position-relative">
                 <div id="tableLoading" class="table-loading">
                     <div class="loading-content">
@@ -152,6 +107,135 @@
                         </div>
                     </div>
                 </div>
+
+                <div id="tableContainer" style="min-height: 250px; opacity: 0; transition: opacity 0.25s ease-in-out;">
+                    <table id="datatablesSimple">
+                        <thead>
+                            <tr>
+                                <th>No Tiket</th>
+                                <th>NIP</th>
+                                <th>Layanan</th>
+                                <th>Unit Kerja</th>
+                                <th>Tanggal Masuk</th>
+                                <th>Status Terakhir</th>
+                                <th>Selesai</th>
+                                <th>Aksi</th>
+                            </tr>
+                        </thead>
+                        <tfoot>
+                            <tr>
+                                <th>No Tiket</th>
+                                <th>NIP</th>
+                                <th>Layanan</th>
+                                <th>Unit Kerja</th>
+                                <th>Tanggal Masuk</th>
+                                <th>Status Terakhir</th>
+                                <th>Selesai</th>
+                                <th>Aksi</th>
+                            </tr>
+                        </tfoot>
+                        <tbody>
+                            @foreach ($tiket as $item)
+                            <tr>
+                                <td>{{ $item->no_tiket }}</td>
+                                <td>
+                                    {{ $item->nip }} <br>
+                                    <small class="text-muted">
+                                        {{ $item->nama ?? '-' }}
+                                    </small>
+                                </td>
+                                <td>{{ $item->layanan->nama_layanan ?? '-' }}</td>
+                                <td>
+                                    {{ $item->nama_ukerja ?? '-' }}
+                                </td>
+                                <td>{{ $item->tanggal }}</td>
+                                <td>{{ $item->tahapTerakhir->statusRel->status ?? '-' }}</td>
+                                <td>
+                                    <div class="d-flex align-items-center justify-content-center">
+                                        @if ($item->archives == 1)
+                                        <span class="badge bg-light text-success border d-inline-flex align-items-center">
+                                            Selesai
+                                        </span>
+                                        @else
+                                        <span class="badge bg-light text-warning border d-inline-flex align-items-center">
+                                            Proses
+                                        </span>
+                                        @endif
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <a class="btn btn-datatable btn-icon btn-transparent-dark me-1 btnDetail"
+                                            href="{{ route('adminBidang.permintaan.editPermintaan', $item->no_tiket) }}"
+                                            title="Update">
+                                            <i data-feather="edit" class="text-warning"></i>
+                                        </a>
+
+                                        <a class="btn btn-datatable btn-icon btn-transparent-dark me-1 btnSelesai"
+                                            href="#" data-notiket="{{ $item->no_tiket }}" data-bs-toggle="tooltip"
+                                            title="Proses Selesai">
+                                            <i data-feather="check" class="text-success"></i>
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/simple-datatables@7.1.2/dist/umd/simple-datatables.min.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        feather.replace();
+
+        const tableLoading = document.getElementById('tableLoading');
+        const tableContainer = document.getElementById('tableContainer');
+        const monthSelect = document.getElementById('monthSelect');
+        const yearSelect = document.getElementById('yearSelect');
+
+        // Initial DataTables setup
+        const initialTable = document.getElementById('datatablesSimple');
+        if (initialTable && typeof simpleDatatables !== 'undefined') {
+            window.dataTable = new simpleDatatables.DataTable(initialTable);
+        }
+
+        // Smooth initial fade in
+        if (tableContainer) {
+            tableContainer.style.opacity = '1';
+        }
+        if (tableLoading) {
+            tableLoading.classList.add('d-none');
+        }
+
+        function escapeHtml(text) {
+            if (!text) return '';
+            const map = {
+                '&': '&amp;',
+                '<': '&lt;',
+                '>': '&gt;',
+                '"': '&quot;',
+                "'": '&#039;'
+            };
+            return String(text).replace(/[&<>"']/g, function(m) { return map[m]; });
+        }
+
+        function renderTable(rowsHtml = '') {
+            if (window.dataTable) {
+                try {
+                    window.dataTable.destroy();
+                } catch (e) {}
+                window.dataTable = null;
+            }
+
+            const container = document.getElementById('tableContainer');
+            if (!container) return;
+
+            container.innerHTML = `
                 <table id="datatablesSimple">
                     <thead>
                         <tr>
@@ -178,168 +262,137 @@
                         </tr>
                     </tfoot>
                     <tbody>
-                        @foreach ($tiket as $item)
-                        <tr>
-                            <td>{{ $item->no_tiket }}</td>
-                            <td>
-                                {{ $item->nip }} <br>
-                                <small class="text-muted">
-                                    {{ $item->nama ?? '-' }}
-                                </small>
-                            </td>
-                            <td>{{ $item->layanan->nama_layanan ?? '-' }}</td>
-                            <td>
-                                {{ $item->nama_ukerja ?? '-' }}
-                            </td>
-                            <td>{{ $item->tanggal }}</td>
-                            <td>{{ $item->tahapTerakhir->statusRel->status ?? '-' }}</td>
-                            <td>
-                                <div class="d-flex align-items-center justify-content-center">
-                                    @if ($item->archives == 1)
-                                    <span class="badge bg-light text-success border d-inline-flex align-items-center">
-                                        Selesai
-                                    </span>
-                                    @else
-                                    <span class="badge bg-light text-warning border d-inline-flex align-items-center">
-                                        Proses
-                                    </span>
-                                    @endif
-                                </div>
-                            </td>
-                            <td>
-                                <div class="d-flex align-items-center">
-                                    <a class="btn btn-datatable btn-icon btn-transparent-dark me-1 btnDetail"
-                                        href="{{ route('adminBidang.permintaan.editPermintaan', $item->no_tiket) }}"
-                                        title="Update">
-
-                                        <i data-feather="edit" class="text-warning"></i>
-                                    </a>
-
-                                    <a class="btn btn-datatable btn-icon btn-transparent-dark me-1 btnSelesai"
-                                        href="#" data-notiket="{{ $item->no_tiket }}" data-bs-toggle="tooltip"
-                                        title="Proses Selesai">
-
-                                        <i data-feather="check" class="text-success"></i>
-                                    </a>
-                                </div>
-                            </td>
-                        </tr>
-                        @endforeach
+                        ${rowsHtml}
                     </tbody>
                 </table>
-            </div>
-        </div>
-    </div>
-</div>
-<script src="https://cdn.jsdelivr.net/npm/simple-datatables@7.1.2/dist/umd/simple-datatables.min.js"></script>
-<script src="{{ asset('templatepro/js/datatables/datatables-simple-demo.js') }}"></script>
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
+            `;
 
-        feather.replace();
-
-        window.addEventListener('load', function() {
-
-            const tableLoading = document.getElementById('tableLoading');
-
-            if (tableLoading) {
-                tableLoading.classList.add('d-none');
+            const newTable = document.getElementById('datatablesSimple');
+            if (newTable && typeof simpleDatatables !== 'undefined') {
+                window.dataTable = new simpleDatatables.DataTable(newTable);
             }
 
-        });
+            feather.replace();
+            container.style.opacity = '1';
+        }
 
-        const modalKonfirmasiEl =
-            document.getElementById('modalKonfirmasi');
+        function loadData() {
+            const month = monthSelect ? monthSelect.value : '';
+            const year = yearSelect ? yearSelect.value : '';
 
-        const btnSubmitFinal =
-            document.getElementById('btnSubmitFinal');
+            if (tableLoading) tableLoading.classList.remove('d-none');
+            if (tableContainer) tableContainer.style.opacity = '0.3';
 
-        const formSelesai =
-            document.getElementById('formSelesai');
+            fetch(`/adminBidang/permintaan/get-data?month=${encodeURIComponent(month)}&year=${encodeURIComponent(year)}`)
+                .then(res => res.json())
+                .then(data => {
+                    let rowsHtml = '';
 
-        const btnSubmitText =
-            btnSubmitFinal.querySelector('.btn-submit-text');
+                    data.forEach(item => {
+                        const noTiket = item.no_tiket || '';
+                        const nip = item.nip || '-';
+                        const nama = item.nama ? `<br><small class="text-muted">${escapeHtml(item.nama)}</small>` : '';
+                        const layanan = (item.layanan && item.layanan.nama_layanan) ? item.layanan.nama_layanan : '-';
+                        const unitKerja = item.nama_ukerja || '-';
+                        const tanggal = item.tanggal || '-';
+                        const statusTerakhir = (item.tahap_terakhir && item.tahap_terakhir.status_rel && item.tahap_terakhir.status_rel.status)
+                            ? item.tahap_terakhir.status_rel.status
+                            : '-';
 
-        const btnSubmitLoading =
-            btnSubmitFinal.querySelector('.btn-submit-loading');
+                        const statusBadge = item.archives == 1
+                            ? `<span class="badge bg-light text-success border d-inline-flex align-items-center">Selesai</span>`
+                            : `<span class="badge bg-light text-warning border d-inline-flex align-items-center">Proses</span>`;
 
-        // =====================================================
-        // Button Tampilkan
-        // =====================================================
+                        const editUrl = `/adminBidang/permintaan/${encodeURIComponent(noTiket)}/edit`;
 
-        const filterForm =
-            document.getElementById('filterForm');
+                        rowsHtml += `
+                            <tr>
+                                <td>${escapeHtml(noTiket)}</td>
+                                <td>${escapeHtml(nip)} ${nama}</td>
+                                <td>${escapeHtml(layanan)}</td>
+                                <td>${escapeHtml(unitKerja)}</td>
+                                <td>${escapeHtml(tanggal)}</td>
+                                <td>${escapeHtml(statusTerakhir)}</td>
+                                <td>
+                                    <div class="d-flex align-items-center justify-content-center">
+                                        ${statusBadge}
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <a class="btn btn-datatable btn-icon btn-transparent-dark me-1 btnDetail"
+                                            href="${editUrl}"
+                                            title="Update">
+                                            <i data-feather="edit" class="text-warning"></i>
+                                        </a>
 
-        const btnTampilkan =
-            document.getElementById('btnTampilkan');
+                                        <a class="btn btn-datatable btn-icon btn-transparent-dark me-1 btnSelesai"
+                                            href="#" data-notiket="${escapeHtml(noTiket)}" data-bs-toggle="tooltip"
+                                            title="Proses Selesai">
+                                            <i data-feather="check" class="text-success"></i>
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                        `;
+                    });
 
-        const btnTampilkanText =
-            btnTampilkan.querySelector('.btn-tampilkan-text');
+                    renderTable(rowsHtml);
+                    if (tableLoading) tableLoading.classList.add('d-none');
+                })
+                .catch(err => {
+                    console.error('Gagal memuat data permintaan:', err);
+                    if (tableLoading) tableLoading.classList.add('d-none');
+                    if (tableContainer) tableContainer.style.opacity = '1';
+                });
+        }
 
-        const btnTampilkanLoading =
-            btnTampilkan.querySelector('.btn-tampilkan-loading');
+        monthSelect?.addEventListener('change', loadData);
+        yearSelect?.addEventListener('change', loadData);
 
-        filterForm.addEventListener('submit', function() {
+        // Modal Konfirmasi Selesai
+        const modalKonfirmasiEl = document.getElementById('modalKonfirmasi');
+        const btnSubmitFinal = document.getElementById('btnSubmitFinal');
+        const formSelesai = document.getElementById('formSelesai');
+        const btnSubmitText = btnSubmitFinal?.querySelector('.btn-submit-text');
+        const btnSubmitLoading = btnSubmitFinal?.querySelector('.btn-submit-loading');
 
-            // Cegah double submit
-            btnTampilkan.disabled = true;
-
-            // Sembunyikan tombol normal
-            btnTampilkanText.classList.add('d-none');
-
-            // Tampilkan spinner
-            btnTampilkanLoading.classList.remove('d-none');
-
-        });
-
-        const modalKonfirmasi =
-            new bootstrap.Modal(modalKonfirmasiEl);
-
-        let selectedNoTiket = null;
+        let modalKonfirmasi = null;
+        if (modalKonfirmasiEl) {
+            modalKonfirmasi = new bootstrap.Modal(modalKonfirmasiEl);
+        }
 
         document.addEventListener('click', function(e) {
-
             const btn = e.target.closest('.btnSelesai');
-
-            if (!btn) {
-                return;
-            }
+            if (!btn) return;
 
             e.preventDefault();
+            const selectedNoTiket = btn.dataset.notiket;
+            if (!selectedNoTiket) return;
 
-            // Ambil nomor tiket
-            selectedNoTiket = btn.dataset.notiket;
-
-            // Pastikan nomor tiket tersedia
-            if (!selectedNoTiket) {
-                return;
+            if (formSelesai) {
+                formSelesai.action = `/adminBidang/permintaan/${encodeURIComponent(selectedNoTiket)}/selesai`;
             }
 
-            formSelesai.action =
-                `/adminBidang/permintaan/${selectedNoTiket}/selesai`;
+            if (btnSubmitFinal) {
+                btnSubmitFinal.disabled = false;
+                btnSubmitText?.classList.remove('d-none');
+                btnSubmitLoading?.classList.add('d-none');
+            }
 
-            btnSubmitFinal.disabled = false;
-
-            btnSubmitText.classList.remove('d-none');
-
-            btnSubmitLoading.classList.add('d-none');
-
-            modalKonfirmasi.show();
-
+            if (modalKonfirmasi) {
+                modalKonfirmasi.show();
+            }
         });
 
-        btnSubmitFinal.addEventListener('click', function() {
-
-            // Cegah double submit
+        btnSubmitFinal?.addEventListener('click', function() {
             btnSubmitFinal.disabled = true;
+            btnSubmitText?.classList.add('d-none');
+            btnSubmitLoading?.classList.remove('d-none');
 
-            // Sembunyikan text normal
-            btnSubmitText.classList.add('d-none');
-
-            // Tampilkan spinner
-            btnSubmitLoading.classList.remove('d-none');
-
-            formSelesai.submit();
+            if (formSelesai) {
+                formSelesai.submit();
+            }
         });
     });
 </script>

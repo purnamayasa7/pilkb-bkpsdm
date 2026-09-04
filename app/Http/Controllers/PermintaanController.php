@@ -55,6 +55,32 @@ class PermintaanController extends Controller
         ));
     }
 
+    public function getData(Request $request)
+    {
+        $month = $request->month ?? Carbon::now()->month;
+        $year = $request->year ?? Carbon::now()->year;
+
+        $user = Auth::user();
+
+        $tiket = Regtiket::with([
+            'layanan.bidang',
+            'tahapTerakhir.statusRel'
+        ])
+            ->whereMonth('tanggal', $month)
+            ->whereYear('tanggal', $year)
+            ->has('tahap', '>', 1)
+            ->has('detail')
+            ->whereHas('layanan', function ($q) use ($user) {
+                if ($user && $user->bidang_id) {
+                    $q->where('kode_bidang', $user->bidang_id);
+                }
+            })
+            ->orderByDesc('tanggal')
+            ->get();
+
+        return response()->json($tiket);
+    }
+
     private function generateQr($url)
     {
         $renderer = new \BaconQrCode\Renderer\ImageRenderer(

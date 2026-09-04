@@ -92,8 +92,9 @@ Route::middleware(['auth', 'force.password'])->group(function () {
     Route::post('/notifications/read-all', [NotificationController::class, 'readAll'])->name('notifications.readAll');
     Route::post('/notifications/delete-all', [NotificationController::class, 'deleteAll'])->name('notifications.deleteAll');
 
-    // Notification Index
+    // Log Aktivitas
     Route::get('/log-aktivitas', [LogController::class, 'index'])->middleware('role:root,admin_bawah,admin_opd,bidang')->name('log.index');
+    Route::get('/log-aktivitas/get-data', [LogController::class, 'getData'])->middleware('role:root,admin_bawah,admin_opd,bidang')->name('log.getData');
     Route::get('/log-aktivitas/export-excel', [LogController::class, 'exportExcel'])->middleware('role:root,admin_bawah,admin_opd,bidang')->name('log.exportExcel');
 
     // Cetak QR & Riwayat Tiket
@@ -162,6 +163,7 @@ Route::prefix('root')
         Route::get('layanan/{id}', [LayananController::class, 'edit'])->name('layanan.edit');
         Route::put('layanan/{id}', [LayananController::class, 'update'])->name('layanan.update');
         Route::put('layanan/{id}/toggle-aktif', [LayananController::class, 'toggleAktif'])->name('layanan.toggle-aktif');
+        Route::get('/get-layanan-by-bidang/{bidang?}', [LayananController::class, 'getByBidang'])->name('layanan.getByBidang');
 
         // MASTER DATA STATUS
         Route::get('status', [StatusController::class, 'index'])->name('status');
@@ -171,6 +173,7 @@ Route::prefix('root')
         Route::put('status/{id}', [StatusController::class, 'update'])->name('status.update');
         Route::delete('status/{id}', [StatusController::class, 'destroy'])->name('status.destroy');
         Route::get('/get-layanan-status/{bidang}', [StatusController::class, 'getLayanan'])->name('status.getLayanan');
+        Route::get('/get-status-by-bidang/{bidang}', [StatusController::class, 'getByBidang'])->name('status.getByBidang');
 
         // MASTER DATA SYARAT
         Route::get('syarat', [SyaratController::class, 'index'])->name('syarat');
@@ -180,17 +183,19 @@ Route::prefix('root')
         Route::put('syarat/{id}', [SyaratController::class, 'update'])->name('syarat.update');
         Route::delete('syarat/{id}', [SyaratController::class, 'destroy'])->name('syarat.destroy');
         Route::get('/get-layanan-syarat/{bidang}', [SyaratController::class, 'getLayanan'])->name('syarat.getLayanan');
+        Route::get('/get-syarat-by-layanan/{layanan}', [SyaratController::class, 'getByLayanan'])->name('syarat.getByLayanan');
 
         // TIKET
         Route::get('tiket', [TiketController::class, 'index'])->name('tiket');
+        Route::get('tiket/get-data', [TiketController::class, 'getTiketData'])->name('tiket.getData');
         Route::get('tiket/export-excel', [TiketController::class, 'exportExcelRoot'])->name('tiket.exportExcel');
         Route::get('tiket/export-pdf', [TiketController::class, 'exportPdfRoot'])->name('tiket.exportPdf');
-        Route::get('filter', [TiketController::class, 'filter'])->name('filter');
         Route::get('/tiket/history/{no_tiket}', [TiketController::class, 'getHistory'])->name('tiket.getHistory');
 
         // LAPORAN
         Route::get('laporan', [LaporanController::class, 'index'])->name('laporan.index');
         Route::get('laporan/layanan', [LaporanController::class, 'getLayananByBidang'])->name('laporan.getLayananByBidang');
+        Route::get('laporan/get-data', [LaporanController::class, 'getData'])->name('laporan.getData');
         Route::get('laporan/export-pdf', [LaporanController::class, 'exportPdf'])->name('laporan.exportPdf');
 
         //FAQ
@@ -215,6 +220,7 @@ Route::prefix('adminOpd')
 
         // REG TIKET
         Route::get('tiket', [TiketController::class, 'indexProses'])->name('tiket.indexProses');
+        Route::get('tiket/get-proses-data', [TiketController::class, 'getProsesData'])->name('tiket.getProsesData');
         Route::get('tiket/create', [TiketController::class, 'create'])->name('tiket.create');
         Route::post('tiket/step', [TiketController::class, 'step'])->name('tiket.step');
         Route::get('/tiket/reset', [TiketController::class, 'reset'])->name('tiket.reset');
@@ -230,6 +236,7 @@ Route::prefix('adminOpd')
 
         // PERBAIKAN USULAN
         Route::get('perbaikan', [DetailTiketController::class, 'index'])->name('perbaikan.index');
+        Route::get('perbaikan/get-data', [DetailTiketController::class, 'getPerbaikanData'])->name('perbaikan.getData');
         Route::get('perbaikan/detail/{no_tiket}', [DetailTiketController::class, 'detailPerbaikan'])->name('perbaikan.detailPerbaikan');
         Route::get('perbaikan/{no_tiket}/edit', [DetailTiketController::class, 'editPerbaikan'])->name('perbaikan.edit');
         Route::post('perbaikan/{no_tiket}/update', [DetailTiketController::class, 'updatePerbaikan'])->name('perbaikan.update');
@@ -246,15 +253,18 @@ Route::prefix('adminOpd')
 
         // CETAK ULANG TIKET
         Route::get('tiket/cetak-form', [TiketController::class, 'formCetak'])->name('tiket.formCetak');
+        Route::get('tiket/get-cetak-data', [TiketController::class, 'getCetakOpdData'])->name('tiket.getCetakData');
 
         // LAPORAN
         Route::get('laporan', [LayananController::class, 'indexLaporan'])->name('laporan.indexLaporan');
+        Route::get('laporan/get-data', [LayananController::class, 'getDataLaporan'])->name('laporan.getData');
         // EXPORT PDF
         Route::get('laporan/export', [LayananController::class, 'exportPdfOpd'])->name('laporan.exportPdfOpd');
 
         // CETAK SYARAT
         Route::get('cetakSyarat', [SyaratController::class, 'indexCetak'])->name('cetakSyarat.index');
         Route::get('get-layanan-syarat/{bidang}', [SyaratController::class, 'getLayanan'])->name('syarat.getLayanan');
+        Route::get('get-syarat-by-layanan/{layanan}', [SyaratController::class, 'getByLayanan'])->name('cetakSyarat.getByLayanan');
         // EXPORT PDF
         Route::get('cetakSyarat/export', [SyaratController::class, 'exportPdf'])->name('cetakSyarat.export');
     });
@@ -265,6 +275,7 @@ Route::prefix('adminBidang')
     ->group(function () {
         // INDEX
         Route::get('permintaan', [PermintaanController::class, 'index'])->name('permintaan.index');
+        Route::get('permintaan/get-data', [PermintaanController::class, 'getData'])->name('permintaan.getData');
         Route::get('permintaan/{no_tiket}/edit', [PermintaanController::class, 'editPermintaan'])->name('permintaan.editPermintaan');
         Route::post('permintaan/{no_tiket}/update', [PermintaanController::class, 'updatePermintaan'])->name('permintaan.updatePermintaan');
         Route::post('permintaan/{no_tiket}/selesai', [PermintaanController::class, 'selesaiPermintaan'])->name('permintaan.selesaiPermintaan');
@@ -277,12 +288,14 @@ Route::prefix('adminBidang')
 
         // PERBAIKAN
         Route::get('perbaikan', [PerbaikanController::class, 'index'])->name('perbaikan.index');
+        Route::get('perbaikan/get-data', [PerbaikanController::class, 'getPerbaikanData'])->name('perbaikan.getData');
         Route::get('perbaikan/detail/{no_tiket}', [PerbaikanController::class, 'detail'])->name('perbaikan.detail');
         Route::get('perbaikan/export-pdf', [PerbaikanController::class, 'exportPdf'])->name('perbaikan.exportPdf');
         Route::get('perbaikan/export-excel', [PerbaikanController::class, 'exportExcel'])->name('perbaikan.exportExcel');
 
         // LAPORAN
         Route::get('laporan', [LaporanController::class, 'indexBidang'])->name('laporan.indexBidang');
+        Route::get('laporan/get-data', [LaporanController::class, 'getDataBidang'])->name('laporan.getDataBidang');
         Route::get('laporan/export-pdf', [LaporanController::class, 'exportPdfBidang'])->name('laporan.exportPdfBidang');
 
         // CETAK SYARAT
@@ -307,6 +320,7 @@ Route::prefix('adminBidang')
         Route::get('syarat/{id}', [SyaratController::class, 'editBidang'])->name('syarat.editBidang');
         Route::put('syarat/{id}', [SyaratController::class, 'updateBidang'])->name('syarat.updateBidang');
         Route::delete('syarat/{id}', [SyaratController::class, 'destroyBidang'])->name('syarat.destroyBidang');
+        Route::get('/get-syarat-by-layanan/{layanan}', [SyaratController::class, 'getByLayanan'])->name('syarat.getByLayanan');
 
         // MASTER DATA STATUS
         Route::get('statusBidang', [StatusController::class, 'indexBidang'])->name('status.indexBidang');
@@ -323,18 +337,22 @@ Route::prefix('adminBawah')
     ->group(function () {
         // INDEX
         Route::get('tiket', [TiketController::class, 'indexList'])->name('tiket.indexList');
+        Route::get('tiket/get-data', [TiketController::class, 'getListData'])->name('tiket.getData');
 
         // CETAK ULANG TIKET
         Route::get('tiket/cetak-form', [TiketController::class, 'formCetakAdminBawah'])->name('tiket.formCetakAdminBawah');
+        Route::get('tiket/get-cetak-data', [TiketController::class, 'getCetakAdminBawahData'])->name('tiket.getCetakData');
 
         // CETAK SYARAT
         Route::get('cetakSyarat', [SyaratController::class, 'indexCetakAdminBawah'])->name('cetakSyarat.indexCetakAdminBawah');
         Route::get('get-layanan-syarat/{bidang}', [SyaratController::class, 'getLayanan'])->name('syarat.getLayanan');
+        Route::get('get-syarat-by-layanan/{layanan}', [SyaratController::class, 'getByLayanan'])->name('cetakSyarat.getByLayanan');
         // EXPORT PDF
         Route::get('cetakSyarat/export', [SyaratController::class, 'exportPdf'])->name('cetakSyarat.export');
 
         // PERBAIKAN USULAN
         Route::get('perbaikan', [DetailTiketController::class, 'indexAdminBawah'])->name('perbaikan.indexAdminBawah');
+        Route::get('perbaikan/get-data', [DetailTiketController::class, 'getPerbaikanData'])->name('perbaikan.getData');
         Route::get('perbaikan/review/{no_tiket}', [DetailTiketController::class, 'review'])->name('perbaikan.review');
         Route::post('perbaikan/review/{no_tiket}', [DetailTiketController::class, 'submitReview'])->name('perbaikan.submitReview');
         Route::get('perbaikan/export-pdf', [DetailTiketController::class, 'exportPerbaikanPdf'])->name('perbaikan.exportPerbaikanPdf');
@@ -348,6 +366,7 @@ Route::prefix('adminBawah')
 
         // ARCHIVES USULAN
         Route::get('archives', [PengambilanController::class, 'indexArchives'])->name('archives.indexArchives');
+        Route::get('archives/get-data', [PengambilanController::class, 'getArchivesData'])->name('archives.getData');
         Route::get('archives/export-pdf', [PengambilanController::class, 'exportArchivesPdf'])->name('archives.exportArchivesPdf');
 
         // EXPORT EXCEL & PDF
@@ -357,16 +376,19 @@ Route::prefix('adminBawah')
         // LAPORAN
         Route::get('laporan', [LaporanController::class, 'index'])->name('laporan.index');
         Route::get('laporan/layanan', [LaporanController::class, 'getLayananByBidang'])->name('laporan.getLayananByBidang');
+        Route::get('laporan/get-data', [LaporanController::class, 'getData'])->name('laporan.getData');
         Route::get('laporan/export-pdf', [LaporanController::class, 'exportPdf'])->name('laporan.exportPdf');
 
         // PENGAMBILAN
         Route::get('pengambilan', [PengambilanController::class, 'indexPengambilan'])->name('pengambilan.indexPengambilan');
+        Route::get('pengambilan/get-data', [PengambilanController::class, 'getData'])->name('pengambilan.getData');
         Route::get('pengambilan/cek-tiket/{no_tiket}', [PengambilanController::class, 'cekTiket'])->name('pengambilan.cekTiket');
         Route::post('pengambilan/store', [PengambilanController::class, 'store'])->name('pengambilan.store');
         Route::get('pengambilan/export-pdf', [PengambilanController::class, 'exportPdf'])->name('pengambilan.exportPdf');
 
         // PINDAH DATA TIKET
         Route::get('pindah', [TiketController::class, 'indexPindah'])->name('pindah.indexPindah');
+        Route::get('pindah/get-data', [TiketController::class, 'getPindahData'])->name('pindah.getData');
         Route::get('pindah/{no_tiket}', [TiketController::class, 'editPindah'])->name('pindah.editPindah');
         Route::post('pindah/{no_tiket}', [TiketController::class, 'updatePindah'])->name('pindah.updatePindah');
         Route::get('pindah/get-layanan/{bidang}', [TiketController::class, 'getLayananPindah'])->name('pindah.getLayanan');

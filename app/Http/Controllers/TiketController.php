@@ -118,6 +118,33 @@ class TiketController extends Controller
         ));
     }
 
+    public function getTiketData(Request $request)
+    {
+        $bidangId = $request->bidang;
+        $start = $request->start_date;
+        $end = $request->end_date;
+
+        $tiket = collect();
+
+        if ($bidangId && $start && $end) {
+            $tiket = Regtiket::with([
+                'layanan',
+                'tahapTerakhir.statusRel'
+            ])
+                ->whereHas('layanan', function ($query) use ($bidangId) {
+                    $query->where('kode_bidang', $bidangId);
+                })
+                ->whereBetween('tanggal', [
+                    $start . ' 00:00:00',
+                    $end . ' 23:59:59'
+                ])
+                ->orderBy('tanggal', 'desc')
+                ->get();
+        }
+
+        return response()->json($tiket);
+    }
+
     public function exportExcelRoot(Request $request)
     {
         return Excel::download(new RootLayananTiketExport($request), 'laporan-permintaan-layanan.xlsx');
@@ -177,6 +204,25 @@ class TiketController extends Controller
         ));
     }
 
+    public function getProsesData(Request $request)
+    {
+        $month = $request->month ?? Carbon::now()->month;
+        $year = $request->year ?? Carbon::now()->year;
+
+        $tiket = Regtiket::with([
+            'layanan',
+            'tahapTerakhir.statusRel'
+        ])
+            ->where('archives', 0)
+            ->where('kode_ukerja', Auth::user()->kode_ukerja)
+            ->whereMonth('tanggal', $month)
+            ->whereYear('tanggal', $year)
+            ->orderBy('tanggal', 'desc')
+            ->get();
+
+        return response()->json($tiket);
+    }
+
     //List Tiket pada menu Admin Bawah
     public function indexList(Request $request)
     {
@@ -206,6 +252,43 @@ class TiketController extends Controller
                 'diambil'
             )
         );
+    }
+
+    public function getListData(Request $request)
+    {
+        $year = $request->year ?? Carbon::now()->year;
+        $diambil = $request->diambil;
+
+        $query = Regtiket::with([
+            'layanan',
+            'tahapTerakhir.statusRel'
+        ])
+            ->whereYear('tanggal', $year);
+
+        // FILTER STATUS DIAMBIL
+        if ($diambil !== null && $diambil !== '') {
+            $query->where('diambil', $diambil);
+        }
+
+        $tiket = $query
+            ->orderBy('tanggal', 'desc')
+            ->get();
+
+        $data = $tiket->map(function ($item) {
+            return [
+                'no_tiket' => $item->no_tiket,
+                'nip' => $item->nip ?? '-',
+                'nama' => $item->nama ?? '-',
+                'nama_ukerja' => $item->nama_ukerja ?? '-',
+                'nama_layanan' => $item->layanan->nama_layanan ?? '-',
+                'tanggal' => $item->tanggal ? Carbon::parse($item->tanggal)->translatedFormat('d F Y H:i') : '-',
+                'diambil' => (int) $item->diambil,
+                'url_public' => route('tiket.public', $item->no_tiket),
+                'url_cetak' => route('tiket.cetak', $item->no_tiket),
+            ];
+        });
+
+        return response()->json($data);
     }
 
     private function generateNoTiket()
@@ -1677,6 +1760,41 @@ class TiketController extends Controller
         return view('pages.opd.tiket.cetak', compact('data'));
     }
 
+    public function getCetakOpdData(Request $request)
+    {
+        $keyword = trim($request->keyword ?? '');
+
+        if (!$keyword) {
+            return response()->json([]);
+        }
+
+        $data = Regtiket::with([
+            'layanan',
+            'tahapTerakhir.statusRel'
+        ])
+            ->where('kode_ukerja', Auth::user()->kode_ukerja)
+            ->where(function ($q) use ($keyword) {
+                $q->where('no_tiket', 'like', "%{$keyword}%")
+                    ->orWhere('nip', 'like', "%{$keyword}%");
+            })
+            ->orderByDesc('tanggal')
+            ->get();
+
+        $result = $data->map(function ($item) {
+            return [
+                'no_tiket' => $item->no_tiket,
+                'nip' => $item->nip ?? '-',
+                'nama' => $item->nama ?? '-',
+                'nama_layanan' => $item->layanan->nama_layanan ?? '-',
+                'tanggal' => $item->tanggal ? Carbon::parse($item->tanggal)->translatedFormat('d F Y H:i') : '-',
+                'status' => $item->tahapTerakhir->statusRel->status ?? '-',
+                'url_cetak' => route('tiket.cetak', $item->no_tiket),
+            ];
+        });
+
+        return response()->json($result);
+    }
+
     // CETAK ULANG TIKET ADMIN BAWAH
     public function formCetakAdminBawah(Request $request)
     {
@@ -1704,14 +1822,46 @@ class TiketController extends Controller
         );
     }
 
+    public function getCetakAdminBawahData(Request $request)
+    {
+        $keyword = trim($request->keyword ?? '');
+
+        if (!$keyword) {
+            return response()->json([]);
+        }
+
+        $data = Regtiket::with([
+            'layanan',
+            'tahapTerakhir.statusRel'
+        ])
+            ->where(function ($query) use ($keyword) {
+                $query->where('no_tiket', 'like', "%{$keyword}%")
+                    ->orWhere('nip', 'like', "%{$keyword}%");
+            })
+            ->orderByDesc('tanggal')
+            ->get();
+
+        $result = $data->map(function ($item) {
+            return [
+                'no_tiket' => $item->no_tiket,
+                'nip' => $item->nip ?? '-',
+                'nama' => $item->nama ?? '-',
+                'nama_ukerja' => $item->nama_ukerja ?? '-',
+                'nama_layanan' => $item->layanan->nama_layanan ?? '-',
+                'tanggal' => $item->tanggal ? Carbon::parse($item->tanggal)->translatedFormat('d F Y H:i') : '-',
+                'status' => $item->tahapTerakhir->statusRel->status ?? '-',
+                'url_cetak' => route('tiket.cetak', $item->no_tiket),
+            ];
+        });
+
+        return response()->json($result);
+    }
+
     // PINDAH DATA TIKET
     public function indexPindah(Request $request)
     {
         $keyword = $request->keyword;
-
         $data = collect();
-        $pegawaiList = [];
-        $simpegAvailable = true;
 
         if ($keyword) {
             $data = Regtiket::with([
@@ -1719,17 +1869,49 @@ class TiketController extends Controller
                 'tahapTerakhir.statusRel'
             ])
                 ->where(function ($query) use ($keyword) {
-                    $query->where('no_tiket', 'like', "%$keyword%");
-                })->get();
-
-            $pegawaiList = $this->pegawaiService->getPegawaiByNips(
-                $data->pluck('nip')
-            );
-
-            $simpegAvailable = $this->pegawaiService->isSimpegAvailable();
+                    $query->where('no_tiket', 'like', "%$keyword%")
+                        ->orWhere('nip', 'like', "%$keyword%");
+                })
+                ->orderByDesc('tanggal')
+                ->get();
         }
 
-        return view('pages.admin-bawah.pindah-tiket.index', compact('data', 'pegawaiList', 'simpegAvailable'));
+        return view('pages.admin-bawah.pindah-tiket.index', compact('data'));
+    }
+
+    public function getPindahData(Request $request)
+    {
+        $keyword = trim($request->keyword ?? '');
+
+        if (!$keyword) {
+            return response()->json([]);
+        }
+
+        $data = Regtiket::with([
+            'layanan',
+            'tahapTerakhir.statusRel'
+        ])
+            ->where(function ($query) use ($keyword) {
+                $query->where('no_tiket', 'like', "%{$keyword}%")
+                    ->orWhere('nip', 'like', "%{$keyword}%");
+            })
+            ->orderByDesc('tanggal')
+            ->get();
+
+        $result = $data->map(function ($item) {
+            return [
+                'no_tiket' => $item->no_tiket,
+                'nip' => $item->nip ?? '-',
+                'nama' => $item->nama ?? '-',
+                'nama_ukerja' => $item->nama_ukerja ?? '-',
+                'nama_layanan' => $item->layanan->nama_layanan ?? '-',
+                'tanggal' => $item->tanggal ? Carbon::parse($item->tanggal)->translatedFormat('d F Y H:i') : '-',
+                'status' => $item->tahapTerakhir->statusRel->status ?? '-',
+                'url_edit' => route('adminBawah.pindah.editPindah', $item->no_tiket),
+            ];
+        });
+
+        return response()->json($result);
     }
 
     public function editPindah($no_tiket)

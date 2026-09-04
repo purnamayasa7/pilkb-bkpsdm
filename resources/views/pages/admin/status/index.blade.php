@@ -100,17 +100,15 @@
 <div class="container-fluid px-4 mt-4">
     <div class="card">
         <div class="card-body">
-            <form method="GET" action="{{ route('root.status') }}" class="mb-3">
+            <form method="GET" action="{{ route('root.status') }}" id="filterForm" class="mb-3">
                 <div class="row">
                     <div class="col-md-5">
-                        <select name="bidang" class="form-select" onchange="this.form.submit()">
-
+                        <select name="bidang" id="bidangSelect" class="form-select">
                             @foreach ($bidang as $b)
                             <option value="{{ $b->id }}" {{ $bidangId == $b->id ? 'selected' : '' }}>
                                 {{ $b->nama_bidang }}
                             </option>
                             @endforeach
-
                         </select>
                     </div>
                 </div>
@@ -123,6 +121,113 @@
                         </div>
                     </div>
                 </div>
+                <div id="tableContainer">
+                    <table id="datatablesSimple">
+                        <thead>
+                            <tr>
+                                <th>No</th>
+                                <th>Nama Layanan</th>
+                                <th>Status</th>
+                                <th>Aksi</th>
+                            </tr>
+                        </thead>
+                        <tfoot>
+                            <tr>
+                                <th>No</th>
+                                <th>Nama Layanan</th>
+                                <th>Status</th>
+                                <th>Aksi</th>
+                            </tr>
+                        </tfoot>
+                        <tbody>
+                            @foreach ($status as $item)
+                            <tr>
+                                <td>{{ $loop->iteration }}</td>
+                                <td>
+                                    {{ $item->layanan->nama_layanan ?? '-' }} <br>
+                                    <small class="text-muted">
+                                        {{ $item->layanan->bidang->nama_bidang ?? '-' }}
+                                    </small>
+                                </td>
+                                <td>{{ $item->status }}</td>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <a class="btn btn-datatable btn-icon btn-transparent-dark me-1 btnDetail"
+                                            href="#" data-id="{{ $item->id }}"
+                                            data-layanan="{{ $item->layanan->nama_layanan ?? '-' }}"
+                                            data-bidang="{{ $item->layanan->bidang->nama_bidang ?? '-' }}"
+                                            data-status="{{ $item->status }}" title="Lihat layanan">
+                                            <i data-feather="eye" class="text-primary"></i>
+                                        </a>
+                                        <a class="btn btn-datatable btn-icon btn-transparent-dark me-1"
+                                            href="{{ route('root.status.edit', $item->id) }}" data-bs-toggle="tooltip"
+                                            title="Edit Status"><i data-feather="edit" class="text-warning"></i></a>
+                                        <a class="btn btn-datatable btn-icon btn-transparent-dark me-1 btnDelete"
+                                            href="#" data-id="{{ $item->id }}"
+                                            data-nama="{{ $item->status }}"
+                                            data-layanan="{{ $item->layanan->nama_layanan ?? '-' }}" title="Hapus Status">
+                                            <i data-feather="trash" class="text-danger"></i>
+                                        </a>
+                                    </div>
+
+                                </td>
+                            </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/simple-datatables@7.1.2/dist/umd/simple-datatables.min.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+
+        feather.replace();
+
+        const tableLoading = document.getElementById('tableLoading');
+        if (tableLoading) tableLoading.classList.add('d-none');
+
+        const initialTable = document.getElementById('datatablesSimple');
+        if (initialTable && typeof simpleDatatables !== 'undefined') {
+            window.dataTable = new simpleDatatables.DataTable(initialTable);
+        }
+
+        const bidangSelect = document.getElementById('bidangSelect');
+        const filterForm = document.getElementById('filterForm');
+
+        if (filterForm) {
+            filterForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+            });
+        }
+
+        function escapeHtml(text) {
+            if (!text) return '';
+            const map = {
+                '&': '&amp;',
+                '<': '&lt;',
+                '>': '&gt;',
+                '"': '&quot;',
+                "'": '&#039;'
+            };
+            return String(text).replace(/[&<>"']/g, function(m) { return map[m]; });
+        }
+
+        function renderTable(rowsHtml = '') {
+            if (window.dataTable) {
+                try {
+                    window.dataTable.destroy();
+                } catch (e) {}
+                window.dataTable = null;
+            }
+
+            const container = document.getElementById('tableContainer');
+            if (!container) return;
+
+            container.innerHTML = `
                 <table id="datatablesSimple">
                     <thead>
                         <tr>
@@ -141,84 +246,120 @@
                         </tr>
                     </tfoot>
                     <tbody>
-                        @foreach ($status as $item)
-                        <tr>
-                            <td>{{ $loop->iteration }}</td>
-                            <td>
-                                {{ $item->layanan->nama_layanan ?? '-' }} <br>
-                                <small class="text-muted">
-                                    {{ $item->layanan->bidang->nama_bidang ?? '-' }}
-                                </small>
-                            </td>
-                            <td>{{ $item->status }}</td>
-                            <td>
-                                <div class="d-flex align-items-center">
-                                    <a class="btn btn-datatable btn-icon btn-transparent-dark me-1 btnDetail"
-                                        href="#" data-id="{{ $item->id }}"
-                                        data-layanan="{{ $item->layanan->nama_layanan ?? '-' }}"
-                                        data-bidang="{{ $item->layanan->bidang->nama_bidang ?? '-' }}"
-                                        data-status="{{ $item->status }}" title="Lihat layanan">
-                                        <i data-feather="eye" class="text-primary"></i>
-                                    </a>
-                                    <a class="btn btn-datatable btn-icon btn-transparent-dark me-1"
-                                        href="{{ route('root.status.edit', $item->id) }}" data-bs-toggle="tooltip"
-                                        title="Edit Status"><i data-feather="edit" class="text-warning"></i></a>
-                                    <a class="btn btn-datatable btn-icon btn-transparent-dark me-1 btnDelete"
-                                        href="#" data-id="{{ $item->id }}"
-                                        data-nama="{{ $item->status }}"
-                                        data-layanan="{{ $item->layanan->nama_layanan }}" title="Hapus Status">
-                                        <i data-feather="trash" class="text-danger"></i>
-                                    </a>
-                                </div>
-
-                            </td>
-                        </tr>
-                        @endforeach
+                        ${rowsHtml}
                     </tbody>
                 </table>
-            </div>
-        </div>
-    </div>
-</div>
+            `;
 
-<script src="https://cdn.jsdelivr.net/npm/simple-datatables@7.1.2/dist/umd/simple-datatables.min.js"></script>
-<script src="{{ asset('templatepro/js/datatables/datatables-simple-demo.js') }}"></script>
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
+            const newTable = document.getElementById('datatablesSimple');
+            if (newTable && typeof simpleDatatables !== 'undefined') {
+                window.dataTable = new simpleDatatables.DataTable(newTable);
+            }
 
-        feather.replace();
+            feather.replace();
+        }
 
-        window.addEventListener('load', function() {
-            document.getElementById('tableLoading').classList.add('d-none');
+        function loadStatus(bidangId) {
+            if (!bidangId) {
+                renderTable('');
+                return;
+            }
+
+            if (tableLoading) tableLoading.classList.remove('d-none');
+
+            fetch(`/root/get-status-by-bidang/${bidangId}`)
+                .then(res => res.json())
+                .then(data => {
+                    let rowsHtml = '';
+
+                    data.forEach((item, index) => {
+                        const namaLayanan = item.layanan ? item.layanan.nama_layanan : '-';
+                        const namaBidang = (item.layanan && item.layanan.bidang) ? item.layanan.bidang.nama_bidang : '-';
+                        const statusText = item.status || '-';
+
+                        rowsHtml += `
+                            <tr>
+                                <td>${index + 1}</td>
+                                <td>
+                                    ${escapeHtml(namaLayanan)} <br>
+                                    <small class="text-muted">${escapeHtml(namaBidang)}</small>
+                                </td>
+                                <td>${escapeHtml(statusText)}</td>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <a class="btn btn-datatable btn-icon btn-transparent-dark me-1 btnDetail"
+                                            href="#"
+                                            data-id="${item.id}"
+                                            data-layanan="${escapeHtml(namaLayanan)}"
+                                            data-bidang="${escapeHtml(namaBidang)}"
+                                            data-status="${escapeHtml(statusText)}"
+                                            title="Lihat detail">
+                                            <i data-feather="eye" class="text-primary"></i>
+                                        </a>
+                                        <a class="btn btn-datatable btn-icon btn-transparent-dark me-1"
+                                            href="/root/status/${item.id}"
+                                            data-bs-toggle="tooltip"
+                                            title="Edit Status">
+                                            <i data-feather="edit" class="text-warning"></i>
+                                        </a>
+                                        <a class="btn btn-datatable btn-icon btn-transparent-dark me-1 btnDelete"
+                                            href="#"
+                                            data-id="${item.id}"
+                                            data-nama="${escapeHtml(statusText)}"
+                                            data-layanan="${escapeHtml(namaLayanan)}"
+                                            title="Hapus Status">
+                                            <i data-feather="trash" class="text-danger"></i>
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                        `;
+                    });
+
+                    renderTable(rowsHtml);
+                    if (tableLoading) tableLoading.classList.add('d-none');
+                })
+                .catch(err => {
+                    console.error('Gagal mengambil data status:', err);
+                    if (tableLoading) tableLoading.classList.add('d-none');
+                });
+        }
+
+        // GANTI BIDANG -> LOAD TANPA RELOAD
+        bidangSelect?.addEventListener('change', function() {
+            if (this.value !== '') {
+                loadStatus(this.value);
+            } else {
+                renderTable('');
+            }
         });
 
-        //Modal Detail
+        // MODAL DETAIL
         const modalDetailEl = document.getElementById('modalDetail');
-        const modalDetail = new bootstrap.Modal(modalDetailEl);
+        const modalDetail = modalDetailEl ? new bootstrap.Modal(modalDetailEl) : null;
 
         document.addEventListener('click', function(e) {
-
             const btn = e.target.closest('.btnDetail');
-            if (!btn) return;
+            if (!btn || !modalDetail) return;
 
             e.preventDefault();
 
-            document.getElementById('detailBidang').innerText = btn.dataset.bidang;
-            document.getElementById('detailLayanan').innerText = btn.dataset.layanan;
-            document.getElementById('detailNama').innerText = btn.dataset.status;
+            document.getElementById('detailBidang').innerText = btn.dataset.bidang || '-';
+            document.getElementById('detailLayanan').innerText = btn.dataset.layanan || '-';
+            document.getElementById('detailNama').innerText = btn.dataset.status || '-';
 
             modalDetail.show();
         });
 
-        //Delete Data
+        // DELETE DATA
         const modalDeleteEl = document.getElementById('modalDelete');
-        const modalDelete = new bootstrap.Modal(modalDeleteEl);
+        const modalDelete = modalDeleteEl ? new bootstrap.Modal(modalDeleteEl) : null;
         const formDelete = document.getElementById('formDelete');
         const btnConfirmDelete = document.getElementById('btnConfirmDelete');
 
         document.addEventListener('click', function(e) {
             const btn = e.target.closest('.btnDelete');
-            if (!btn) return;
+            if (!btn || !modalDelete) return;
 
             e.preventDefault();
 
@@ -227,17 +368,19 @@
             const layanan = btn.dataset.layanan;
 
             document.getElementById('textDelete').innerHTML =
-                `Apakah anda yakin ingin menghapus status <b>${nama}</b> pada layanan <b>${layanan}</b>?`;
+                `Apakah anda yakin ingin menghapus status <b>${escapeHtml(nama)}</b> pada layanan <b>${escapeHtml(layanan)}</b>?`;
 
             formDelete.action = `/root/status/${id}`;
 
             modalDelete.show();
         });
 
-        formDelete.addEventListener('submit', function() {
-            btnConfirmDelete.disabled = true;
-            btnConfirmDelete.querySelector('.btn-delete-text')?.classList.add('d-none');
-            btnConfirmDelete.querySelector('.btn-delete-loading')?.classList.remove('d-none');
+        formDelete?.addEventListener('submit', function() {
+            if (btnConfirmDelete) {
+                btnConfirmDelete.disabled = true;
+                btnConfirmDelete.querySelector('.btn-delete-text')?.classList.add('d-none');
+                btnConfirmDelete.querySelector('.btn-delete-loading')?.classList.remove('d-none');
+            }
         });
     });
 </script>

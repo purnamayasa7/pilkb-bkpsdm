@@ -59,6 +59,43 @@ class LogController extends Controller
         ));
     }
 
+    public function getData(Request $request)
+    {
+        $user = Auth::user();
+
+        $tanggal_awal = $request->tanggal_awal;
+        $tanggal_akhir = $request->tanggal_akhir;
+
+        $query = Log::with(['user', 'user.role', 'user.bidang']);
+
+        switch ($user->role_id) {
+            case 1:
+                break;
+            case 2:
+                $query->where('user_id', $user->id);
+                break;
+            case 3:
+                $query->where('kode_ukerja', $user->kode_ukerja);
+                break;
+            case 4:
+                $query->whereHas('user', function ($q) use ($user) {
+                    $q->where('bidang_id', $user->bidang_id);
+                });
+                break;
+        }
+
+        if ($tanggal_awal && $tanggal_akhir) {
+            $query->whereBetween('created_at', [
+                $tanggal_awal . ' 00:00:00',
+                $tanggal_akhir . ' 23:59:59'
+            ]);
+        }
+
+        $logs = $query->latest()->get();
+
+        return response()->json($logs);
+    }
+
     public function exportExcel(Request $request)
     {
         $request->validate([

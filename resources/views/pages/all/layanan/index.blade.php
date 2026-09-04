@@ -21,12 +21,12 @@
                         </button>
                         <ul class="dropdown-menu">
                             <li>
-                                <a class="dropdown-item" href="{{ route('root.tiket.exportExcel', request()->query()) }}">
+                                <a id="btnExportExcel" class="dropdown-item" href="{{ route('root.tiket.exportExcel', request()->query()) }}">
                                     <i class="me-1" data-feather="file-text"></i> Export Excel
                                 </a>
                             </li>
                             <li>
-                                <a class="dropdown-item" href="{{ route('root.tiket.exportPdf', request()->query()) }}" target="_blank">
+                                <a id="btnExportPdf" class="dropdown-item" href="{{ route('root.tiket.exportPdf', request()->query()) }}" target="_blank">
                                     <i class="me-1" data-feather="file"></i> Export PDF
                                 </a>
                             </li>
@@ -162,8 +162,8 @@
                         </div>
                     </div>
                     <!-- HIDDEN INPUT -->
-                    <input type="hidden" name="start_date" id="startDate">
-                    <input type="hidden" name="end_date" id="endDate">
+                    <input type="hidden" name="start_date" id="startDate" value="{{ $start }}">
+                    <input type="hidden" name="end_date" id="endDate" value="{{ $end }}">
                 </div>
             </form>
             <div class="position-relative">
@@ -174,6 +174,198 @@
                         </div>
                     </div>
                 </div>
+                <div id="tableContainer">
+                    <table id="datatablesSimple">
+                        <thead>
+                            <tr>
+                                <th>No</th>
+                                <th>No Tiket</th>
+                                <th>NIP</th>
+                                <th>Unit Kerja</th>
+                                <th>Layanan</th>
+                                <th>Tanggal</th>
+                                <th>Status</th>
+                                <th>Aksi</th>
+                            </tr>
+                        </thead>
+                        <tfoot>
+                            <tr>
+                                <th>No</th>
+                                <th>No Tiket</th>
+                                <th>NIP</th>
+                                <th>Unit Kerja</th>
+                                <th>Layanan</th>
+                                <th>Tanggal</th>
+                                <th>Status</th>
+                                <th>Aksi</th>
+                            </tr>
+                        </tfoot>
+                        <tbody>
+                            @foreach ($tiket as $item)
+                            <tr>
+                                <td>{{ $loop->iteration }}</td>
+                                <td>{{ $item->no_tiket }}</td>
+                                <td>
+                                    {{ $item->nip }} <br>
+                                    <small class="text-muted">
+                                        {{ $item->nama ?? '-' }}
+                                    </small>
+                                </td>
+                                <td>
+                                    {{ $item->nama_ukerja ?? '-' }}
+                                </td>
+                                <td>{{ $item->layanan->nama_layanan ?? '-' }}</td>
+                                <td>{{ $item->tanggal }}</td>
+                                <td>{{ $item->tahapTerakhir->statusRel->status ?? '-' }}</td>
+                                <td>
+                                    <a class="btn btn-datatable btn-icon btn-transparent-dark me-1 btnDetail"
+                                        href="#"
+                                        data-notiket="{{ $item->no_tiket }}"
+                                        title="Lihat Riwayat">
+
+                                        <i data-feather="eye" class="text-primary"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/simple-datatables@7.1.2/dist/umd/simple-datatables.min.js"></script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+
+        feather.replace();
+
+        const tableLoading = document.getElementById('tableLoading');
+        if (tableLoading) tableLoading.classList.add('d-none');
+
+        const initialTable = document.getElementById('datatablesSimple');
+        if (initialTable && typeof simpleDatatables !== 'undefined') {
+            window.dataTable = new simpleDatatables.DataTable(initialTable);
+        }
+
+        const filterForm = document.getElementById('filterForm');
+        if (filterForm) {
+            filterForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+            });
+        }
+
+        const modal = new bootstrap.Modal(document.getElementById('modalDetail'));
+        const baseUrl = "{{ url('root/tiket/history') }}";
+
+        let historyData = [];
+        let currentPage = 1;
+        const perPage = 5;
+
+        function renderHistoryTable() {
+            let start = (currentPage - 1) * perPage;
+            let end = start + perPage;
+            let pageData = historyData.slice(start, end);
+            let html = '';
+
+            if (pageData.length === 0) {
+                html = `
+                    <tr>
+                        <td colspan="3" class="text-center">Tidak ada data</td>
+                    </tr>`;
+            } else {
+                pageData.forEach((item, index) => {
+                    html += `
+                        <tr>
+                            <td>Tahap ${start + index + 1}</td>
+                            <td>${item.tanggal}</td>
+                            <td>${item.status_rel ? item.status_rel.status : '-'}</td>
+                        </tr>`;
+                });
+            }
+
+            document.getElementById('historyTable').innerHTML = html;
+            renderHistoryPagination();
+        }
+
+        function renderHistoryPagination() {
+            let totalPage = Math.ceil(historyData.length / perPage);
+            let html = '';
+
+            if (totalPage > 1) {
+                if (currentPage > 1) {
+                    html += `
+                        <button class="btn btn-sm btn-outline-primary me-1" onclick="prevPage()">
+                            Prev
+                        </button>`;
+                }
+
+                html += `
+                    <span class="me-2">
+                        Page ${currentPage} / ${totalPage}
+                    </span>`;
+
+                if (currentPage < totalPage) {
+                    html += `
+                        <button class="btn btn-sm btn-outline-primary" onclick="nextPage()">
+                            Next
+                        </button>`;
+                }
+            }
+
+            document.getElementById('historyPagination').innerHTML = html;
+        }
+
+        window.nextPage = function() {
+            currentPage++;
+            renderHistoryTable();
+        };
+
+        window.prevPage = function() {
+            currentPage--;
+            renderHistoryTable();
+        };
+
+        function escapeHtml(text) {
+            if (!text) return '';
+            const map = {
+                '&': '&amp;',
+                '<': '&lt;',
+                '>': '&gt;',
+                '"': '&quot;',
+                "'": '&#039;'
+            };
+            return String(text).replace(/[&<>"']/g, function(m) { return map[m]; });
+        }
+
+        function updateExportLinks(bidangId, startDate, endDate) {
+            const btnExcel = document.getElementById('btnExportExcel');
+            const btnPdf = document.getElementById('btnExportPdf');
+            const params = new URLSearchParams();
+            if (bidangId) params.append('bidang', bidangId);
+            if (startDate) params.append('start_date', startDate);
+            if (endDate) params.append('end_date', endDate);
+            const queryString = params.toString() ? `?${params.toString()}` : '';
+
+            if (btnExcel) btnExcel.href = `{{ route('root.tiket.exportExcel') }}${queryString}`;
+            if (btnPdf) btnPdf.href = `{{ route('root.tiket.exportPdf') }}${queryString}`;
+        }
+
+        function renderTiketTable(rowsHtml = '') {
+            if (window.dataTable) {
+                try {
+                    window.dataTable.destroy();
+                } catch (e) {}
+                window.dataTable = null;
+            }
+
+            const container = document.getElementById('tableContainer');
+            if (!container) return;
+
+            container.innerHTML = `
                 <table id="datatablesSimple">
                     <thead>
                         <tr>
@@ -200,220 +392,144 @@
                         </tr>
                     </tfoot>
                     <tbody>
-                        @foreach ($tiket as $item)
-                        <tr>
-                            <td>{{ $loop->iteration }}</td>
-                            <td>{{ $item->no_tiket }}</td>
-                            <td>
-                                {{ $item->nip }} <br>
-                                <small class="text-muted">
-                                    {{ $item->nama ?? '-' }}
-                                </small>
-                            </td>
-                            <td>
-                                {{ $item->nama_ukerja ?? '-' }}
-                            </td>
-                            <td>{{ $item->layanan->nama_layanan ?? '-' }}</td>
-                            <td>{{ $item->tanggal }}</td>
-                            <td>{{ $item->tahapTerakhir->statusRel->status ?? '-' }}</td>
-                            <td>
-                                <a class="btn btn-datatable btn-icon btn-transparent-dark me-1 btnDetail"
-                                    href="#"
-                                    data-notiket="{{ $item->no_tiket }}"
-                                    title="Lihat Riwayat">
-
-                                    <i data-feather="eye" class="text-primary"></i>
-                                </a>
-                            </td>
-                        </tr>
-                        @endforeach
+                        ${rowsHtml}
                     </tbody>
                 </table>
-            </div>
-        </div>
-    </div>
-</div>
-
-<script src="https://cdn.jsdelivr.net/npm/simple-datatables@7.1.2/dist/umd/simple-datatables.min.js"></script>
-<script src="{{ asset('templatepro/js/datatables/datatables-simple-demo.js') }}"></script>
-
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-
-        window.addEventListener('load', function() {
-            document.getElementById('tableLoading').classList.add('d-none');
-        });
-
-        const modal = new bootstrap.Modal(document.getElementById('modalDetail'));
-
-        const baseUrl = "{{ url('root/tiket/history') }}";
-
-        let historyData = [];
-        let currentPage = 1;
-        const perPage = 5;
-
-        function renderTable() {
-
-            let start = (currentPage - 1) * perPage;
-            let end = start + perPage;
-
-            let pageData = historyData.slice(start, end);
-
-            let html = '';
-
-            if (pageData.length === 0) {
-
-                html =
-                    `<tr>
-                    <td colspan="3" class="text-center">
-                        Tidak ada data
-                    </td>
-                </tr>`;
-
-            } else {
-
-                pageData.forEach((item, index) => {
-
-                    html += `
-                    <tr>
-                        <td>Tahap ${start + index + 1}</td>
-                        <td>${item.tanggal}</td>
-                        <td>${item.status_rel ? item.status_rel.status : '-'}</td>
-                    </tr>
-                `;
-
-                });
-
-            }
-
-            document.getElementById('historyTable').innerHTML = html;
-
-            renderPagination();
-        }
-
-        function renderPagination() {
-
-            let totalPage = Math.ceil(historyData.length / perPage);
-
-            let html = '';
-
-            if (totalPage > 1) {
-
-                if (currentPage > 1) {
-
-                    html += `
-                    <button class="btn btn-sm btn-outline-primary me-1"
-                        onclick="prevPage()">
-                        Prev
-                    </button>
-                `;
-
-                }
-
-                html += `
-                <span class="me-2">
-                    Page ${currentPage} / ${totalPage}
-                </span>
             `;
 
-                if (currentPage < totalPage) {
-
-                    html += `
-                    <button class="btn btn-sm btn-outline-primary"
-                        onclick="nextPage()">
-                        Next
-                    </button>
-                `;
-
-                }
+            const newTable = document.getElementById('datatablesSimple');
+            if (newTable && typeof simpleDatatables !== 'undefined') {
+                window.dataTable = new simpleDatatables.DataTable(newTable);
             }
 
-            document.getElementById('historyPagination').innerHTML = html;
+            feather.replace();
         }
 
-        window.nextPage = function() {
-            currentPage++;
-            renderTable();
+        function loadTiket(bidangId, startDate, endDate) {
+            if (!bidangId || !startDate || !endDate) {
+                renderTiketTable('');
+                return;
+            }
+
+            if (tableLoading) tableLoading.classList.remove('d-none');
+            updateExportLinks(bidangId, startDate, endDate);
+
+            fetch(`/root/tiket/get-data?bidang=${bidangId}&start_date=${startDate}&end_date=${endDate}`)
+                .then(res => res.json())
+                .then(data => {
+                    let rowsHtml = '';
+
+                    data.forEach((item, index) => {
+                        const nama = item.nama ? item.nama : '-';
+                        const ukerja = item.nama_ukerja || '-';
+                        const layanan = item.layanan ? item.layanan.nama_layanan : '-';
+                        const tgl = item.tanggal || '-';
+                        const statusText = (item.tahap_terakhir && item.tahap_terakhir.status_rel)
+                            ? item.tahap_terakhir.status_rel.status
+                            : '-';
+
+                        rowsHtml += `
+                            <tr>
+                                <td>${index + 1}</td>
+                                <td>${escapeHtml(item.no_tiket)}</td>
+                                <td>
+                                    ${escapeHtml(item.nip)} <br>
+                                    <small class="text-muted">
+                                        ${escapeHtml(nama)}
+                                    </small>
+                                </td>
+                                <td>${escapeHtml(ukerja)}</td>
+                                <td>${escapeHtml(layanan)}</td>
+                                <td>${escapeHtml(tgl)}</td>
+                                <td>${escapeHtml(statusText)}</td>
+                                <td>
+                                    <a class="btn btn-datatable btn-icon btn-transparent-dark me-1 btnDetail"
+                                        href="#"
+                                        data-notiket="${escapeHtml(item.no_tiket)}"
+                                        title="Lihat Riwayat">
+                                        <i data-feather="eye" class="text-primary"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                        `;
+                    });
+
+                    renderTiketTable(rowsHtml);
+                    if (tableLoading) tableLoading.classList.add('d-none');
+                })
+                .catch(err => {
+                    console.error('Gagal mengambil data tiket:', err);
+                    if (tableLoading) tableLoading.classList.add('d-none');
+                });
         }
 
-        window.prevPage = function() {
-            currentPage--;
-            renderTable();
-        }
-
+        // Event Modal Detail Tiket History
         document.addEventListener('click', function(e) {
-
             const btn = e.target.closest('.btnDetail');
-
             if (!btn) return;
 
             e.preventDefault();
-
             const noTiket = btn.dataset.notiket;
 
             document.getElementById('mdNoTiket').innerText = noTiket;
-
-            document.getElementById('historyTable').innerHTML =
-                `<tr>
-                <td colspan="3" class="text-center">
-                    Loading...
-                </td>
-            </tr>`;
+            document.getElementById('historyTable').innerHTML = `
+                <tr>
+                    <td colspan="3" class="text-center">Loading...</td>
+                </tr>`;
 
             fetch(`${baseUrl}/${noTiket}`)
                 .then(res => res.json())
                 .then(data => {
-
                     historyData = data;
-
                     currentPage = 1;
-
-                    renderTable();
-
+                    renderHistoryTable();
                     modal.show();
-
                 })
                 .catch(() => {
-
-                    document.getElementById('historyTable').innerHTML =
-                        `<tr>
-                        <td colspan="3"
-                            class="text-danger text-center">
-                            Gagal load data
-                        </td>
-                    </tr>`;
-
+                    document.getElementById('historyTable').innerHTML = `
+                        <tr>
+                            <td colspan="3" class="text-danger text-center">Gagal load data</td>
+                        </tr>`;
                 });
-
         });
 
         const bidangSelect = document.getElementById('bidangSelect');
         const startInput = document.getElementById('startDate');
         const endInput = document.getElementById('endDate');
-        const form = document.getElementById('filterForm');
 
-        const picker = new Litepicker({
+        // GANTI BIDANG
+        bidangSelect?.addEventListener('change', function() {
+            if (this.value && startInput.value && endInput.value) {
+                loadTiket(this.value, startInput.value, endInput.value);
+            } else {
+                updateExportLinks(this.value, startInput.value, endInput.value);
+                renderTiketTable('');
+            }
+        });
+
+        // DATE RANGE PICKER
+        new Litepicker({
             element: document.getElementById('myCustomDateRange'),
             singleMode: false,
             format: 'YYYY-MM-DD',
             autoApply: true,
-
             setup: (picker) => {
-
                 picker.on('selected', (startDate, endDate) => {
                     if (!startDate || !endDate) return;
+
+                    const sDate = startDate.format('YYYY-MM-DD');
+                    const eDate = endDate.format('YYYY-MM-DD');
+
+                    startInput.value = sDate;
+                    endInput.value = eDate;
 
                     if (!bidangSelect.value) {
                         alert('Pilih bidang terlebih dahulu');
                         return;
                     }
 
-                    startInput.value = startDate.format('YYYY-MM-DD');
-                    endInput.value = endDate.format('YYYY-MM-DD');
-
-                    form.submit();
+                    loadTiket(bidangSelect.value, sDate, eDate);
                 });
-
             }
         });
 

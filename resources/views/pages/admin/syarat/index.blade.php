@@ -142,91 +142,230 @@
                     </div>
                 </div>
             </div>
-            <table id="datatablesSimple">
-                <thead>
-                    <tr>
-                        <th>No</th>
-                        <th>Nama Layanan</th>
-                        <th>Syarat</th>
-                        <th>Metode e-File</th>
-                        <th>Aksi</th>
-                    </tr>
-                </thead>
-                <tfoot>
-                    <tr>
-                        <th>No</th>
-                        <th>Nama Layanan</th>
-                        <th>Syarat</th>
-                        <th>Metode e-File</th>
-                        <th>Aksi</th>
-                    </tr>
-                </tfoot>
-                <tbody>
-                    @foreach ($syarat as $item)
-                    <tr>
-                        <td>{{ $loop->iteration }}</td>
-                        <td>
-                            {{ $item->layanan->nama_layanan ?? '-' }}
-                        </td>
-                        <td>{{ $item->syarat }}</td>
-                        <td>
-                            @switch($item->metode)
-                            @case('simpeg')
-                            SIMPEG
-                            @break
+            <div id="tableContainer">
+                <table id="datatablesSimple">
+                    <thead>
+                        <tr>
+                            <th>No</th>
+                            <th>Nama Layanan</th>
+                            <th>Syarat</th>
+                            <th>Metode e-File</th>
+                            <th>Aksi</th>
+                        </tr>
+                    </thead>
+                    <tfoot>
+                        <tr>
+                            <th>No</th>
+                            <th>Nama Layanan</th>
+                            <th>Syarat</th>
+                            <th>Metode e-File</th>
+                            <th>Aksi</th>
+                        </tr>
+                    </tfoot>
+                    <tbody>
+                        @foreach ($syarat as $item)
+                        <tr>
+                            <td>{{ $loop->iteration }}</td>
+                            <td>
+                                {{ $item->layanan->nama_layanan ?? '-' }}
+                            </td>
+                            <td>{{ $item->syarat }}</td>
+                            <td>
+                                @switch($item->metode)
+                                @case('simpeg')
+                                SIMPEG
+                                @break
 
-                            @case('upload')
-                            Upload
-                            @break
+                                @case('upload')
+                                Upload
+                                @break
 
-                            @default
-                            -
-                            @endswitch
-                        </td>
-                        <td>
-                            <div class="d-flex align-items-center">
-                                <a class="btn btn-datatable btn-icon btn-transparent-dark me-1 btnDetail"
-                                    href="#" data-layanan="{{ $item->layanan->nama_layanan ?? '-' }}"
-                                    data-bidang="{{ $item->layanan->bidang->nama_bidang ?? '-' }}"
-                                    data-syarat="{{ $item->syarat }}" title="Lihat layanan">
-                                    <i data-feather="eye" class="text-primary"></i>
-                                </a>
-                                <a class="btn btn-datatable btn-icon btn-transparent-dark me-1"
-                                    href="{{ route('root.syarat.edit', $item->id) }}" data-bs-toggle="tooltip"
-                                    title="Edit Syarat"><i data-feather="edit" class="text-warning"></i></a>
-                                <a class="btn btn-datatable btn-icon btn-transparent-dark me-1 btnDelete"
-                                    href="#" data-id="{{ $item->id }}"
-                                    data-nama="{{ $item->syarat }}"
-                                    data-layanan="{{ $item->layanan->nama_layanan }}" title="Hapus Status">
-                                    <i data-feather="trash" class="text-danger"></i>
-                                </a>
-                            </div>
+                                @default
+                                -
+                                @endswitch
+                            </td>
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    <a class="btn btn-datatable btn-icon btn-transparent-dark me-1 btnDetail"
+                                        href="#" data-layanan="{{ $item->layanan->nama_layanan ?? '-' }}"
+                                        data-bidang="{{ $item->layanan->bidang->nama_bidang ?? '-' }}"
+                                        data-syarat="{{ $item->syarat }}" title="Lihat layanan">
+                                        <i data-feather="eye" class="text-primary"></i>
+                                    </a>
+                                    <a class="btn btn-datatable btn-icon btn-transparent-dark me-1"
+                                        href="{{ route('root.syarat.edit', $item->id) }}" data-bs-toggle="tooltip"
+                                        title="Edit Syarat"><i data-feather="edit" class="text-warning"></i></a>
+                                    <a class="btn btn-datatable btn-icon btn-transparent-dark me-1 btnDelete"
+                                        href="#" data-id="{{ $item->id }}"
+                                        data-nama="{{ $item->syarat }}"
+                                        data-layanan="{{ $item->layanan->nama_layanan }}" title="Hapus Status">
+                                        <i data-feather="trash" class="text-danger"></i>
+                                    </a>
+                                </div>
 
-                        </td>
-                    </tr>
-                    @endforeach
-                </tbody>
-            </table>
+                            </td>
+                        </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
 </div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/simple-datatables@7.1.2/dist/umd/simple-datatables.min.js"></script>
-<script src="{{ asset('templatepro/js/datatables/datatables-simple-demo.js') }}"></script>
 <script>
     document.addEventListener('DOMContentLoaded', function() {
 
         feather.replace();
 
-        window.addEventListener('load', function() {
-            document.getElementById('tableLoading').classList.add('d-none');
-        });
+        const tableLoading = document.getElementById('tableLoading');
+        if (tableLoading) tableLoading.classList.add('d-none');
+
+        const initialTable = document.getElementById('datatablesSimple');
+        if (initialTable && typeof simpleDatatables !== 'undefined') {
+            window.dataTable = new simpleDatatables.DataTable(initialTable);
+        }
 
         const bidangSelect = document.getElementById('bidangSelect');
         const layananSelect = document.getElementById('layananSelect');
+        const filterForm = document.getElementById('filterForm');
+
+        if (filterForm) {
+            filterForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+            });
+        }
 
         let selectedLayanan = "{{ request('layanan') ?? '' }}";
+
+        function escapeHtml(text) {
+            if (!text) return '';
+            const map = {
+                '&': '&amp;',
+                '<': '&lt;',
+                '>': '&gt;',
+                '"': '&quot;',
+                "'": '&#039;'
+            };
+            return String(text).replace(/[&<>"']/g, function(m) { return map[m]; });
+        }
+
+        function renderTable(rowsHtml = '') {
+            if (window.dataTable) {
+                try {
+                    window.dataTable.destroy();
+                } catch (e) {}
+                window.dataTable = null;
+            }
+
+            const container = document.getElementById('tableContainer');
+            if (!container) return;
+
+            container.innerHTML = `
+                <table id="datatablesSimple">
+                    <thead>
+                        <tr>
+                            <th>No</th>
+                            <th>Nama Layanan</th>
+                            <th>Syarat</th>
+                            <th>Metode e-File</th>
+                            <th>Aksi</th>
+                        </tr>
+                    </thead>
+                    <tfoot>
+                        <tr>
+                            <th>No</th>
+                            <th>Nama Layanan</th>
+                            <th>Syarat</th>
+                            <th>Metode e-File</th>
+                            <th>Aksi</th>
+                        </tr>
+                    </tfoot>
+                    <tbody>
+                        ${rowsHtml}
+                    </tbody>
+                </table>
+            `;
+
+            const newTable = document.getElementById('datatablesSimple');
+            if (newTable && typeof simpleDatatables !== 'undefined') {
+                window.dataTable = new simpleDatatables.DataTable(newTable);
+            }
+
+            feather.replace();
+        }
+
+        function loadSyarat(layananId) {
+            if (!layananId) {
+                renderTable('');
+                return;
+            }
+
+            if (tableLoading) tableLoading.classList.remove('d-none');
+
+            fetch(`/root/get-syarat-by-layanan/${layananId}`)
+                .then(res => res.json())
+                .then(data => {
+                    let rowsHtml = '';
+
+                    data.forEach((item, index) => {
+                        let metodeText = '-';
+                        if (item.metode === 'simpeg') {
+                            metodeText = 'SIMPEG';
+                        } else if (item.metode === 'upload') {
+                            metodeText = 'Upload';
+                        }
+
+                        const namaLayanan = item.layanan ? item.layanan.nama_layanan : '-';
+                        const namaBidang = (item.layanan && item.layanan.bidang) ? item.layanan.bidang.nama_bidang : '-';
+                        const syaratText = item.syarat || '-';
+
+                        rowsHtml += `
+                            <tr>
+                                <td>${index + 1}</td>
+                                <td>${escapeHtml(namaLayanan)}</td>
+                                <td>${escapeHtml(syaratText)}</td>
+                                <td>${escapeHtml(metodeText)}</td>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <a class="btn btn-datatable btn-icon btn-transparent-dark me-1 btnDetail"
+                                            href="#"
+                                            data-layanan="${escapeHtml(namaLayanan)}"
+                                            data-bidang="${escapeHtml(namaBidang)}"
+                                            data-syarat="${escapeHtml(syaratText)}"
+                                            title="Lihat detail">
+                                            <i data-feather="eye" class="text-primary"></i>
+                                        </a>
+                                        <a class="btn btn-datatable btn-icon btn-transparent-dark me-1"
+                                            href="/root/syarat/${item.id}"
+                                            data-bs-toggle="tooltip"
+                                            title="Edit Syarat">
+                                            <i data-feather="edit" class="text-warning"></i>
+                                        </a>
+                                        <a class="btn btn-datatable btn-icon btn-transparent-dark me-1 btnDelete"
+                                            href="#"
+                                            data-id="${item.id}"
+                                            data-nama="${escapeHtml(syaratText)}"
+                                            data-layanan="${escapeHtml(namaLayanan)}"
+                                            title="Hapus Syarat">
+                                            <i data-feather="trash" class="text-danger"></i>
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                        `;
+                    });
+
+                    renderTable(rowsHtml);
+                    if (tableLoading) tableLoading.classList.add('d-none');
+                })
+                .catch(err => {
+                    console.error('Gagal mengambil data syarat:', err);
+                    if (tableLoading) tableLoading.classList.add('d-none');
+                });
+        }
 
         function loadLayanan(bidangId) {
             fetch(`/root/get-layanan-syarat/${bidangId}`)
@@ -243,7 +382,10 @@
 
                     layananSelect.appendChild(defaultOption);
 
-                    if (data.length === 0) return;
+                    if (data.length === 0) {
+                        renderTable('');
+                        return;
+                    }
 
                     const fragment = document.createDocumentFragment();
 
@@ -260,50 +402,59 @@
                     });
 
                     layananSelect.appendChild(fragment);
+                })
+                .catch(err => {
+                    console.error('Gagal mengambil layanan:', err);
                 });
         }
 
-        // load awal
-        loadLayanan(bidangSelect.value);
+        // Load awal dropdown layanan
+        if (bidangSelect && bidangSelect.value) {
+            loadLayanan(bidangSelect.value);
+        }
 
         // GANTI BIDANG
-        bidangSelect.addEventListener('change', function() {
+        bidangSelect?.addEventListener('change', function() {
             selectedLayanan = '';
+            renderTable('');
             loadLayanan(this.value);
         });
 
-        // PILIH LAYANAN
-        layananSelect.addEventListener('change', function() {
+        // PILIH LAYANAN -> LOAD TANPA RELOAD
+        layananSelect?.addEventListener('change', function() {
             if (this.value !== '') {
-                document.getElementById('filterForm').submit();
+                loadSyarat(this.value);
+            } else {
+                renderTable('');
             }
         });
 
         // MODAL DETAIL
-        const modalDetail = new bootstrap.Modal(document.getElementById('modalDetail'));
+        const modalDetailEl = document.getElementById('modalDetail');
+        const modalDetail = modalDetailEl ? new bootstrap.Modal(modalDetailEl) : null;
 
         document.addEventListener('click', function(e) {
             const btn = e.target.closest('.btnDetail');
-            if (!btn) return;
+            if (!btn || !modalDetail) return;
 
             e.preventDefault();
 
-            document.getElementById('detailBidang').innerText = btn.dataset.bidang;
-            document.getElementById('detailLayanan').innerText = btn.dataset.layanan;
-            document.getElementById('detailSyarat').innerText = btn.dataset.syarat;
+            document.getElementById('detailBidang').innerText = btn.dataset.bidang || '-';
+            document.getElementById('detailLayanan').innerText = btn.dataset.layanan || '-';
+            document.getElementById('detailSyarat').innerText = btn.dataset.syarat || '-';
 
             modalDetail.show();
         });
 
         // DELETE DATA
         const modalDeleteEl = document.getElementById('modalDelete');
-        const modalDelete = new bootstrap.Modal(modalDeleteEl);
+        const modalDelete = modalDeleteEl ? new bootstrap.Modal(modalDeleteEl) : null;
         const formDelete = document.getElementById('formDelete');
         const btnConfirmDelete = document.getElementById('btnConfirmDelete');
 
         document.addEventListener('click', function(e) {
             const btn = e.target.closest('.btnDelete');
-            if (!btn) return;
+            if (!btn || !modalDelete) return;
 
             e.preventDefault();
 
@@ -311,17 +462,19 @@
             const layanan = btn.dataset.layanan;
 
             document.getElementById('textDelete').innerHTML =
-                `Apakah anda yakin ingin menghapus syarat ini pada layanan <b>${layanan}</b>?`;
+                `Apakah anda yakin ingin menghapus syarat ini pada layanan <b>${escapeHtml(layanan)}</b>?`;
 
             formDelete.action = `/root/syarat/${id}`;
 
             modalDelete.show();
         });
 
-        formDelete.addEventListener('submit', function() {
-            btnConfirmDelete.disabled = true;
-            btnConfirmDelete.querySelector('.btn-delete-text')?.classList.add('d-none');
-            btnConfirmDelete.querySelector('.btn-delete-loading')?.classList.remove('d-none');
+        formDelete?.addEventListener('submit', function() {
+            if (btnConfirmDelete) {
+                btnConfirmDelete.disabled = true;
+                btnConfirmDelete.querySelector('.btn-delete-text')?.classList.add('d-none');
+                btnConfirmDelete.querySelector('.btn-delete-loading')?.classList.remove('d-none');
+            }
         });
     });
 </script>

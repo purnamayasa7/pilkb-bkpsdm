@@ -306,4 +306,15 @@ class StatusController extends Controller
 
         return response()->json($layanan);
     }
+
+    public function getByBidang($bidangId)
+    {
+        $status = Status::with(['layanan.bidang'])
+            ->whereHas('layanan', function ($query) use ($bidangId) {
+                $query->where('kode_bidang', $bidangId);
+            })
+            ->get();
+
+        return response()->json($status);
+    }
 }

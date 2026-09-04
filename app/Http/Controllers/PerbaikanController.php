@@ -88,6 +88,12 @@ class PerbaikanController extends Controller
         ]);
     }
 
+    public function getPerbaikanData(Request $request)
+    {
+        $data = $this->getData($request);
+        return response()->json($data);
+    }
+
     public function detail($no_tiket)
     {
         $detail = DetailTiket::with('syarat')

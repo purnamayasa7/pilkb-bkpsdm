@@ -24,49 +24,26 @@ class PengambilanController extends Controller
     public function indexArchives(Request $request)
     {
         $bidangList = Bidang::orderBy('nama_bidang')->get();
-
         $data = collect();
 
-        if ($request->has('filter')) {
-
+        // Hanya load data awal jika parameter tanggal_awal & tanggal_akhir tersedia
+        if ($request->filled('tanggal_awal') && $request->filled('tanggal_akhir')) {
             $query = Regtiket::with([
                 'layanan.bidang',
                 'operatorArchives',
                 'tahapTerakhir.statusRel'
             ])
-                ->where('archives', 1);
-
-            // FILTER BIDANG
-            if ($request->filled('bidang')) {
-
-                $query->whereHas('layanan', function ($q) use ($request) {
-                    $q->where('kode_bidang', $request->bidang);
-                });
-            }
-
-            // FILTER TANGGAL
-            if (
-                $request->filled('tanggal_awal') &&
-                $request->filled('tanggal_akhir')
-            ) {
-                $query->whereBetween('tanggal', [
+                ->where('archives', 1)
+                ->whereBetween('tanggal', [
                     $request->tanggal_awal . ' 00:00:00',
                     $request->tanggal_akhir . ' 23:59:59'
                 ]);
-            } elseif ($request->filled('tanggal_awal')) {
 
-                $query->whereDate(
-                    'tanggal',
-                    '>=',
-                    $request->tanggal_awal
-                );
-            } elseif ($request->filled('tanggal_akhir')) {
-
-                $query->whereDate(
-                    'tanggal',
-                    '<=',
-                    $request->tanggal_akhir
-                );
+            // FILTER BIDANG
+            if ($request->filled('bidang') && $request->bidang != 'all') {
+                $query->whereHas('layanan', function ($q) use ($request) {
+                    $q->where('kode_bidang', $request->bidang);
+                });
             }
 
             $data = $query
@@ -78,6 +55,53 @@ class PengambilanController extends Controller
             'data',
             'bidangList'
         ));
+    }
+
+    public function getArchivesData(Request $request)
+    {
+        $tglAwal = $request->tanggal_awal;
+        $tglAkhir = $request->tanggal_akhir;
+
+        if (!$tglAwal || !$tglAkhir) {
+            return response()->json([]);
+        }
+
+        $query = Regtiket::with([
+            'layanan.bidang',
+            'operatorArchives',
+            'tahapTerakhir.statusRel'
+        ])
+            ->where('archives', 1)
+            ->whereBetween('tanggal', [
+                $tglAwal . ' 00:00:00',
+                $tglAkhir . ' 23:59:59'
+            ]);
+
+        // FILTER BIDANG
+        if ($request->filled('bidang') && $request->bidang != 'all') {
+            $query->whereHas('layanan', function ($q) use ($request) {
+                $q->where('kode_bidang', $request->bidang);
+            });
+        }
+
+        $data = $query
+            ->latest('tanggal')
+            ->get();
+
+        $result = $data->map(function ($item) {
+            return [
+                'no_tiket' => $item->no_tiket,
+                'nip' => $item->nip ?? '-',
+                'nama' => $item->nama ?? '-',
+                'ukerja' => $item->nama_ukerja ?? '-',
+                'layanan' => $item->layanan->nama_layanan ?? '-',
+                'tanggal' => $item->tanggal ? Carbon::parse($item->tanggal)->translatedFormat('d F Y H:i') : '-',
+                'status' => $item->tahapTerakhir->statusRel->status ?? '-',
+                'operator' => $item->operatorArchives->nama ?? '-',
+            ];
+        });
+
+        return response()->json($result);
     }
 
     public function indexPengambilan(Request $request)
@@ -107,6 +131,44 @@ class PengambilanController extends Controller
             'pegawaiList',
             'simpegAvailable'
         ));
+    }
+
+    public function getData(Request $request)
+    {
+        $year = $request->year ?? Carbon::now()->year;
+
+        $pengambilan = Pengambilan::with([
+            'tiket.layanan'
+        ])
+            ->whereYear('tanggal_pengambilan', $year)
+            ->orderBy('tanggal_pengambilan', 'desc')
+            ->get();
+
+        $pegawaiList = $this->pegawaiService->getPegawaiByNips(
+            $pengambilan
+                ->pluck('tiket.nip')
+                ->filter()
+                ->unique()
+                ->values()
+        );
+
+        $data = $pengambilan->map(function ($item) use ($pegawaiList) {
+            $nip = $item->tiket->nip ?? null;
+            $nama = $pegawaiList[$nip]['nama_lengkap'] ?? ($item->tiket->nama ?? '-');
+            $ukerja = $pegawaiList[$nip]['ket_ukerja'] ?? ($item->tiket->nama_ukerja ?? '-');
+
+            return [
+                'id' => $item->id,
+                'no_tiket' => $item->tiket->no_tiket ?? '-',
+                'nip' => $nip ?? '-',
+                'nama' => $nama,
+                'ukerja' => $ukerja,
+                'layanan' => $item->tiket->layanan->nama_layanan ?? '-',
+                'tanggal_pengambilan' => $item->tanggal_pengambilan ? Carbon::parse($item->tanggal_pengambilan)->translatedFormat('d F Y H:i') : '-',
+            ];
+        });
+
+        return response()->json($data);
     }
 
     // CEK TIKET DI TAMBAH PENGAMBILAN MODAL
@@ -280,61 +342,36 @@ class PengambilanController extends Controller
     // EXPORT ARCHIVES
     public function exportArchivesPdf(Request $request)
     {
+        $request->validate([
+            'tanggal_awal' => 'required|date',
+            'tanggal_akhir' => 'required|date|after_or_equal:tanggal_awal',
+        ]);
+
         $query = Regtiket::with([
             'layanan.bidang',
             'operatorArchives',
             'tahapTerakhir.statusRel'
         ])
-            ->where('archives', 1);
-
-        // FILTER BIDANG
-        if ($request->filled('bidang')) {
-
-            $query->whereHas('layanan', function ($q) use ($request) {
-
-                $q->where('kode_bidang', $request->bidang);
-            });
-        }
-
-        // FILTER TANGGAL
-        if (
-            $request->filled('tanggal_awal') &&
-            $request->filled('tanggal_akhir')
-        ) {
-
-            $query->whereBetween('tanggal', [
+            ->where('archives', 1)
+            ->whereBetween('tanggal', [
                 $request->tanggal_awal . ' 00:00:00',
                 $request->tanggal_akhir . ' 23:59:59'
             ]);
-        } elseif ($request->filled('tanggal_awal')) {
 
-            $query->whereDate(
-                'tanggal',
-                '>=',
-                $request->tanggal_awal
-            );
-        } elseif ($request->filled('tanggal_akhir')) {
-
-            $query->whereDate(
-                'tanggal',
-                '<=',
-                $request->tanggal_akhir
-            );
+        // FILTER BIDANG
+        if ($request->filled('bidang') && $request->bidang != 'all') {
+            $query->whereHas('layanan', function ($q) use ($request) {
+                $q->where('kode_bidang', $request->bidang);
+            });
         }
 
         $data = $query
             ->latest('tanggal')
             ->get();
 
-        $pegawaiList = $this->pegawaiService->getPegawaiByNips(
-            $data->pluck('nip')
-                ->filter()
-                ->unique()
-                ->values()
-        );
-
         $tanggal_awal = $request->tanggal_awal;
         $tanggal_akhir = $request->tanggal_akhir;
+        $pegawaiList = [];
 
         $pdf = Pdf::loadView(
             'pages.admin-bawah.archives.pdf',
