@@ -1711,6 +1711,7 @@ class TiketController extends Controller
 
         $data = collect();
         $pegawaiList = [];
+        $simpegAvailable = true;
 
         if ($keyword) {
             $data = Regtiket::with([
@@ -1810,11 +1811,11 @@ class TiketController extends Controller
 
             // simpan data layanan lama dan baru
             $layananLama = Layanan::with('bidang')
-                ->where('kode_layanan', $tiket->kode_layanan)
+                ->where('id', $tiket->kode_layanan)
                 ->first();
 
             $layananBaru = Layanan::with('bidang')
-                ->where('kode_layanan', $request->kode_layanan)
+                ->where('id', $request->kode_layanan)
                 ->first();
 
             $olddata = [

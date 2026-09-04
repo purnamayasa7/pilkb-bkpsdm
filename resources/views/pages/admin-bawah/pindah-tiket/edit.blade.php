@@ -8,8 +8,14 @@
                 <div class="col-auto mb-3">
                     <h1 class="page-header-title">
                         <div class="page-header-icon"><i data-feather="shuffle"></i></div>
-                        Edit Data Tiket
+                        Pindah Layanan Tiket
                     </h1>
+                </div>
+                <div class="col-12 col-xl-auto mb-3">
+                    <a class="btn btn-sm btn-light text-primary" href="{{ route('adminBawah.pindah.indexPindah') }}">
+                        <i class="me-1" data-feather="arrow-left"></i>
+                        Kembali
+                    </a>
                 </div>
             </div>
         </div>
@@ -19,6 +25,13 @@
 <div class="container-fluid px-4 mt-4">
     <div class="card">
         <div class="card-body">
+            <!-- Alert Container untuk validasi form -->
+            <div id="alertContainer" class="d-none alert alert-danger alert-dismissible fade show" role="alert">
+                <i data-feather="alert-circle" class="me-1"></i>
+                <span id="alertMessage">Semua syarat wajib dicentang terlebih dahulu.</span>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+
             <form id="formPindah" method="POST"
                 action="{{ route('adminBawah.pindah.updatePindah', $tiket->no_tiket) }}">
 
@@ -64,7 +77,7 @@
                             @foreach ($bidang as $b)
                             <option
                                 value="{{ $b->id }}"
-                                {{ $b->id == $tiket->layanan->kode_bidang ? 'selected' : '' }}>
+                                {{ $b->id == optional($tiket->layanan)->kode_bidang ? 'selected' : '' }}>
                                 {{ $b->nama_bidang }}
                             </option>
                             @endforeach
@@ -109,13 +122,13 @@
                                     <tr>
                                         <th width="50">No</th>
                                         <th>Syarat</th>
-                                        <th width="120">Validasi</th>
+                                        <th width="120" class="text-center">Validasi</th>
                                     </tr>
                                 </thead>
 
                                 <tbody id="syaratTable">
 
-                                    @foreach($syarat as $i => $s)
+                                    @forelse($syarat as $i => $s)
                                     <tr>
                                         <td>{{ $i + 1 }}</td>
 
@@ -125,13 +138,19 @@
 
                                             <input
                                                 type="checkbox"
-                                                class="syarat-check"
+                                                class="form-check-input syarat-check"
                                                 name="syarat_id[]"
                                                 value="{{ $s->id }}">
                                         </td>
 
                                     </tr>
-                                    @endforeach
+                                    @empty
+                                    <tr>
+                                        <td colspan="3" class="text-center text-muted">
+                                            Tidak ada syarat untuk layanan ini
+                                        </td>
+                                    </tr>
+                                    @endforelse
 
                                 </tbody>
 
@@ -164,8 +183,6 @@
     </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/simple-datatables@7.1.2/dist/umd/simple-datatables.min.js"></script>
-<script src="{{ asset('templatepro/js/datatables/datatables-simple-demo.js') }}"></script>
 <script>
     document.addEventListener('DOMContentLoaded', function() {
 
@@ -174,6 +191,8 @@
         const bidangSelect = document.getElementById('bidang');
         const layananSelect = document.getElementById('layanan');
         const syaratTable = document.getElementById('syaratTable');
+        const alertContainer = document.getElementById('alertContainer');
+        const alertMessage = document.getElementById('alertMessage');
 
         function loadSyarat(kodeLayanan) {
 
@@ -204,6 +223,7 @@
                                 <td class="text-center">
                                     <input
                                         type="checkbox"
+                                        class="form-check-input syarat-check"
                                         name="syarat_id[]"
                                         value="${item.id}"
                                         >
@@ -254,6 +274,14 @@
 
                     if (data.length > 0) {
                         loadSyarat(data[0].id);
+                    } else {
+                        syaratTable.innerHTML = `
+                            <tr>
+                                <td colspan="3" class="text-center text-muted">
+                                    Tidak ada layanan pada bidang ini
+                                </td>
+                            </tr>
+                        `;
                     }
 
                 })
@@ -274,6 +302,18 @@
                 const checkboxes =
                     document.querySelectorAll('.syarat-check');
 
+                if (checkboxes.length === 0) {
+                    e.preventDefault();
+                    if (alertContainer && alertMessage) {
+                        alertMessage.innerText = 'Layanan ini tidak memiliki syarat atau belum dimuat.';
+                        alertContainer.classList.remove('d-none');
+                        alertContainer.scrollIntoView({ behavior: 'smooth' });
+                    } else {
+                        alert('Layanan ini tidak memiliki syarat atau belum dimuat.');
+                    }
+                    return false;
+                }
+
                 let semuaCentang = true;
 
                 checkboxes.forEach(item => {
@@ -288,13 +328,19 @@
 
                     e.preventDefault();
 
-                    Swal.fire({
-                        icon: 'warning',
-                        title: 'Validasi gagal',
-                        text: 'Semua syarat wajib dicentang terlebih dahulu.'
-                    });
+                    if (alertContainer && alertMessage) {
+                        alertMessage.innerText = 'Semua syarat wajib dicentang terlebih dahulu.';
+                        alertContainer.classList.remove('d-none');
+                        alertContainer.scrollIntoView({ behavior: 'smooth' });
+                    } else {
+                        alert('Semua syarat wajib dicentang terlebih dahulu.');
+                    }
 
                     return false;
+                }
+
+                if (alertContainer) {
+                    alertContainer.classList.add('d-none');
                 }
 
                 const btnSubmitPindah = document.getElementById('btnSubmitPindah');

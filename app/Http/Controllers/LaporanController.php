@@ -51,6 +51,15 @@ class LaporanController extends Controller
          */
         if ($request->has('filter')) {
 
+            $request->validate([
+                'tanggal_awal' => 'required|date',
+                'tanggal_akhir' => 'required|date|after_or_equal:tanggal_awal',
+            ], [
+                'tanggal_awal.required' => 'Tanggal awal wajib diisi.',
+                'tanggal_akhir.required' => 'Tanggal akhir wajib diisi.',
+                'tanggal_akhir.after_or_equal' => 'Tanggal akhir harus sama atau setelah tanggal awal.',
+            ]);
+
             $query = Regtiket::with([
                 'layanan.bidang',
                 'tahapTerakhir.statusRel'
@@ -182,6 +191,15 @@ class LaporanController extends Controller
 
     public function exportPdf(Request $request)
     {
+        $request->validate([
+            'tanggal_awal' => 'required|date',
+            'tanggal_akhir' => 'required|date|after_or_equal:tanggal_awal',
+        ], [
+            'tanggal_awal.required' => 'Tanggal awal wajib diisi.',
+            'tanggal_akhir.required' => 'Tanggal akhir wajib diisi.',
+            'tanggal_akhir.after_or_equal' => 'Tanggal akhir harus sama atau setelah tanggal awal.',
+        ]);
+
         $query = Regtiket::with([
             'layanan.bidang',
             'tahapTerakhir.statusRel'

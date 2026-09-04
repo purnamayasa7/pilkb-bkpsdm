@@ -47,6 +47,15 @@
                 <td class="data-sep">:</td>
                 <td class="data-val">{{ $data->count() }} Usulan</td>
             </tr>
+            @if(request('tanggal_awal') && request('tanggal_akhir'))
+            <tr>
+                <td class="data-label">Periode</td>
+                <td class="data-sep">:</td>
+                <td class="data-val" colspan="5">
+                    {{ \Carbon\Carbon::parse(request('tanggal_awal'))->translatedFormat('d F Y') }} s.d. {{ \Carbon\Carbon::parse(request('tanggal_akhir'))->translatedFormat('d F Y') }}
+                </td>
+            </tr>
+            @endif
         </table>
     </div>
 
