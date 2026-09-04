@@ -201,7 +201,12 @@
                             <div class="welcome-avatar-ring">
                                 <img src="/images/lili-avatar.png" alt="LILI" class="welcome-lili-img">
                             </div>
-                            <span class="chat-welcome-live-dot" title="LILI Online"></span>
+                            <span class="lili-verified-badge badge-lg" title="LILI Terverifikasi (Asisten Virtual)">
+                                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <circle cx="12" cy="12" r="10.5" fill="#25D366" stroke="#ffffff" stroke-width="2"/>
+                                    <path d="M7.5 12.2L10.5 15.2L16.8 8.8" stroke="#ffffff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
+                                </svg>
+                            </span>
                             <div class="welcome-lili-bubble-pill">
                                 <i data-feather="message-circle"></i>
                                 <span>Klik Tanya LILI</span>
@@ -328,7 +333,12 @@
                 <div class="welcome-avatar-ring">
                     <img src="/images/lili-avatar.png" alt="LILI" class="welcome-lili-img">
                 </div>
-                <span class="chat-welcome-live-dot" title="LILI Online"></span>
+                <span class="lili-verified-badge badge-lg" title="LILI Terverifikasi (Asisten Virtual)">
+                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <circle cx="12" cy="12" r="10.5" fill="#25D366" stroke="#ffffff" stroke-width="2"/>
+                        <path d="M7.5 12.2L10.5 15.2L16.8 8.8" stroke="#ffffff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </span>
                 <div class="welcome-lili-bubble-pill">
                     <i data-feather="message-circle"></i>
                     <span>Klik Tanya LILI</span>

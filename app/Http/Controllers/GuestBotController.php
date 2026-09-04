@@ -205,8 +205,66 @@ class GuestBotController extends Controller
         $pertanyaan = $request->input('pertanyaan');
         $history = $request->input('history', []);
 
-        $result = $aiService->ask($pertanyaan, $history);
+        $userInfo = null;
+        if (auth()->check()) {
+            $u = auth()->user();
+            $userInfo = [
+                'name'       => $u->nama ?: $u->name,
+                'unit_kerja' => $u->nama_ukerja ?: ($u->ukerja?->nama_ukerja ?? null),
+                'role'       => $u->role?->name ?? 'pegawai',
+            ];
+        }
+
+        $result = $aiService->ask($pertanyaan, $history, $userInfo);
 
         return response()->json($result);
+    }
+
+    /**
+     * Simpan feedback / rating respon AI (Thumbs up / Thumbs down).
+     */
+    public function simpanFeedback(Request $request)
+    {
+        $request->validate([
+            'rating'          => 'required|in:up,down,1,0',
+            'pertanyaan'      => 'nullable|string|max:500',
+            'jawaban_ringkas' => 'nullable|string|max:1000',
+            'source'          => 'nullable|string|max:50',
+        ]);
+
+        $rating = in_array($request->input('rating'), ['up', '1', 1], true) ? 1 : 0;
+        $user = auth()->user();
+
+        try {
+            \App\Models\Log::create([
+                'user_id'     => $user?->id,
+                'kode_ukerja' => $user?->kode_ukerja,
+                'module'      => 'chat_ai_feedback',
+                'action'      => $rating === 1 ? 'thumbs_up' : 'thumbs_down',
+                'description' => 'Feedback rating respon AI LILI: ' . ($rating === 1 ? 'Membantu' : 'Kurang Membantu'),
+                'url'         => $request->fullUrl(),
+                'method'      => $request->method(),
+                'ip_address'  => $request->ip(),
+                'user_agent'  => $request->userAgent(),
+                'new_data'    => [
+                    'rating'          => $rating,
+                    'pertanyaan'      => $request->input('pertanyaan'),
+                    'jawaban_ringkas' => $request->input('jawaban_ringkas'),
+                    'source'          => $request->input('source', 'lili_ai'),
+                    'created_at'      => now()->toDateTimeString(),
+                ],
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Terima kasih atas penilaian Anda!',
+            ]);
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::error('Gagal menyimpan feedback AI: ' . $e->getMessage());
+            return response()->json([
+                'success' => true,
+                'message' => 'Feedback diterima.',
+            ]);
+        }
     }
 }

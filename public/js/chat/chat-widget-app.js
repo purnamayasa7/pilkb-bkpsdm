@@ -888,7 +888,12 @@
                 <div class="chat-item chat-item-lili-ai" id="btnOpenLiliFromInboxList">
                     <div class="position-relative flex-shrink-0 me-2" style="width: 44px; height: 44px;">
                         <img src="/images/lili-avatar.png" alt="LILI" style="width: 44px; height: 44px; border-radius: 50%; object-fit: cover; border: 2px solid #6366f1; box-shadow: 0 2px 6px rgba(99,102,241,0.25);">
-                        <span style="position: absolute; bottom: 0; right: 0; width: 10px; height: 10px; background: #10b981; border: 2px solid #fff; border-radius: 50%;"></span>
+                        <span class="lili-verified-badge badge-md" title="Terverifikasi (Asisten Virtual Resmi)">
+                            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <circle cx="12" cy="12" r="10.5" fill="#25D366" stroke="#ffffff" stroke-width="2"/>
+                                <path d="M7.5 12.2L10.5 15.2L16.8 8.8" stroke="#ffffff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                        </span>
                     </div>
                     <div class="chat-content flex-grow-1 overflow-hidden">
                         <div class="chat-item-top d-flex align-items-center justify-content-between mb-1">
@@ -1876,6 +1881,10 @@
                 this.liliAiHistory = this.liliAiHistory || [];
             }
 
+            const greetingName = window.ChatAuth?.name
+                ? `Halo, Bapak/Ibu <strong>${this.escapeHtml(window.ChatAuth.name)}</strong>${(window.ChatAuth.ukerja || window.ChatAuth.nama_ukerja) ? ' (' + this.escapeHtml(window.ChatAuth.ukerja || window.ChatAuth.nama_ukerja) + ')' : ''}!`
+                : 'Halo!';
+
             const defaultWelcomeHtml = `
                 <div class="bot-message-wrapper">
                     <div class="bot-badge-header">
@@ -1883,7 +1892,7 @@
                         <span>LILI - Asisten Virtual</span>
                     </div>
                     <div class="bot-bubble">
-                        <p class="mb-2">Halo! Saya <strong>LILI</strong> (<em>Layanan Informasi &amp; Literasi Kepegawaian Interaktif</em>) Asisten Virtual PILKB. 😊</p>
+                        <p class="mb-2">${greetingName} Saya <strong>LILI</strong> (<em>Layanan Informasi &amp; Literasi Kepegawaian Interaktif</em>) Asisten Virtual PILKB BKPSDM Kabupaten Buleleng. 😊</p>
                         <p class="mb-2">Anda dapat berkonsultasi seputar regulasi ASN, cek status usulan tiket, serta persyaratan layanan kepegawaian di BKPSDM Buleleng.</p>
                         <p class="mb-1 text-muted small fw-semibold">Contoh pertanyaan yang bisa Anda tanyakan kepada LILI:</p>
                         <ul class="mb-3 small ps-3 text-muted">
@@ -1918,7 +1927,12 @@
                             <div class="d-flex align-items-center gap-2">
                                 <div class="position-relative flex-shrink-0">
                                     <img src="/images/lili-avatar.png" alt="LILI" style="width: 34px; height: 34px; border-radius: 50%; object-fit: cover; border: 1.5px solid #6366f1; box-shadow: 0 2px 6px rgba(99,102,241,0.25);">
-                                    <span style="position: absolute; bottom: 0; right: 0; width: 8px; height: 8px; background: #10b981; border: 1.5px solid #fff; border-radius: 50%;"></span>
+                                    <span class="lili-verified-badge badge-sm" title="Terverifikasi">
+                                        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                            <circle cx="12" cy="12" r="10.5" fill="#25D366" stroke="#ffffff" stroke-width="2"/>
+                                            <path d="M7.5 12.2L10.5 15.2L16.8 8.8" stroke="#ffffff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
+                                        </svg>
+                                    </span>
                                 </div>
                                 <div class="overflow-hidden">
                                     <div class="d-flex align-items-center gap-1">
@@ -2141,6 +2155,21 @@
                         <div class="bot-bubble">
                             <div class="ai-reply-content mb-2">${formattedReply}</div>
                             ${actionChipsHtml}
+                            <div class="ai-bubble-toolbar">
+                                <button type="button" class="btn-copy-ai" title="Salin Jawaban LILI">
+                                    <i data-feather="copy" style="width:12px;height:12px;"></i>
+                                    <span class="copy-label">Salin</span>
+                                </button>
+                                <div class="ai-feedback-actions">
+                                    <span class="ai-feedback-label">Membantu?</span>
+                                    <button type="button" class="btn-ai-rate rate-up" title="Jawaban Membantu">
+                                        <i data-feather="thumbs-up" style="width:12px;height:12px;"></i>
+                                    </button>
+                                    <button type="button" class="btn-ai-rate rate-down" title="Jawaban Kurang Sesuai">
+                                        <i data-feather="thumbs-down" style="width:12px;height:12px;"></i>
+                                    </button>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 `);
@@ -2375,17 +2404,106 @@
         }
     });
 
-    $(document).on('click', '#btnSendLiliApp', function (e) {
+    $(document).on('click', '#btnResetLiliChat', function (e) {
         e.preventDefault();
-        window.ChatWidgetApp.sendLiliAiMessage();
+        window.ChatWidgetApp.startLiliAiMode(window.ChatWidgetApp.previousView, true);
     });
 
-    $(document).on('click', '.chip-prompt', function (e) {
+    $(document).on('click', '.chip-admin', function (e) {
         e.preventDefault();
-        const prompt = $(this).data('prompt');
-        if (prompt) {
-            window.ChatWidgetApp.sendLiliAiMessage(prompt);
+        if (typeof window.loadTicketSearch === 'function') {
+            window.ChatWidgetApp.stopPolling();
+            window.ChatWidgetApp.activeConversationId = null;
+            window.ChatWidgetApp.previousView = 'search';
+            window.loadTicketSearch('back');
+        } else {
+            $('#btnBackFromLiliAi').trigger('click');
         }
+    });
+
+    // Copy to clipboard with visual feedback
+    $(document).on('click', '.btn-copy-ai', function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+        const btn = $(this);
+        const bubble = btn.closest('.bot-bubble');
+        const clone = bubble.clone();
+        clone.find('.ai-bubble-toolbar, .ai-action-chips, .ai-action-chips-wrap, .bot-options-grid, button').remove();
+        const cleanText = clone.text().replace(/\n\s*\n/g, '\n\n').trim();
+
+        const onCopied = () => {
+            const originalContent = btn.html();
+            btn.addClass('copied').html('<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-check"><polyline points="20 6 9 17 4 12"></polyline></svg> <span class="copy-label">Tersalin!</span>');
+            setTimeout(() => {
+                btn.removeClass('copied').html(originalContent);
+                if (window.feather) feather.replace();
+            }, 2000);
+        };
+
+        if (navigator.clipboard && window.isSecureContext) {
+            navigator.clipboard.writeText(cleanText).then(onCopied).catch(() => {
+                const ta = document.createElement('textarea');
+                ta.value = cleanText;
+                ta.style.position = 'fixed';
+                ta.style.left = '-9999px';
+                document.body.appendChild(ta);
+                ta.focus();
+                ta.select();
+                try { document.execCommand('copy'); onCopied(); } catch (err) {}
+                document.body.removeChild(ta);
+            });
+        } else {
+            const ta = document.createElement('textarea');
+            ta.value = cleanText;
+            ta.style.position = 'fixed';
+            ta.style.left = '-9999px';
+            document.body.appendChild(ta);
+            ta.focus();
+            ta.select();
+            try { document.execCommand('copy'); onCopied(); } catch (err) {}
+            document.body.removeChild(ta);
+        }
+    });
+
+    // Rating feedback (👍 / 👎)
+    $(document).on('click', '.btn-ai-rate', function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+        const btn = $(this);
+        if (btn.hasClass('active') || btn.prop('disabled')) return;
+
+        const rating = btn.hasClass('rate-up') ? 'up' : 'down';
+        const actions = btn.closest('.ai-feedback-actions');
+        const bubble = btn.closest('.bot-bubble');
+
+        actions.find('.btn-ai-rate').prop('disabled', true);
+        btn.addClass('active');
+
+        const toast = $('<span class="ai-feedback-toast">Terima kasih!</span>');
+        actions.append(toast);
+        setTimeout(() => {
+            toast.fadeOut(300, function () { $(this).remove(); });
+        }, 2500);
+
+        const clone = bubble.clone();
+        clone.find('.ai-bubble-toolbar, .ai-action-chips, .ai-action-chips-wrap, .bot-options-grid, button').remove();
+        const snippet = clone.text().trim().substring(0, 150);
+
+        $.ajax({
+            url: '/guest-bot/feedback-ai',
+            type: 'POST',
+            headers: {
+                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content'),
+                'Accept': 'application/json'
+            },
+            contentType: 'application/json',
+            data: JSON.stringify({
+                rating: rating,
+                jawaban_ringkas: snippet
+            })
+        }).fail(function (err) {
+            console.warn('AI feedback rating save error:', err);
+        });
     });
 
     // Scroll tracking on chat messages container (WhatsApp Style Scroll Preservation)

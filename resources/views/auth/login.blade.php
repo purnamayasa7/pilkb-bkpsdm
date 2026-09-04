@@ -531,7 +531,12 @@
                             <div class="welcome-avatar-ring">
                                 <img src="{{ asset('images/lili-avatar.png') }}" alt="LILI" class="welcome-lili-img">
                             </div>
-                            <span class="chat-welcome-live-dot" title="LILI Online"></span>
+                            <span class="lili-verified-badge badge-lg" title="LILI Terverifikasi (Asisten Virtual)">
+                                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <circle cx="12" cy="12" r="10.5" fill="#25D366" stroke="#ffffff" stroke-width="2"/>
+                                    <path d="M7.5 12.2L10.5 15.2L16.8 8.8" stroke="#ffffff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
+                                </svg>
+                            </span>
                             <div class="welcome-lili-bubble-pill">
                                 <i data-feather="message-circle"></i>
                                 <span>Klik Tanya LILI</span>
@@ -824,7 +829,12 @@
                                 <div class="d-flex align-items-center gap-2">
                                     <div class="position-relative flex-shrink-0">
                                         <img src="{{ asset('images/lili-avatar.png') }}" alt="LILI" style="width: 34px; height: 34px; border-radius: 50%; object-fit: cover; border: 1.5px solid #6366f1; box-shadow: 0 2px 6px rgba(99,102,241,0.25);">
-                                        <span style="position: absolute; bottom: 0; right: 0; width: 8px; height: 8px; background: #10b981; border: 1.5px solid #fff; border-radius: 50%;"></span>
+                                        <span class="lili-verified-badge badge-sm" title="Terverifikasi">
+                                            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                <circle cx="12" cy="12" r="10.5" fill="#25D366" stroke="#ffffff" stroke-width="2"/>
+                                                <path d="M7.5 12.2L10.5 15.2L16.8 8.8" stroke="#ffffff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
+                                            </svg>
+                                        </span>
                                     </div>
                                     <div class="overflow-hidden">
                                         <div class="d-flex align-items-center gap-1">

@@ -3174,6 +3174,115 @@ body.dark-mode .ai-action-chip.chip-prompt:hover {
     border-color: #6366f1;
 }
 
+/* AI Bubble Bottom Toolbar (Copy & Feedback) */
+.ai-bubble-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 8px;
+    padding-top: 6px;
+    border-top: 1px solid rgba(0, 0, 0, 0.07);
+    font-size: 11.5px;
+}
+
+.btn-copy-ai {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    background: transparent;
+    border: none;
+    padding: 2px 7px;
+    border-radius: 6px;
+    color: #64748b;
+    cursor: pointer;
+    font-size: 11px;
+    font-weight: 500;
+    transition: all 0.15s ease;
+}
+
+.btn-copy-ai:hover {
+    color: #2563eb;
+    background: rgba(37, 99, 235, 0.08);
+}
+
+.btn-copy-ai.copied {
+    color: #10b981 !important;
+    background: rgba(16, 185, 129, 0.12) !important;
+}
+
+.ai-feedback-actions {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.ai-feedback-label {
+    font-size: 10.5px;
+    color: #94a3b8;
+    margin-right: 2px;
+}
+
+.btn-ai-rate {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    border: none;
+    padding: 3px 6px;
+    border-radius: 4px;
+    color: #94a3b8;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.btn-ai-rate:hover {
+    color: #475569;
+    background: rgba(0, 0, 0, 0.05);
+}
+
+.btn-ai-rate.rate-up.active {
+    color: #16a34a !important;
+    background: rgba(22, 163, 74, 0.12) !important;
+}
+
+.btn-ai-rate.rate-down.active {
+    color: #dc2626 !important;
+    background: rgba(220, 38, 38, 0.12) !important;
+}
+
+.btn-ai-rate.disabled {
+    pointer-events: none;
+    opacity: 0.85;
+}
+
+.ai-feedback-toast {
+    font-size: 10.5px;
+    color: #16a34a;
+    font-style: italic;
+}
+
+body.dark-mode .ai-bubble-toolbar {
+    border-top-color: rgba(255, 255, 255, 0.09);
+}
+
+body.dark-mode .btn-copy-ai {
+    color: #94a3b8;
+}
+
+body.dark-mode .btn-copy-ai:hover {
+    color: #93c5fd;
+    background: rgba(147, 197, 253, 0.12);
+}
+
+body.dark-mode .btn-ai-rate {
+    color: #64748b;
+}
+
+body.dark-mode .btn-ai-rate:hover {
+    color: #cbd5e1;
+    background: rgba(255, 255, 255, 0.08);
+}
+
 /* Interactive Welcome LILI Avatar Button */
 .chat-welcome-avatar-btn {
     cursor: pointer;
@@ -3265,6 +3374,57 @@ body.dark-mode .ai-action-chip.chip-prompt:hover {
 
 .chat-welcome-avatar-btn:hover .chat-welcome-live-dot {
     transform: scale(1.12);
+}
+
+/* WhatsApp-Style Verified Checkmark Badge for LILI Avatar */
+.lili-verified-badge {
+    position: absolute;
+    bottom: -1px;
+    right: -1px;
+    width: 14px;
+    height: 14px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 3;
+    filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.25));
+    transition: transform 0.25s ease;
+    pointer-events: none;
+}
+
+.lili-verified-badge svg {
+    width: 100%;
+    height: 100%;
+    display: block;
+}
+
+.lili-verified-badge.badge-lg {
+    width: 21px;
+    height: 21px;
+    bottom: 2px;
+    right: 2px;
+}
+
+.lili-verified-badge.badge-md {
+    width: 16px;
+    height: 16px;
+    bottom: -1px;
+    right: -1px;
+}
+
+.lili-verified-badge.badge-sm {
+    width: 13px;
+    height: 13px;
+    bottom: -1px;
+    right: -1px;
+}
+
+.chat-welcome-avatar-btn:hover .lili-verified-badge {
+    transform: scale(1.15);
+}
+
+body.dark-mode .lili-verified-badge circle {
+    stroke: #1e293b !important;
 }
 
 /* Bubble Tanya LILI mengadopsi warna biru floating chat agar serasi */

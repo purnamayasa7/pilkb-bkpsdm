@@ -473,6 +473,13 @@
                                 <li><em>"Apa saja syarat usulan kenaikan pangkat di BKPSDM Buleleng?"</em></li>
                                 <li><em>"Bagaimana aturan disiplin dan sanksi jam kerja ASN?"</em></li>
                             </ul>
+                            <div class="ai-action-chips-wrap d-flex flex-wrap gap-1 mt-2 mb-2">
+                                <button type="button" class="ai-action-chip chip-prompt" data-ai-prompt="Apa saja syarat usulan kenaikan pangkat di BKPSDM Buleleng?">🔘 Kenaikan Pangkat</button>
+                                <button type="button" class="ai-action-chip chip-prompt" data-ai-prompt="Bagaimana prosedur pengajuan cuti tahunan ASN?">🔘 Cuti ASN</button>
+                                <button type="button" class="ai-action-chip chip-prompt" data-ai-prompt="Bagaimana aturan jam kerja dan sanksi disiplin ASN?">🔘 Disiplin Pegawai</button>
+                                <button type="button" class="ai-action-chip chip-prompt" data-ai-prompt="Apa syarat mutasi pegawai di BKPSDM Buleleng?">🔘 Mutasi Pegawai</button>
+                                <button type="button" class="ai-action-chip chip-prompt" data-ai-prompt="Apa saja syarat usulan pensiun BUP?">🔘 Pensiun BUP</button>
+                            </div>
                             <p class="mb-0 text-muted small fst-italic">Silakan ketik pertanyaan Anda pada kolom pesan di bawah lalu tekan Kirim (Enter).</p>
                             
                             <div class="bot-options-grid mt-3">
@@ -604,6 +611,21 @@
                                 <div class="bot-bubble">
                                     <div class="ai-reply-content mb-2">${formattedReply}</div>
                                     ${actionChipsHtml}
+                                    <div class="ai-bubble-toolbar">
+                                        <button type="button" class="btn-copy-ai" title="Salin Jawaban LILI">
+                                            <i data-feather="copy" style="width:12px;height:12px;"></i>
+                                            <span class="copy-label">Salin</span>
+                                        </button>
+                                        <div class="ai-feedback-actions">
+                                            <span class="ai-feedback-label">Membantu?</span>
+                                            <button type="button" class="btn-ai-rate rate-up" title="Jawaban Membantu">
+                                                <i data-feather="thumbs-up" style="width:12px;height:12px;"></i>
+                                            </button>
+                                            <button type="button" class="btn-ai-rate rate-down" title="Jawaban Kurang Sesuai">
+                                                <i data-feather="thumbs-down" style="width:12px;height:12px;"></i>
+                                            </button>
+                                        </div>
+                                    </div>
                                     
                                     <p class="mt-3 mb-1 text-muted small fw-semibold">Langkah selanjutnya:</p>
                                     <div class="bot-options-grid">
@@ -2006,6 +2028,88 @@
                 }).catch(() => {
                     alert('Nomor tiket: ' + ticketText);
                 });
+            });
+
+            // Copy to clipboard with visual feedback
+            document.addEventListener('click', function (e) {
+                const btn = e.target.closest('.btn-copy-ai');
+                if (!btn) return;
+                e.preventDefault();
+                e.stopPropagation();
+
+                const bubble = btn.closest('.bot-bubble');
+                const clone = bubble.cloneNode(true);
+                clone.querySelectorAll('.ai-bubble-toolbar, .ai-action-chips, .ai-action-chips-wrap, .bot-options-grid, button').forEach(el => el.remove());
+                const cleanText = (clone.textContent || '').replace(/\n\s*\n/g, '\n\n').trim();
+
+                const onCopied = () => {
+                    const originalHtml = btn.innerHTML;
+                    btn.classList.add('copied');
+                    btn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-check"><polyline points="20 6 9 17 4 12"></polyline></svg> <span class="copy-label">Tersalin!</span>';
+                    setTimeout(() => {
+                        btn.classList.remove('copied');
+                        btn.innerHTML = originalHtml;
+                        if (window.feather) feather.replace();
+                    }, 2000);
+                };
+
+                if (navigator.clipboard && window.isSecureContext) {
+                    navigator.clipboard.writeText(cleanText).then(onCopied).catch(() => {
+                        const ta = document.createElement('textarea');
+                        ta.value = cleanText;
+                        ta.style.position = 'fixed';
+                        ta.style.left = '-9999px';
+                        document.body.appendChild(ta);
+                        ta.focus();
+                        ta.select();
+                        try { document.execCommand('copy'); onCopied(); } catch (err) {}
+                        document.body.removeChild(ta);
+                    });
+                } else {
+                    const ta = document.createElement('textarea');
+                    ta.value = cleanText;
+                    ta.style.position = 'fixed';
+                    ta.style.left = '-9999px';
+                    document.body.appendChild(ta);
+                    ta.focus();
+                    ta.select();
+                    try { document.execCommand('copy'); onCopied(); } catch (err) {}
+                    document.body.removeChild(ta);
+                }
+            });
+
+            // Rating feedback (👍 / 👎)
+            document.addEventListener('click', function (e) {
+                const btn = e.target.closest('.btn-ai-rate');
+                if (!btn) return;
+                e.preventDefault();
+                e.stopPropagation();
+
+                if (btn.classList.contains('active') || btn.disabled) return;
+
+                const rating = btn.classList.contains('rate-up') ? 'up' : 'down';
+                const actions = btn.closest('.ai-feedback-actions');
+                const bubble = btn.closest('.bot-bubble');
+
+                actions.querySelectorAll('.btn-ai-rate').forEach(b => b.disabled = true);
+                btn.classList.add('active');
+
+                const toast = document.createElement('span');
+                toast.className = 'ai-feedback-toast';
+                toast.innerText = 'Terima kasih!';
+                actions.appendChild(toast);
+                setTimeout(() => {
+                    toast.remove();
+                }, 2500);
+
+                const clone = bubble.cloneNode(true);
+                clone.querySelectorAll('.ai-bubble-toolbar, .ai-action-chips, .ai-action-chips-wrap, .bot-options-grid, button').forEach(el => el.remove());
+                const snippet = (clone.textContent || '').trim().substring(0, 150);
+
+                apiRequest('/guest-bot/feedback-ai', 'POST', {
+                    rating: rating,
+                    jawaban_ringkas: snippet
+                }).catch(err => console.warn('Rating feedback error:', err));
             });
         }
     };

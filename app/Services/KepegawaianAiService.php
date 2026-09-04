@@ -60,7 +60,7 @@ EOT;
      * @param array $chatHistory
      * @return array
      */
-    public function ask(string $question, array $chatHistory = []): array
+    public function ask(string $question, array $chatHistory = [], ?array $userInfo = null): array
     {
         $sanitizedQuestion = $this->sanitizeInput($question);
         if (empty($sanitizedQuestion)) {
@@ -166,7 +166,16 @@ EOT;
         }
 
         try {
-            $fullPrompt = self::SYSTEM_INSTRUCTION . $groundingContext . "\n\n";
+            $fullPrompt = self::SYSTEM_INSTRUCTION . $groundingContext;
+
+            if (!empty($userInfo['name'])) {
+                $fullPrompt .= "\n\n[PROFIL PENGGUNA TERAUTENTIKASI]:\n" .
+                    "- Nama Pegawai: " . strip_tags($userInfo['name']) . "\n" .
+                    "- Unit Kerja / OPD: " . strip_tags($userInfo['unit_kerja'] ?? 'Pemerintah Kabupaten Buleleng') . "\n" .
+                    "PETUNJUK SAPAAN: Anda dapat menyapa pegawai secara ramah dan sopan (contoh: Bpk/Ibu " . strip_tags($userInfo['name']) . ") jika relevan.\n";
+            }
+
+            $fullPrompt .= "\n\n";
 
             foreach ($chatHistory as $item) {
                 $itemText = $item['text'] ?? $item['content'] ?? '';
@@ -216,10 +225,11 @@ EOT;
                     $reply = $data['candidates'][0]['content']['parts'][0]['text'] ?? null;
 
                     if (!empty($reply)) {
+                        $followUps = $this->generateFollowUpSuggestions($sanitizedQuestion, $serviceData, 'gemini_ai');
                         return [
                             'success' => true,
                             'reply'   => $this->cleanAiReply($reply),
-                            'actions' => $actions,
+                            'actions' => array_merge($actions, $followUps),
                             'source'  => 'gemini_ai'
                         ];
                     }
@@ -419,6 +429,16 @@ EOT;
                             'type'  => 'ticket',
                             'label' => 'Buka Rincian Tiket',
                             'url'   => $urlDetail
+                        ],
+                        [
+                            'type'   => 'prompt',
+                            'label'  => '🔍 Cek usulan NIP lain',
+                            'prompt' => 'Saya mau cek usulan tiket untuk NIP'
+                        ],
+                        [
+                            'type'   => 'prompt',
+                            'label'  => '📋 Syarat mutasi pegawai',
+                            'prompt' => 'Apa syarat mutasi pegawai di BKPSDM Buleleng?'
                         ]
                     ],
                     'source'  => 'db_nip_lookup'
@@ -493,6 +513,16 @@ EOT;
                                 'type'  => 'ticket',
                                 'label' => 'Buka Rincian Tiket',
                                 'url'   => $urlDetail
+                            ],
+                            [
+                                'type'   => 'prompt',
+                                'label'  => '🔍 Cek tiket lain',
+                                'prompt' => 'Saya mau cek status tiket'
+                            ],
+                            [
+                                'type'   => 'prompt',
+                                'label'  => '🏖️ Syarat pengajuan cuti',
+                                'prompt' => 'Apa syarat pengajuan cuti di BKPSDM Buleleng?'
                             ]
                         ],
                         'source'  => 'db_ticket_lookup'
@@ -891,12 +921,77 @@ EOT;
             ];
         }
 
+        $followUps = $this->generateFollowUpSuggestions($question, $serviceData, 'fallback');
+
         return [
             'success' => true,
             'reply'   => "Terima kasih atas pertanyaan Anda. 😊\n\nSebagai asisten virtual LILI di BKPSDM Kabupaten Buleleng, saya siap membantu menjelaskan regulasi kepegawaian, ketentuan cuti, kenaikan pangkat, pensiun, tugas belajar, maupun disiplin ASN. Silakan sampaikan pertanyaan spesifik yang ingin Anda ketahui.",
-            'actions' => [],
+            'actions' => array_merge($actions, $followUps),
             'source'  => 'fallback_general'
         ];
+    }
+
+    /**
+     * Hasilkan saran pertanyaan lanjutan cerdas (follow-up suggestions) dan tombol eskalasi admin bidang.
+     */
+    private function generateFollowUpSuggestions(string $question, ?array $serviceData = null, ?string $source = null): array
+    {
+        $qLower = mb_strtolower($question, 'UTF-8');
+        $suggestions = [];
+
+        // 1. Jika ada data layanan spesifik yang sedang dibahas
+        if ($serviceData && ($serviceData['type'] ?? '') === 'single') {
+            $namaLower = mb_strtolower($serviceData['nama_layanan'] ?? '', 'UTF-8');
+
+            if (str_contains($namaLower, 'pindah tugas') || str_contains($qLower, 'mutasi')) {
+                $suggestions[] = ['type' => 'prompt', 'label' => '⏱️ Berapa lama proses mutasi?', 'prompt' => 'Berapa estimasi waktu penyelesaian mutasi pegawai di BKPSDM Buleleng?'];
+                $suggestions[] = ['type' => 'prompt', 'label' => '📋 Alur pengajuan mutasi', 'prompt' => 'Bagaimana alur dan prosedur pengajuan usulan mutasi pegawai?'];
+            } elseif (str_contains($namaLower, 'cuti') || str_contains($qLower, 'cuti')) {
+                $suggestions[] = ['type' => 'prompt', 'label' => '🏖️ Berapa hari hak cuti tahunan?', 'prompt' => 'Berapa hari hak cuti tahunan bagi ASN?'];
+                $suggestions[] = ['type' => 'prompt', 'label' => '👶 Syarat cuti melahirkan', 'prompt' => 'Bagaimana syarat dan ketentuan cuti melahirkan bagi ASN?'];
+            } elseif (str_contains($namaLower, 'pangkat') || str_contains($qLower, 'pangkat')) {
+                $suggestions[] = ['type' => 'prompt', 'label' => '📅 Kapan 6 periode kenaikan pangkat?', 'prompt' => 'Kapan saja periode kenaikan pangkat PNS dalam setahun?'];
+                $suggestions[] = ['type' => 'prompt', 'label' => '🎓 Syarat KP penyesuaian ijazah', 'prompt' => 'Apa syarat kenaikan pangkat penyesuaian ijazah?'];
+            } elseif (str_contains($namaLower, 'pensiun') || str_contains($qLower, 'pensiun')) {
+                $suggestions[] = ['type' => 'prompt', 'label' => '⏳ Berapa batas usia pensiun ASN?', 'prompt' => 'Berapa batas usia pensiun untuk jabatan pelaksana dan fungsional?'];
+                $suggestions[] = ['type' => 'prompt', 'label' => '📅 Kapan usulan pensiun diajukan?', 'prompt' => 'Kapan waktu terbaik mengajukan berkas usulan pensiun ke BKPSDM?'];
+            } elseif (str_contains($namaLower, 'belajar') || str_contains($qLower, 'belajar')) {
+                $suggestions[] = ['type' => 'prompt', 'label' => '🎓 Beda Izin Belajar & Tugas Belajar', 'prompt' => 'Apa perbedaan antara Izin Belajar dan Tugas Belajar bagi ASN?'];
+            }
+
+            // Tombol eskalasi ke petugas / admin bidang terkait (jika ada bidang_id)
+            if (!empty($serviceData['bidang_id'])) {
+                $suggestions[] = [
+                    'type'        => 'admin',
+                    'label'       => '💬 Hubungi Petugas ' . ($serviceData['bidang_nama'] ?? 'Bidang'),
+                    'bidang_id'   => $serviceData['bidang_id'],
+                    'bidang_nama' => $serviceData['bidang_nama'] ?? 'Bidang Terkait',
+                ];
+            }
+
+            return $suggestions;
+        }
+
+        // 2. Jika membahas topik umum kepegawaian
+        if (str_contains($qLower, 'disiplin') || str_contains($qLower, 'hukuman') || str_contains($qLower, 'jam kerja')) {
+            $suggestions[] = ['type' => 'prompt', 'label' => '📌 Tingkat hukuman disiplin', 'prompt' => 'Apa saja tingkatan dan jenis hukuman disiplin PNS menurut PP 94/2021?'];
+            $suggestions[] = ['type' => 'prompt', 'label' => '⏱️ Aturan jam kerja ASN', 'prompt' => 'Bagaimana aturan jam kerja dan sanksi jika tidak masuk kerja bagi ASN?'];
+        } elseif (str_contains($qLower, 'cuti')) {
+            $suggestions[] = ['type' => 'prompt', 'label' => '🏖️ Apa syarat pengajuan cuti?', 'prompt' => 'Apa syarat pengajuan cuti di BKPSDM Buleleng?'];
+            $suggestions[] = ['type' => 'prompt', 'label' => '📌 Ketentuan cuti besar ASN', 'prompt' => 'Bagaimana ketentuan dan syarat cuti besar bagi ASN?'];
+        } elseif (str_contains($qLower, 'pangkat')) {
+            $suggestions[] = ['type' => 'prompt', 'label' => '📌 Syarat kenaikan pangkat reguler', 'prompt' => 'Apa syarat kenaikan pangkat reguler di BKPSDM Buleleng?'];
+            $suggestions[] = ['type' => 'prompt', 'label' => '📅 6 Periode kenaikan pangkat', 'prompt' => 'Kapan saja periode kenaikan pangkat PNS dalam setahun?'];
+        } elseif (str_contains($qLower, 'pensiun')) {
+            $suggestions[] = ['type' => 'prompt', 'label' => '👴 Syarat pensiun BUP', 'prompt' => 'Apa syarat usulan pensiun di BKPSDM Buleleng?'];
+            $suggestions[] = ['type' => 'prompt', 'label' => '📌 Syarat pensiun dini / APS', 'prompt' => 'Bagaimana ketentuan pensiun atas permintaan sendiri (APS)?'];
+        } else {
+            // General follow-ups
+            $suggestions[] = ['type' => 'prompt', 'label' => '📌 Layanan populer BKPSDM', 'prompt' => 'Apa saja layanan di BKPSDM Buleleng?'];
+            $suggestions[] = ['type' => 'prompt', 'label' => '🔍 Cek usulan tiket', 'prompt' => 'Saya hendak cek status tiket saya, tetapi saya tidak tau no tiket'];
+        }
+
+        return $suggestions;
     }
 
     /**

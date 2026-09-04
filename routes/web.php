@@ -55,6 +55,7 @@ Route::get('/guest-bot/semua-layanan', [\App\Http\Controllers\GuestBotController
 Route::get('/guest-bot/bidang-layanan', [\App\Http\Controllers\GuestBotController::class, 'getBidangLayanan'])->middleware('throttle:60,1');
 Route::get('/guest-bot/syarat/{layananId}', [\App\Http\Controllers\GuestBotController::class, 'getSyaratLayanan'])->middleware('throttle:60,1');
 Route::post('/guest-bot/tanya-ai', [\App\Http\Controllers\GuestBotController::class, 'tanyaAi'])->middleware('throttle:15,1');
+Route::post('/guest-bot/feedback-ai', [\App\Http\Controllers\GuestBotController::class, 'simpanFeedback'])->middleware('throttle:30,1');
 // Open & close chat
 Route::post('/chat/{conversation}/close', [ChatController::class, 'closeChat']);
 Route::post('/chat/{conversation}/reopen', [ChatController::class, 'reopenChat']);
