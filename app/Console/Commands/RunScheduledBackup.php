@@ -53,6 +53,10 @@ class RunScheduledBackup extends Command
                 }
 
                 $this->error($errorMsg);
+                if (!empty(trim($output))) {
+                    $this->line($output);
+                }
+
                 Log::error('Backup Otomatis Gagal', ['output' => $output]);
 
                 ActivityLogService::log(
