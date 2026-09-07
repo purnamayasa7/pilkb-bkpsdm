@@ -1,17 +1,17 @@
 @extends('layouts.app')
 
 @section('content')
-<header class="page-header page-header-compact page-header-light border-bottom bg-white mb-4">
-    <div class="container-fluid px-4">
+<header class="page-header page-header-compact page-header-light border-bottom bg-white mb-4 backup-page-header">
+    <div class="container-fluid px-3 px-md-4">
         <div class="page-header-content">
             <div class="row align-items-center justify-content-between pt-3">
-                <div class="col-auto mb-3">
-                    <h1 class="page-header-title">
-                        <div class="page-header-icon"><i data-feather="database"></i></div>
+                <div class="col-12 col-md-auto mb-2 mb-md-3">
+                    <h1 class="page-header-title backup-page-title d-flex align-items-center">
+                        <div class="page-header-icon backup-page-icon me-2"><i data-feather="database"></i></div>
                         Manajemen Backup Database
                     </h1>
                 </div>
-                <div class="col-12 col-xl-auto mb-3">
+                <div class="col-12 col-md-auto mb-3">
                     <form action="{{ route('root.backup.create') }}" method="POST" id="formCreateBackup" class="d-inline">
                         @csrf
                         <button type="submit" class="btn btn-sm btn-primary shadow-sm" id="btnCreateBackup">
@@ -31,21 +31,21 @@
     </div>
 </header>
 
-<div class="container-fluid px-4">
+<div class="container-fluid px-3 px-md-4">
     <!-- Stat Cards -->
-    <div class="row mb-4">
-        <div class="col-xl-4 col-md-6 mb-4">
-            <div class="card border-start-lg border-start-primary h-100 shadow-sm">
+    <div class="row mb-3 mb-md-4">
+        <div class="col-12 col-md-6 col-xl-4 mb-3 mb-xl-4">
+            <div class="card border-start-lg border-start-primary h-100 shadow-sm backup-stat-card">
                 <div class="card-body">
                     <div class="d-flex align-items-center">
                         <div class="flex-grow-1">
                             <div class="small fw-bold text-primary mb-1">Total File Backup</div>
-                            <div class="h3 fw-bold text-gray-800">{{ $stats['total_backups'] }} file</div>
-                            <div class="text-xs text-muted">Tersimpan di storage lokal aplikasi</div>
+                            <div class="h3 fw-bold text-gray-800 backup-stat-val mb-1">{{ $stats['total_backups'] }} file</div>
+                            <div class="text-xs text-muted backup-stat-sub">Tersimpan di storage lokal aplikasi</div>
                         </div>
                         <div class="ms-2">
-                            <div class="icon-circle bg-primary-soft text-primary p-3 rounded-circle">
-                                <i data-feather="archive" style="width: 24px; height: 24px;"></i>
+                            <div class="icon-circle bg-primary-soft text-primary rounded-circle backup-icon-circle p-3">
+                                <i data-feather="archive" class="backup-stat-icon" style="width: 24px; height: 24px;"></i>
                             </div>
                         </div>
                     </div>
@@ -53,18 +53,18 @@
             </div>
         </div>
 
-        <div class="col-xl-4 col-md-6 mb-4">
-            <div class="card border-start-lg border-start-info h-100 shadow-sm">
+        <div class="col-12 col-md-6 col-xl-4 mb-3 mb-xl-4">
+            <div class="card border-start-lg border-start-info h-100 shadow-sm backup-stat-card">
                 <div class="card-body">
                     <div class="d-flex align-items-center">
                         <div class="flex-grow-1">
                             <div class="small fw-bold text-info mb-1">Total Ukuran Penyimpanan</div>
-                            <div class="h3 fw-bold text-gray-800">{{ $stats['total_size'] }}</div>
-                            <div class="text-xs text-muted">Kapasitas disk backup terpakai</div>
+                            <div class="h3 fw-bold text-gray-800 backup-stat-val mb-1">{{ $stats['total_size'] }}</div>
+                            <div class="text-xs text-muted backup-stat-sub">Kapasitas disk backup terpakai</div>
                         </div>
                         <div class="ms-2">
-                            <div class="icon-circle bg-info-soft text-info p-3 rounded-circle">
-                                <i data-feather="hard-drive" style="width: 24px; height: 24px;"></i>
+                            <div class="icon-circle bg-info-soft text-info rounded-circle backup-icon-circle p-3">
+                                <i data-feather="hard-drive" class="backup-stat-icon" style="width: 24px; height: 24px;"></i>
                             </div>
                         </div>
                     </div>
@@ -72,20 +72,20 @@
             </div>
         </div>
 
-        <div class="col-xl-4 col-md-6 mb-4">
-            <div class="card border-start-lg border-start-success h-100 shadow-sm">
+        <div class="col-12 col-md-12 col-xl-4 mb-3 mb-xl-4">
+            <div class="card border-start-lg border-start-success h-100 shadow-sm backup-stat-card">
                 <div class="card-body">
                     <div class="d-flex align-items-center">
                         <div class="flex-grow-1">
                             <div class="small fw-bold text-success mb-1">Backup Terakhir</div>
-                            <div class="h5 fw-bold text-gray-800">
+                            <div class="h5 fw-bold text-gray-800 backup-stat-val mb-1">
                                 @if ($stats['latest_backup'])
                                     {{ $stats['latest_backup']->isoFormat('D MMMM Y, HH:mm') }} WITA
                                 @else
                                     <span class="text-muted">Belum ada backup</span>
                                 @endif
                             </div>
-                            <div class="text-xs text-muted">
+                            <div class="text-xs text-muted backup-stat-sub">
                                 @if ($stats['latest_backup'])
                                     {{ $stats['latest_backup']->diffForHumans() }}
                                 @else
@@ -94,8 +94,8 @@
                             </div>
                         </div>
                         <div class="ms-2">
-                            <div class="icon-circle bg-success-soft text-success p-3 rounded-circle">
-                                <i data-feather="clock" style="width: 24px; height: 24px;"></i>
+                            <div class="icon-circle bg-success-soft text-success rounded-circle backup-icon-circle p-3">
+                                <i data-feather="clock" class="backup-stat-icon" style="width: 24px; height: 24px;"></i>
                             </div>
                         </div>
                     </div>
@@ -105,29 +105,53 @@
     </div>
 
     <!-- Main Table Card -->
-    <div class="card shadow-sm mb-4">
-        <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
-            <h6 class="m-0 font-weight-bold text-primary">
-                <i data-feather="list" class="me-1"></i> Daftar File Backup Database
+    <div class="card shadow-sm mb-4 backup-stat-card">
+        <div class="card-header bg-white py-3 card-header-backup d-flex flex-wrap justify-content-between align-items-center gap-2">
+            <h6 class="m-0 font-weight-bold text-primary d-flex align-items-center">
+                <i data-feather="list" class="me-2" style="width: 18px; height: 18px;"></i>
+                Daftar File Backup Database
             </h6>
+            <div class="header-badges d-flex align-items-center gap-2">
+                <span class="badge bg-light text-primary border badge-schedule-info">
+                    <i data-feather="calendar" class="me-1" style="width: 12px; height: 12px;"></i>
+                    Jadwal Otomatis: <strong>01:00 WITA</strong>
+                </span>
+                @if ($stats['has_backup_today'])
+                    <span class="badge bg-success-soft text-success border border-success badge-schedule-success">
+                        <i data-feather="check-circle" class="me-1" style="width: 12px; height: 12px;"></i>
+                        Backup Hari Ini Selesai
+                    </span>
+                @elseif ($stats['is_missed_today'])
+                    <span class="badge bg-danger-soft text-danger border border-danger badge-schedule-missed">
+                        <i data-feather="alert-triangle" class="me-1" style="width: 12px; height: 12px;"></i>
+                        Jadwal Terlewat (Server Offline)
+                    </span>
+                @else
+                    <span class="badge bg-secondary-soft text-secondary border badge-schedule-waiting">
+                        <i data-feather="clock" class="me-1" style="width: 12px; height: 12px;"></i>
+                        Menunggu Jadwal 01:00 WITA
+                    </span>
+                @endif
+            </div>
         </div>
-        <div class="card-body">
-            <div class="alert alert-primary-soft d-flex align-items-center mb-4" role="alert">
-                <i data-feather="info" class="me-2 flex-shrink-0"></i>
+
+        <div class="card-body p-3 p-md-4">
+            <div class="alert alert-primary-soft d-flex align-items-start align-items-md-center mb-3 mb-md-4 backup-info-alert" role="alert">
+                <i data-feather="info" class="me-2 mt-1 mt-md-0 flex-shrink-0" style="width: 18px; height: 18px;"></i>
                 <div class="small">
-                    Backup database mencakup seluruh skema dan data tabel aplikasi PILKB dalam bentuk file terkompresi <code>.zip</code>. Anda dapat mengunduh salinan berkas backup ke perangkat lokal atau menghapus salinan lama jika ruang penyimpanan hampir penuh.
+                    Backup database mencakup seluruh skema dan data tabel aplikasi PILKB dalam format berkas terkompresi <code>.zip</code>. Anda dapat mengunduh salinan berkas ke perangkat lokal atau menghapus salinan lama jika ruang penyimpanan hampir penuh.
                 </div>
             </div>
 
-            <div class="table-responsive">
+            <div class="table-responsive" style="-webkit-overflow-scrolling: touch;">
                 <table class="table table-bordered table-hover align-middle mb-0" id="datatablesSimple">
-                    <thead class="table-light">
+                    <thead class="table-light table-backup-head">
                         <tr>
-                            <th style="width: 50px;">No</th>
+                            <th class="text-center" style="width: 50px;">No</th>
                             <th>Nama Berkas Backup</th>
-                            <th style="width: 130px;">Ukuran File</th>
-                            <th style="width: 220px;">Waktu Pembuatan</th>
-                            <th style="width: 140px;" class="text-center">Aksi</th>
+                            <th class="text-nowrap" style="width: 130px;">Ukuran File</th>
+                            <th class="text-nowrap" style="width: 230px;">Waktu Pembuatan</th>
+                            <th class="text-center text-nowrap" style="width: 140px;">Aksi</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -136,25 +160,25 @@
                             <td class="text-center">{{ $loop->iteration }}</td>
                             <td>
                                 <div class="d-flex align-items-center">
-                                    <i data-feather="file-text" class="text-primary me-2"></i>
-                                    <div>
-                                        <span class="fw-semibold text-dark">{{ $backup['filename'] }}</span>
-                                        <div class="text-muted small">{{ $backup['path'] }}</div>
+                                    <i data-feather="file-text" class="text-primary me-2 flex-shrink-0" style="width: 18px; height: 18px;"></i>
+                                    <div class="text-break">
+                                        <span class="fw-semibold table-backup-filename">{{ $backup['filename'] }}</span>
+                                        <div class="small table-backup-path">{{ $backup['path'] }}</div>
                                     </div>
                                 </div>
                             </td>
-                            <td>
-                                <span class="badge bg-light text-dark border">
+                            <td class="text-nowrap">
+                                <span class="badge bg-light text-dark border table-backup-badge-size">
                                     {{ $backup['size'] }}
                                 </span>
                             </td>
-                            <td>
-                                <div>{{ $backup['created_at']->isoFormat('D MMMM Y, HH:mm:ss') }}</div>
-                                <div class="text-muted small">{{ $backup['created_at']->diffForHumans() }}</div>
+                            <td class="text-nowrap">
+                                <div class="table-backup-date">{{ $backup['created_at']->isoFormat('D MMMM Y, HH:mm:ss') }} WITA</div>
+                                <div class="small table-backup-diff">{{ $backup['created_at']->diffForHumans() }}</div>
                             </td>
-                            <td class="text-center">
+                            <td class="text-center text-nowrap">
                                 <div class="d-inline-flex gap-1">
-                                    <a class="btn btn-sm btn-outline-primary"
+                                    <a class="btn btn-sm btn-outline-primary btn-backup-download"
                                        href="{{ route('root.backup.download', $backup['filename']) }}"
                                        data-bs-toggle="tooltip"
                                        title="Download Backup">
@@ -163,7 +187,7 @@
                                     </a>
 
                                     <button type="button"
-                                            class="btn btn-sm btn-outline-danger btnDelete"
+                                            class="btn btn-sm btn-outline-danger btn-backup-delete btnDelete"
                                             data-filename="{{ $backup['filename'] }}"
                                             data-bs-toggle="tooltip"
                                             title="Hapus File">
@@ -190,23 +214,26 @@
 {{-- Modal Delete Backup --}}
 <div class="modal fade" id="modalDelete" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
+        <div class="modal-content shadow-lg">
             <div class="modal-header">
-                <h5 class="modal-title">Konfirmasi Hapus Backup</h5>
+                <h5 class="modal-title d-flex align-items-center">
+                    <i data-feather="alert-circle" class="text-danger me-2" style="width: 20px; height: 20px;"></i>
+                    Konfirmasi Hapus Backup
+                </h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
 
             <div class="modal-body">
                 <p id="textDelete" class="mb-0"></p>
-                <div class="text-danger small mt-2">
-                    <i data-feather="alert-triangle" class="me-1" style="width: 14px; height: 14px;"></i>
-                    Tindakan ini permanen dan file tidak dapat dipulihkan.
+                <div class="text-danger small mt-2 d-flex align-items-center">
+                    <i data-feather="alert-triangle" class="me-1 flex-shrink-0" style="width: 14px; height: 14px;"></i>
+                    <span>Tindakan ini permanen dan berkas tidak dapat dipulihkan.</span>
                 </div>
             </div>
 
             <div class="modal-footer">
                 <button type="button" class="btn btn-light" data-bs-dismiss="modal">
-                    <i data-feather="x" class="me-1"></i> Batal
+                    <i data-feather="x" class="me-1" style="width: 14px; height: 14px;"></i> Batal
                 </button>
 
                 <form id="formDelete" method="POST">
@@ -214,7 +241,7 @@
                     @method('DELETE')
                     <button class="btn btn-danger" type="submit" id="btnConfirmDelete">
                         <span class="btn-delete-text">
-                            <i data-feather="trash-2" class="me-1"></i> Ya, Hapus
+                            <i data-feather="trash-2" class="me-1" style="width: 14px; height: 14px;"></i> Ya, Hapus
                         </span>
                         <span class="btn-delete-loading d-none">
                             <span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>

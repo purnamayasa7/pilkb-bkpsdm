@@ -24,24 +24,41 @@ class BackupController extends Controller
             ->map(function ($filePath) use ($disk) {
                 $lastModifiedTimestamp = $disk->lastModified($filePath);
                 $sizeInBytes = $disk->size($filePath);
+                $filename = basename($filePath);
+
+                // Prioritaskan waktu asli dari nama file Spatie (format: Y-m-d-H-i-s)
+                $createdAt = null;
+                $filenameWithoutExt = preg_replace('/\.zip$/i', '', $filename);
+                try {
+                    $createdAt = Carbon::createFromFormat('Y-m-d-H-i-s', $filenameWithoutExt, config('app.timezone', 'Asia/Makassar'));
+                } catch (\Throwable $e) {
+                    $createdAt = Carbon::createFromTimestamp($lastModifiedTimestamp)->timezone(config('app.timezone', 'Asia/Makassar'));
+                }
 
                 return [
                     'path' => $filePath,
-                    'filename' => basename($filePath),
+                    'filename' => $filename,
                     'size' => $this->formatBytes($sizeInBytes),
                     'size_bytes' => $sizeInBytes,
-                    'created_at' => Carbon::createFromTimestamp($lastModifiedTimestamp),
-                    'timestamp' => $lastModifiedTimestamp,
+                    'created_at' => $createdAt,
+                    'timestamp' => $createdAt->timestamp,
                 ];
             })
             ->sortByDesc('timestamp')
             ->values();
+
+        $now = Carbon::now();
+        $startOfDay = Carbon::today()->startOfDay();
+        $hasBackupToday = $backups->contains(fn($b) => $b['created_at']->greaterThanOrEqualTo($startOfDay));
+        $isMissedToday = !$hasBackupToday && ($now->hour >= 1 && ($now->hour > 1 || $now->minute >= 30));
 
         $totalSizeBytes = $backups->sum('size_bytes');
         $stats = [
             'total_backups' => $backups->count(),
             'total_size' => $this->formatBytes($totalSizeBytes),
             'latest_backup' => $backups->first()['created_at'] ?? null,
+            'has_backup_today' => $hasBackupToday,
+            'is_missed_today' => $isMissedToday,
         ];
 
         return view('pages.admin.backup.index', compact('backups', 'stats'));
