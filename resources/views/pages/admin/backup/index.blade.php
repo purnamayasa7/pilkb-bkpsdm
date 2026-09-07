@@ -1,5 +1,338 @@
 @extends('layouts.app')
 
+@push('styles')
+<style>
+    /* DataTables Search Box Shadow Fix & Input */
+    .datatable-top {
+        padding: 0.9rem 1.15rem !important;
+        overflow: visible !important;
+    }
+
+    .datatable-search {
+        padding: 4px 6px !important;
+        overflow: visible !important;
+    }
+
+    .datatable-input {
+        margin: 2px !important;
+        padding: 0.45rem 0.85rem !important;
+        border-radius: 0.375rem !important;
+        transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out !important;
+    }
+
+    .datatable-input:focus {
+        outline: 0 !important;
+        box-shadow: 0 0 0 0.22rem rgba(0, 97, 242, 0.22) !important;
+    }
+
+    html.dark-mode .datatable-input:focus,
+    body.dark-mode .datatable-input:focus {
+        box-shadow: 0 0 0 0.22rem rgba(79, 111, 255, 0.25) !important;
+    }
+
+    /* DataTables Controls on Mobile Screens */
+    @media (max-width: 575.98px) {
+        .datatable-top {
+            display: flex !important;
+            flex-direction: column !important;
+            gap: 0.6rem !important;
+            align-items: stretch !important;
+            padding: 0.75rem !important;
+        }
+
+        .datatable-dropdown,
+        .datatable-search {
+            float: none !important;
+            width: 100% !important;
+            padding: 0 !important;
+        }
+
+        .datatable-input {
+            width: 100% !important;
+            min-width: 0 !important;
+            margin: 2px 0 !important;
+        }
+
+        .datatable-bottom {
+            display: flex !important;
+            flex-direction: column !important;
+            gap: 0.6rem !important;
+            align-items: center !important;
+            text-align: center !important;
+            padding: 0.75rem !important;
+        }
+
+        .datatable-info,
+        .datatable-pagination {
+            float: none !important;
+            margin: 0 !important;
+        }
+    }
+
+    /* Header Halaman di Dark Mode */
+    html.dark-mode .backup-page-header,
+    body.dark-mode .backup-page-header {
+        background-color: #182235 !important;
+        border-bottom-color: #253247 !important;
+    }
+
+    html.dark-mode .backup-page-title,
+    body.dark-mode .backup-page-title {
+        color: #f1f5f9 !important;
+    }
+
+    html.dark-mode .backup-page-icon,
+    body.dark-mode .backup-page-icon {
+        color: #818cf8 !important;
+    }
+
+    /* Kartu Statistik di Dark Mode */
+    html.dark-mode .backup-stat-card,
+    body.dark-mode .backup-stat-card {
+        background-color: #182235 !important;
+        border-color: #253247 !important;
+    }
+
+    html.dark-mode .backup-stat-val,
+    body.dark-mode .backup-stat-val {
+        color: #f1f5f9 !important;
+    }
+
+    html.dark-mode .backup-stat-sub,
+    body.dark-mode .backup-stat-sub {
+        color: #94a3b8 !important;
+    }
+
+    /* Ikon Lingkaran Kartu Statistik di Dark Mode */
+    html.dark-mode .bg-primary-soft,
+    body.dark-mode .bg-primary-soft {
+        background-color: rgba(79, 111, 255, 0.18) !important;
+        color: #818cf8 !important;
+    }
+
+    html.dark-mode .bg-info-soft,
+    body.dark-mode .bg-info-soft {
+        background-color: rgba(14, 165, 233, 0.18) !important;
+        color: #38bdf8 !important;
+    }
+
+    html.dark-mode .bg-success-soft,
+    body.dark-mode .bg-success-soft {
+        background-color: rgba(34, 197, 94, 0.18) !important;
+        color: #4ade80 !important;
+    }
+
+    /* Header Kartu Utama & Badge Jadwal di Dark Mode */
+    html.dark-mode .card-header-backup,
+    body.dark-mode .card-header-backup {
+        background-color: #182235 !important;
+        border-bottom-color: #253247 !important;
+    }
+
+    html.dark-mode .card-header-backup h6,
+    body.dark-mode .card-header-backup h6 {
+        color: #818cf8 !important;
+    }
+
+    html.dark-mode .badge-schedule-info,
+    body.dark-mode .badge-schedule-info {
+        background-color: #101a2c !important;
+        color: #818cf8 !important;
+        border-color: #34445b !important;
+    }
+
+    html.dark-mode .badge-schedule-success,
+    body.dark-mode .badge-schedule-success {
+        background-color: rgba(34, 197, 94, 0.15) !important;
+        color: #4ade80 !important;
+        border-color: rgba(34, 197, 94, 0.3) !important;
+    }
+
+    html.dark-mode .badge-schedule-missed,
+    body.dark-mode .badge-schedule-missed {
+        background-color: rgba(239, 68, 68, 0.15) !important;
+        color: #f87171 !important;
+        border-color: rgba(239, 68, 68, 0.3) !important;
+    }
+
+    html.dark-mode .badge-schedule-waiting,
+    body.dark-mode .badge-schedule-waiting {
+        background-color: rgba(148, 163, 184, 0.15) !important;
+        color: #cbd5e1 !important;
+        border-color: #334155 !important;
+    }
+
+    /* Kotak Alert Informasi di Dark Mode */
+    html.dark-mode .backup-info-alert,
+    body.dark-mode .backup-info-alert {
+        background-color: rgba(30, 58, 138, 0.25) !important;
+        border: 1px solid rgba(59, 130, 246, 0.3) !important;
+        color: #bfdbfe !important;
+    }
+
+    html.dark-mode .backup-info-alert code,
+    body.dark-mode .backup-info-alert code {
+        background-color: #0f172a !important;
+        color: #93c5fd !important;
+        border: 1px solid #1e293b !important;
+    }
+
+    /* Tabel di Dark Mode */
+    html.dark-mode .table-backup-head th,
+    body.dark-mode .table-backup-head th {
+        background-color: #101a2c !important;
+        color: #cbd5e1 !important;
+        border-color: #253247 !important;
+    }
+
+    html.dark-mode .table-backup-filename,
+    body.dark-mode .table-backup-filename {
+        color: #f1f5f9 !important;
+    }
+
+    html.dark-mode .table-backup-path,
+    body.dark-mode .table-backup-path {
+        color: #94a3b8 !important;
+    }
+
+    html.dark-mode .table-backup-badge-size,
+    body.dark-mode .table-backup-badge-size {
+        background-color: #101a2c !important;
+        color: #cbd5e1 !important;
+        border-color: #253247 !important;
+    }
+
+    html.dark-mode .table-backup-date,
+    body.dark-mode .table-backup-date {
+        color: #e2e8f0 !important;
+    }
+
+    html.dark-mode .table-backup-diff,
+    body.dark-mode .table-backup-diff {
+        color: #94a3b8 !important;
+    }
+
+    /* Tombol Aksi Tabel di Dark Mode */
+    html.dark-mode .btn-backup-download,
+    body.dark-mode .btn-backup-download {
+        border-color: #4f6fff !important;
+        color: #818cf8 !important;
+    }
+
+    html.dark-mode .btn-backup-download:hover,
+    body.dark-mode .btn-backup-download:hover {
+        background-color: #4f6fff !important;
+        color: #ffffff !important;
+    }
+
+    html.dark-mode .btn-backup-delete,
+    body.dark-mode .btn-backup-delete {
+        border-color: #ef4444 !important;
+        color: #f87171 !important;
+    }
+
+    html.dark-mode .btn-backup-delete:hover,
+    body.dark-mode .btn-backup-delete:hover {
+        background-color: #ef4444 !important;
+        color: #ffffff !important;
+    }
+
+    /* Modal Konfirmasi Hapus di Dark Mode */
+    html.dark-mode .modal-content,
+    body.dark-mode .modal-content {
+        background-color: #182235 !important;
+        border-color: #253247 !important;
+    }
+
+    html.dark-mode .modal-header,
+    html.dark-mode .modal-footer,
+    body.dark-mode .modal-header,
+    body.dark-mode .modal-footer {
+        border-color: #253247 !important;
+    }
+
+    html.dark-mode .modal-title,
+    body.dark-mode .modal-title {
+        color: #f1f5f9 !important;
+    }
+
+    html.dark-mode .btn-close,
+    body.dark-mode .btn-close {
+        filter: invert(1) grayscale(100%) brightness(200%);
+    }
+
+    html.dark-mode #textDelete,
+    body.dark-mode #textDelete {
+        color: #cbd5e1 !important;
+    }
+
+    html.dark-mode #textDelete b,
+    body.dark-mode #textDelete b {
+        color: #f1f5f9 !important;
+    }
+
+    /* Responsif Mobile Khusus Halaman Backup */
+    @media (max-width: 767.98px) {
+        .backup-page-header .page-header-content .row {
+            flex-direction: column !important;
+            align-items: stretch !important;
+        }
+
+        .backup-page-title {
+            font-size: 1.25rem !important;
+        }
+
+        #btnCreateBackup {
+            width: 100% !important;
+            justify-content: center !important;
+            padding: 0.55rem 1rem !important;
+            font-size: 0.9rem !important;
+        }
+
+        #formCreateBackup {
+            display: block !important;
+            width: 100% !important;
+        }
+
+        .backup-stat-card .card-body {
+            padding: 0.9rem 1rem !important;
+        }
+
+        .backup-stat-val {
+            font-size: 1.35rem !important;
+        }
+
+        .backup-stat-icon {
+            width: 20px !important;
+            height: 20px !important;
+        }
+
+        .backup-icon-circle {
+            padding: 0.65rem !important;
+        }
+    }
+
+    @media (max-width: 575.98px) {
+        .card-header-backup {
+            flex-direction: column !important;
+            align-items: flex-start !important;
+            gap: 0.5rem !important;
+        }
+
+        .card-header-backup .header-badges {
+            width: 100% !important;
+            display: flex !important;
+            flex-wrap: wrap !important;
+            gap: 0.35rem !important;
+        }
+
+        .card-header-backup .header-badges .badge {
+            font-size: 0.72rem !important;
+        }
+    }
+</style>
+@endpush
+
 @section('content')
 <header class="page-header page-header-compact page-header-light border-bottom bg-white mb-4 backup-page-header">
     <div class="container-fluid px-3 px-md-4">
