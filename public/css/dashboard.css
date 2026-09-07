@@ -109,4 +109,70 @@ html.dark-mode .timeline.timeline-xs .timeline-item .timeline-item-marker .timel
 
 html.dark-mode .timeline.timeline-xs .timeline-item .timeline-item-marker .timeline-item-marker-indicator {
     border-color: #182235 !important;
+}
+
+/* Dark Mode Support for Dashboard Stat Cards */
+html.dark-mode .card.border-start-lg .text-xs.text-success,
+html.dark-mode .card.border-start-lg .text-xs.text-success > i,
+html.dark-mode .card.border-start-lg .text-xs.text-success > svg,
+body.dark-mode .card.border-start-lg .text-xs.text-success,
+body.dark-mode .card.border-start-lg .text-xs.text-success > i,
+body.dark-mode .card.border-start-lg .text-xs.text-success > svg {
+    color: #34d399 !important;
+    stroke: #34d399 !important;
+}
+
+html.dark-mode .card.border-start-lg .text-xs.text-danger,
+html.dark-mode .card.border-start-lg .text-xs.text-danger > i,
+html.dark-mode .card.border-start-lg .text-xs.text-danger > svg,
+body.dark-mode .card.border-start-lg .text-xs.text-danger,
+body.dark-mode .card.border-start-lg .text-xs.text-danger > i,
+body.dark-mode .card.border-start-lg .text-xs.text-danger > svg {
+    color: #fb7185 !important;
+    stroke: #fb7185 !important;
+}
+
+html.dark-mode .card.border-start-lg .text-xs.text-primary,
+html.dark-mode .card.border-start-lg .text-xs.text-primary > i,
+html.dark-mode .card.border-start-lg .text-xs.text-primary > svg,
+body.dark-mode .card.border-start-lg .text-xs.text-primary,
+body.dark-mode .card.border-start-lg .text-xs.text-primary > i,
+body.dark-mode .card.border-start-lg .text-xs.text-primary > svg {
+    color: #60a5fa !important;
+    stroke: #60a5fa !important;
+}
+
+html.dark-mode .card.border-start-lg .text-xs.text-secondary,
+html.dark-mode .card.border-start-lg .text-xs.text-secondary > i,
+html.dark-mode .card.border-start-lg .text-xs.text-secondary > svg,
+body.dark-mode .card.border-start-lg .text-xs.text-secondary,
+body.dark-mode .card.border-start-lg .text-xs.text-secondary > i,
+body.dark-mode .card.border-start-lg .text-xs.text-secondary > svg {
+    color: #94a3b8 !important;
+    stroke: #94a3b8 !important;
+}
+
+html.dark-mode .card.border-start-lg .text-xs.text-warning,
+html.dark-mode .card.border-start-lg .text-xs.text-warning > i,
+html.dark-mode .card.border-start-lg .text-xs.text-warning > svg,
+body.dark-mode .card.border-start-lg .text-xs.text-warning,
+body.dark-mode .card.border-start-lg .text-xs.text-warning > i,
+body.dark-mode .card.border-start-lg .text-xs.text-warning > svg {
+    color: #fbbf24 !important;
+    stroke: #fbbf24 !important;
+}
+
+html.dark-mode .card.border-start-lg .text-xs svg.feather,
+html.dark-mode .card.border-start-lg .text-xs i[data-feather],
+body.dark-mode .card.border-start-lg .text-xs svg.feather,
+body.dark-mode .card.border-start-lg .text-xs i[data-feather] {
+    stroke: currentColor !important;
+}
+
+html.dark-mode .card.border-start-lg .text-muted,
+html.dark-mode .card.border-start-lg .text-xs .text-muted,
+body.dark-mode .card.border-start-lg .text-muted,
+body.dark-mode .card.border-start-lg .text-xs .text-muted {
+    color: #94a3b8 !important;
+    stroke: none !important;
 }

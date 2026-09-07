@@ -198,12 +198,10 @@
                                 <td>
                                     @if ($item->diperbaiki == 0)
                                     <span class="badge bg-red-soft text-danger border d-inline-flex align-items-center">
-                                        <i data-feather="x" class="me-1"></i>
                                         Belum
                                     </span>
                                     @else
                                     <span class="badge bg-green-soft text-green d-inline-flex align-items-center">
-                                        <i data-feather="check" class="me-1"></i>
                                         Sudah
                                     </span>
                                     @endif

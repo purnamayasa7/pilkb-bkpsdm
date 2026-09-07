@@ -207,6 +207,10 @@ Route::prefix('root')
         Route::delete('faq/{id}', [FaQController::class, 'destroy'])->name('faq.destroy');
 
         // Backup Database
+        Route::get('backup', [BackupController::class, 'index'])->name('backup.index');
+        Route::post('backup/create', [BackupController::class, 'createBackup'])->name('backup.create');
+        Route::get('backup/download/{filename}', [BackupController::class, 'download'])->name('backup.download');
+        Route::delete('backup/{filename}', [BackupController::class, 'destroy'])->name('backup.destroy');
         Route::get('backup/database', [BackupController::class, 'runBackup'])->name('backup.database');
     });
 

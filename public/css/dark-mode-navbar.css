@@ -803,20 +803,112 @@ body.dark-mode .user-info-card .icon-box-sm svg {
 }
 
 /* Dashboard Border-Start Cards */
-body.dark-mode #layoutSidenav_content .card.border-start-lg .small.fw-bold {
-    color: #d6deeb !important;
-}
-
-body.dark-mode #layoutSidenav_content .card.border-start-lg .h5 {
+body.dark-mode #layoutSidenav_content .card.border-start-lg .h5,
+html.dark-mode #layoutSidenav_content .card.border-start-lg .h5 {
     color: #f8fafc !important;
 }
 
-body.dark-mode #layoutSidenav_content .card.border-start-lg .text-xs {
-    color: #b4c0d1 !important;
+/* Card titles in dark mode */
+body.dark-mode #layoutSidenav_content .card.border-start-lg .small.fw-bold.text-primary,
+body.dark-mode #layoutSidenav_content .card.border-start-lg.border-start-primary .small.fw-bold,
+html.dark-mode #layoutSidenav_content .card.border-start-lg .small.fw-bold.text-primary,
+html.dark-mode #layoutSidenav_content .card.border-start-lg.border-start-primary .small.fw-bold {
+    color: #60a5fa !important;
 }
 
-body.dark-mode #layoutSidenav_content .card.border-start-lg .text-muted {
+body.dark-mode #layoutSidenav_content .card.border-start-lg .small.fw-bold.text-secondary,
+body.dark-mode #layoutSidenav_content .card.border-start-lg.border-start-secondary .small.fw-bold,
+html.dark-mode #layoutSidenav_content .card.border-start-lg .small.fw-bold.text-secondary,
+html.dark-mode #layoutSidenav_content .card.border-start-lg.border-start-secondary .small.fw-bold {
+    color: #c084fc !important;
+}
+
+body.dark-mode #layoutSidenav_content .card.border-start-lg .small.fw-bold.text-danger,
+body.dark-mode #layoutSidenav_content .card.border-start-lg.border-start-danger .small.fw-bold,
+html.dark-mode #layoutSidenav_content .card.border-start-lg .small.fw-bold.text-danger,
+html.dark-mode #layoutSidenav_content .card.border-start-lg.border-start-danger .small.fw-bold {
+    color: #fb7185 !important;
+}
+
+body.dark-mode #layoutSidenav_content .card.border-start-lg .small.fw-bold.text-success,
+body.dark-mode #layoutSidenav_content .card.border-start-lg.border-start-success .small.fw-bold,
+html.dark-mode #layoutSidenav_content .card.border-start-lg .small.fw-bold.text-success,
+html.dark-mode #layoutSidenav_content .card.border-start-lg.border-start-success .small.fw-bold {
+    color: #34d399 !important;
+}
+
+/* Trend comparison text & icons in dark mode */
+body.dark-mode #layoutSidenav_content .card.border-start-lg .text-xs,
+html.dark-mode #layoutSidenav_content .card.border-start-lg .text-xs {
+    color: inherit;
+}
+
+body.dark-mode #layoutSidenav_content .card.border-start-lg .text-xs.text-success,
+body.dark-mode #layoutSidenav_content .card.border-start-lg .text-xs.text-success > i,
+body.dark-mode #layoutSidenav_content .card.border-start-lg .text-xs.text-success > svg,
+html.dark-mode #layoutSidenav_content .card.border-start-lg .text-xs.text-success,
+html.dark-mode #layoutSidenav_content .card.border-start-lg .text-xs.text-success > i,
+html.dark-mode #layoutSidenav_content .card.border-start-lg .text-xs.text-success > svg {
+    color: #34d399 !important;
+    stroke: #34d399 !important;
+}
+
+body.dark-mode #layoutSidenav_content .card.border-start-lg .text-xs.text-danger,
+body.dark-mode #layoutSidenav_content .card.border-start-lg .text-xs.text-danger > i,
+body.dark-mode #layoutSidenav_content .card.border-start-lg .text-xs.text-danger > svg,
+html.dark-mode #layoutSidenav_content .card.border-start-lg .text-xs.text-danger,
+html.dark-mode #layoutSidenav_content .card.border-start-lg .text-xs.text-danger > i,
+html.dark-mode #layoutSidenav_content .card.border-start-lg .text-xs.text-danger > svg {
+    color: #fb7185 !important;
+    stroke: #fb7185 !important;
+}
+
+body.dark-mode #layoutSidenav_content .card.border-start-lg .text-xs.text-primary,
+body.dark-mode #layoutSidenav_content .card.border-start-lg .text-xs.text-primary > i,
+body.dark-mode #layoutSidenav_content .card.border-start-lg .text-xs.text-primary > svg,
+html.dark-mode #layoutSidenav_content .card.border-start-lg .text-xs.text-primary,
+html.dark-mode #layoutSidenav_content .card.border-start-lg .text-xs.text-primary > i,
+html.dark-mode #layoutSidenav_content .card.border-start-lg .text-xs.text-primary > svg {
+    color: #60a5fa !important;
+    stroke: #60a5fa !important;
+}
+
+body.dark-mode #layoutSidenav_content .card.border-start-lg .text-xs.text-secondary,
+body.dark-mode #layoutSidenav_content .card.border-start-lg .text-xs.text-secondary > i,
+body.dark-mode #layoutSidenav_content .card.border-start-lg .text-xs.text-secondary > svg,
+html.dark-mode #layoutSidenav_content .card.border-start-lg .text-xs.text-secondary,
+html.dark-mode #layoutSidenav_content .card.border-start-lg .text-xs.text-secondary > i,
+html.dark-mode #layoutSidenav_content .card.border-start-lg .text-xs.text-secondary > svg {
     color: #94a3b8 !important;
+    stroke: #94a3b8 !important;
+}
+
+body.dark-mode #layoutSidenav_content .card.border-start-lg .text-xs.text-warning,
+body.dark-mode #layoutSidenav_content .card.border-start-lg .text-xs.text-warning > i,
+body.dark-mode #layoutSidenav_content .card.border-start-lg .text-xs.text-warning > svg,
+html.dark-mode #layoutSidenav_content .card.border-start-lg .text-xs.text-warning,
+html.dark-mode #layoutSidenav_content .card.border-start-lg .text-xs.text-warning > i,
+html.dark-mode #layoutSidenav_content .card.border-start-lg .text-xs.text-warning > svg {
+    color: #fbbf24 !important;
+    stroke: #fbbf24 !important;
+}
+
+body.dark-mode #layoutSidenav_content .card.border-start-lg .text-xs svg.feather,
+body.dark-mode #layoutSidenav_content .card.border-start-lg .text-xs i[data-feather],
+html.dark-mode #layoutSidenav_content .card.border-start-lg .text-xs svg.feather,
+html.dark-mode #layoutSidenav_content .card.border-start-lg .text-xs i[data-feather] {
+    stroke: currentColor !important;
+}
+
+/* Comparison "Dibanding..." label text */
+body.dark-mode #layoutSidenav_content .card.border-start-lg .text-muted,
+body.dark-mode #layoutSidenav_content .card.border-start-lg .text-xs .text-muted,
+body.dark-mode #layoutSidenav_content .card.border-start-lg .text-xs span.text-muted,
+html.dark-mode #layoutSidenav_content .card.border-start-lg .text-muted,
+html.dark-mode #layoutSidenav_content .card.border-start-lg .text-xs .text-muted,
+html.dark-mode #layoutSidenav_content .card.border-start-lg .text-xs span.text-muted {
+    color: #94a3b8 !important;
+    stroke: none !important;
 }
 
 body.dark-mode #layoutSidenav_content .card.border-start-lg.border-start-primary {

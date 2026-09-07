@@ -61,6 +61,16 @@ return [
             'options' => extension_loaded('pdo_mysql') ? array_filter([
                 (PHP_VERSION_ID >= 80500 ? \Pdo\Mysql::ATTR_SSL_CA : \PDO::MYSQL_ATTR_SSL_CA) => env('MYSQL_ATTR_SSL_CA'),
             ]) : [],
+            'dump' => array_filter([
+                'dump_binary_path' => env(
+                    'DB_DUMP_BINARY_PATH',
+                    PHP_OS_FAMILY === 'Windows'
+                        ? (file_exists('C:/laragon/bin/mysql/mysql-8.0.30-winx64/bin') ? 'C:/laragon/bin/mysql/mysql-8.0.30-winx64/bin' : '')
+                        : ''
+                ),
+                'use_single_transaction' => true,
+                'timeout' => 60 * 5,
+            ], fn($value) => $value !== '' && $value !== null),
         ],
 
         'mariadb' => [
