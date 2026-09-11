@@ -3,6 +3,7 @@
 namespace App\Exports;
 
 use App\Models\Bidang;
+use App\Models\Layanan;
 use App\Models\Regtiket;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\Request;
@@ -19,23 +20,25 @@ class RootLayananTiketExport implements FromView
 
     public function view(): View
     {
+        $month = (int) ($this->req->month ?? \Carbon\Carbon::now()->month);
+        $year = (int) ($this->req->year ?? \Carbon\Carbon::now()->year);
+
+        $startDate = \Carbon\Carbon::create($year, $month, 1)->startOfMonth()->format('Y-m-d');
+        $endDate = \Carbon\Carbon::create($year, $month, 1)->endOfMonth()->format('Y-m-d');
+
         $query = Regtiket::with([
             'layanan.bidang',
             'tahapTerakhir.statusRel'
-        ]);
+        ])
+            ->whereBetween('tanggal', [$startDate, $endDate]);
 
         if ($this->req->filled('bidang')) {
-            $query->whereHas('layanan', function ($q) {
-                $q->where('kode_bidang', $this->req->bidang);
-            });
+            $layananIds = Layanan::where('kode_bidang', $this->req->bidang)->pluck('id');
+            $query->whereIn('kode_layanan', $layananIds);
         }
 
-        if ($this->req->filled('start_date') && $this->req->filled('end_date')) {
-            $query->whereBetween('tanggal', [
-                $this->req->start_date . ' 00:00:00',
-                $this->req->end_date . ' 23:59:59'
-            ]);
-        }
+        $start = $startDate;
+        $end = $endDate;
 
         $data = $query->orderBy('tanggal', 'desc')->get();
         $bidang = $this->req->filled('bidang') ? Bidang::find($this->req->bidang) : null;
@@ -43,8 +46,8 @@ class RootLayananTiketExport implements FromView
         return view('pages.all.layanan.export.export-excel', [
             'data'   => $data,
             'bidang' => $bidang,
-            'start'  => $this->req->start_date,
-            'end'    => $this->req->end_date,
+            'start'  => $start,
+            'end'    => $end,
         ]);
     }
 }

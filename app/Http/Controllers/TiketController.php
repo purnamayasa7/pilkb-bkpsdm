@@ -22,6 +22,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use Inertia\Inertia;
 use BaconQrCode\Renderer\ImageRenderer;
 use BaconQrCode\Renderer\Image\SvgImageBackEnd;
 use BaconQrCode\Renderer\RendererStyle\RendererStyle;
@@ -85,62 +86,60 @@ class TiketController extends Controller
     public function index(Request $request)
     {
         $bidang = Bidang::all();
-
         $bidangId = $request->bidang;
-        $start = $request->start_date;
-        $end = $request->end_date;
 
-        $tiket = collect();
+        $month = (int) ($request->month ?? Carbon::now()->month);
+        $year = (int) ($request->year ?? Carbon::now()->year);
 
-        if ($bidangId && $start && $end) {
+        // 1. Optimasi Tanggal: Buat rentang tanggal awal & akhir bulan (SARGable)
+        $startDate = Carbon::create($year, $month, 1)->startOfMonth()->format('Y-m-d');
+        $endDate = Carbon::create($year, $month, 1)->endOfMonth()->format('Y-m-d');
 
-            $tiket = Regtiket::with([
-                'layanan',
-                'tahapTerakhir.statusRel'
-            ])
-                ->whereHas('layanan', function ($query) use ($bidangId) {
-                    $query->where('kode_bidang', $bidangId);
-                })
-                ->whereBetween('tanggal', [
-                    $start . ' 00:00:00',
-                    $end . ' 23:59:59'
-                ])
-                ->orderBy('tanggal', 'desc')
-                ->get();
+        $query = Regtiket::with([
+            'layanan.bidang',
+            'tahapTerakhir.statusRel'
+        ])
+            // Menggunakan whereBetween jauh lebih cepat daripada whereMonth & whereYear
+            ->whereBetween('tanggal', [$startDate, $endDate]);
+
+        // 2. Optimasi Filter Bidang: Gunakan whereIn daripada whereHas
+        if ($request->filled('bidang')) {
+            $layananIds = Layanan::where('kode_bidang', $bidangId)->pluck('id');
+            $query->whereIn('kode_layanan', $layananIds);
         }
 
-        return view('pages.all.layanan.index', compact(
-            'tiket',
-            'bidang',
-            'bidangId',
-            'start',
-            'end'
-        ));
+        $tiket = $query->orderBy('tanggal', 'desc')->get();
+
+        return Inertia::render('Root/Tiket/Index', [
+            'tiket' => $tiket,
+            'bidang' => $bidang,
+            'bidangId' => $bidangId ? (string) $bidangId : '',
+            'month' => (int) $month,
+            'year' => (int) $year,
+        ]);
     }
 
     public function getTiketData(Request $request)
     {
         $bidangId = $request->bidang;
-        $start = $request->start_date;
-        $end = $request->end_date;
+        $month = (int) ($request->month ?? Carbon::now()->month);
+        $year = (int) ($request->year ?? Carbon::now()->year);
 
-        $tiket = collect();
+        $startDate = Carbon::create($year, $month, 1)->startOfMonth()->format('Y-m-d');
+        $endDate = Carbon::create($year, $month, 1)->endOfMonth()->format('Y-m-d');
 
-        if ($bidangId && $start && $end) {
-            $tiket = Regtiket::with([
-                'layanan',
-                'tahapTerakhir.statusRel'
-            ])
-                ->whereHas('layanan', function ($query) use ($bidangId) {
-                    $query->where('kode_bidang', $bidangId);
-                })
-                ->whereBetween('tanggal', [
-                    $start . ' 00:00:00',
-                    $end . ' 23:59:59'
-                ])
-                ->orderBy('tanggal', 'desc')
-                ->get();
+        $query = Regtiket::with([
+            'layanan.bidang',
+            'tahapTerakhir.statusRel'
+        ])
+            ->whereBetween('tanggal', [$startDate, $endDate]);
+
+        if ($request->filled('bidang')) {
+            $layananIds = Layanan::where('kode_bidang', $bidangId)->pluck('id');
+            $query->whereIn('kode_layanan', $layananIds);
         }
+
+        $tiket = $query->orderBy('tanggal', 'desc')->get();
 
         return response()->json($tiket);
     }
@@ -152,28 +151,28 @@ class TiketController extends Controller
 
     public function exportPdfRoot(Request $request)
     {
+        $month = (int) ($request->month ?? Carbon::now()->month);
+        $year = (int) ($request->year ?? Carbon::now()->year);
+
+        $startDate = Carbon::create($year, $month, 1)->startOfMonth()->format('Y-m-d');
+        $endDate = Carbon::create($year, $month, 1)->endOfMonth()->format('Y-m-d');
+
         $query = Regtiket::with([
             'layanan.bidang',
             'tahapTerakhir.statusRel'
-        ]);
+        ])
+            ->whereBetween('tanggal', [$startDate, $endDate]);
 
         if ($request->filled('bidang')) {
-            $query->whereHas('layanan', function ($q) use ($request) {
-                $q->where('kode_bidang', $request->bidang);
-            });
+            $layananIds = Layanan::where('kode_bidang', $request->bidang)->pluck('id');
+            $query->whereIn('kode_layanan', $layananIds);
         }
 
-        if ($request->filled('start_date') && $request->filled('end_date')) {
-            $query->whereBetween('tanggal', [
-                $request->start_date . ' 00:00:00',
-                $request->end_date . ' 23:59:59'
-            ]);
-        }
+        $start = $startDate;
+        $end = $endDate;
 
         $data = $query->orderBy('tanggal', 'desc')->get();
         $bidang = $request->filled('bidang') ? Bidang::find($request->bidang) : null;
-        $start = $request->start_date;
-        $end = $request->end_date;
 
         $pdf = Pdf::loadView('pages.all.layanan.export.export-pdf', compact('data', 'bidang', 'start', 'end'))
             ->setPaper('a4', 'landscape');
@@ -183,8 +182,8 @@ class TiketController extends Controller
 
     public function indexProses(Request $request)
     {
-        $month = $request->month ?? Carbon::now()->month;
-        $year = $request->year ?? Carbon::now()->year;
+        $month = (int) ($request->month ?? Carbon::now()->month);
+        $year = (int) ($request->year ?? Carbon::now()->year);
 
         $tiket = Regtiket::with([
             'layanan',
@@ -197,11 +196,11 @@ class TiketController extends Controller
             ->orderBy('tanggal', 'desc')
             ->get();
 
-        return view('pages.opd.layanan.index', compact(
-            'tiket',
-            'month',
-            'year'
-        ));
+        return inertia('Opd/Tiket/Index', [
+            'tiket' => $tiket,
+            'month' => $month,
+            'year' => $year,
+        ]);
     }
 
     public function getProsesData(Request $request)
@@ -223,10 +222,11 @@ class TiketController extends Controller
         return response()->json($tiket);
     }
 
-    //List Tiket pada menu Admin Bawah
+    // List Tiket pada menu Admin Bawah
     public function indexList(Request $request)
     {
-        $year = $request->year ?? Carbon::now()->year;
+        $currentYear = (int) Carbon::now()->year;
+        $year = $request->filled('year') ? (int) $request->year : $currentYear;
         $diambil = $request->diambil;
 
         $query = Regtiket::with([
@@ -240,18 +240,26 @@ class TiketController extends Controller
             $query->where('diambil', $diambil);
         }
 
+        // FILTER LAYANAN
+        if ($request->filled('layanan')) {
+            $query->where('kode_layanan', $request->layanan);
+        }
+
         $tiket = $query
             ->orderBy('tanggal', 'desc')
             ->get();
 
-        return view(
-            'pages.admin-bawah.tiket.index',
-            compact(
-                'tiket',
-                'year',
-                'diambil'
-            )
-        );
+        $availableYears = range($currentYear - 10, $currentYear);
+        rsort($availableYears);
+
+        return Inertia::render('AdminBawah/Tiket/Index', [
+            'tiket' => $tiket,
+            'year' => $year,
+            'availableYears' => $availableYears,
+            'diambil' => $diambil !== null && $diambil !== '' ? (string) $diambil : '',
+            'layananList' => Layanan::where('aktif', 1)->orderBy('nama_layanan')->get(),
+            'selectedLayanan' => $request->filled('layanan') ? (string) $request->layanan : '',
+        ]);
     }
 
     public function getListData(Request $request)
@@ -462,18 +470,15 @@ class TiketController extends Controller
     | Tampilkan halaman
     |--------------------------------------------------------------------------
     */
-        return view(
-            'pages.opd.tiket.create',
-            compact(
-                'step',
-                'bidang',
-                'data',
-                'syarat',
-                'nama_layanan',
-                'tiket',
-                'qr'
-            )
-        );
+        return inertia('Opd/Tiket/Create', [
+            'step' => (int) $step,
+            'bidang' => $bidang,
+            'data' => $data,
+            'syarat' => $syarat,
+            'nama_layanan' => $nama_layanan,
+            'tiket' => $tiket,
+            'qr' => $qr,
+        ]);
     }
 
     public function viewFile($id)
@@ -1627,12 +1632,30 @@ class TiketController extends Controller
 
     public function getHistory($no_tiket)
     {
-        $data = Tahap::with('statusRel')
+        $tiket = Regtiket::with(['layanan', 'layanan.bidang'])
+            ->where('no_tiket', $no_tiket)
+            ->first();
+
+        if ($tiket && (empty($tiket->nama) || $tiket->nama === '-')) {
+            try {
+                $pegawai = $this->pegawaiService->getPegawaiByNip($tiket->nip);
+                if (!empty($pegawai)) {
+                    $tiket->nama = $pegawai['nama_lengkap'] ?? $pegawai['nama'] ?? $tiket->nama;
+                }
+            } catch (\Throwable $th) {
+                // Ignore API error
+            }
+        }
+
+        $data = Tahap::with(['statusRel', 'regtiket.layanan'])
             ->where('no_tiket', $no_tiket)
             ->orderBy('tanggal', 'asc')
             ->get();
 
-        return response()->json($data);
+        return response()->json([
+            'tiket' => $tiket,
+            'tahapan' => $data,
+        ]);
     }
 
     // Cek Tiket Public
@@ -1757,7 +1780,10 @@ class TiketController extends Controller
                 ->get();
         }
 
-        return view('pages.opd.tiket.cetak', compact('data'));
+        return inertia('Opd/Tiket/Cetak', [
+            'data'    => $data,
+            'keyword' => $keyword ?? '',
+        ]);
     }
 
     public function getCetakOpdData(Request $request)
@@ -1810,16 +1836,17 @@ class TiketController extends Controller
             ])
                 ->where(function ($query) use ($keyword) {
                     $query->where('no_tiket', 'like', "%{$keyword}%")
-                        ->orWhere('nip', 'like', "%{$keyword}%");
+                        ->orWhere('nip', 'like', "%{$keyword}%")
+                        ->orWhere('nama', 'like', "%{$keyword}%");
                 })
                 ->orderByDesc('tanggal')
                 ->get();
         }
 
-        return view(
-            'pages.admin-bawah.tiket.cetak',
-            compact('data')
-        );
+        return Inertia::render('AdminBawah/Tiket/Cetak', [
+            'data' => $data,
+            'keyword' => $keyword ?? '',
+        ]);
     }
 
     public function getCetakAdminBawahData(Request $request)
@@ -1876,7 +1903,10 @@ class TiketController extends Controller
                 ->get();
         }
 
-        return view('pages.admin-bawah.pindah-tiket.index', compact('data'));
+        return inertia('AdminBawah/Pindah/Index', [
+            'data' => $data,
+            'keyword' => $keyword ?? '',
+        ]);
     }
 
     public function getPindahData(Request $request)
@@ -1916,7 +1946,7 @@ class TiketController extends Controller
 
     public function editPindah($no_tiket)
     {
-        $tiket = Regtiket::with('layanan')
+        $tiket = Regtiket::with(['layanan.bidang'])
             ->where('no_tiket', $no_tiket)
             ->firstOrFail();
 
@@ -1924,7 +1954,7 @@ class TiketController extends Controller
 
         $layanan = Layanan::where(
             'kode_bidang',
-            $tiket->layanan->kode_bidang
+            optional($tiket->layanan)->kode_bidang
         )->get();
 
         $syarat = Syarat::where(
@@ -1932,15 +1962,30 @@ class TiketController extends Controller
             $tiket->kode_layanan
         )->get();
 
-        return view(
-            'pages.admin-bawah.pindah-tiket.edit',
-            compact(
-                'tiket',
-                'bidang',
-                'layanan',
-                'syarat'
-            )
-        );
+        $pegawai = [];
+        try {
+            $pegawai = $this->pegawaiService->getPegawaiByNip($tiket->nip);
+        } catch (\Throwable $th) {
+            // Ignore error API
+        }
+
+        $dataPegawai = [
+            'nama' => $tiket->nama ?? ($pegawai['nama_lengkap'] ?? $pegawai['nama'] ?? '-'),
+            'golongan' => $pegawai['ket_gol'] ?? '-',
+            'unit' => $tiket->nama_ukerja ?? '-',
+        ];
+
+        $url = route('tiket.public', ['no_tiket' => $tiket->no_tiket]);
+        $qr = $this->generateQr($url);
+
+        return inertia('AdminBawah/Pindah/Edit', [
+            'tiket' => $tiket,
+            'bidang' => $bidang,
+            'layanan' => $layanan,
+            'syarat' => $syarat,
+            'dataPegawai' => $dataPegawai,
+            'qr' => $qr,
+        ]);
     }
 
     public function getLayananPindah($bidang)

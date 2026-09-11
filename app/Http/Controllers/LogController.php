@@ -51,12 +51,12 @@ class LogController extends Controller
 
         $logs = $is_search ? $query->latest()->get() : collect();
 
-        return view('pages.log.index', compact(
-            'logs',
-            'tanggal_awal',
-            'tanggal_akhir',
-            'is_search'
-        ));
+        return inertia('Log/Index', [
+            'logs'          => $logs,
+            'tanggal_awal'  => $tanggal_awal,
+            'tanggal_akhir' => $tanggal_akhir,
+            'is_search'     => $is_search,
+        ]);
     }
 
     public function getData(Request $request)

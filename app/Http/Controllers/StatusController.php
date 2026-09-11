@@ -8,24 +8,45 @@ use App\Models\Status;
 use App\Services\ActivityLogService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Inertia\Inertia;
 
 class StatusController extends Controller
 {
     public function index(Request $request)
     {
-        $bidang = Bidang::all();
+        $bidang = Bidang::orderBy('nama_bidang')->get();
 
-        $bidangId = $request->bidang ?? $bidang->first()?->id;
+        $bidangId = $request->bidang;
+        $layananId = $request->layanan;
 
-        $status = Status::with(['layanan.bidang'])
-            ->when($bidangId, function ($query) use ($bidangId) {
-                $query->whereHas('layanan', function ($query) use ($bidangId) {
-                    $query->where('kode_bidang', $bidangId);
-                });
-            })
-            ->get();
+        $allLayanan = Layanan::orderBy('kode_bidang')->orderBy('nama_layanan')->get();
 
-        return view('pages.admin.status.index', compact('status', 'bidang', 'bidangId'));
+        $layanan = ($bidangId && $bidangId !== 'all')
+            ? $allLayanan->where('kode_bidang', $bidangId)->values()
+            : $allLayanan;
+
+        $query = Status::with(['layanan.bidang']);
+
+        if ($bidangId && $bidangId !== 'all') {
+            $query->whereHas('layanan', function ($q) use ($bidangId) {
+                $q->where('kode_bidang', $bidangId);
+            });
+        }
+
+        if ($layananId && $layananId !== 'all') {
+            $query->where('kode_layanan', $layananId);
+        }
+
+        $status = $query->get();
+
+        return Inertia::render('Root/Status/Index', [
+            'status'     => $status,
+            'bidang'     => $bidang,
+            'bidangId'   => $bidangId ?? 'all',
+            'layanan'    => $layanan,
+            'layananId'  => $layananId ?? 'all',
+            'allLayanan' => $allLayanan,
+        ]);
     }
 
     // Menu Admin Bidang
@@ -57,12 +78,24 @@ class StatusController extends Controller
         ));
     }
 
-    public function create()
+    public function create(Request $request)
     {
-        $layanan = Layanan::all();
-        $bidang = Bidang::all();
+        $bidang = Bidang::orderBy('nama_bidang')->get();
+        $bidangId = $request->bidang ?? $bidang->first()?->id;
 
-        return view('pages.admin.status.create', compact('layanan', 'bidang'));
+        $allLayanan = Layanan::orderBy('kode_bidang')->orderBy('nama_layanan')->get();
+
+        $layanan = ($bidangId && $bidangId !== 'all')
+            ? $allLayanan->where('kode_bidang', $bidangId)->values()
+            : collect();
+
+        return Inertia::render('Root/Status/Create', [
+            'bidang'            => $bidang,
+            'bidangId'          => $bidangId ? (string) $bidangId : null,
+            'layanan'           => $layanan,
+            'allLayanan'        => $allLayanan,
+            'selectedLayananId' => $request->filled('layanan') ? (string) $request->layanan : null,
+        ]);
     }
 
     // Menu Admin Bidang
@@ -216,11 +249,11 @@ class StatusController extends Controller
 
     public function edit($id)
     {
-        $status = Status::findOrFail($id);
-        $layanan = Layanan::all();
-        $bidang = Bidang::all();
+        $status = Status::with('layanan.bidang')->findOrFail($id);
 
-        return view('pages.admin.status.edit', compact('status', 'layanan', 'bidang'));
+        return Inertia::render('Root/Status/Edit', [
+            'status' => $status,
+        ]);
     }
 
     // Menu Admin Bidang

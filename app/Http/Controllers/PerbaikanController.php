@@ -82,9 +82,10 @@ class PerbaikanController extends Controller
             $layananList->where('kode_bidang', $user->bidang_id);
         }
 
-        return view('pages.bidang.perbaikan.index', [
+        return inertia('Bidang/Perbaikan/Index', [
             'data' => $data,
-            'layananList' => $layananList->get()
+            'layananList' => $layananList->get(),
+            'namaBidang' => $user->nama_bidang ?? 'Bidang',
         ]);
     }
 

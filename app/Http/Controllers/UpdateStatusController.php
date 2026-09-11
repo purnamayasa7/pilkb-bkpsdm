@@ -9,16 +9,33 @@ use App\Models\Tahap;
 use App\Models\User;
 use App\Notifications\TiketNotification;
 use App\Services\ActivityLogService;
+use App\Services\KelengkapanService;
 use App\Services\PegawaiService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 
 class UpdateStatusController extends Controller
 {
     public function __construct(
-        protected PegawaiService $pegawaiService
+        protected PegawaiService $pegawaiService,
+        protected KelengkapanService $kelengkapanService
     ) {}
+
+    private function generateQr($url)
+    {
+        $renderer = new \BaconQrCode\Renderer\ImageRenderer(
+            new \BaconQrCode\Renderer\RendererStyle\RendererStyle(120),
+            new \BaconQrCode\Renderer\Image\SvgImageBackEnd()
+        );
+
+        $writer = new \BaconQrCode\Writer($renderer);
+
+        return base64_encode(
+            $writer->writeString($url)
+        );
+    }
 
     public function index(Request $request)
     {
@@ -48,16 +65,13 @@ class UpdateStatusController extends Controller
                 ->where('archives', 0)
                 ->orderByDesc('tanggal')
                 ->get();
-
-            $pegawaiList = $this->pegawaiService->getPegawaiByNips(
-                $data->pluck('nip')
-            );
         }
 
-        return view('pages.bidang.update-status.index', compact(
-            'data',
-            'pegawaiList'
-        ));
+        return inertia('Bidang/Status/Index', [
+            'data' => $data,
+            'keyword' => $keyword ?? '',
+            'namaBidang' => $user->nama_bidang ?? 'Bidang',
+        ]);
     }
 
     public function edit($no_tiket)
@@ -86,19 +100,113 @@ class UpdateStatusController extends Controller
             $tiket->kode_layanan
         )->get();
 
-
         $dataPegawai = [
             'nama' => $pegawai['nama_lengkap'] ?? '-',
             'golongan' => $pegawai['ket_gol'] ?? '-',
             'unit' => $pegawai['ket_ukerja'] ?? '-',
         ];
 
-        return view('pages.bidang.update-status.edit', compact(
-            'tiket',
-            'detail',
-            'dataPegawai',
-            'statusList'
-        ));
+        /*
+         * DATA DOKUMEN REVIEW (E-FILE)
+         */
+        foreach ($detail as $d) {
+            $syarat = $d->syarat;
+
+            if (!$syarat) {
+                $d->dokumen_review = [
+                    'metode' => null,
+                    'kode_efile' => null,
+                    'tersedia' => false,
+                    'nama' => null,
+                    'url' => null,
+                    'dokumen' => [],
+                ];
+                continue;
+            }
+
+            $disk = Storage::disk('pilkb_efile');
+            $fileManualTersedia = !empty($d->file_path) && $disk->exists($d->file_path);
+
+            if ($fileManualTersedia) {
+                $urlManual = route('adminBidang.permintaan.dokumen', ['id' => $d->id]);
+                $namaManual = $d->file_name ?? 'Dokumen';
+
+                $d->dokumen_review = [
+                    'metode' => 'upload',
+                    'kode_efile' => $syarat->kode_efile,
+                    'tersedia' => true,
+                    'nama' => $namaManual,
+                    'url' => $urlManual,
+                    'dokumen' => [
+                        [
+                            'nama' => $namaManual,
+                            'url' => $urlManual,
+                            'tanggal' => $d->uploaded_at ? $d->uploaded_at->format('d/m/Y H:i') : null,
+                            'urutan' => null,
+                            'status' => 'upload',
+                            'ref_table' => null,
+                            'sumber' => 'upload',
+                            'raw' => null,
+                        ]
+                    ],
+                ];
+                continue;
+            }
+
+            if ($syarat->metode === 'simpeg') {
+                $hasil = $this->kelengkapanService->getSyaratDokumen($tiket->nip, $syarat);
+                $dokumen = $hasil['dokumen'] ?? [];
+
+                $dokumenTerformat = collect($dokumen)
+                    ->map(function ($item) {
+                        return [
+                            'nama' => $item['nama_file'] ?? $item['nama'] ?? $item['file_name'] ?? $item['nama_dokumen'] ?? 'Dokumen',
+                            'url' => $item['preview_url'] ?? $item['url'] ?? null,
+                            'tanggal' => $item['tanggal'] ?? $item['created_at'] ?? $item['tgl_dokumen'] ?? null,
+                            'urutan' => $item['urutan'] ?? null,
+                            'status' => $item['status'] ?? null,
+                            'ref_table' => $item['ref_table'] ?? null,
+                            'sumber' => 'simpeg',
+                            'raw' => $item,
+                        ];
+                    })
+                    ->sortByDesc(function ($item) {
+                        return (int) ($item['urutan'] ?? 0);
+                    })
+                    ->values()
+                    ->all();
+
+                $d->dokumen_review = [
+                    'metode' => 'simpeg',
+                    'kode_efile' => $syarat->kode_efile,
+                    'tersedia' => count($dokumenTerformat) > 0,
+                    'nama' => $dokumenTerformat[0]['nama'] ?? null,
+                    'url' => $dokumenTerformat[0]['url'] ?? null,
+                    'dokumen' => $dokumenTerformat,
+                ];
+                continue;
+            }
+
+            $d->dokumen_review = [
+                'metode' => $syarat->metode,
+                'kode_efile' => $syarat->kode_efile,
+                'tersedia' => false,
+                'nama' => null,
+                'url' => null,
+                'dokumen' => [],
+            ];
+        }
+
+        $url = route('tiket.public', ['no_tiket' => $tiket->no_tiket]);
+        $qr = $this->generateQr($url);
+
+        return inertia('Bidang/Status/Edit', [
+            'tiket' => $tiket,
+            'detail' => $detail,
+            'dataPegawai' => $dataPegawai,
+            'statusList' => $statusList,
+            'qr' => $qr,
+        ]);
     }
 
     public function update(Request $request, $no_tiket)

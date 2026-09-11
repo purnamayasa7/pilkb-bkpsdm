@@ -22,34 +22,24 @@ class LaporanController extends Controller
     public function index(Request $request)
     {
         $bidangList = Bidang::orderBy('nama_bidang')->get();
-
-        $layananList = collect();
+        $allLayanan = Layanan::orderBy('nama_layanan')->get();
         $data = collect();
 
         /**
          * LOAD DROPDOWN LAYANAN
          */
-        if ($request->filled('bidang')) {
-
-            if ($request->bidang == 'all') {
-
-                $layananList = Layanan::orderBy('nama_layanan')
-                    ->get();
-            } else {
-
-                $layananList = Layanan::where(
-                    'kode_bidang',
-                    $request->bidang
-                )
-                    ->orderBy('nama_layanan')
-                    ->get();
-            }
+        if ($request->filled('bidang') && $request->bidang != 'all') {
+            $layananList = Layanan::where('kode_bidang', $request->bidang)
+                ->orderBy('nama_layanan')
+                ->get();
+        } else {
+            $layananList = $allLayanan;
         }
 
         /**
          * FILTER DATA
          */
-        if ($request->has('filter')) {
+        if ($request->has('filter') || ($request->filled('tanggal_awal') && $request->filled('tanggal_akhir'))) {
 
             $request->validate([
                 'tanggal_awal' => 'required|date',
@@ -131,22 +121,35 @@ class LaporanController extends Controller
          */
         $user = Auth::user();
 
-        if ($user->role->name == 'root') {
-
-            $view = 'pages.admin.laporan.index';
-        } elseif ($user->role->name == 'admin_bawah') {
-
-            $view = 'pages.admin-bawah.laporan.index';
+        if ($user->role->name == 'admin_bawah') {
+            return inertia('AdminBawah/Laporan/Index', [
+                'bidangList'  => $bidangList,
+                'layananList' => $layananList,
+                'allLayanan'  => $allLayanan,
+                'data'        => $data,
+                'filters'     => [
+                    'bidang'        => $request->bidang ?? 'all',
+                    'layanan'       => $request->layanan ?? 'all',
+                    'tanggal_awal'  => $request->tanggal_awal ?? '',
+                    'tanggal_akhir' => $request->tanggal_akhir ?? '',
+                ],
+            ]);
+        } elseif ($user->role->name == 'root') {
+            return inertia('Root/Laporan/Index', [
+                'bidangList'  => $bidangList,
+                'layananList' => $layananList,
+                'allLayanan'  => $allLayanan,
+                'data'        => $data,
+                'filters'     => [
+                    'bidang'        => $request->bidang ?? 'all',
+                    'layanan'       => $request->layanan ?? 'all',
+                    'tanggal_awal'  => $request->tanggal_awal ?? '',
+                    'tanggal_akhir' => $request->tanggal_akhir ?? '',
+                ],
+            ]);
         } else {
-
             abort(403);
         }
-
-        return view($view, compact(
-            'bidangList',
-            'layananList',
-            'data'
-        ));
     }
 
     public function indexBidang(Request $request)
@@ -173,11 +176,12 @@ class LaporanController extends Controller
                 ->get();
         }
 
-        return view('pages.bidang.laporan.index', compact(
-            'tiket',
-            'start',
-            'end'
-        ));
+        return inertia('Bidang/Laporan/Index', [
+            'tiket'      => $tiket,
+            'start'      => $start ?? '',
+            'end'        => $end ?? '',
+            'namaBidang' => $user->bidang->nama_bidang ?? 'Bidang',
+        ]);
     }
 
     public function getDataBidang(Request $request)

@@ -302,7 +302,7 @@ return [
 
         [
             'type' => 'item',
-            'title' => 'Daftar Perbaikan Usulan',
+            'title' => 'Daftar Perbaikan',
             'path' => 'adminOpd/perbaikan',
             'icon' => 'edit',
             'active_key' => 'list-perbaikan',
@@ -417,7 +417,7 @@ return [
 
         [
             'type' => 'item',
-            'title' => 'Daftar Perbaikan Usulan',
+            'title' => 'Daftar Perbaikan',
             'path' => 'adminBidang/perbaikan',
             'icon' => 'tool',
             'active_key' => 'list-permintaan_data',

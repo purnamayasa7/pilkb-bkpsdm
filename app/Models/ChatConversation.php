@@ -67,8 +67,12 @@ class ChatConversation extends Model
 
         $lastRead = (int) ($participant->last_read_message_id ?? 0);
 
-        // Optimasi: jika pesan terakhir sudah terbaca, unread pasti 0 tanpa perlu query
-        if ($this->last_message_id && (int) $this->last_message_id <= $lastRead) {
+        // Optimasi: jika pesan terakhir sudah terbaca atau sama, unread pasti 0 tanpa query berat
+        $maxMsgId = (int) ($this->last_message_id ?: ($this->relationLoaded('messages') ? $this->messages->max('id') : $this->messages()->max('id')) ?: 0);
+        if ($maxMsgId > 0 && $maxMsgId <= $lastRead) {
+            return 0;
+        }
+        if ($maxMsgId === 0) {
             return 0;
         }
 

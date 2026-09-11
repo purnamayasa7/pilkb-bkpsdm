@@ -15,6 +15,7 @@ use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Inertia\Inertia;
 use Maatwebsite\Excel\Facades\Excel;
 
 class LayananController extends Controller
@@ -36,7 +37,11 @@ class LayananController extends Controller
             ->orderBy('nama_layanan', 'asc')
             ->get();
 
-        return view('pages.admin.layanan.index', compact('layanan', 'bidang', 'bidangId'));
+        return Inertia::render('Root/Layanan/Index', [
+            'layanan' => $layanan,
+            'bidang' => $bidang,
+            'bidangId' => $bidangId ?? 'all',
+        ]);
     }
 
     public function getByBidang($bidangId = null)
@@ -61,7 +66,10 @@ class LayananController extends Controller
             ->orderBy('nama_layanan')
             ->get();
 
-        return view('pages.bidang.layanan.index', compact('layanan'));
+        return Inertia::render('Bidang/Layanan/Index', [
+            'layanan' => $layanan,
+            'bidang' => $user->bidang,
+        ]);
     }
 
     public function getHistory($no_tiket)
@@ -78,15 +86,21 @@ class LayananController extends Controller
     {
         $bidang = Bidang::all();
 
-        return view('pages.admin.layanan.create', compact('bidang'));
+        return Inertia::render('Root/Layanan/Create', [
+            'bidang' => $bidang,
+        ]);
     }
 
     // Menu Admin Bidang
     public function createBidang()
     {
+        $user = Auth::user();
         $bidang = Bidang::all();
 
-        return view('pages.bidang.layanan.create', compact('bidang'));
+        return Inertia::render('Bidang/Layanan/Create', [
+            'bidang' => $bidang,
+            'userBidang' => $user->bidang,
+        ]);
     }
 
     // Menu Admin Bidang
@@ -240,16 +254,22 @@ class LayananController extends Controller
         $layanan = Layanan::findOrFail($id);
         $bidang = Bidang::all();
 
-        return view('pages.admin.layanan.edit', compact('layanan', 'bidang'));
+        return Inertia::render('Root/Layanan/Edit', [
+            'layanan' => $layanan,
+            'bidang' => $bidang,
+        ]);
     }
 
     // Menu Admin Bidang
     public function editBidang($id)
     {
-        $layanan = Layanan::findOrFail($id);
+        $layanan = Layanan::with('bidang')->findOrFail($id);
         $bidang = Bidang::all();
 
-        return view('pages.bidang.layanan.edit', compact('layanan', 'bidang'));
+        return Inertia::render('Bidang/Layanan/Edit', [
+            'layanan' => $layanan,
+            'bidang' => $bidang,
+        ]);
     }
 
     //Aktif/Nonaktif Layanan
@@ -334,11 +354,11 @@ class LayananController extends Controller
                 ->get();
         }
 
-        return view('pages.opd.laporan.index', compact(
-            'tiket',
-            'start',
-            'end'
-        ));
+        return inertia('Opd/Laporan/Index', [
+            'tiket' => $tiket,
+            'start' => $start ?? '',
+            'end'   => $end ?? '',
+        ]);
     }
 
     public function getDataLaporan(Request $request)

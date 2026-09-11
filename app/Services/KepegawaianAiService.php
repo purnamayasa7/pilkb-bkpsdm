@@ -282,18 +282,25 @@ EOT;
 
             // Persona hijacking / jailbreaks
             '/\b(jailbreak|dan\s*mode|developer\s*mode|unrestricted\s*mode|god\s*mode)\b/i',
-            '/(?:kamu\s+sekarang|berperanlah\s+sebagai|act\s+as\s+a?|you\s+are\s+now)\s+(?:hacker|peretas|dan|jailbreak|unrestricted|attacker)/i',
+            '/(?:kamu\s+sekarang|berperanlah\s+sebagai|act\s+as\s+a?|you\s+are\s+now|pretend\s+to\s+be)\s+(?:hacker|peretas|dan|jailbreak|unrestricted|attacker)/i',
 
             // SQL Injection probing patterns
             '/\b(union\s+select|select\s+.*\s+from\s+(?:users|information_schema|tb_user|tb_regtiket)|drop\s+table|insert\s+into|delete\s+from\s+tb_)\b/i',
             '/\b(?:--|\#|\/\*).*select/i',
 
-            // Shell / command injection
-            '/\b(?:exec|passthru|shell_exec|system)\s*\(/i',
+            // Shell / command injection & script execution
+            '/\b(?:exec|passthru|shell_exec|system|eval)\s*\(/i',
             '/\b(?:cat\s+\/etc\/passwd|\/bin\/sh|\/bin\/bash|cmd\.exe|powershell)\b/i',
+            '/\b(?:base64_decode|gzinflate|str_rot13)\s*\(/i',
 
-            // System file extraction
+            // XSS & Script tags
+            '/<\s*script[^>]*>/i',
+            '/javascript\s*:/i',
+            '/\b(?:onerror|onload|onclick)\s*=/i',
+
+            // System file extraction & path traversal
             '/\b(?:\.env|wp-config\.php|database\.php|id_rsa)\b/i',
+            '#(?:\.\./|\.\.\\\\){2,}#',
         ];
 
         foreach ($patterns as $pattern) {
@@ -531,19 +538,21 @@ EOT;
             }
 
             // Jika token tiket tidak ditemukan di database PILKB
-            // Pastikan ini adalah pertanyaan/input tiket (bukan kata biasa dalam kalimat panjang)
+            // Pastikan tidak pernah bocor ke LLM agar tidak terjadi simulasi tiket fiktif
             $wordCount = count(preg_split('/\s+/', trim($question)));
             $isExplicitCheckTicket = (
+                str_contains($qLower, 'tiket') ||
                 preg_match('/(?:cek|status|lacak|progres|posisi|tracking).*(?:tiket|usulan)/i', $qLower) ||
                 preg_match('/(?:tiket|no(?:mor)?\s*tiket)\s*[:\s#]/i', $qLower) ||
-                $wordCount <= 2 // User mengetik langsung kode nomor tiket seperti "01012026ABCD"
+                $wordCount <= 3 ||
+                preg_match('/^[A-Za-z0-9]{6,16}$/', trim($question))
             );
 
             if ($isExplicitCheckTicket) {
                 $searchedToken = $ticketCandidates[0];
                 return [
                     'success' => true,
-                    'reply'   => "Mohon maaf, nomor tiket **{$searchedToken}** tidak ditemukan dalam database sistem PILKB BKPSDM Kabupaten Buleleng.\n\nMohon pastikan kembali nomor tiket yang Anda masukkan sudah lengkap dan benar. Jika Anda tidak mengingat nomor tiket, Anda juga dapat memasukkan **18 digit NIP** Anda untuk mengecek status usulan terakhir yang tercatat di sistem. 😊",
+                    'reply'   => "Mohon maaf, nomor tiket **{$searchedToken}** tidak ditemukan dalam database resmi PILKB BKPSDM Kabupaten Buleleng.\n\nMohon pastikan kembali nomor tiket yang Anda masukkan sudah lengkap dan benar. Jika Anda tidak mengingat nomor tiket, Anda juga dapat memasukkan **18 digit NIP** Anda untuk mengecek status usulan terakhir yang tercatat di database resmi PILKB. 😊",
                     'actions' => [],
                     'source'  => 'db_ticket_not_found'
                 ];
@@ -790,6 +799,8 @@ EOT;
             $hasPdf = !empty($serviceData['has_pdf']) && !empty($serviceData['pdf_url']);
             $pdfNotice = $hasPdf ? "\nFormat persyaratan resmi dapat diunduh melalui tombol PDF di bawah. " : " ";
 
+            $followUps = $this->generateFollowUpSuggestions($question, $serviceData, 'fallback');
+
             return [
                 'success' => true,
                 'reply'   => "Berdasarkan informasi persyaratan resmi di **BKPSDM Kabupaten Buleleng**, berikut adalah berkas persyaratan untuk **{$serviceData['nama_layanan']}** ({$serviceData['bidang_nama']}):\n\n" .
@@ -797,7 +808,7 @@ EOT;
                     $syaratText . "\n" .
                     "⏱️ **Estimasi Waktu Penyelesaian:** " . ($serviceData['waktu_penyelesaian'] ?: 'Sesuai ketentuan') . "\n" .
                     $pdfNotice . "Ada hal lain seputar berkas ini yang ingin LILI jelaskan? 😊",
-                'actions' => $actions,
+                'actions' => array_merge($actions, $followUps),
                 'source'  => 'fallback_service_syarat'
             ];
         }

@@ -30,10 +30,19 @@ Route::get('/', function () {
     }
     return redirect()->route('login');
 });
+Route::get('/preview-theme', function () {
+    return inertia('Dev/Preview');
+})->middleware(['auth'])->name('preview.theme');
 
 Route::get('/cek-tiket', [TiketController::class, 'formCek'])->name('tiket.form');
 Route::post('/cek-tiket', [TiketController::class, 'cekTiket'])->middleware('throttle:10,1')->name('tiket.cek');
 Route::get('/cek-tiket/{no_tiket}', [TiketController::class, 'showPublic'])->name('tiket.public');
+Route::get('/lacak-usulan', function (\Illuminate\Http\Request $request) {
+    if ($request->filled('no_tiket')) {
+        return redirect()->route('tiket.public', ['no_tiket' => $request->no_tiket]);
+    }
+    return redirect()->route('tiket.form');
+});
 Route::get('/get-layanan-syarat/{bidang}', [SyaratController::class, 'getLayanan'])->name('getLayanan');
 Route::get('/syarat/export-pdf', [SyaratController::class, 'exportPdf'])->name('exportPdf');
 
@@ -91,6 +100,7 @@ Route::middleware(['auth', 'force.password'])->group(function () {
     Route::get('/notifications/read/{id}', [NotificationController::class, 'read'])->name('notifications.read');
     Route::post('/notifications/read-all', [NotificationController::class, 'readAll'])->name('notifications.readAll');
     Route::post('/notifications/delete-all', [NotificationController::class, 'deleteAll'])->name('notifications.deleteAll');
+    Route::delete('/notifications/{id}', [NotificationController::class, 'destroy'])->name('notifications.destroy');
 
     // Log Aktivitas
     Route::get('/log-aktivitas', [LogController::class, 'index'])->middleware('role:root,admin_bawah,admin_opd,bidang')->name('log.index');

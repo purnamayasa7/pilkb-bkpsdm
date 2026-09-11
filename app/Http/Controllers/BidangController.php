@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Bidang;
 use App\Services\ActivityLogService;
 use Illuminate\Http\Request;
+use Inertia\Inertia;
 
 class BidangController extends Controller
 {
@@ -13,14 +14,14 @@ class BidangController extends Controller
         $bidang = Bidang::orderBy('created_at', 'desc')
             ->get();
 
-        return view('pages.admin.bidang.index', [
+        return Inertia::render('Root/Bidang/Index', [
             'bidang' => $bidang,
         ]);
     }
 
     public function create()
     {
-        return view('pages.admin.bidang.create');
+        return Inertia::render('Root/Bidang/Create');
     }
 
     public function store(Request $request)
@@ -51,7 +52,9 @@ class BidangController extends Controller
     {
         $bidang = Bidang::findOrFail($id);
 
-        return view('pages.admin.bidang.edit', compact('bidang'));
+        return Inertia::render('Root/Bidang/Edit', [
+            'bidang' => $bidang,
+        ]);
     }
 
     public function update(Request $request, $bidangId)

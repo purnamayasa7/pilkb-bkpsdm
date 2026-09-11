@@ -13,13 +13,16 @@ use Illuminate\Support\Facades\Hash;
 use App\Services\PegawaiService;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
+use Inertia\Inertia;
 use Maatwebsite\Excel\Facades\Excel;
 
 class UserController extends Controller
 {
     public function changePasswordForm()
     {
-        return view('pages.auth.change-password');
+        return inertia('Profile/ChangePassword', [
+            'mustChangePassword' => (bool) Auth::user()->must_change_password,
+        ]);
     }
 
     public function changePassword(Request $request)
@@ -65,11 +68,33 @@ class UserController extends Controller
 
     public function index()
     {
-        $user = User::with('role')
+        $users = User::with(['role', 'bidang'])
             ->orderBy('created_at', 'asc')
-            ->get();
+            ->get()
+            ->map(function ($u) {
+                return [
+                    'id' => $u->id,
+                    'username' => $u->username,
+                    'nama' => $u->nama,
+                    'bidang_id' => $u->bidang_id,
+                    'nama_bidang' => $u->nama_bidang,
+                    'jabatan' => $u->jabatan,
+                    'role_id' => $u->role_id,
+                    'role' => $u->role ? $u->role->name : null,
+                    'nama_role' => $u->nama_role,
+                    'aktif' => (bool) $u->aktif,
+                    'kode_ukerja' => $u->kode_ukerja,
+                    'email' => $u->email,
+                    'no_wa' => $u->no_wa,
+                    'foto' => $u->foto,
+                    'foto_url' => $u->foto_url,
+                    'created_at' => $u->created_at?->toIso8601String(),
+                ];
+            });
 
-        return view('pages.admin.user.index', compact('user'));
+        return Inertia::render('Root/User/Index', [
+            'users' => $users,
+        ]);
     }
 
     protected $pegawaiService;
@@ -125,9 +150,11 @@ class UserController extends Controller
 
     public function create()
     {
-        $bidang = Bidang::all();
+        $bidang = Bidang::orderBy('nama_bidang', 'asc')->get();
 
-        return view('pages.admin.user.register', compact('bidang'));
+        return Inertia::render('Root/User/Create', [
+            'bidang' => $bidang,
+        ]);
     }
 
     public function store(Request $request)
@@ -297,8 +324,8 @@ class UserController extends Controller
 
     public function edit($id)
     {
-        $profile = User::findOrFail($id);
-        $bidang = Bidang::all();
+        $profile = User::with('role')->findOrFail($id);
+        $bidang = Bidang::orderBy('nama_bidang', 'asc')->get();
 
         $pegawai = $this->pegawaiService
             ->getPegawaiByNip($profile->username);
@@ -314,20 +341,31 @@ class UserController extends Controller
         $nama_jab = $pegawai['nama_jab'] ?? '-';
         $ket_agama = $pegawai['ket_agama'] ?? '-';
 
-        return view(
-            'pages.admin.user.edit',
-            compact(
-                'profile',
-                'bidang',
-                'ket_ukerja',
-                'nama_lengkap',
-                'foto_url',
-                'ttl',
-                'ket_gol',
-                'nama_jab',
-                'ket_agama'
-            )
-        );
+        return Inertia::render('Root/User/Edit', [
+            'profile' => [
+                'id' => $profile->id,
+                'username' => $profile->username,
+                'nama' => $profile->nama,
+                'email' => $profile->email,
+                'bidang_id' => $profile->bidang_id,
+                'role_id' => $profile->role_id,
+                'role' => $profile->role?->name,
+                'nama_role' => $profile->nama_role,
+                'kode_ukerja' => $profile->kode_ukerja,
+                'foto' => $profile->foto,
+                'foto_url' => $foto_url,
+            ],
+            'bidang' => $bidang,
+            'pegawai' => [
+                'nama_lengkap' => $nama_lengkap,
+                'ket_ukerja' => $ket_ukerja,
+                'foto_url' => $foto_url,
+                'ttl' => $ttl,
+                'ket_gol' => $ket_gol,
+                'nama_jab' => $nama_jab,
+                'ket_agama' => $ket_agama,
+            ],
+        ]);
     }
 
     //Aktif/Nonaktif User
@@ -382,23 +420,38 @@ class UserController extends Controller
         ])
             ->where('nip', $user->username)
             ->orderBy('tanggal', 'desc')
-            ->get();
+            ->get()
+            ->map(function ($t) {
+                return [
+                    'no_tiket' => $t->no_tiket,
+                    'nama_layanan' => $t->layanan?->nama_layanan ?? '-',
+                    'tanggal' => $t->tanggal ? Carbon::parse($t->tanggal)->isoFormat('D MMMM Y') : '-',
+                    'status' => $t->tahapTerakhir?->statusRel?->status ?? 'Menunggu',
+                    'status_id' => $t->tahapTerakhir?->status ?? null,
+                ];
+            });
 
-        return view(
-            'profile.index',
-            compact(
-                'user',
-                'bidang',
-                'nama_lengkap',
-                'ket_ukerja',
-                'foto_url',
-                'ttl',
-                'ket_gol',
-                'nama_jab',
-                'ket_agama',
-                'tiket'
-            )
-        );
+        return inertia('Profile/Index', [
+            'user' => [
+                'id' => $user->id,
+                'username' => $user->username,
+                'email' => $user->email,
+                'nama' => $user->nama,
+                'role' => $user->role?->display_name ?? $user->role?->name ?? 'Pengguna',
+                'bidang_nama' => $user->bidang?->nama_bidang ?? '-',
+            ],
+            'pegawai' => [
+                'nama_lengkap' => $nama_lengkap,
+                'nip' => $user->username,
+                'ket_ukerja' => $ket_ukerja,
+                'foto_url' => $foto_url,
+                'ttl' => $ttl,
+                'ket_gol' => $ket_gol,
+                'nama_jab' => $nama_jab,
+                'ket_agama' => $ket_agama,
+            ],
+            'tiket' => $tiket,
+        ]);
     }
 
     public function updateProfile(Request $request)
@@ -446,7 +499,7 @@ class UserController extends Controller
         // REFRESH SESSION
         Auth::login($user);
 
-        return redirect()->route('dashboard')
+        return redirect()->route('profile')
             ->with('success', 'Profil berhasil diperbarui');
     }
 

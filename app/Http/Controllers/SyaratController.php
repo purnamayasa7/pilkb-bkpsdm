@@ -11,6 +11,7 @@ use Illuminate\Support\Str;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Inertia\Inertia;
 
 class SyaratController extends Controller
 {
@@ -21,11 +22,13 @@ class SyaratController extends Controller
 
         $bidangId = $request->bidang ?? $bidang->first()?->id;
 
-        $layanan = Layanan::where('kode_bidang', $bidangId)->get();
+        $allLayanan = Layanan::orderBy('kode_bidang')->orderBy('nama_layanan')->get();
+
+        $layanan = $allLayanan->where('kode_bidang', $bidangId)->values();
 
         $layananId = $request->filled('layanan') ? $request->layanan : null;
 
-        $syarat = Syarat::with('layanan')
+        $syarat = Syarat::with(['layanan.bidang'])
             ->when($layananId, function ($query) use ($layananId) {
                 $query->where('kode_layanan', $layananId);
             }, function ($query) {
@@ -33,13 +36,14 @@ class SyaratController extends Controller
             })
             ->get();
 
-        return view('pages.admin.syarat.index', compact(
-            'syarat',
-            'bidang',
-            'bidangId',
-            'layanan',
-            'layananId'
-        ));
+        return Inertia::render('Root/Syarat/Index', [
+            'syarat'     => $syarat,
+            'bidang'     => $bidang,
+            'bidangId'   => $bidangId ? (string) $bidangId : null,
+            'layanan'    => $layanan,
+            'layananId'  => $layananId ? (string) $layananId : null,
+            'allLayanan' => $allLayanan,
+        ]);
     }
 
     // Menu Admin Bidang
@@ -51,26 +55,26 @@ class SyaratController extends Controller
             ->orderBy('nama_layanan')
             ->get();
 
-        $layananId = $request->layanan;
+        $layananId = $request->filled('layanan') ? (string) $request->layanan : null;
 
         $syarat = collect();
 
         if ($layananId) {
-
             $validLayanan = $layanan->contains('id', $layananId);
 
             if ($validLayanan) {
-                $syarat = Syarat::with('layanan')
+                $syarat = Syarat::with(['layanan.bidang'])
                     ->where('kode_layanan', $layananId)
                     ->get();
             }
         }
 
-        return view('pages.bidang.syarat.index', compact(
-            'layanan',
-            'layananId',
-            'syarat'
-        ));
+        return Inertia::render('Bidang/Syarat/Index', [
+            'layanan' => $layanan,
+            'layananId' => $layananId,
+            'syarat' => $syarat,
+            'bidang' => $user->bidang,
+        ]);
     }
 
     public function create(Request $request)
@@ -79,21 +83,23 @@ class SyaratController extends Controller
 
         $bidangId = $request->bidang ?? $bidang->first()?->id;
 
+        $allLayanan = Layanan::orderBy('kode_bidang')->orderBy('nama_layanan')->get();
+
         $layanan = $bidangId
-            ? Layanan::where('kode_bidang', $bidangId)
-            ->orderBy('nama_layanan')
-            ->get()
+            ? $allLayanan->where('kode_bidang', $bidangId)->values()
             : collect();
 
         // Master jenis e-file dari SIMPEG
         $syaratEfile = SyaratEfile::orderBy('syarat')->get();
 
-        return view('pages.admin.syarat.create', compact(
-            'bidang',
-            'bidangId',
-            'layanan',
-            'syaratEfile'
-        ));
+        return Inertia::render('Root/Syarat/Create', [
+            'bidang'            => $bidang,
+            'bidangId'          => $bidangId ? (string) $bidangId : null,
+            'layanan'           => $layanan,
+            'allLayanan'        => $allLayanan,
+            'syaratEfile'       => $syaratEfile,
+            'selectedLayananId' => $request->filled('layanan') ? (string) $request->layanan : null,
+        ]);
     }
 
     // Menu Admin Bidang
@@ -110,11 +116,12 @@ class SyaratController extends Controller
         // Master jenis e-file dari SIMPEG
         $syaratEfile = SyaratEfile::orderBy('syarat')->get();
 
-        return view('pages.bidang.syarat.create', compact(
-            'bidang',
-            'layanan',
-            'syaratEfile'
-        ));
+        return Inertia::render('Bidang/Syarat/Create', [
+            'bidang' => $bidang,
+            'layanan' => $layanan,
+            'syaratEfile' => $syaratEfile,
+            'selectedLayananId' => $request->filled('layanan') ? (string) $request->layanan : null,
+        ]);
     }
 
     public function store(Request $request)
@@ -203,7 +210,7 @@ class SyaratController extends Controller
         );
 
         return redirect()
-            ->route('adminBidang.syarat.indexBidang')
+            ->route('adminBidang.syarat.indexBidang', ['layanan' => $layanan->id])
             ->with('success', 'Syarat berhasil ditambahkan');
     }
 
@@ -357,7 +364,7 @@ class SyaratController extends Controller
         );
 
         return redirect()
-            ->route('adminBidang.syarat.indexBidang')
+            ->route('adminBidang.syarat.indexBidang', ['layanan' => $syarat->kode_layanan])
             ->with('success', 'Syarat berhasil diupdate.');
     }
 
@@ -369,10 +376,10 @@ class SyaratController extends Controller
         $syaratEfile = SyaratEfile::orderBy('syarat')
             ->get();
 
-        return view('pages.admin.syarat.edit', compact(
-            'syarat',
-            'syaratEfile'
-        ));
+        return Inertia::render('Root/Syarat/Edit', [
+            'syarat'      => $syarat,
+            'syaratEfile' => $syaratEfile,
+        ]);
     }
 
     // Menu Admin Bidang
@@ -387,10 +394,10 @@ class SyaratController extends Controller
         $syaratEfile = SyaratEfile::orderBy('syarat')
             ->get();
 
-        return view('pages.bidang.syarat.edit', compact(
-            'syarat',
-            'syaratEfile'
-        ));
+        return Inertia::render('Bidang/Syarat/Edit', [
+            'syarat' => $syarat,
+            'syaratEfile' => $syaratEfile,
+        ]);
     }
 
     public function destroy($id)
@@ -447,7 +454,7 @@ class SyaratController extends Controller
         );
 
         return redirect()
-            ->route('adminBidang.syarat.indexBidang')
+            ->route('adminBidang.syarat.indexBidang', ['layanan' => $olddata['kode_layanan']])
             ->with('success', 'Syarat berhasil dihapus.');
     }
 
@@ -474,7 +481,10 @@ class SyaratController extends Controller
 
         $bidangId = $request->bidang ?? $bidang->first()?->id;
 
-        $layanan = Layanan::where('kode_bidang', $bidangId)->get();
+        // Semua layanan dikirim agar React bisa filter client-side saat bidang berubah (tanpa reload)
+        $allLayanan = Layanan::orderBy('kode_bidang')->orderBy('nama_layanan')->get();
+
+        $layanan = $allLayanan->where('kode_bidang', $bidangId)->values();
 
         $layananId = $request->filled('layanan') ? $request->layanan : null;
 
@@ -489,15 +499,16 @@ class SyaratController extends Controller
         $selectedLayanan = $layanan->firstWhere('id', $layananId);
         $selectedBidang  = $bidang->firstWhere('id', $bidangId);
 
-        return view('pages.opd.cetak-syarat.index', compact(
-            'syarat',
-            'bidang',
-            'bidangId',
-            'layanan',
-            'layananId',
-            'selectedLayanan',
-            'selectedBidang'
-        ));
+        return inertia('Opd/Syarat/Index', [
+            'syarat'          => $syarat,
+            'bidang'          => $bidang,
+            'allLayanan'      => $allLayanan,
+            'bidangId'        => $bidangId ? (int) $bidangId : null,
+            'layanan'         => $layanan,
+            'layananId'       => $layananId ? (int) $layananId : null,
+            'selectedLayanan' => $selectedLayanan,
+            'selectedBidang'  => $selectedBidang,
+        ]);
     }
 
     // Cetak Syarat Menu Admin Bawah
@@ -507,7 +518,9 @@ class SyaratController extends Controller
 
         $bidangId = $request->bidang ?? $bidang->first()?->id;
 
-        $layanan = Layanan::where('kode_bidang', $bidangId)->get();
+        $allLayanan = Layanan::orderBy('kode_bidang')->orderBy('nama_layanan')->get();
+
+        $layanan = $allLayanan->where('kode_bidang', $bidangId)->values();
 
         $layananId = $request->filled('layanan') ? $request->layanan : null;
 
@@ -522,25 +535,29 @@ class SyaratController extends Controller
         $selectedLayanan = $layanan->firstWhere('id', $layananId);
         $selectedBidang  = $bidang->firstWhere('id', $bidangId);
 
-        return view('pages.admin-bawah.cetak-syarat.index', compact(
-            'syarat',
-            'bidang',
-            'bidangId',
-            'layanan',
-            'layananId',
-            'selectedLayanan',
-            'selectedBidang'
-        ));
+        return inertia('AdminBawah/CetakSyarat/Index', [
+            'syarat'          => $syarat,
+            'bidang'          => $bidang,
+            'allLayanan'      => $allLayanan,
+            'bidangId'        => $bidangId ? (int) $bidangId : null,
+            'layanan'         => $layanan,
+            'layananId'       => $layananId ? (int) $layananId : null,
+            'selectedLayanan' => $selectedLayanan,
+            'selectedBidang'  => $selectedBidang,
+        ]);
     }
 
     // Cetak Syarat Menu Admin Bidang
     public function indexCetakAdminBidang(Request $request)
     {
+        $user = Auth::user();
         $bidang = Bidang::all();
 
-        $bidangId = $request->bidang ?? $bidang->first()?->id;
+        $bidangId = $request->bidang ?? ($user->bidang_id ?? $bidang->first()?->id);
 
-        $layanan = Layanan::where('kode_bidang', $bidangId)->get();
+        $allLayanan = Layanan::orderBy('kode_bidang')->orderBy('nama_layanan')->get();
+
+        $layanan = $allLayanan->where('kode_bidang', $bidangId)->values();
 
         $layananId = $request->filled('layanan') ? $request->layanan : null;
 
@@ -555,15 +572,16 @@ class SyaratController extends Controller
         $selectedLayanan = $layanan->firstWhere('id', $layananId);
         $selectedBidang  = $bidang->firstWhere('id', $bidangId);
 
-        return view('pages.bidang.cetak-syarat.index', compact(
-            'syarat',
-            'bidang',
-            'bidangId',
-            'layanan',
-            'layananId',
-            'selectedLayanan',
-            'selectedBidang'
-        ));
+        return inertia('Bidang/CetakSyarat/Index', [
+            'syarat'          => $syarat,
+            'bidang'          => $bidang,
+            'allLayanan'      => $allLayanan,
+            'bidangId'        => $bidangId ? (int) $bidangId : null,
+            'layanan'         => $layanan,
+            'layananId'       => $layananId ? (int) $layananId : null,
+            'selectedLayanan' => $selectedLayanan,
+            'selectedBidang'  => $selectedBidang,
+        ]);
     }
 
 

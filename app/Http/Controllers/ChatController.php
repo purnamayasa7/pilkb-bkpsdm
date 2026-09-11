@@ -16,6 +16,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Notification;
+use Inertia\Inertia;
 
 class ChatController extends Controller
 {
@@ -26,28 +27,8 @@ class ChatController extends Controller
         $this->pegawaiService = $pegawaiService;
     }
 
-    // OPD, Bidang
-    public function index()
-    {
-        $user = Auth::user();
-
-        $conversationIds = ChatParticipant::where(
-            'user_id',
-            $user->id
-        )->pluck('conversation_id');
-
-        $conversations = ChatConversation::with([
-            'creator',
-            'messages'
-        ])
-            ->whereIn('id', $conversationIds)
-            ->orderByDesc('last_message_id')
-            ->get();
-
-        return view('chat.index', compact('conversations'));
-    }
-
-    public function myConversations()
+    // OPD, Bidang, Root, Admin Bawah
+    public function index(Request $request)
     {
         $user = Auth::user();
 
@@ -66,14 +47,71 @@ class ChatController extends Controller
             ->orderByDesc('last_message_id')
             ->get();
 
+        $formatted = $conversations->map(function ($conversation) use ($user) {
+            $lastMsg = $conversation->lastMessage;
+            $partner = $this->getConversationPartner($conversation, $user);
+
+            $layananNama = $conversation->tiket?->layanan?->nama_layanan
+                ?? $conversation->layanan?->nama_layanan
+                ?? null;
+
+            $bidangNama = $conversation->bidang?->nama_bidang
+                ?? $conversation->tiket?->layanan?->bidang?->nama_bidang
+                ?? null;
+
+            return [
+                'id' => $conversation->id,
+                'no_tiket' => $conversation->no_tiket,
+                'status' => $conversation->status ?? 'open',
+                'last_message_id' => $conversation->last_message_id,
+                'nama_pengirim' => $partner['nama_pengirim'],
+                'sender_role' => $partner['sender_role'],
+                'sender_role_label' => $partner['sender_role_label'],
+                'layanan' => $layananNama,
+                'bidang' => $bidangNama,
+                'last_message' => optional($lastMsg)->message ?? 'Belum ada pesan',
+                'last_message_time' => $lastMsg
+                    ? $lastMsg->created_at->format('Y-m-d H:i:s')
+                    : ($conversation->updated_at ? $conversation->updated_at->format('Y-m-d H:i:s') : null),
+                'is_last_from_me' => $lastMsg ? (int) $lastMsg->sender_user_id === (int) $user->id : false,
+                'unread' => $conversation->unreadCount($user->id),
+                'need_reply' => (bool) $conversation->need_reply,
+                'type' => $conversation->type,
+            ];
+        });
+
+        $roomParam = $request->query('room') ?? $request->query('id');
+        $initialActiveId = $roomParam ? (is_numeric($roomParam) ? (int) $roomParam : $roomParam) : null;
+
+        return Inertia::render('Chat/Index', [
+            'initialConversations' => $formatted,
+            'initialActiveId' => $initialActiveId,
+        ]);
+    }
+
+    public function myConversations()
+    {
+        $user = Auth::user();
+
+        $conversations = ChatConversation::with([
+            'creator.role',
+            'guest',
+            'tiket.layanan.bidang',
+            'layanan.bidang',
+            'bidang',
+            'participants.user.role',
+            'lastMessage'
+        ])
+            ->whereHas('participants', function ($q) use ($user) {
+                $q->where('user_id', $user->id);
+            })
+            ->orderByDesc('last_message_id')
+            ->get();
+
         return response()->json(
             $conversations->map(function ($conversation) use ($user) {
                 $lastMsg = $conversation->lastMessage;
-
-                $responder = $conversation->participants
-                    ->where('user_id', '!=', $user->id)
-                    ->first()
-                    ?->user;
+                $partner = $this->getConversationPartner($conversation, $user);
 
                 $layananNama = $conversation->tiket?->layanan?->nama_layanan
                     ?? $conversation->layanan?->nama_layanan
@@ -83,41 +121,14 @@ class ChatController extends Controller
                     ?? $conversation->tiket?->layanan?->bidang?->nama_bidang
                     ?? null;
 
-                $senderName = $responder?->nama
-                    ?? $conversation->guest?->nama
-                    ?? $conversation->creator?->nama
-                    ?? 'Helpdesk BKPSDM';
-
-                $senderRole = 'opd';
-                $senderRoleLabel = 'OPD';
-                if ($conversation->guest_id || $conversation->type === 'guest' || $conversation->guest) {
-                    $senderRole = 'tamu';
-                    $senderRoleLabel = 'Tamu';
-                } elseif ($conversation->creator) {
-                    $roleName = $conversation->creator->role?->name;
-                    if ($roleName === 'admin_opd') {
-                        $senderRole = 'opd';
-                        $senderRoleLabel = 'OPD';
-                    } elseif ($roleName === 'bidang') {
-                        $senderRole = 'bidang';
-                        $senderRoleLabel = 'Bidang';
-                    } elseif ($roleName === 'admin_bawah') {
-                        $senderRole = 'fo';
-                        $senderRoleLabel = 'FO';
-                    } else {
-                        $senderRole = 'opd';
-                        $senderRoleLabel = 'OPD';
-                    }
-                }
-
                 return [
                     'id' => $conversation->id,
                     'no_tiket' => $conversation->no_tiket,
                     'status' => $conversation->status ?? 'open',
                     'last_message_id' => $conversation->last_message_id,
-                    'nama_pengirim' => $senderName,
-                    'sender_role' => $senderRole,
-                    'sender_role_label' => $senderRoleLabel,
+                    'nama_pengirim' => $partner['nama_pengirim'],
+                    'sender_role' => $partner['sender_role'],
+                    'sender_role_label' => $partner['sender_role_label'],
                     'layanan' => $layananNama,
                     'bidang' => $bidangNama,
                     'last_message' => optional($lastMsg)->message ?? 'Belum ada pesan',
@@ -422,7 +433,7 @@ class ChatController extends Controller
             });
 
 
-        $conversation->load(['tiket.layanan.bidang', 'layanan.bidang', 'bidang', 'creator.role', 'guest']);
+        $conversation->load(['tiket.layanan.bidang', 'layanan.bidang', 'bidang', 'creator.role', 'guest', 'participants.user.role']);
 
         $layananNama = $conversation->tiket?->layanan?->nama_layanan
             ?? $conversation->layanan?->nama_layanan
@@ -432,27 +443,7 @@ class ChatController extends Controller
             ?? $conversation->tiket?->layanan?->bidang?->nama_bidang
             ?? null;
 
-        $senderRole = 'opd';
-        $senderRoleLabel = 'OPD';
-        if ($conversation->guest_id || $conversation->type === 'guest' || $conversation->guest) {
-            $senderRole = 'tamu';
-            $senderRoleLabel = 'Tamu';
-        } elseif ($conversation->creator) {
-            $roleName = $conversation->creator->role?->name;
-            if ($roleName === 'admin_opd') {
-                $senderRole = 'opd';
-                $senderRoleLabel = 'OPD';
-            } elseif ($roleName === 'bidang') {
-                $senderRole = 'bidang';
-                $senderRoleLabel = 'Bidang';
-            } elseif ($roleName === 'admin_bawah') {
-                $senderRole = 'fo';
-                $senderRoleLabel = 'FO';
-            } else {
-                $senderRole = 'opd';
-                $senderRoleLabel = 'OPD';
-            }
-        }
+        $partner = $this->getConversationPartner($conversation, $user);
 
         return response()->json([
             'ticket_number'     => $conversation->no_tiket,
@@ -460,9 +451,9 @@ class ChatController extends Controller
             'layanan'           => $layananNama,
             'bidang'            => $bidangNama,
             'type'              => $conversation->type,
-            'sender_role'       => $senderRole,
-            'sender_role_label' => $senderRoleLabel,
-            'nama_pengirim'     => $conversation->guest?->nama ?? $conversation->creator?->nama ?? 'Pengguna',
+            'sender_role'       => $partner['sender_role'],
+            'sender_role_label' => $partner['sender_role_label'],
+            'nama_pengirim'     => $partner['nama_pengirim'],
             'messages'          => $messages
         ]);
     }
@@ -1003,9 +994,12 @@ class ChatController extends Controller
             return response()->json(['message' => 'Unauthorized'], 403);
         }
 
-        $lastMessageId = $conversation->messages()->max('id');
+        $lastMessageId = (int) max(
+            (int) ($conversation->last_message_id ?? 0),
+            (int) ($conversation->messages()->max('id') ?? 0)
+        );
 
-        if ($lastMessageId) {
+        if ($lastMessageId > 0) {
             ChatParticipant::where('conversation_id', $conversation->id)
                 ->where('user_id', $user->id)
                 ->update(['last_read_message_id' => $lastMessageId]);
@@ -1293,5 +1287,82 @@ class ChatController extends Controller
             'success' => true,
             'message' => 'Percakapan berhasil dihapus dari daftar Anda'
         ]);
+    }
+
+    /**
+     * Tentukan lawan chat (nama pengirim dan role) yang dilihat oleh user aktif.
+     */
+    private function getConversationPartner(ChatConversation $conversation, User $currentUser): array
+    {
+        $isCreator = ((int) $conversation->created_by === (int) $currentUser->id);
+
+        if ($isCreator) {
+            // Lawan chat adalah responder / pihak lain dalam percakapan
+            $otherUser = $conversation->participants
+                ->where('user_id', '!=', $currentUser->id)
+                ->first()
+                ?->user;
+
+            if ($otherUser) {
+                $nama = $otherUser->nama ?: $otherUser->name;
+                $roleName = $otherUser->role?->name;
+            } else {
+                // Belum ada responder yang bergabung
+                $bidangNama = $conversation->bidang?->nama_bidang
+                    ?? $conversation->tiket?->layanan?->bidang?->nama_bidang
+                    ?? null;
+
+                if ($conversation->type === 'ticket') {
+                    $nama = 'Admin ' . ($bidangNama ?? 'Bidang');
+                    $roleName = 'bidang';
+                } else {
+                    $nama = 'Helpdesk BKPSDM';
+                    $roleName = 'admin_bawah';
+                }
+            }
+        } else {
+            // User saat ini adalah responder (Admin Bidang / FO), maka lawan chat adalah creator / tamu
+            if ($conversation->guest) {
+                $nama = $conversation->guest->nama;
+                $roleName = 'tamu';
+            } elseif ($conversation->creator) {
+                $nama = $conversation->creator->nama ?: $conversation->creator->name;
+                $roleName = $conversation->creator->role?->name;
+            } else {
+                $otherUser = $conversation->participants
+                    ->where('user_id', '!=', $currentUser->id)
+                    ->first()
+                    ?->user;
+                $nama = $otherUser ? ($otherUser->nama ?: $otherUser->name) : 'Pengguna';
+                $roleName = $otherUser?->role?->name;
+            }
+        }
+
+        // Mapping role badge
+        if ($roleName === 'tamu' || $conversation->guest_id || $conversation->type === 'guest') {
+            $senderRole = 'tamu';
+            $senderRoleLabel = 'Tamu';
+        } elseif ($roleName === 'admin_opd') {
+            $senderRole = 'opd';
+            $senderRoleLabel = 'OPD';
+        } elseif ($roleName === 'bidang') {
+            $senderRole = 'bidang';
+            $senderRoleLabel = 'Bidang';
+        } elseif ($roleName === 'admin_bawah') {
+            $senderRole = 'fo';
+            $senderRoleLabel = 'FO';
+        } elseif (in_array($roleName, ['root', 'admin_atas'], true)) {
+            $senderRole = 'admin';
+            $senderRoleLabel = 'Admin';
+        } else {
+            $senderRole = 'opd';
+            $senderRoleLabel = 'OPD';
+        }
+
+        return [
+            'nama_pengirim'     => $nama ?: 'Pengguna',
+            'sender_role'       => $senderRole,
+            'sender_role_label' => $senderRoleLabel,
+        ];
     }
 }

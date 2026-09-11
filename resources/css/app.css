@@ -1,3 +1,124 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
+
+/* Tailwind CSS v4 Class-based Dark Mode Variant */
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+    --font-sans: 'Plus Jakarta Sans', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+
+    /* Semantic Primary Brand Colors (Sapphire Blue khas PILKB) */
+    --color-primary-50: #eff6ff;
+    --color-primary-100: #dbeafe;
+    --color-primary-200: #bfdbfe;
+    --color-primary-300: #93c5fd;
+    --color-primary-400: #60a5fa;
+    --color-primary-500: #3b82f6;
+    --color-primary-600: #2563eb;
+    --color-primary-700: #1d4ed8;
+    --color-primary-800: #1e40af;
+    --color-primary-900: #1e3a8a;
+    --color-primary-950: #172554;
+
+    /* Semantic Surface & Border Tokens */
+    --color-surface: #ffffff;
+    --color-surface-secondary: #f8fafc;
+    --color-surface-card: #ffffff;
+    --color-border-subtle: #e2e8f0;
+}
+
+/* Base resets & typography */
+@layer base {
+    * {
+        border-color: var(--color-border-subtle);
+    }
+
+    body {
+        font-family: var(--font-sans);
+    }
+
+    .dark {
+        --color-surface: #0b1120;
+        --color-surface-secondary: #0f172a;
+        --color-surface-card: #1e293b;
+        --color-border-subtle: #1e293b;
+    }
+}
+
+/* Custom Scrollbar Global */
+::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+    background: rgba(156, 163, 175, 0.4);
+    border-radius: 9999px;
+}
+
+.dark ::-webkit-scrollbar-thumb {
+    background: rgba(148, 163, 184, 0.25);
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: rgba(156, 163, 175, 0.7);
+}
+
+/* Sidebar Scrollbar: hidden by default, visible on sidebar hover */
+.sidebar-scroll {
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* IE and Edge */
+}
+
+.sidebar-scroll::-webkit-scrollbar {
+    width: 4px;
+}
+
+.sidebar-scroll::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.sidebar-scroll::-webkit-scrollbar-thumb {
+    background: transparent;
+    border-radius: 9999px;
+    transition: background-color 0.2s ease;
+}
+
+.sidebar-container:hover .sidebar-scroll,
+.sidebar-scroll:hover {
+    scrollbar-width: thin;
+}
+
+.sidebar-container:hover .sidebar-scroll::-webkit-scrollbar-thumb,
+.sidebar-scroll:hover::-webkit-scrollbar-thumb {
+    background: rgba(156, 163, 175, 0.4);
+}
+
+.dark .sidebar-container:hover .sidebar-scroll::-webkit-scrollbar-thumb,
+.dark .sidebar-scroll:hover::-webkit-scrollbar-thumb {
+    background: rgba(148, 163, 184, 0.25);
+}
+
+.sidebar-container:hover .sidebar-scroll::-webkit-scrollbar-thumb:hover,
+.sidebar-scroll:hover::-webkit-scrollbar-thumb:hover {
+    background: rgba(156, 163, 175, 0.7);
+}
+
+/* Standarisasi Combobox / Select Global PILKB */
+select {
+    padding-left: 1rem; /* Minimal 16px agar teks combobox tidak pernah mepet ke kiri */
+    padding-right: 2.25rem; /* Ruang untuk icon chevron kanan */
+}
+
+/* Combobox yang memiliki icon di sisi kiri */
+.relative > svg.absolute.left-3 + select,
+.relative > svg.absolute.left-3\.5 + select,
+.relative > svg.left-3 + select,
+.relative > svg.left-3\.5 + select,
+select.pl-9,
+select.pl-10 {
+    padding-left: 2.5rem !important; /* 40px memastikan teks rapi dan proporsional setelah icon */
+}

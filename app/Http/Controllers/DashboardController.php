@@ -325,32 +325,76 @@ class DashboardController extends Controller
                 ->get();
         }
 
-        return view('pages.dashboard', compact(
-            'user',
-            'ket_ukerja',
+        $nip = $user->username ?? ($pegawai['nip'] ?? '-');
+        $email = !empty($user->email) ? $user->email : ($pegawai['email'] ?? '-');
 
-            'selectedDate',
+        $role = $user->role->name ?? '';
 
-            'pengajuanHariIni',
-            'pengajuanBulanIni',
-            'btlBulanIni',
-            'tiketArchives',
+        $dashboardConfig = [
+            'admin_bawah' => [
+                'text' => 'Silakan melakukan verifikasi permintaan layanan secara berkala untuk memastikan proses pelayanan berjalan dengan baik, tepat, dan sesuai ketentuan.',
+                'button' => 'List Permintaan',
+                'url' => route('adminBawah.permintaan.indexPermintaan'),
+            ],
+            'admin_opd' => [
+                'text' => 'Silakan melakukan pengajuan dan monitoring usulan secara berkala untuk memastikan seluruh proses berjalan dengan baik dan sesuai tahapan.',
+                'button' => 'Pengajuan Layanan',
+                'url' => route('adminOpd.tiket.create'),
+            ],
+            'bidang' => [
+                'text' => 'Silakan melakukan verifikasi permintaan layanan secara berkala untuk memastikan proses pelayanan berjalan dengan baik, tepat, dan sesuai ketentuan.',
+                'button' => 'List Permintaan',
+                'url' => route('adminBidang.permintaan.index'),
+            ],
+            'root' => [
+                'text' => 'Silakan melakukan pengelolaan master data, pemantauan sistem, serta pelaksanaan backup database secara berkala untuk menjaga keamanan dan konsistensi data.',
+                'button' => 'Backup Database',
+                'url' => route('root.backup.index'),
+            ],
+        ];
 
-            'trendHariIni',
-            'trendPengajuan',
-            'trendBTL',
-            'trendTahap',
+        $config = $dashboardConfig[$role] ?? $dashboardConfig['root'];
 
-            'chartBidangLabels',
-            'chartBidangData',
-
-            'chartTahunLabels',
-            'chartTahunData',
-
-            'pengajuanTerakhirOpd',
-
-            'year'
-        ));
+        return inertia('Dashboard', [
+            'user' => [
+                'nama' => $user->nama,
+                'username' => $nip,
+                'nip' => $nip,
+                'email' => $email,
+                'role' => $user->role->name ?? 'User',
+            ],
+            'ket_ukerja' => $ket_ukerja,
+            'nip' => $nip,
+            'email' => $email,
+            'selectedDate' => $selectedDate->format('Y-m'),
+            'selectedMonthName' => $selectedDate->translatedFormat('F Y'),
+            'pengajuanHariIni' => (int) $pengajuanHariIni,
+            'pengajuanBulanIni' => (int) $pengajuanBulanIni,
+            'btlBulanIni' => (int) $btlBulanIni,
+            'tiketArchives' => (int) $tiketArchives,
+            'trendHariIni' => $trendHariIni,
+            'trendPengajuan' => $trendPengajuan,
+            'trendBTL' => $trendBTL,
+            'trendTahap' => $trendTahap,
+            'chartBidangLabels' => array_values($chartBidangLabels->toArray()),
+            'chartBidangData' => array_values($chartBidangData->toArray()),
+            'chartTahunLabels' => $chartTahunLabels,
+            'chartTahunData' => array_values($chartTahunData),
+            'pengajuanTerakhirOpd' => $pengajuanTerakhirOpd->map(function ($item) {
+                return [
+                    'no_tiket' => $item->no_tiket,
+                    'layanan' => $item->layanan->nama_layanan ?? '-',
+                    'status' => $item->tahapTerakhir->statusRel->status ?? 'Tahap Awal',
+                    'tanggal' => Carbon::parse($item->tanggal)->translatedFormat('d M'),
+                    'tanggal_lengkap' => Carbon::parse($item->tanggal)->translatedFormat('d F Y'),
+                    'nama' => $item->nama,
+                    'nip' => $item->nip,
+                    'archives' => (int) $item->archives,
+                ];
+            }),
+            'year' => (int) $year,
+            'heroConfig' => $config,
+        ]);
     }
 
     // Helper Trend

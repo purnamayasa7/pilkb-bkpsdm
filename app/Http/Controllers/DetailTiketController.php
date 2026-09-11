@@ -24,6 +24,7 @@ use BaconQrCode\Writer;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Storage;
+use Inertia\Inertia;
 
 class DetailTiketController extends Controller
 {
@@ -97,9 +98,8 @@ class DetailTiketController extends Controller
     {
         $data = $this->getData($request);
 
-        return view('pages.opd.perbaikan.index', [
+        return inertia('Opd/Perbaikan/Index', [
             'data' => $data,
-
             'layananList' => Layanan::where('aktif', 1)
                 ->orderBy('nama_layanan')
                 ->get(),
@@ -111,9 +111,8 @@ class DetailTiketController extends Controller
     {
         $data = $this->getData($request, true);
 
-        return view('pages.admin-bawah.perbaikan.index', [
+        return Inertia::render('AdminBawah/Perbaikan/Index', [
             'data' => $data,
-
             'layananList' => Layanan::where('aktif', 1)
                 ->orderBy('nama_layanan')
                 ->get(),
@@ -163,7 +162,8 @@ class DetailTiketController extends Controller
     {
         $query = Regtiket::with([
             'layanan',
-            'tahapTerakhir.statusRel'
+            'tahapTerakhir.statusRel',
+            'detail'
         ])
             // HANYA TAHAP 1
             ->has('tahap', '=', 1);
@@ -180,9 +180,10 @@ class DetailTiketController extends Controller
             ->orderByDesc('tanggal')
             ->get();
 
-        return view('pages.admin-bawah.registrasi.index', [
+        return Inertia::render('AdminBawah/Permintaan/Index', [
             'tiket' => $tiket,
-            'layananList' => Layanan::where('aktif', 1)->get(),
+            'layananList' => Layanan::where('aktif', 1)->orderBy('nama_layanan')->get(),
+            'selectedLayanan' => $request->filled('layanan') ? (string) $request->layanan : '',
         ]);
     }
 
@@ -619,22 +620,12 @@ class DetailTiketController extends Controller
     |--------------------------------------------------------------------------
     */
 
-        return view(
-            'pages.admin-bawah.perbaikan.edit',
-            [
-                'tiket' =>
-                $tiket,
-
-                'detail' =>
-                $detail,
-
-                'dataPegawai' =>
-                $dataPegawai,
-
-                'qr' =>
-                $qr,
-            ]
-        );
+        return Inertia::render('AdminBawah/Perbaikan/Review', [
+            'tiket'       => $tiket,
+            'detail'      => $detail,
+            'dataPegawai' => $dataPegawai,
+            'qr'          => $qr,
+        ]);
     }
 
     // Tampil Review Permintaan Admin Bawah
@@ -988,7 +979,7 @@ class DetailTiketController extends Controller
 
         $qr = $this->generateQr($url);
 
-        return view('pages.admin-bawah.registrasi.edit', [
+        return Inertia::render('AdminBawah/Permintaan/Review', [
             'tiket'       => $tiket,
             'detail'      => $detail,
             'dataPegawai' => $dataPegawai,
@@ -2007,8 +1998,8 @@ class DetailTiketController extends Controller
         $qr = $this->generateQr($url);
 
         //  VIEWs
-        return view(
-            'pages.opd.perbaikan.edit',
+        return inertia(
+            'Opd/Perbaikan/Edit',
             [
                 'tiket' => $tiket,
                 'detail' => $detail,

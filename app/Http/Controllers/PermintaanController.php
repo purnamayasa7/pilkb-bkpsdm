@@ -48,11 +48,12 @@ class PermintaanController extends Controller
             ->orderByDesc('tanggal')
             ->get();
 
-        return view('pages.bidang.permintaan.index', compact(
-            'tiket',
-            'month',
-            'year'
-        ));
+        return inertia('Bidang/Permintaan/Index', [
+            'tiket' => $tiket,
+            'month' => (int) $month,
+            'year' => (int) $year,
+            'namaBidang' => $user->nama_bidang ?? 'Bidang',
+        ]);
     }
 
     public function getData(Request $request)
@@ -459,28 +460,13 @@ class PermintaanController extends Controller
         $qr = $this->generateQr($url);
 
 
-        return view(
-            'pages.bidang.permintaan.edit',
-            [
-                'tiket' =>
-                $tiket,
-
-                'detail' =>
-                $detail,
-
-                'dataPegawai' =>
-                $dataPegawai,
-
-                'statusList' =>
-                Status::where(
-                    'kode_layanan',
-                    $tiket->kode_layanan
-                )->get(),
-
-                'qr' =>
-                $qr,
-            ]
-        );
+        return inertia('Bidang/Permintaan/Edit', [
+            'tiket' => $tiket,
+            'detail' => $detail,
+            'dataPegawai' => $dataPegawai,
+            'statusList' => Status::where('kode_layanan', $tiket->kode_layanan)->get(),
+            'qr' => $qr,
+        ]);
     }
 
     public function updatePermintaan(Request $request, $no_tiket)

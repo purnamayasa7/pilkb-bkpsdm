@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Bidang;
+use App\Models\Layanan;
 use App\Models\Pengambilan;
 use App\Models\Regtiket;
 use App\Models\User;
@@ -13,6 +14,7 @@ use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Notification;
+use Inertia\Inertia;
 
 class PengambilanController extends Controller
 {
@@ -24,37 +26,42 @@ class PengambilanController extends Controller
     public function indexArchives(Request $request)
     {
         $bidangList = Bidang::orderBy('nama_bidang')->get();
-        $data = collect();
+        $bidang = $request->bidang ?? 'all';
+        $tanggalAwal = $request->tanggal_awal ?? Carbon::now()->startOfMonth()->toDateString();
+        $tanggalAkhir = $request->tanggal_akhir ?? Carbon::now()->toDateString();
 
-        // Hanya load data awal jika parameter tanggal_awal & tanggal_akhir tersedia
-        if ($request->filled('tanggal_awal') && $request->filled('tanggal_akhir')) {
-            $query = Regtiket::with([
-                'layanan.bidang',
-                'operatorArchives',
-                'tahapTerakhir.statusRel'
-            ])
-                ->where('archives', 1)
-                ->whereBetween('tanggal', [
-                    $request->tanggal_awal . ' 00:00:00',
-                    $request->tanggal_akhir . ' 23:59:59'
-                ]);
+        $query = Regtiket::with([
+            'layanan.bidang',
+            'operatorArchives',
+            'tahapTerakhir.statusRel'
+        ])
+            ->where('archives', 1);
 
-            // FILTER BIDANG
-            if ($request->filled('bidang') && $request->bidang != 'all') {
-                $query->whereHas('layanan', function ($q) use ($request) {
-                    $q->where('kode_bidang', $request->bidang);
-                });
-            }
-
-            $data = $query
-                ->latest('tanggal')
-                ->get();
+        if ($tanggalAwal && $tanggalAkhir) {
+            $query->whereBetween('tanggal', [
+                $tanggalAwal . ' 00:00:00',
+                $tanggalAkhir . ' 23:59:59'
+            ]);
         }
 
-        return view('pages.admin-bawah.archives.index', compact(
-            'data',
-            'bidangList'
-        ));
+        // FILTER BIDANG
+        if ($request->filled('bidang') && $request->bidang != 'all') {
+            $query->whereHas('layanan', function ($q) use ($request) {
+                $q->where('kode_bidang', $request->bidang);
+            });
+        }
+
+        $data = $query
+            ->latest('tanggal')
+            ->get();
+
+        return Inertia::render('AdminBawah/Archives/Index', [
+            'data' => $data,
+            'bidangList' => $bidangList,
+            'selectedBidang' => (string) $bidang,
+            'tanggalAwal' => $tanggalAwal,
+            'tanggalAkhir' => $tanggalAkhir,
+        ]);
     }
 
     public function getArchivesData(Request $request)
@@ -106,31 +113,36 @@ class PengambilanController extends Controller
 
     public function indexPengambilan(Request $request)
     {
-        $year = $request->year ?? Carbon::now()->year;
+        $currentYear = (int) Carbon::now()->year;
+        $year = $request->filled('year') ? (int) $request->year : $currentYear;
 
-        $pengambilan = Pengambilan::with([
-            'tiket.layanan'
+        $query = Pengambilan::with([
+            'tiket.layanan',
+            'tiket.tahapTerakhir.statusRel'
         ])
-            ->whereYear('tanggal_pengambilan', $year)
+            ->whereYear('tanggal_pengambilan', $year);
+
+        // FILTER LAYANAN
+        if ($request->filled('layanan')) {
+            $query->whereHas('tiket', function ($q) use ($request) {
+                $q->where('kode_layanan', $request->layanan);
+            });
+        }
+
+        $pengambilan = $query
             ->orderBy('tanggal_pengambilan', 'desc')
             ->get();
 
-        $pegawaiList = $this->pegawaiService->getPegawaiByNips(
-            $pengambilan
-                ->pluck('tiket.nip')
-                ->filter()
-                ->unique()
-                ->values()
-        );
+        $availableYears = range($currentYear - 10, $currentYear);
+        rsort($availableYears);
 
-        $simpegAvailable = $this->pegawaiService->isSimpegAvailable();
-
-        return view('pages.admin-bawah.pengambilan.index', compact(
-            'pengambilan',
-            'year',
-            'pegawaiList',
-            'simpegAvailable'
-        ));
+        return Inertia::render('AdminBawah/Pengambilan/Index', [
+            'pengambilan' => $pengambilan,
+            'year' => $year,
+            'availableYears' => $availableYears,
+            'layananList' => Layanan::where('aktif', 1)->orderBy('nama_layanan')->get(),
+            'selectedLayanan' => $request->filled('layanan') ? (string) $request->layanan : '',
+        ]);
     }
 
     public function getData(Request $request)
@@ -144,18 +156,10 @@ class PengambilanController extends Controller
             ->orderBy('tanggal_pengambilan', 'desc')
             ->get();
 
-        $pegawaiList = $this->pegawaiService->getPegawaiByNips(
-            $pengambilan
-                ->pluck('tiket.nip')
-                ->filter()
-                ->unique()
-                ->values()
-        );
-
-        $data = $pengambilan->map(function ($item) use ($pegawaiList) {
+        $data = $pengambilan->map(function ($item) {
             $nip = $item->tiket->nip ?? null;
-            $nama = $pegawaiList[$nip]['nama_lengkap'] ?? ($item->tiket->nama ?? '-');
-            $ukerja = $pegawaiList[$nip]['ket_ukerja'] ?? ($item->tiket->nama_ukerja ?? '-');
+            $nama = $item->tiket->nama ?? '-';
+            $ukerja = $item->tiket->nama_ukerja ?? '-';
 
             return [
                 'id' => $item->id,
@@ -174,18 +178,31 @@ class PengambilanController extends Controller
     // CEK TIKET DI TAMBAH PENGAMBILAN MODAL
     public function cekTiket($no_tiket)
     {
-        $tiket = Regtiket::where('no_tiket', $no_tiket)->first();
+        $tiket = Regtiket::with('layanan')->where('no_tiket', $no_tiket)->first();
 
         if (!$tiket) {
             return response()->json([
-                'success' => false
+                'success' => false,
+                'message' => 'Nomor tiket tidak ditemukan dalam sistem.'
+            ]);
+        }
+
+        if ($tiket->diambil == 1) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Berkas tiket ini sudah pernah tercatat diambil.'
             ]);
         }
 
         return response()->json([
             'success' => true,
             'no_tiket' => $tiket->no_tiket,
-            'nip' => $tiket->nip
+            'nip' => $tiket->nip,
+            'nama' => $tiket->nama ?? '-',
+            'ukerja' => $tiket->nama_ukerja ?? '-',
+            'layanan' => $tiket->layanan->nama_layanan ?? '-',
+            'nama_penerima' => $tiket->nama_penerima ?? $tiket->nama ?? '',
+            'no_hp' => $tiket->no_hp ?? '',
         ]);
     }
 

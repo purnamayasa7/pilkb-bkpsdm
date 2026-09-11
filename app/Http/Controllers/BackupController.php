@@ -47,21 +47,43 @@ class BackupController extends Controller
             ->sortByDesc('timestamp')
             ->values();
 
-        $now = Carbon::now();
-        $startOfDay = Carbon::today()->startOfDay();
+        $now = Carbon::now(config('app.timezone', 'Asia/Makassar'));
+        $startOfDay = Carbon::today(config('app.timezone', 'Asia/Makassar'))->startOfDay();
         $hasBackupToday = $backups->contains(fn($b) => $b['created_at']->greaterThanOrEqualTo($startOfDay));
         $isMissedToday = !$hasBackupToday && ($now->hour >= 1 && ($now->hour > 1 || $now->minute >= 30));
 
         $totalSizeBytes = $backups->sum('size_bytes');
+        $latest = $backups->first();
+
         $stats = [
             'total_backups' => $backups->count(),
             'total_size' => $this->formatBytes($totalSizeBytes),
-            'latest_backup' => $backups->first()['created_at'] ?? null,
+            'latest_backup' => $latest ? [
+                'formatted' => $latest['created_at']->isoFormat('D MMMM Y, HH:mm') . ' WITA',
+                'time_ago' => $latest['created_at']->diffForHumans(),
+                'filename' => $latest['filename'],
+            ] : null,
             'has_backup_today' => $hasBackupToday,
             'is_missed_today' => $isMissedToday,
         ];
 
-        return view('pages.admin.backup.index', compact('backups', 'stats'));
+        // Format data untuk serialisasi JSON Inertia yang bersih dan terstandarisasi
+        $serializedBackups = $backups->map(function ($b) {
+            return [
+                'filename' => $b['filename'],
+                'path' => $b['path'],
+                'size' => $b['size'],
+                'size_bytes' => $b['size_bytes'],
+                'created_at' => $b['created_at']->isoFormat('D MMMM Y, HH:mm:ss') . ' WITA',
+                'time_ago' => $b['created_at']->diffForHumans(),
+                'timestamp' => $b['timestamp'],
+            ];
+        })->values();
+
+        return inertia('Root/Backup/Index', [
+            'backups' => $serializedBackups,
+            'stats' => $stats,
+        ]);
     }
 
     /**

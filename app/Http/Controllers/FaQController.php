@@ -10,21 +10,34 @@ class FaQController extends Controller
 {
     public function index()
     {
-        $faq = Faq::orderBy('pertanyaan')->get();
+        $faqs = Faq::orderBy('id', 'desc')->get()->map(function ($item) {
+            return [
+                'id' => $item->id,
+                'pertanyaan' => $item->pertanyaan,
+                'jawaban' => $item->jawaban,
+                'created_at_formatted' => $item->created_at ? $item->created_at->isoFormat('D MMMM Y, HH:mm') . ' WITA' : '-',
+                'time_ago' => $item->created_at ? $item->created_at->diffForHumans() : '',
+                'created_at' => $item->created_at ? $item->created_at->toIso8601String() : null,
+            ];
+        });
 
-        return view('pages.admin.faq.index', compact('faq'));
+        return inertia('Root/Faq/Index', [
+            'faqs' => $faqs,
+        ]);
     }
 
     public function create()
     {
-        return view('pages.admin.faq.create');
+        return inertia('Root/Faq/Create');
     }
 
     public function edit($id)
     {
         $faq = Faq::findOrFail($id);
 
-        return view('pages.admin.faq.edit', compact('faq'));
+        return inertia('Root/Faq/Edit', [
+            'faq' => $faq,
+        ]);
     }
 
     public function store(Request $request)
