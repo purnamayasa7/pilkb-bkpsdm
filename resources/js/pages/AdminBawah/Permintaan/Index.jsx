@@ -163,7 +163,7 @@ export default function Index({
 
     return (
         <AuthenticatedLayout user={auth?.user}>
-            <Head title="Registrasi SKPD - PILKB" />
+            <Head title="PILKB - Registrasi SKPD" />
 
             {/* Container Full Width Sesuai Standard.md Bagian 3 Poin 2 */}
             <div className="space-y-6">

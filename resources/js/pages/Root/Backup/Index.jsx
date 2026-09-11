@@ -19,6 +19,7 @@ import {
     Info,
     AlertCircle,
     Loader2,
+    ChevronDown,
 } from 'lucide-react';
 
 export default function RootBackupIndex({ backups = [], stats = {} }) {
@@ -286,6 +287,7 @@ export default function RootBackupIndex({ backups = [], stats = {} }) {
                                     <option value={25}>25 per hal</option>
                                     <option value={50}>50 per hal</option>
                                 </select>
+                                <ChevronDown className="w-3.5 h-3.5 text-slate-400 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
                             </div>
                         </div>
                     </div>

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useMemo } from 'react';
+import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { Head, usePage } from '@inertiajs/react';
 import AuthenticatedLayout from '@/layouts/AuthenticatedLayout';
 import { getInitials, formatCleanName } from '@/utils/initials';
@@ -319,6 +319,75 @@ export default function ChatIndex({ initialConversations = [], initialActiveId =
     const emojiPickerRef = useRef(null);
     const audioChimeRef = useRef(null);
 
+    // SIDEBAR SCROLL POSITION & AUTO-SCROLL TO ACTIVE ITEM
+    const sidebarListRef = useRef(null);
+    const sidebarScrollPosRef = useRef(0);
+
+    const scrollToActiveSidebarItem = useCallback((behavior = 'smooth') => {
+        if (!activeId) return;
+
+        const container = sidebarListRef.current;
+        if (!container) return;
+
+        const targetId = activeId === 'lili_ai' ? 'sidebar-item-lili_ai' : `sidebar-item-${activeId}`;
+        const targetElement = document.getElementById(targetId);
+
+        if (targetElement) {
+            const containerRect = container.getBoundingClientRect();
+            const itemRect = targetElement.getBoundingClientRect();
+
+            // Cek apakah item sudah sepenuhnya terlihat di dalam viewport container sidebar (dengan margin padding 8px)
+            const isFullyVisible = (
+                itemRect.top >= containerRect.top + 8 &&
+                itemRect.bottom <= containerRect.bottom - 8
+            );
+
+            if (!isFullyVisible) {
+                targetElement.scrollIntoView({
+                    behavior: behavior,
+                    block: 'center',
+                    inline: 'nearest'
+                });
+            }
+        }
+    }, [activeId]);
+
+    // Auto-scroll sidebar ke item aktif saat activeId berubah atau saat list pertama kali dimuat
+    useEffect(() => {
+        if (!activeId) return;
+
+        const timer1 = setTimeout(() => {
+            scrollToActiveSidebarItem('smooth');
+        }, 80);
+
+        const timer2 = setTimeout(() => {
+            scrollToActiveSidebarItem('smooth');
+        }, 250);
+
+        return () => {
+            clearTimeout(timer1);
+            clearTimeout(timer2);
+        };
+    }, [activeId, scrollToActiveSidebarItem]);
+
+    // Saat filter atau search berubah, pastikan active item tetap terlihat jika masih ada dalam list
+    useEffect(() => {
+        if (!activeId) return;
+        const timer = setTimeout(() => {
+            scrollToActiveSidebarItem('smooth');
+        }, 120);
+        return () => clearTimeout(timer);
+    }, [filterTab, searchQuery, scrollToActiveSidebarItem]);
+
+    // Saat daftar percakapan diisi atau diperbarui, pastikan item aktif langsung di-scroll ke posisi tampak
+    useEffect(() => {
+        if (!activeId || conversations.length === 0) return;
+        const timer = setTimeout(() => {
+            scrollToActiveSidebarItem('smooth');
+        }, 120);
+        return () => clearTimeout(timer);
+    }, [conversations.length, activeId, scrollToActiveSidebarItem]);
+
     useEffect(() => {
         function handleClickOutside(e) {
             if (headerMenuRef.current && !headerMenuRef.current.contains(e.target)) {
@@ -623,6 +692,10 @@ export default function ChatIndex({ initialConversations = [], initialActiveId =
             });
             loadRoom(nextId);
         }
+
+        setTimeout(() => {
+            scrollToActiveSidebarItem('smooth');
+        }, 50);
     };
 
     const handleSelectLili = () => {
@@ -641,6 +714,10 @@ export default function ChatIndex({ initialConversations = [], initialActiveId =
             playLiliVoice();
             liliVoicePlayedRef.current = true;
         }
+
+        setTimeout(() => {
+            scrollToActiveSidebarItem('smooth');
+        }, 50);
     };
 
     // Auto-buka room jika diarahkan dari navbar atau URL query parameter (?room=... atau ?id=...)
@@ -1277,7 +1354,7 @@ export default function ChatIndex({ initialConversations = [], initialActiveId =
 
     return (
         <AuthenticatedLayout fullHeight={true} noPadding={true}>
-            <Head title="Pusat Komunikasi & Bantuan - PILKB" />
+            <Head title="PILKB - Pusat Komunikasi & Bantuan" />
 
             {/* FULL-VIEWPORT WRAPPER (NO PAGE SCROLL, EXACTLY LIKE WHATSAPP WINDOWS) */}
             <div className="flex-1 min-h-0 flex flex-col p-2 sm:p-3 lg:p-4 bg-slate-50/80 dark:bg-slate-950 overflow-hidden h-full">
@@ -1288,8 +1365,9 @@ export default function ChatIndex({ initialConversations = [], initialActiveId =
                     {/* --------------------------------------------------------------------- */}
                     {/* PANEL 1: DAFTAR PERCAKAPAN (SIDEBAR WA WINDOWS)                       */}
                     {/* --------------------------------------------------------------------- */}
-                    {(!isMobile || !activeId) && (
-                        <div className="w-full md:w-80 lg:w-96 shrink-0 flex flex-col h-full border-r border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 overflow-hidden">
+                    <div className={`w-full md:w-80 lg:w-96 shrink-0 flex-col h-full border-r border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 overflow-hidden ${
+                        isMobile && activeId ? 'hidden' : 'flex'
+                    }`}>
                             {/* Header Sidebar: User Profile (PINNED AT TOP, DOES NOT SCROLL) */}
                             <div className="h-16 px-4 border-b border-slate-100 dark:border-slate-800/80 flex items-center justify-between shrink-0 bg-white dark:bg-slate-900">
                                 <div className="flex items-center gap-3 overflow-hidden">
@@ -1459,10 +1537,17 @@ export default function ChatIndex({ initialConversations = [], initialActiveId =
                             </div>
 
                             {/* Scrollable Conversation List (ONLY THIS AREA SCROLLS IN PANEL 1) */}
-                            <div className="flex-1 min-h-0 overflow-y-auto divide-y divide-slate-100 dark:divide-slate-800/60 overscroll-contain">
+                            <div
+                                ref={sidebarListRef}
+                                onScroll={(e) => {
+                                    sidebarScrollPosRef.current = e.currentTarget.scrollTop;
+                                }}
+                                className="flex-1 min-h-0 overflow-y-auto divide-y divide-slate-100 dark:divide-slate-800/60 overscroll-contain"
+                            >
                                 {/* 1. PINNED LILI AI CARD */}
                                 {showLiliInList && (
                                     <div
+                                        id="sidebar-item-lili_ai"
                                         onClick={handleSelectLili}
                                         className={`p-3 hover:bg-slate-50 dark:hover:bg-slate-800/50 cursor-pointer transition-colors relative flex items-start gap-3 ${
                                             activeId === 'lili_ai'
@@ -1529,6 +1614,7 @@ export default function ChatIndex({ initialConversations = [], initialActiveId =
                                         return (
                                             <div
                                                 key={conv.id}
+                                                id={`sidebar-item-${conv.id}`}
                                                 onClick={() => handleSelectConversation(conv)}
                                                 className={`p-3 hover:bg-slate-50 dark:hover:bg-slate-800/50 cursor-pointer transition-colors relative flex items-start gap-3 ${
                                                     isActive
@@ -1617,13 +1703,13 @@ export default function ChatIndex({ initialConversations = [], initialActiveId =
                                 )}
                             </div>
                         </div>
-                    )}
 
                     {/* --------------------------------------------------------------------- */}
                     {/* PANEL 2: RUANG PERCAKAPAN (MAIN PANEL WA WINDOWS)                     */}
                     {/* --------------------------------------------------------------------- */}
-                    {(!isMobile || activeId) && (
-                        <div className="flex-1 min-w-0 flex flex-col h-full bg-slate-50/50 dark:bg-slate-950/30 overflow-hidden">
+                    <div className={`flex-1 min-w-0 flex-col h-full bg-slate-50/50 dark:bg-slate-950/30 overflow-hidden ${
+                        isMobile && !activeId ? 'hidden' : 'flex'
+                    }`}>
                             {/* KONDISI 1: EMPTY STATE (WHATSAPP WINDOWS AESTHETIC) */}
                             {!activeId && (
                                 <div className="h-full flex flex-col items-center justify-between p-6 sm:p-10 text-center select-none bg-slate-50/50 dark:bg-slate-950/40">
@@ -2257,9 +2343,8 @@ export default function ChatIndex({ initialConversations = [], initialActiveId =
                                 </div>
                             )}
                         </div>
-                    )}
+                    </div>
                 </div>
-            </div>
 
             {/* ========================================================================= */}
             {/* MODAL CARI TIKET PERCAKAPAN BARU (ADMIN OPD ONLY)                         */}

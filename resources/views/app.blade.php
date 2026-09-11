@@ -9,6 +9,7 @@
 
     <!-- Favicon -->
     <link rel="icon" type="image/png" href="{{ asset('images/KabBuleleng.png') }}">
+    <link rel="preload" as="image" href="{{ asset('images/KabBuleleng.png') }}">
 
     <!-- Google Fonts: Plus Jakarta Sans -->
     <link rel="preconnect" href="https://fonts.googleapis.com">

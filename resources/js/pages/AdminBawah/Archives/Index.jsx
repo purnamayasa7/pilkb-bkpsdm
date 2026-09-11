@@ -233,7 +233,7 @@ export default function Index({
 
     return (
         <AuthenticatedLayout user={auth.user}>
-            <Head title="Arsip Usulan Layanan - Admin Bawah" />
+            <Head title="PILKB - Arsip Usulan Layanan" />
 
             {/* Container Baku Standard.md (space-y-6 lebar penuh tanpa batasan max-w) */}
             <div className="space-y-6">
