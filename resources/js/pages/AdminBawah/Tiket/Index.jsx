@@ -215,7 +215,7 @@ export default function Index({
                             </h1>
                         </div>
                         <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 pl-11">
-                            Monitoring dan penelusuran seluruh berkas tiket usulan layanan kepegawaian di lingkungan BKPSDM.
+                            Monitoring dan penelusuran seluruh berkas tiket usulan layanan kepegawaian.
                         </p>
                     </div>
 

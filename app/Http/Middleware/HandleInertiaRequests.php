@@ -121,11 +121,13 @@ class HandleInertiaRequests extends Middleware
                         ->orderByDesc('last_message_id')
                         ->get();
 
+                    $activeRoomParam = request()->query('room') ?? request()->query('id');
                     $totalUnreadMessages = 0;
                     $formattedList = [];
 
                     foreach ($conversations as $conv) {
-                        $unread = (int) $conv->unreadCount($user->id);
+                        $isBeingOpened = ($activeRoomParam && (int) $conv->id === (int) $activeRoomParam);
+                        $unread = $isBeingOpened ? 0 : (int) $conv->unreadCount($user->id);
                         if ($unread > 0) {
                             $totalUnreadMessages += $unread;
                         }

@@ -163,7 +163,7 @@ export default function Cetak({ data = [], keyword = '' }) {
                                     type="text"
                                     value={searchInput}
                                     onChange={(e) => setSearchInput(e.target.value)}
-                                    placeholder="Masukkan No Tiket (contoh: TKT-...), NIP, atau Nama Pegawai..."
+                                    placeholder="Masukkan No Tiket, NIP, atau Nama Pegawai..."
                                     className="w-full pl-10 pr-10 py-2.5 text-xs sm:text-sm bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
                                     autoFocus
                                 />

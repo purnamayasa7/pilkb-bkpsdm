@@ -37,6 +37,7 @@ export default function AuthenticatedLayout({ children, title, fullHeight = fals
     } = props;
     const user = auth?.user;
     const unreadNotifsCount = notifications?.unread_count || 0;
+    const notifList = notifications?.list || [];
     const [liveMessages, setLiveMessages] = useState(unread_messages || { unread_count: 0, list: [] });
 
     useEffect(() => {
@@ -61,6 +62,17 @@ export default function AuthenticatedLayout({ children, title, fullHeight = fals
     const [notifOpen, setNotifOpen] = useState(false);
     const [msgDropdownOpen, setMsgDropdownOpen] = useState(false);
     const [flashVisible, setFlashVisible] = useState(true);
+    const [isNavigating, setIsNavigating] = useState(false);
+
+    // Listen to Inertia page navigation events for custom logo spinner
+    useEffect(() => {
+        const removeStart = router.on('start', () => setIsNavigating(true));
+        const removeFinish = router.on('finish', () => setIsNavigating(false));
+        return () => {
+            removeStart();
+            removeFinish();
+        };
+    }, []);
 
     const toggleSidebarCollapsed = () => {
         setSidebarCollapsed((prev) => {
@@ -113,13 +125,23 @@ export default function AuthenticatedLayout({ children, title, fullHeight = fals
             }
         };
 
+        const handleChatSyncUnread = (e) => {
+            if (!e.detail) return;
+            setLiveMessages({
+                unread_count: Number(e.detail.unread_count) || 0,
+                list: Array.isArray(e.detail.list) ? e.detail.list : [],
+            });
+        };
+
         window.addEventListener('chat:read', handleChatRead);
         window.addEventListener('chat:read-all', handleChatReadAll);
+        window.addEventListener('chat:sync-unread', handleChatSyncUnread);
         window.addEventListener('keydown', handleKeyDown);
 
         return () => {
             window.removeEventListener('chat:read', handleChatRead);
             window.removeEventListener('chat:read-all', handleChatReadAll);
+            window.removeEventListener('chat:sync-unread', handleChatSyncUnread);
             window.removeEventListener('keydown', handleKeyDown);
         };
     }, []);
@@ -174,6 +196,11 @@ export default function AuthenticatedLayout({ children, title, fullHeight = fals
                 if (isFromMe) return;
 
                 const isOnChat = typeof window !== 'undefined' && window.location.pathname.startsWith('/chat');
+                if (isOnChat) {
+                    // Ketika pengguna sedang berada di halaman /chat, seluruh status percakapan,
+                    // penentuan room aktif, audio chime, dan badge navbar disinkronkan oleh Chat/Index
+                    return;
+                }
 
                 // Update optimistik instan (0ms) pada icon navbar dan dropdown list
                 setLiveMessages(prev => {
@@ -202,8 +229,7 @@ export default function AuthenticatedLayout({ children, title, fullHeight = fals
                 });
 
                 // Bunyikan chime notifikasi jika pengguna sedang berada di halaman luar /chat
-                if (!isOnChat) {
-                    const now = Date.now();
+                const now = Date.now();
                     if (now - lastSoundTimeRef.current > 1500) {
                         lastSoundTimeRef.current = now;
                         try {
@@ -221,7 +247,6 @@ export default function AuthenticatedLayout({ children, title, fullHeight = fals
                             preserveState: true,
                         });
                     }, 350);
-                }
             };
 
             userEventRef.on('value', handleUserEvent);
@@ -280,6 +305,36 @@ export default function AuthenticatedLayout({ children, title, fullHeight = fals
                     className="fixed inset-0 bg-slate-950/50 backdrop-blur-xs z-40 lg:hidden transition-opacity"
                     onClick={() => setSidebarOpen(false)}
                 />
+            )}
+
+            {/* ── Page Navigation Logo Spinner (Center Screen) ── */}
+            {isNavigating && (
+                <div
+                    className="fixed inset-0 z-[9999] flex items-center justify-center bg-slate-950/20 dark:bg-slate-950/50 backdrop-blur-xs transition-opacity duration-200"
+                    aria-label="Memuat halaman..."
+                >
+                    <div className="relative flex flex-col items-center justify-center">
+                        <div className="relative w-20 h-20 flex items-center justify-center">
+                            {/* Outer pulsing glow ring */}
+                            <span className="absolute inset-0 rounded-full bg-blue-500/20 animate-ping" />
+                            {/* Spinning ring */}
+                            <span
+                                className="absolute inset-0 rounded-full border-[3px] border-transparent border-t-blue-600 border-r-blue-400 dark:border-t-blue-500 dark:border-r-blue-300 animate-spin"
+                                style={{ animationDuration: '0.8s' }}
+                            />
+                            {/* Static outer ring */}
+                            <span className="absolute inset-0 rounded-full border border-blue-200/50 dark:border-blue-800/50" />
+                            {/* Logo container */}
+                            <div className="w-14 h-14 rounded-full bg-white dark:bg-slate-900 shadow-2xl border border-slate-100 dark:border-slate-800 flex items-center justify-center overflow-hidden">
+                                <img
+                                    src="/images/KabBuleleng.png"
+                                    alt="Loading..."
+                                    className="w-10 h-10 object-contain"
+                                />
+                            </div>
+                        </div>
+                    </div>
+                </div>
             )}
 
             {/* SIDEBAR: Modern PILKB Sidebar */}
@@ -517,8 +572,11 @@ export default function AuthenticatedLayout({ children, title, fullHeight = fals
                             >
                                 <Bell className="w-4 h-4" />
                                 {unreadNotifsCount > 0 && (
-                                    <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 rounded-full bg-rose-600 text-white text-[10px] font-bold flex items-center justify-center ring-2 ring-white dark:ring-slate-900 shadow-xs">
-                                        {unreadNotifsCount > 9 ? '9+' : unreadNotifsCount}
+                                    <span className="absolute -top-1 -right-1 flex h-[18px] min-w-[18px]">
+                                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-60"></span>
+                                        <span className="relative min-w-[18px] h-[18px] px-1 rounded-full bg-rose-600 text-white text-[10px] font-bold flex items-center justify-center ring-2 ring-white dark:ring-slate-900 shadow-xs">
+                                            {unreadNotifsCount > 99 ? '99+' : unreadNotifsCount}
+                                        </span>
                                     </span>
                                 )}
                             </button>

@@ -63,6 +63,24 @@ function formatMsgTime(dateStr) {
     }
 }
 
+function formatRelativeTime(dateStr) {
+    if (!dateStr) return '';
+    try {
+        const d = new Date(dateStr.replace(' ', 'T'));
+        if (isNaN(d.getTime())) return '';
+        const diffMs = Date.now() - d.getTime();
+        const diffMins = Math.floor(diffMs / 60000);
+        if (diffMins < 1) return 'Baru saja';
+        if (diffMins < 60) return `${diffMins}m lalu`;
+        const diffHours = Math.floor(diffMins / 60);
+        if (diffHours < 24) return `${diffHours}j lalu`;
+        const diffDays = Math.floor(diffHours / 24);
+        return `${diffDays}h lalu`;
+    } catch {
+        return '';
+    }
+}
+
 function getMessageDateGroup(dateStr) {
     if (!dateStr) return '';
     try {
@@ -213,6 +231,37 @@ export default function ChatIndex({ initialConversations = [], initialActiveId =
     useEffect(() => {
         activeIdRef.current = activeId;
     }, [activeId]);
+
+    // Sinkronisasi status unread & list percakapan navbar secara real-time dari Chat/Index
+    useEffect(() => {
+        if (!conversations || !Array.isArray(conversations)) return;
+
+        const totalUnread = conversations.reduce((sum, c) => sum + (Number(c.unread) || 0), 0);
+
+        const top5 = conversations
+            .filter(c => (Number(c.unread) || 0) > 0 || c.last_message)
+            .slice(0, 5)
+            .map(c => ({
+                id: c.id,
+                no_tiket: c.no_tiket,
+                nama_pengirim: c.nama_pengirim || 'Pengguna',
+                role_label: c.sender_role_label || c.sender_role || 'User',
+                last_message: c.last_message || 'Belum ada pesan',
+                time_ago: c.last_message_time ? formatRelativeTime(c.last_message_time) : '',
+                unread: Number(c.unread) || 0,
+                url: `/chat?room=${c.id}`,
+            }));
+
+        try {
+            window.dispatchEvent(new CustomEvent('chat:sync-unread', {
+                detail: {
+                    unread_count: totalUnread,
+                    list: top5,
+                }
+            }));
+        } catch {}
+    }, [conversations]);
+
     const [activeRoomData, setActiveRoomData] = useState(null);
     const [messages, setMessages] = useState([]);
     const [loadingRoom, setLoadingRoom] = useState(false);
@@ -1729,7 +1778,7 @@ export default function ChatIndex({ initialConversations = [], initialActiveId =
                                                             <div className="flex items-center justify-between gap-2 mb-1.5 pb-1 border-b border-slate-100 dark:border-slate-800">
                                                                 <span className="font-bold text-indigo-600 dark:text-indigo-400 text-[11px] flex items-center gap-1">
                                                                     <Sparkles className="w-3 h-3" />
-                                                                    <span>LILI AI</span>
+                                                                    <span>LILI Asisten Virtual</span>
                                                                 </span>
                                                                 <div className="flex items-center gap-1">
                                                                     <button

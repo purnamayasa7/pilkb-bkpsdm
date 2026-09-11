@@ -163,7 +163,7 @@ export default function Index({
 
     return (
         <AuthenticatedLayout user={auth?.user}>
-            <Head title="Registrasi SKPD - Front Office - PILKB" />
+            <Head title="Registrasi SKPD - PILKB" />
 
             {/* Container Full Width Sesuai Standard.md Bagian 3 Poin 2 */}
             <div className="space-y-6">
@@ -197,7 +197,7 @@ export default function Index({
                             </h1>
                         </div>
                         <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 pl-11">
-                            Daftar usulan berkas masuk dari ASN / SKPD yang menunggu validasi tahap pertama oleh Front Office BKPSDM.
+                            Daftar usulan berkas masuk dari OPD yang menunggu validasi tahap pertama oleh Front Office BKPSDM.
                         </p>
                     </div>
 
@@ -286,7 +286,7 @@ export default function Index({
                     {/* Layanan Aktif */}
                     <div className="rounded-2xl p-4 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
                         <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider block">
-                            Katalog Layanan
+                            Layanan
                         </span>
                         <div className="flex items-center justify-between mt-2">
                             <span className="text-2xl font-extrabold text-slate-900 dark:text-white">
@@ -335,7 +335,7 @@ export default function Index({
                                     onChange={(e) => handleLayananChange(e.target.value)}
                                     className="w-full pl-9 pr-8 py-2 text-xs sm:text-sm bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent appearance-none transition-all cursor-pointer truncate"
                                 >
-                                    <option value="">Semua Katalog Layanan</option>
+                                    <option value="">Semua Layanan</option>
                                     {layananList.map((lay) => (
                                         <option key={lay.id} value={lay.id}>
                                             {lay.nama_layanan}
