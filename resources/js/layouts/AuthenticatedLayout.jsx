@@ -37,9 +37,14 @@ export default function AuthenticatedLayout({ children, title, fullHeight = fals
     } = props;
     const user = auth?.user;
     const unreadNotifsCount = notifications?.unread_count || 0;
-    const notifList = notifications?.list || [];
-    const unreadMessagesCount = unread_messages?.unread_count || 0;
-    const messagesList = unread_messages?.list || [];
+    const [liveMessages, setLiveMessages] = useState(unread_messages || { unread_count: 0, list: [] });
+
+    useEffect(() => {
+        setLiveMessages(unread_messages || { unread_count: 0, list: [] });
+    }, [unread_messages]);
+
+    const unreadMessagesCount = liveMessages?.unread_count || 0;
+    const messagesList = liveMessages?.list || [];
 
     const [darkMode, setDarkMode] = useState(false);
     const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -91,14 +96,60 @@ export default function AuthenticatedLayout({ children, title, fullHeight = fals
             }
 
             const userEventRef = window.FirebaseDB.ref(`users/${user.id}/last_event`);
-            const startTime = Date.now();
+            const mountTime = Date.now();
+            let isFirstSnapshot = true;
 
             const handleUserEvent = (snap) => {
                 const val = snap.val();
-                if (!val || !val.timestamp) return;
-                if (val.timestamp < startTime - 5000) return;
+                if (!val || !val.messageData) return;
 
-                if (window.location.pathname !== '/chat') {
+                // Abaikan snapshot inisial yang merupakan pesan lama dari sebelum page dibuka
+                if (isFirstSnapshot) {
+                    isFirstSnapshot = false;
+                    return;
+                }
+
+                const eventTime = Number(val.sent_at || val.messageData?.timestamp || val.timestamp || 0);
+                if (eventTime > 0 && eventTime < mountTime) {
+                    return;
+                }
+
+                const senderUserId = Number(val.messageData?.sender_user_id);
+                const isFromMe = senderUserId === Number(user.id);
+                if (isFromMe) return;
+
+                const isOnChat = typeof window !== 'undefined' && window.location.pathname.startsWith('/chat');
+
+                // Update optimistik instan (0ms) pada icon navbar dan dropdown list
+                setLiveMessages(prev => {
+                    const prevList = prev?.list || [];
+                    const convId = val.conversationData?.id;
+                    const cleanName = val.conversationData?.nama_pengirim || val.messageData?.sender_name || 'Pengguna';
+                    const newMsgItem = {
+                        id: convId,
+                        no_tiket: val.conversationData?.no_tiket,
+                        nama_pengirim: cleanName,
+                        role_label: val.conversationData?.sender_role_label || 'User',
+                        last_message: val.messageData?.message || 'Pesan baru',
+                        time_ago: 'Baru saja',
+                        unread: 1,
+                        url: `/chat?room=${convId}`,
+                    };
+                    const filtered = prevList.filter(item => item.id !== convId);
+                    return {
+                        unread_count: (prev?.unread_count || 0) + 1,
+                        list: [newMsgItem, ...filtered].slice(0, 5),
+                    };
+                });
+
+                // Bunyikan chime notifikasi jika pengguna sedang berada di halaman luar /chat
+                if (!isOnChat) {
+                    try {
+                        const audio = new Audio('/sound/notification.mp3');
+                        audio.play().catch(() => {});
+                    } catch {}
+
+                    // Sinkronisasi resmi dari server secara halus (tanpa reload halaman penuh)
                     router.reload({
                         only: ['unread_messages'],
                         preserveScroll: true,
