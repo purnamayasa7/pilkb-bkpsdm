@@ -730,16 +730,21 @@ export default function ChatIndex({ initialConversations = [], initialActiveId =
 
         if (window.FirebaseDB && currentUser?.id) {
             const userEventRef = window.FirebaseDB.ref(`users/${currentUser.id}/last_event`);
+            const mountTime = Date.now();
             let isFirstSnapshot = true;
             const onUserEvent = (snapshot) => {
                 const data = snapshot.val();
                 if (!data || !data.messageData) return;
+                // Snapshot inisial Firebase selalu membawa event lama yang sudah ada di database saat page di-mount.
+                // Abaikan snapshot pertama agar tidak me-replay pesan lama menjadi unread palsu.
                 if (isFirstSnapshot) {
                     isFirstSnapshot = false;
-                    const eventTime = data.timestamp || (data.messageData.created_at ? new Date(data.messageData.created_at).getTime() : 0);
-                    if (Date.now() - eventTime > 15000) {
-                        return; // Abaikan event basi snapshot pertama kali
-                    }
+                    return;
+                }
+                // Proteksi timestamp: hanya proses event yang benar-benar dikirim setelah komponen terpasang
+                const eventTime = Number(data.sent_at || data.messageData?.timestamp || data.timestamp || 0);
+                if (eventTime > 0 && eventTime < mountTime) {
+                    return;
                 }
                 handleIncomingLiveMessage(data);
             };

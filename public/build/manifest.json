@@ -305,7 +305,7 @@
     "isEntry": true
   },
   "resources/js/app.jsx": {
-    "file": "assets/app-Z5Pcsg2v.js",
+    "file": "assets/app-Cp8uqGAw.js",
     "name": "app",
     "src": "resources/js/app.jsx",
     "isEntry": true,
@@ -776,7 +776,7 @@
     ]
   },
   "resources/js/pages/Chat/Index.jsx": {
-    "file": "assets/Index-BtoBGLUF.js",
+    "file": "assets/Index-NoDGmNER.js",
     "name": "Index",
     "src": "resources/js/pages/Chat/Index.jsx",
     "isDynamicEntry": true,

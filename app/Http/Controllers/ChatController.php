@@ -47,7 +47,25 @@ class ChatController extends Controller
             ->orderByDesc('last_message_id')
             ->get();
 
-        $formatted = $conversations->map(function ($conversation) use ($user) {
+        $roomParam = $request->query('room') ?? $request->query('id');
+        $initialActiveId = $roomParam ? (is_numeric($roomParam) ? (int) $roomParam : $roomParam) : null;
+
+        if ($initialActiveId && is_numeric($initialActiveId)) {
+            $convToRead = $conversations->firstWhere('id', (int) $initialActiveId);
+            if ($convToRead) {
+                $lastMsgId = (int) max(
+                    (int) ($convToRead->last_message_id ?? 0),
+                    (int) ($convToRead->messages()->max('id') ?? 0)
+                );
+                if ($lastMsgId > 0) {
+                    ChatParticipant::where('conversation_id', $convToRead->id)
+                        ->where('user_id', $user->id)
+                        ->update(['last_read_message_id' => $lastMsgId]);
+                }
+            }
+        }
+
+        $formatted = $conversations->map(function ($conversation) use ($user, $initialActiveId) {
             $lastMsg = $conversation->lastMessage;
             $partner = $this->getConversationPartner($conversation, $user);
 
@@ -58,6 +76,8 @@ class ChatController extends Controller
             $bidangNama = $conversation->bidang?->nama_bidang
                 ?? $conversation->tiket?->layanan?->bidang?->nama_bidang
                 ?? null;
+
+            $unreadCount = ((int) $conversation->id === (int) $initialActiveId) ? 0 : $conversation->unreadCount($user->id);
 
             return [
                 'id' => $conversation->id,
@@ -74,14 +94,11 @@ class ChatController extends Controller
                     ? $lastMsg->created_at->format('Y-m-d H:i:s')
                     : ($conversation->updated_at ? $conversation->updated_at->format('Y-m-d H:i:s') : null),
                 'is_last_from_me' => $lastMsg ? (int) $lastMsg->sender_user_id === (int) $user->id : false,
-                'unread' => $conversation->unreadCount($user->id),
+                'unread' => $unreadCount,
                 'need_reply' => (bool) $conversation->need_reply,
                 'type' => $conversation->type,
             ];
         });
-
-        $roomParam = $request->query('room') ?? $request->query('id');
-        $initialActiveId = $roomParam ? (is_numeric($roomParam) ? (int) $roomParam : $roomParam) : null;
 
         return Inertia::render('Chat/Index', [
             'initialConversations' => $formatted,
@@ -382,9 +399,10 @@ class ChatController extends Controller
             ], 403);
         }
 
-        $lastMessageId = $conversation->last_message_id ?: $conversation
-            ->messages()
-            ->max('id');
+        $lastMessageId = (int) max(
+            (int) ($conversation->last_message_id ?? 0),
+            (int) ($conversation->messages()->max('id') ?? 0)
+        );
 
         ChatParticipant::where(
             'conversation_id',
