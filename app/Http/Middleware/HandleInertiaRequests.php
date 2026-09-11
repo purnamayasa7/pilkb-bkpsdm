@@ -121,13 +121,13 @@ class HandleInertiaRequests extends Middleware
                         ->orderByDesc('last_message_id')
                         ->get();
 
-                    $unreadConversationsCount = 0;
+                    $totalUnreadMessages = 0;
                     $formattedList = [];
 
                     foreach ($conversations as $conv) {
-                        $unread = $conv->unreadCount($user->id);
+                        $unread = (int) $conv->unreadCount($user->id);
                         if ($unread > 0) {
-                            $unreadConversationsCount++;
+                            $totalUnreadMessages += $unread;
                         }
 
                         if (count($formattedList) < 5) {
@@ -176,7 +176,7 @@ class HandleInertiaRequests extends Middleware
                     }
 
                     return [
-                        'unread_count' => $unreadConversationsCount,
+                        'unread_count' => $totalUnreadMessages,
                         'list'         => $formattedList,
                     ];
                 } catch (\Throwable $e) {

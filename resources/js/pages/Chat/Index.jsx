@@ -450,6 +450,9 @@ export default function ChatIndex({ initialConversations = [], initialActiveId =
             setConversations(prev =>
                 prev.map(c => (c.id === convId ? { ...c, unread: 0 } : c))
             );
+            try {
+                window.dispatchEvent(new CustomEvent('chat:read', { detail: { conversationId: convId } }));
+            } catch {}
             setTimeout(() => scrollToBottom('auto'), 40);
         } catch (err) {
             console.error('Failed to load room messages', err);
@@ -520,6 +523,9 @@ export default function ChatIndex({ initialConversations = [], initialActiveId =
             prev.map(c => (c.id === nextId ? { ...c, unread: 0 } : c))
         );
         axios.post(`/chat/${nextId}/mark-read`).catch(() => {});
+        try {
+            window.dispatchEvent(new CustomEvent('chat:read', { detail: { conversationId: nextId } }));
+        } catch {}
 
         // JIKA ROOM SUDAH PERNAH DI-LOAD: GUNAKAN CACHE (0ms, SANGAT RINGAN, TIDAK LOAD ULANG)
         if (roomCacheRef.current.has(nextId)) {

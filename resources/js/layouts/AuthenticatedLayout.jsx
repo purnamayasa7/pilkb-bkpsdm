@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Link, usePage, router } from '@inertiajs/react';
 import {
     Menu,
@@ -46,6 +46,9 @@ export default function AuthenticatedLayout({ children, title, fullHeight = fals
     const unreadMessagesCount = liveMessages?.unread_count || 0;
     const messagesList = liveMessages?.list || [];
 
+    const lastSoundTimeRef = useRef(0);
+    const reloadTimerRef = useRef(null);
+
     const [darkMode, setDarkMode] = useState(false);
     const [sidebarOpen, setSidebarOpen] = useState(false);
     const [sidebarCollapsed, setSidebarCollapsed] = useState(() => {
@@ -68,6 +71,58 @@ export default function AuthenticatedLayout({ children, title, fullHeight = fals
             return next;
         });
     };
+
+    // Global listener when chat is marked read anywhere (e.g. from chat room or navbar click)
+    useEffect(() => {
+        const handleChatRead = (e) => {
+            const convId = Number(e.detail?.conversationId);
+            if (!convId) return;
+
+            setLiveMessages(prev => {
+                if (!prev) return prev;
+                const prevList = prev.list || [];
+                const target = prevList.find(item => Number(item.id) === convId);
+                const readCount = Number(target?.unread || 0);
+
+                const updatedList = prevList.map(item =>
+                    Number(item.id) === convId ? { ...item, unread: 0 } : item
+                );
+
+                return {
+                    unread_count: Math.max(0, (Number(prev.unread_count) || 0) - readCount),
+                    list: updatedList,
+                };
+            });
+        };
+
+        const handleChatReadAll = () => {
+            setLiveMessages(prev => {
+                if (!prev) return prev;
+                return {
+                    unread_count: 0,
+                    list: (prev.list || []).map(item => ({ ...item, unread: 0 })),
+                };
+            });
+        };
+
+        const handleKeyDown = (e) => {
+            if (e.key === 'Escape') {
+                setMsgDropdownOpen(false);
+                setNotifOpen(false);
+                setProfileMenuOpen(false);
+            }
+        };
+
+        window.addEventListener('chat:read', handleChatRead);
+        window.addEventListener('chat:read-all', handleChatReadAll);
+        window.addEventListener('keydown', handleKeyDown);
+
+        return () => {
+            window.removeEventListener('chat:read', handleChatRead);
+            window.removeEventListener('chat:read-all', handleChatReadAll);
+            window.removeEventListener('keydown', handleKeyDown);
+        };
+    }, []);
 
     // Sync Dark/Light Mode state (Default Light Mode)
     useEffect(() => {
@@ -123,8 +178,12 @@ export default function AuthenticatedLayout({ children, title, fullHeight = fals
                 // Update optimistik instan (0ms) pada icon navbar dan dropdown list
                 setLiveMessages(prev => {
                     const prevList = prev?.list || [];
-                    const convId = val.conversationData?.id;
+                    const convId = Number(val.conversationData?.id);
                     const cleanName = val.conversationData?.nama_pengirim || val.messageData?.sender_name || 'Pengguna';
+                    const existingItem = prevList.find(item => Number(item.id) === convId);
+                    const prevItemUnread = Number(existingItem?.unread || 0);
+                    const newItemUnread = prevItemUnread + 1;
+
                     const newMsgItem = {
                         id: convId,
                         no_tiket: val.conversationData?.no_tiket,
@@ -132,29 +191,36 @@ export default function AuthenticatedLayout({ children, title, fullHeight = fals
                         role_label: val.conversationData?.sender_role_label || 'User',
                         last_message: val.messageData?.message || 'Pesan baru',
                         time_ago: 'Baru saja',
-                        unread: 1,
+                        unread: newItemUnread,
                         url: `/chat?room=${convId}`,
                     };
-                    const filtered = prevList.filter(item => item.id !== convId);
+                    const filtered = prevList.filter(item => Number(item.id) !== convId);
                     return {
-                        unread_count: (prev?.unread_count || 0) + 1,
+                        unread_count: (Number(prev?.unread_count) || 0) + 1,
                         list: [newMsgItem, ...filtered].slice(0, 5),
                     };
                 });
 
                 // Bunyikan chime notifikasi jika pengguna sedang berada di halaman luar /chat
                 if (!isOnChat) {
-                    try {
-                        const audio = new Audio('/sound/notification.mp3');
-                        audio.play().catch(() => {});
-                    } catch {}
+                    const now = Date.now();
+                    if (now - lastSoundTimeRef.current > 1500) {
+                        lastSoundTimeRef.current = now;
+                        try {
+                            const audio = new Audio('/sound/notification.mp3');
+                            audio.play().catch(() => {});
+                        } catch {}
+                    }
 
-                    // Sinkronisasi resmi dari server secara halus (tanpa reload halaman penuh)
-                    router.reload({
-                        only: ['unread_messages'],
-                        preserveScroll: true,
-                        preserveState: true,
-                    });
+                    // Sinkronisasi resmi dari server secara halus (debounced partial reload)
+                    clearTimeout(reloadTimerRef.current);
+                    reloadTimerRef.current = setTimeout(() => {
+                        router.reload({
+                            only: ['unread_messages'],
+                            preserveScroll: true,
+                            preserveState: true,
+                        });
+                    }, 350);
                 }
             };
 
@@ -599,8 +665,11 @@ export default function AuthenticatedLayout({ children, title, fullHeight = fals
                             >
                                 <MessageSquare className="w-4 h-4" />
                                 {unreadMessagesCount > 0 && (
-                                    <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 rounded-full bg-rose-600 text-white text-[10px] font-bold flex items-center justify-center ring-2 ring-white dark:ring-slate-900 shadow-xs">
-                                        {unreadMessagesCount > 9 ? '9+' : unreadMessagesCount}
+                                    <span className="absolute -top-1 -right-1 flex h-[18px] min-w-[18px]">
+                                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-60"></span>
+                                        <span className="relative min-w-[18px] h-[18px] px-1 rounded-full bg-rose-600 text-white text-[10px] font-bold flex items-center justify-center ring-2 ring-white dark:ring-slate-900 shadow-xs">
+                                            {unreadMessagesCount > 99 ? '99+' : unreadMessagesCount}
+                                        </span>
                                     </span>
                                 )}
                             </button>
@@ -660,7 +729,12 @@ export default function AuthenticatedLayout({ children, title, fullHeight = fals
                                                         <Link
                                                             key={item.id}
                                                             href={itemUrl}
-                                                            onClick={() => setMsgDropdownOpen(false)}
+                                                            onClick={() => {
+                                                                setMsgDropdownOpen(false);
+                                                                try {
+                                                                    window.dispatchEvent(new CustomEvent('chat:read', { detail: { conversationId: item.id } }));
+                                                                } catch {}
+                                                            }}
                                                             className={`block p-3.5 sm:px-4 transition-colors hover:bg-slate-50 dark:hover:bg-slate-800/60 ${
                                                                 isUnread
                                                                     ? 'bg-blue-50/40 dark:bg-blue-950/20'
