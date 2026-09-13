@@ -471,6 +471,18 @@ class PermintaanController extends Controller
 
     public function updatePermintaan(Request $request, $no_tiket)
     {
+        $user = Auth::user();
+
+        $tiket = Regtiket::with('layanan')
+            ->where('no_tiket', $no_tiket)
+            ->whereHas('layanan', function ($query) use ($user) {
+                $query->where(
+                    'kode_bidang',
+                    $user->bidang_id
+                );
+            })
+            ->firstOrFail();
+
         DB::beginTransaction();
 
         try {
@@ -504,11 +516,6 @@ class PermintaanController extends Controller
                     $semuaValid = false;
                 }
             }
-
-            // Get Data Tiket
-            $tiket = Regtiket::with('layanan')
-                ->where('no_tiket', $no_tiket)
-                ->firstOrFail();
 
             $tahap = Tahap::create([
                 'no_tiket' => $no_tiket,
@@ -609,11 +616,19 @@ class PermintaanController extends Controller
 
     public function selesaiPermintaan($no_tiket)
     {
+        $user = Auth::user();
+
+        $tiket = Regtiket::with('layanan')
+            ->where('no_tiket', $no_tiket)
+            ->whereHas('layanan', function ($query) use ($user) {
+                $query->where(
+                    'kode_bidang',
+                    $user->bidang_id
+                );
+            })
+            ->firstOrFail();
+
         try {
-            $tiket = Regtiket::where(
-                'no_tiket',
-                $no_tiket
-            )->firstOrFail();
 
             $olddata = [
                 'archives' => $tiket->archives,
@@ -762,42 +777,35 @@ class PermintaanController extends Controller
             );
         }
 
-
         /*
      * ========================================================
-     * GUNAKAN DISK E-FILE PILKB
+     * VALIDASI KEAMANAN FILE (PATH TRAVERSAL DEFENSE)
      * ========================================================
      */
+
+        $cleanRelativePath = ltrim(str_replace(['\\', "\0"], ['/', ''], $detail->file_path), '/');
+
+        if (str_contains($cleanRelativePath, '..') || str_contains($cleanRelativePath, ':')) {
+            abort(403, 'Akses file tidak valid.');
+        }
 
         $disk = \Illuminate\Support\Facades\Storage::disk(
             'pilkb_efile'
         );
 
-
-        /*
-     * ========================================================
-     * PASTIKAN FILE FISIK ADA
-     * ========================================================
-     */
-
-        if (!$disk->exists($detail->file_path)) {
+        if (!$disk->exists($cleanRelativePath)) {
             abort(
                 404,
                 'File dokumen tidak ditemukan.'
             );
         }
 
+        $realFilePath = realpath($disk->path($cleanRelativePath));
+        $diskRootPath = realpath($disk->path(''));
 
-        /*
-     * ========================================================
-     * AMBIL PATH FISIK
-     * ========================================================
-     */
-
-        $path = $disk->path(
-            $detail->file_path
-        );
-
+        if (!$realFilePath || !$diskRootPath || !str_starts_with($realFilePath, $diskRootPath)) {
+            abort(403, 'Akses file di luar direktori penyimpanan ditolak.');
+        }
 
         /*
      * ========================================================
@@ -808,16 +816,16 @@ class PermintaanController extends Controller
      * karena dokumen ingin ditampilkan di browser/PDF viewer.
      */
 
+        $safeDownloadName = str_replace(['"', "\r", "\n"], '', basename($detail->file_name ?? 'dokumen.pdf'));
+
         return response()->file(
-            $path,
+            $realFilePath,
             [
                 'Content-Type' =>
                 'application/pdf',
 
                 'Content-Disposition' =>
-                'inline; filename="' .
-                    ($detail->file_name ?? 'dokumen.pdf') .
-                    '"',
+                'inline; filename="' . $safeDownloadName . '"',
 
                 /*
              * Jangan gunakan cache.

@@ -106,6 +106,11 @@ class ChatController extends Controller
         ]);
     }
 
+    public function show($conversation)
+    {
+        return redirect()->route('chat.index', ['room' => $conversation]);
+    }
+
     public function myConversations()
     {
         $user = Auth::user();

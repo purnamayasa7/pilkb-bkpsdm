@@ -484,7 +484,7 @@ class TiketController extends Controller
     public function viewFile($id)
     {
         $detail = DetailTiket::with([
-            'regtiket',
+            'regtiket.layanan',
             'syarat'
         ])->findOrFail($id);
 
@@ -503,9 +503,16 @@ class TiketController extends Controller
             abort(403, 'Anda tidak memiliki akses ke dokumen ini.');
         }
 
+        if (
+            $user->role_id == 4 &&
+            $detail->regtiket->layanan?->kode_bidang !== $user->bidang_id
+        ) {
+            abort(403, 'Anda tidak memiliki akses ke dokumen ini.');
+        }
+
         /*
     |--------------------------------------------------------------------------
-    | CEK FILE
+    | CEK FILE & VALIDASI KEAMANAN (PATH TRAVERSAL DEFENSE)
     |--------------------------------------------------------------------------
     */
 
@@ -513,10 +520,23 @@ class TiketController extends Controller
             abort(404, 'File tidak ditemukan.');
         }
 
+        $cleanRelativePath = ltrim(str_replace(['\\', "\0"], ['/', ''], $detail->file_path), '/');
+
+        if (str_contains($cleanRelativePath, '..') || str_contains($cleanRelativePath, ':')) {
+            abort(403, 'Akses file tidak valid.');
+        }
+
         $disk = Storage::disk('pilkb_efile');
 
-        if (!$disk->exists($detail->file_path)) {
+        if (!$disk->exists($cleanRelativePath)) {
             abort(404, 'File tidak ditemukan di penyimpanan.');
+        }
+
+        $realFilePath = realpath($disk->path($cleanRelativePath));
+        $diskRootPath = realpath($disk->path(''));
+
+        if (!$realFilePath || !$diskRootPath || !str_starts_with($realFilePath, $diskRootPath)) {
+            abort(403, 'Akses file di luar direktori penyimpanan ditolak.');
         }
 
         /*
@@ -545,7 +565,7 @@ class TiketController extends Controller
     |--------------------------------------------------------------------------
     */
 
-        $file = $disk->get($detail->file_path);
+        $file = $disk->get($cleanRelativePath);
 
         /*
     |--------------------------------------------------------------------------
@@ -553,11 +573,13 @@ class TiketController extends Controller
     |--------------------------------------------------------------------------
     */
 
+        $safeDownloadName = str_replace(['"', "\r", "\n"], '', basename($detail->file_name ?? 'dokumen.pdf'));
+
         return response($file, 200)
             ->header('Content-Type', $mimeType)
             ->header(
                 'Content-Disposition',
-                'inline; filename="' . $detail->file_name . '"'
+                'inline; filename="' . $safeDownloadName . '"'
             );
     }
 
@@ -1632,11 +1654,25 @@ class TiketController extends Controller
 
     public function getHistory($no_tiket)
     {
-        $tiket = Regtiket::with(['layanan', 'layanan.bidang'])
-            ->where('no_tiket', $no_tiket)
-            ->first();
+        $user = Auth::user();
 
-        if ($tiket && (empty($tiket->nama) || $tiket->nama === '-')) {
+        $query = Regtiket::with(['layanan', 'layanan.bidang'])
+            ->where('no_tiket', $no_tiket);
+
+        if ($user) {
+            $query->visibleBy($user);
+        }
+
+        $tiket = $query->first();
+
+        if (!$tiket) {
+            return response()->json([
+                'tiket' => null,
+                'tahapan' => [],
+            ], 404);
+        }
+
+        if (empty($tiket->nama) || $tiket->nama === '-') {
             try {
                 $pegawai = $this->pegawaiService->getPegawaiByNip($tiket->nip);
                 if (!empty($pegawai)) {
@@ -1661,7 +1697,7 @@ class TiketController extends Controller
     // Cek Tiket Public
     public function formCek()
     {
-        return view('pages.public.cek_tiket');
+        return redirect()->route('login');
     }
 
     public function cekTiket(Request $request)

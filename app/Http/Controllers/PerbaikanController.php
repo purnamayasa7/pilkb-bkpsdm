@@ -97,6 +97,19 @@ class PerbaikanController extends Controller
 
     public function detail($no_tiket)
     {
+        $user = Auth::user();
+        if ($user && $user->bidang_id) {
+            $isMilikBidang = Regtiket::where('no_tiket', $no_tiket)
+                ->whereHas('layanan', function ($q) use ($user) {
+                    $q->where('kode_bidang', $user->bidang_id);
+                })
+                ->exists();
+
+            if (!$isMilikBidang) {
+                abort(403);
+            }
+        }
+
         $detail = DetailTiket::with('syarat')
             ->where('no_tiket', $no_tiket)
             ->where('status', 2)

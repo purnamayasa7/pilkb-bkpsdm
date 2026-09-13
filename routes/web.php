@@ -36,7 +36,7 @@ Route::get('/preview-theme', function () {
 
 Route::get('/cek-tiket', [TiketController::class, 'formCek'])->name('tiket.form');
 Route::post('/cek-tiket', [TiketController::class, 'cekTiket'])->middleware('throttle:10,1')->name('tiket.cek');
-Route::get('/cek-tiket/{no_tiket}', [TiketController::class, 'showPublic'])->name('tiket.public');
+Route::get('/cek-tiket/{no_tiket}', [TiketController::class, 'showPublic'])->middleware('throttle:30,1')->name('tiket.public');
 Route::get('/lacak-usulan', function (\Illuminate\Http\Request $request) {
     if ($request->filled('no_tiket')) {
         return redirect()->route('tiket.public', ['no_tiket' => $request->no_tiket]);
@@ -44,10 +44,10 @@ Route::get('/lacak-usulan', function (\Illuminate\Http\Request $request) {
     return redirect()->route('tiket.form');
 });
 Route::get('/get-layanan-syarat/{bidang}', [SyaratController::class, 'getLayanan'])->name('getLayanan');
-Route::get('/syarat/export-pdf', [SyaratController::class, 'exportPdf'])->name('exportPdf');
+Route::get('/syarat/export-pdf', [SyaratController::class, 'exportPdf'])->middleware('throttle:15,1')->name('exportPdf');
 
 // Cetak PDF
-Route::get('/tiket/cetak/{no_tiket}', [TiketController::class, 'cetak'])->name('tiket.cetak');
+Route::get('/tiket/cetak/{no_tiket}', [TiketController::class, 'cetak'])->middleware('throttle:20,1')->name('tiket.cetak');
 
 // Guest Chat (Public with Rate-Limiting Security)
 Route::get('/guest-chat/bidang', [ChatController::class, 'getBidang'])->middleware('throttle:60,1');
@@ -65,11 +65,11 @@ Route::get('/guest-bot/bidang-layanan', [\App\Http\Controllers\GuestBotControlle
 Route::get('/guest-bot/syarat/{layananId}', [\App\Http\Controllers\GuestBotController::class, 'getSyaratLayanan'])->middleware('throttle:60,1');
 Route::post('/guest-bot/tanya-ai', [\App\Http\Controllers\GuestBotController::class, 'tanyaAi'])->middleware('throttle:15,1');
 Route::post('/guest-bot/feedback-ai', [\App\Http\Controllers\GuestBotController::class, 'simpanFeedback'])->middleware('throttle:30,1');
-// Open & close chat
-Route::post('/chat/{conversation}/close', [ChatController::class, 'closeChat']);
-Route::post('/chat/{conversation}/reopen', [ChatController::class, 'reopenChat']);
-// Total Unread Count
-Route::get('/chat/unread-count', [ChatController::class, 'unreadCount']);
+// Open & close chat (Authenticated)
+Route::post('/chat/{conversation}/close', [ChatController::class, 'closeChat'])->middleware('auth');
+Route::post('/chat/{conversation}/reopen', [ChatController::class, 'reopenChat'])->middleware('auth');
+// Total Unread Count (Authenticated)
+Route::get('/chat/unread-count', [ChatController::class, 'unreadCount'])->middleware('auth');
 // Check NIP Tanya Admin
 Route::get('/guest-chat/pegawai/{nip}', [ChatController::class, 'getPegawaiByNip'])->middleware('throttle:30,1');
 
@@ -93,7 +93,7 @@ Route::middleware(['auth', 'force.password'])->group(function () {
 
     // Change Password
     Route::get('/change-password', [UserController::class, 'changePasswordForm'])->name('password.change');
-    Route::post('/change-password', [UserController::class, 'changePassword'])->name('password.update');
+    Route::post('/change-password', [UserController::class, 'changePassword'])->name('password.change.update');
 
     // Notification
     Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications.index');
@@ -262,8 +262,8 @@ Route::prefix('adminOpd')
         Route::get('perbaikan/export-pdf', [DetailTiketController::class, 'exportPdf'])->name('perbaikan.exportPdf');
 
         //AJAX
-        Route::get('get-layanan/{id}', [TiketController::class, 'getLayanan']);
-        Route::get('get-syarat/{id}', [TiketController::class, 'getSyarat']);
+        Route::get('get-layanan/{id}', [TiketController::class, 'getLayanan'])->name('layanan.ajax');
+        Route::get('get-syarat/{id}', [TiketController::class, 'getSyarat'])->name('syarat.ajax');
 
         // CETAK ULANG TIKET
         Route::get('tiket/cetak-form', [TiketController::class, 'formCetak'])->name('tiket.formCetak');

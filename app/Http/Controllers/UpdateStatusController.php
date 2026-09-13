@@ -211,6 +211,15 @@ class UpdateStatusController extends Controller
 
     public function update(Request $request, $no_tiket)
     {
+        $currentUser = Auth::user();
+
+        $tiket = Regtiket::with('layanan')
+            ->where('no_tiket', $no_tiket)
+            ->whereHas('layanan', function ($query) use ($currentUser) {
+                $query->where('kode_bidang', $currentUser->bidang_id);
+            })
+            ->firstOrFail();
+
         DB::beginTransaction();
 
         try {
@@ -255,10 +264,6 @@ class UpdateStatusController extends Controller
                     [],
                     $tahap->toArray()
                 );
-
-                // Ambil tiket untuk mendapatkan kode_ukerja
-                $tiket = Regtiket::where('no_tiket', $no_tiket)
-                    ->firstOrFail();
 
                 // Kirim Notifikasi ke Admin OPD pemilik tiket
                 $adminOpd = User::where('role_id', 3)

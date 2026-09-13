@@ -989,19 +989,28 @@ class DetailTiketController extends Controller
 
     public function viewDokumen($id)
     {
-        $detail = DetailTiket::with('regtiket')
+        $detail = DetailTiket::with('regtiket.layanan')
             ->where('id', $id)
             ->firstOrFail();
 
         /*
     |--------------------------------------------------------------------------
-    | CEK HAK AKSES ADMIN OPD
+    | CEK HAK AKSES ADMIN OPD & BIDANG
     |--------------------------------------------------------------------------
     */
 
+        $currentUser = Auth::user();
+
         if (
-            Auth::user()->role_id == 3 &&
-            $detail->regtiket?->kode_ukerja !== Auth::user()->kode_ukerja
+            $currentUser->role_id == 3 &&
+            $detail->regtiket?->kode_ukerja !== $currentUser->kode_ukerja
+        ) {
+            abort(403);
+        }
+
+        if (
+            $currentUser->role_id == 4 &&
+            $detail->regtiket?->layanan?->kode_bidang !== $currentUser->bidang_id
         ) {
             abort(403);
         }
@@ -1018,35 +1027,27 @@ class DetailTiketController extends Controller
 
         /*
     |--------------------------------------------------------------------------
-    | LOKASI FISIK E-FILE
-    |--------------------------------------------------------------------------
-    |
-    | File disimpan langsung:
-    |
-    | D:\efile-pilkb\{no_tiket}\{file}
-    |
-    */
-
-        $basePath = 'D:\\efile-pilkb';
-
-        $path = $basePath . DIRECTORY_SEPARATOR .
-            str_replace(
-                ['/', '\\'],
-                DIRECTORY_SEPARATOR,
-                $detail->file_path
-            );
-
-        /*
-    |--------------------------------------------------------------------------
-    | CEK FILE FISIK
+    | LOKASI FISIK & VALIDASI KEAMANAN FILE (PATH TRAVERSAL DEFENSE)
     |--------------------------------------------------------------------------
     */
 
-        if (!is_file($path)) {
-            abort(
-                404,
-                'File dokumen tidak ditemukan: ' . $path
-            );
+        $cleanRelativePath = ltrim(str_replace(['\\', "\0"], ['/', ''], $detail->file_path), '/');
+
+        if (str_contains($cleanRelativePath, '..') || str_contains($cleanRelativePath, ':')) {
+            abort(403, 'Akses file tidak valid.');
+        }
+
+        $disk = Storage::disk('pilkb_efile');
+
+        if (!$disk->exists($cleanRelativePath)) {
+            abort(404, 'File dokumen tidak ditemukan.');
+        }
+
+        $realFilePath = realpath($disk->path($cleanRelativePath));
+        $diskRootPath = realpath($disk->path(''));
+
+        if (!$realFilePath || !$diskRootPath || !str_starts_with($realFilePath, $diskRootPath)) {
+            abort(403, 'Akses file di luar direktori penyimpanan ditolak.');
         }
 
         /*
@@ -1061,15 +1062,15 @@ class DetailTiketController extends Controller
     |
     */
 
+        $safeDownloadName = str_replace(['"', "\r", "\n"], '', basename($detail->file_name ?? 'dokumen.pdf'));
+
         return response()->file(
-            $path,
+            $realFilePath,
             [
                 'Content-Type' => 'application/pdf',
 
                 'Content-Disposition' =>
-                'inline; filename="' .
-                    ($detail->file_name ?? 'dokumen.pdf') .
-                    '"',
+                'inline; filename="' . $safeDownloadName . '"',
 
                 'Cache-Control' =>
                 'no-store, no-cache, must-revalidate, max-age=0',
@@ -1653,8 +1654,15 @@ class DetailTiketController extends Controller
     // Update nilai diperbaiki menjadi = 1 pada menu Admin OPD
     public function konfirmasiPerbaikan($no_tiket)
     {
-        $tiket = Regtiket::where('no_tiket', $no_tiket)
-            ->firstOrFail();
+        $currentUser = Auth::user();
+
+        $query = Regtiket::with('layanan')->where('no_tiket', $no_tiket);
+
+        if ($currentUser && $currentUser->role_id == 3) {
+            $query->where('kode_ukerja', $currentUser->kode_ukerja);
+        }
+
+        $tiket = $query->firstOrFail();
 
         $oldData = [
             'diperbaiki' => $tiket->diperbaiki,
@@ -1728,6 +1736,18 @@ class DetailTiketController extends Controller
 
     public function detailPerbaikan($no_tiket)
     {
+        $currentUser = Auth::user();
+
+        if ($currentUser && $currentUser->role_id == 3) {
+            $milikOpd = Regtiket::where('no_tiket', $no_tiket)
+                ->where('kode_ukerja', $currentUser->kode_ukerja)
+                ->exists();
+
+            if (!$milikOpd) {
+                abort(403);
+            }
+        }
+
         $data = DetailTiket::with('syarat')
             ->where('no_tiket', $no_tiket)
             ->where('status', 2)
@@ -2023,7 +2043,7 @@ class DetailTiketController extends Controller
                 'dokumen' => 'nullable|array',
 
                 'dokumen.*' =>
-                'nullable|file|mimes:pdf|max:1024',
+                'nullable|file|mimes:pdf|mimetypes:application/pdf|max:1024',
             ],
             [
                 'dokumen.*.file' =>
@@ -2239,17 +2259,9 @@ class DetailTiketController extends Controller
             |
             */
 
-                $safeOriginalName = preg_replace(
-                    '/[^A-Za-z0-9._-]/',
-                    '_',
-                    $originalName
-                );
-
-
                 $fileName =
-                    bin2hex(random_bytes(8)) .
-                    '_' .
-                    $safeOriginalName;
+                    bin2hex(random_bytes(16)) .
+                    '.pdf';
 
 
                 /*

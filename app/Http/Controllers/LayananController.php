@@ -209,7 +209,9 @@ class LayananController extends Controller
 
     public function updateBidang(Request $request, $layananId)
     {
-        $layanan = Layanan::findOrFail($layananId);
+        $layanan = Layanan::where('id', $layananId)
+            ->where('kode_bidang', Auth::user()->bidang_id)
+            ->firstOrFail();
 
         $request->validate([
             'nama_layanan' => 'required',
@@ -263,7 +265,10 @@ class LayananController extends Controller
     // Menu Admin Bidang
     public function editBidang($id)
     {
-        $layanan = Layanan::with('bidang')->findOrFail($id);
+        $layanan = Layanan::with('bidang')
+            ->where('id', $id)
+            ->where('kode_bidang', Auth::user()->bidang_id)
+            ->firstOrFail();
         $bidang = Bidang::all();
 
         return Inertia::render('Bidang/Layanan/Edit', [

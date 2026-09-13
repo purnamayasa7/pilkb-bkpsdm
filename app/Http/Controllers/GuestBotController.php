@@ -45,14 +45,21 @@ class GuestBotController extends Controller
         $bidangId = $tiket->layanan?->kode_bidang ?? $tiket->layanan?->bidang_id ?? '';
         $bidangNama = $tiket->layanan?->bidang?->nama_bidang ?? '-';
 
+        $maskedEmail = $tiket->email
+            ? preg_replace('/(?<=.{2}).(?=.*@)/u', '*', $tiket->email)
+            : '';
+        $maskedNip = strlen($tiket->nip ?? '') >= 12
+            ? substr($tiket->nip, 0, 8) . '******' . substr($tiket->nip, -4)
+            : ($tiket->nip ?: '-');
+
         return response()->json([
             'status' => 'found',
             'data'   => [
                 'no_tiket'       => $tiket->no_tiket,
                 'nama'           => $tiket->nama,
-                'nip'            => $tiket->nip ?: '-',
+                'nip'            => $maskedNip,
                 'unit_kerja'     => $tiket->nama_ukerja ?: '-',
-                'email'          => $tiket->email ?: '',
+                'email'          => $maskedEmail,
                 'layanan_id'     => $layananId,
                 'bidang_id'      => $bidangId,
                 'layanan'        => $tiket->layanan?->nama_layanan ?? '-',

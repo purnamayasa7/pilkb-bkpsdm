@@ -56,7 +56,7 @@ return [
         // e-File PILKB
         'pilkb_efile' => [
             'driver' => 'local',
-            'root' => env('PILKB_EFILE_PATH'),
+            'root' => env('PILKB_EFILE_PATH', 'D:/efile-pilkb'),
             'throw' => true,
         ],
 

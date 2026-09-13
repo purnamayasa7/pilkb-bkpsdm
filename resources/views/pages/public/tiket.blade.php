@@ -312,7 +312,7 @@
                             <tr>
                                 <td class="info-label">NIP</td>
                                 <td class="info-sep">:</td>
-                                <td class="info-val">{{ $tiket->nip }}</td>
+                                <td class="info-val">{{ auth()->check() ? $tiket->nip : (strlen($tiket->nip ?? '') >= 12 ? substr($tiket->nip, 0, 8) . '******' . substr($tiket->nip, -4) : $tiket->nip) }}</td>
                             </tr>
                             <tr>
                                 <td class="info-label">Nama Pegawai</td>

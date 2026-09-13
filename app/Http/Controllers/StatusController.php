@@ -52,30 +52,7 @@ class StatusController extends Controller
     // Menu Admin Bidang
     public function indexBidang(Request $request)
     {
-        $user = Auth::user();
-
-        $layanan = Layanan::where('kode_bidang', $user->bidang_id)
-            ->orderBy('nama_layanan')
-            ->get();
-
-        $layananId = $request->filled('layanan')
-            ? $request->layanan
-            : null;
-
-        $status = Status::with(['layanan.bidang'])
-            ->whereHas('layanan', function ($q) use ($user) {
-                $q->where('kode_bidang', $user->bidang_id);
-            })
-            ->when($layananId, function ($q) use ($layananId) {
-                $q->where('kode_layanan', $layananId);
-            })
-            ->get();
-
-        return view('pages.bidang.status.index', compact(
-            'status',
-            'layanan',
-            'layananId'
-        ));
+        return redirect()->route('adminBidang.status.index');
     }
 
     public function create(Request $request)
@@ -101,13 +78,7 @@ class StatusController extends Controller
     // Menu Admin Bidang
     public function createBidang()
     {
-        $user = Auth::user();
-
-        $layanan = Layanan::where('kode_bidang', $user->bidang_id)
-            ->orderBy('nama_layanan')
-            ->get();
-
-        return view('pages.bidang.status.create', compact('layanan'));
+        return redirect()->route('adminBidang.status.index');
     }
 
     public function store(Request $request)
@@ -259,22 +230,7 @@ class StatusController extends Controller
     // Menu Admin Bidang
     public function editBidang($id)
     {
-        $user = Auth::user();
-
-        $status = Status::with('layanan.bidang')
-            ->whereHas('layanan', function ($q) use ($user) {
-                $q->where('kode_bidang', $user->bidang_id);
-            })
-            ->findOrFail($id);
-
-        $layanan = Layanan::where('kode_bidang', $user->bidang_id)
-            ->orderBy('nama_layanan')
-            ->get();
-
-        return view('pages.bidang.status.edit', compact(
-            'status',
-            'layanan'
-        ));
+        return redirect()->route('adminBidang.status.index');
     }
 
     public function destroy($id)
