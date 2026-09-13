@@ -20,6 +20,7 @@ import {
     Clock,
     Tag,
     MessageSquare,
+    Sparkles,
 } from 'lucide-react';
 import MenuIcon from '../components/MenuIcon';
 import TicketSearch from '../components/TicketSearch';
@@ -312,19 +313,17 @@ export default function AuthenticatedLayout({ children, title, fullHeight = fals
             >
                 <div className="relative flex flex-col items-center justify-center">
                     <div className="relative w-20 h-20 flex items-center justify-center">
-                        {/* Outer pulsing glow ring */}
-                        <span className={`absolute inset-0 rounded-full bg-blue-500/20 ${isNavigating ? 'animate-ping' : ''}`} />
-                        {/* Spinning ring */}
+                        {/* Static outer subtle track ring */}
+                        <span className="absolute inset-0 rounded-full border border-slate-200 dark:border-slate-800" />
+                        {/* Spinning ring: 1 solid brand color */}
                         <span
-                            className={`absolute inset-0 rounded-full border-[3px] border-transparent border-t-blue-600 border-r-blue-400 dark:border-t-blue-500 dark:border-r-blue-300 ${
+                            className={`absolute inset-0 rounded-full border-2 border-transparent border-t-blue-600 dark:border-t-blue-500 ${
                                 isNavigating ? 'animate-spin' : ''
                             }`}
-                            style={{ animationDuration: '0.8s' }}
+                            style={{ animationDuration: '0.85s' }}
                         />
-                        {/* Static outer ring */}
-                        <span className="absolute inset-0 rounded-full border border-blue-200/50 dark:border-blue-800/50" />
-                        {/* Logo container */}
-                        <div className="w-14 h-14 rounded-full bg-white dark:bg-slate-900 shadow-2xl border border-slate-100 dark:border-slate-800 flex items-center justify-center overflow-hidden">
+                        {/* Logo container (clean, sharp, no glow) */}
+                        <div className="w-14 h-14 rounded-full bg-white dark:bg-slate-900 shadow-md border border-slate-200 dark:border-slate-800 flex items-center justify-center overflow-hidden">
                             <img
                                 src="/images/KabBuleleng.png"
                                 alt="Loading..."
@@ -516,7 +515,7 @@ export default function AuthenticatedLayout({ children, title, fullHeight = fals
 
             {/* MAIN CONTENT AREA */}
             <div className={`flex-1 flex flex-col min-w-0 transition-all duration-300 ease-in-out ${
-                fullHeight ? 'h-screen overflow-hidden' : ''
+                fullHeight ? 'h-screen h-[100dvh] overflow-hidden' : ''
             } ${
                 sidebarCollapsed ? 'lg:pl-20' : 'lg:pl-64'
             }`}>
@@ -572,11 +571,8 @@ export default function AuthenticatedLayout({ children, title, fullHeight = fals
                             >
                                 <Bell className="w-4 h-4" />
                                 {unreadNotifsCount > 0 && (
-                                    <span className="absolute -top-1 -right-1 flex h-[18px] min-w-[18px]">
-                                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-60"></span>
-                                        <span className="relative min-w-[18px] h-[18px] px-1 rounded-full bg-rose-600 text-white text-[10px] font-bold flex items-center justify-center ring-2 ring-white dark:ring-slate-900 shadow-xs">
-                                            {unreadNotifsCount > 99 ? '99+' : unreadNotifsCount}
-                                        </span>
+                                    <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 rounded-full bg-rose-600 text-white text-[10px] font-bold flex items-center justify-center ring-2 ring-white dark:ring-slate-900 shadow-xs pointer-events-none">
+                                        {unreadNotifsCount > 99 ? '99+' : unreadNotifsCount}
                                     </span>
                                 )}
                             </button>
@@ -723,11 +719,8 @@ export default function AuthenticatedLayout({ children, title, fullHeight = fals
                             >
                                 <MessageSquare className="w-4 h-4" />
                                 {unreadMessagesCount > 0 && (
-                                    <span className="absolute -top-1 -right-1 flex h-[18px] min-w-[18px]">
-                                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-60"></span>
-                                        <span className="relative min-w-[18px] h-[18px] px-1 rounded-full bg-rose-600 text-white text-[10px] font-bold flex items-center justify-center ring-2 ring-white dark:ring-slate-900 shadow-xs">
-                                            {unreadMessagesCount > 99 ? '99+' : unreadMessagesCount}
-                                        </span>
+                                    <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 rounded-full bg-rose-600 text-white text-[10px] font-bold flex items-center justify-center ring-2 ring-white dark:ring-slate-900 shadow-xs pointer-events-none">
+                                        {unreadMessagesCount > 99 ? '99+' : unreadMessagesCount}
                                     </span>
                                 )}
                             </button>
@@ -764,6 +757,49 @@ export default function AuthenticatedLayout({ children, title, fullHeight = fals
                                                 Buka Chat
                                             </Link>
                                         </div>
+
+                                        {/* Pinned Banner Konsultasi LILI AI */}
+                                        <Link
+                                            href="/chat?room=lili_ai"
+                                            onClick={() => setMsgDropdownOpen(false)}
+                                            className="flex items-center gap-3 p-3 sm:px-4 bg-gradient-to-r from-indigo-50/90 via-blue-50/50 to-indigo-50/90 dark:from-indigo-950/40 dark:via-blue-950/20 dark:to-indigo-950/40 hover:from-indigo-100 hover:to-blue-100 dark:hover:from-indigo-900/60 dark:hover:to-blue-900/40 border-b border-indigo-100/80 dark:border-indigo-900/50 transition-colors group cursor-pointer"
+                                            title="Konsultasi regulasi kepegawaian instan bersama Asisten Virtual LILI"
+                                        >
+                                            <div className="relative shrink-0">
+                                                <div className="w-8 h-8 rounded-full overflow-hidden border border-indigo-300 dark:border-indigo-500 shadow-2xs">
+                                                    <img
+                                                        src="/images/lili-avatar.png"
+                                                        alt="LILI"
+                                                        className="w-full h-full object-cover"
+                                                        onError={(e) => {
+                                                            e.target.style.display = 'none';
+                                                            if (e.target.nextSibling) e.target.nextSibling.style.display = 'flex';
+                                                        }}
+                                                    />
+                                                    <span className="w-full h-full bg-indigo-600 text-white font-bold text-[10px] hidden items-center justify-center">
+                                                        LI
+                                                    </span>
+                                                </div>
+                                                <span className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 bg-emerald-500 rounded-full ring-1.5 ring-white dark:ring-slate-900 pointer-events-none" />
+                                            </div>
+
+                                            <div className="flex-1 min-w-0">
+                                                <div className="flex items-center gap-1.5">
+                                                    <h4 className="text-xs font-bold text-indigo-950 dark:text-indigo-200 truncate">
+                                                        LILI Asisten Kepegawaian
+                                                    </h4>
+                                                    <span className="px-1.5 py-0.2 rounded-full text-[9px] font-extrabold bg-indigo-100 dark:bg-indigo-900/80 text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-700/60">
+                                                        Online 24/7
+                                                    </span>
+                                                </div>
+                                                <p className="text-[11px] text-indigo-700/80 dark:text-indigo-300/80 truncate mt-0.5 flex items-center gap-1">
+                                                    <Sparkles className="w-3 h-3 text-amber-500 shrink-0" />
+                                                    <span>Konsultasi regulasi kepegawaian instan</span>
+                                                </p>
+                                            </div>
+
+                                            <ArrowRight className="w-3.5 h-3.5 text-indigo-400 group-hover:translate-x-0.5 transition-transform shrink-0" />
+                                        </Link>
 
                                         {/* Dropdown List (Max 5 Pesan Percakapan) */}
                                         <div className="max-h-[380px] overflow-y-auto divide-y divide-slate-100 dark:divide-slate-800/80">

@@ -1357,21 +1357,21 @@ export default function ChatIndex({ initialConversations = [], initialActiveId =
             <Head title="PILKB - Pusat Komunikasi & Bantuan" />
 
             {/* FULL-VIEWPORT WRAPPER (NO PAGE SCROLL, EXACTLY LIKE WHATSAPP WINDOWS) */}
-            <div className="flex-1 min-h-0 flex flex-col p-2 sm:p-3 lg:p-4 bg-slate-50/80 dark:bg-slate-950 overflow-hidden h-full">
+            <div className="flex-1 min-h-0 flex flex-col p-0 md:p-3 lg:p-4 bg-slate-50/80 dark:bg-slate-950 overflow-hidden h-full">
                 
                 {/* DUAL-PANEL CHAT CONTAINER (FLEX-1 TAKES 100% HEIGHT, ZERO OVERFLOW) */}
-                <div className="flex-1 min-h-0 rounded-2xl md:rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs overflow-hidden flex flex-row">
+                <div className="flex-1 min-h-0 rounded-none md:rounded-3xl bg-white dark:bg-slate-900 border-0 md:border border-slate-200 dark:border-slate-800 shadow-xs overflow-hidden flex flex-row">
                     
                     {/* --------------------------------------------------------------------- */}
                     {/* PANEL 1: DAFTAR PERCAKAPAN (SIDEBAR WA WINDOWS)                       */}
                     {/* --------------------------------------------------------------------- */}
                     <div className={`w-full md:w-80 lg:w-96 shrink-0 flex-col h-full border-r border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 overflow-hidden ${
-                        isMobile && activeId ? 'hidden' : 'flex'
+                        activeId ? 'hidden md:flex' : 'flex'
                     }`}>
                             {/* Header Sidebar: User Profile (PINNED AT TOP, DOES NOT SCROLL) */}
-                            <div className="h-16 px-4 border-b border-slate-100 dark:border-slate-800/80 flex items-center justify-between shrink-0 bg-white dark:bg-slate-900">
-                                <div className="flex items-center gap-3 overflow-hidden">
-                                    <div className="w-10 h-10 rounded-full bg-blue-600 text-white font-bold text-xs flex items-center justify-center shrink-0 shadow-2xs">
+                            <div className="h-16 px-3.5 sm:px-4 border-b border-slate-100 dark:border-slate-800/80 flex items-center justify-between shrink-0 bg-white dark:bg-slate-900">
+                                <div className="flex items-center gap-2.5 sm:gap-3 overflow-hidden">
+                                    <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-blue-600 text-white font-bold text-xs flex items-center justify-center shrink-0 shadow-2xs">
                                         {getInitials(currentUser?.nama || 'Pengguna', 'SM')}
                                     </div>
                                     <div className="overflow-hidden">
@@ -1435,7 +1435,7 @@ export default function ChatIndex({ initialConversations = [], initialActiveId =
                             </div>
 
                             {/* Search Bar Section (PINNED, DOES NOT SCROLL) */}
-                            <div className="p-3 pb-2.5 border-b border-slate-100 dark:border-slate-800/80 bg-white dark:bg-slate-900 shrink-0">
+                            <div className="p-2.5 sm:p-3 pb-2.5 border-b border-slate-100 dark:border-slate-800/80 bg-white dark:bg-slate-900 shrink-0">
                                 <div className="relative flex items-center">
                                     <Search className="w-4 h-4 text-slate-400 absolute left-3.5 pointer-events-none" />
                                     <input
@@ -1549,7 +1549,7 @@ export default function ChatIndex({ initialConversations = [], initialActiveId =
                                     <div
                                         id="sidebar-item-lili_ai"
                                         onClick={handleSelectLili}
-                                        className={`p-3 hover:bg-slate-50 dark:hover:bg-slate-800/50 cursor-pointer transition-colors relative flex items-start gap-3 ${
+                                        className={`p-2.5 sm:p-3 hover:bg-slate-50 dark:hover:bg-slate-800/50 cursor-pointer transition-colors relative flex items-start gap-2.5 sm:gap-3 ${
                                             activeId === 'lili_ai'
                                                 ? 'bg-indigo-50/80 dark:bg-indigo-950/50'
                                                 : ''
@@ -1562,7 +1562,7 @@ export default function ChatIndex({ initialConversations = [], initialActiveId =
                                             <img
                                                 src="/images/lili-avatar.png"
                                                 alt="LILI"
-                                                className="w-10 h-10 rounded-full object-cover border-2 border-indigo-400/80 shadow-2xs"
+                                                className="w-9 h-9 sm:w-10 sm:h-10 rounded-full object-cover border-2 border-indigo-400/80 shadow-2xs"
                                                 onError={(e) => {
                                                     e.target.style.display = 'none';
                                                     e.target.nextSibling.style.display = 'flex';
@@ -1570,7 +1570,7 @@ export default function ChatIndex({ initialConversations = [], initialActiveId =
                                             />
                                             <div
                                                 style={{ display: 'none' }}
-                                                className="w-10 h-10 rounded-full bg-indigo-600 text-white font-bold text-xs items-center justify-center border-2 border-indigo-300"
+                                                className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-indigo-600 text-white font-bold text-xs items-center justify-center border-2 border-indigo-300"
                                             >
                                                 LI
                                             </div>
@@ -1616,7 +1616,7 @@ export default function ChatIndex({ initialConversations = [], initialActiveId =
                                                 key={conv.id}
                                                 id={`sidebar-item-${conv.id}`}
                                                 onClick={() => handleSelectConversation(conv)}
-                                                className={`p-3 hover:bg-slate-50 dark:hover:bg-slate-800/50 cursor-pointer transition-colors relative flex items-start gap-3 ${
+                                                className={`p-2.5 sm:p-3 hover:bg-slate-50 dark:hover:bg-slate-800/50 cursor-pointer transition-colors relative flex items-start gap-2.5 sm:gap-3 ${
                                                     isActive
                                                         ? 'bg-blue-50/80 dark:bg-blue-950/50'
                                                         : ''
@@ -1636,7 +1636,7 @@ export default function ChatIndex({ initialConversations = [], initialActiveId =
                                                     </div>
                                                 )}
 
-                                                <div className="w-10 h-10 rounded-full bg-blue-600 text-white font-bold text-xs flex items-center justify-center shrink-0 shadow-2xs mt-0.5">
+                                                <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-blue-600 text-white font-bold text-xs flex items-center justify-center shrink-0 shadow-2xs mt-0.5">
                                                     {getInitials(conv.nama_pengirim || 'Pengguna', 'KP')}
                                                 </div>
 
@@ -1708,7 +1708,7 @@ export default function ChatIndex({ initialConversations = [], initialActiveId =
                     {/* PANEL 2: RUANG PERCAKAPAN (MAIN PANEL WA WINDOWS)                     */}
                     {/* --------------------------------------------------------------------- */}
                     <div className={`flex-1 min-w-0 flex-col h-full bg-slate-50/50 dark:bg-slate-950/30 overflow-hidden ${
-                        isMobile && !activeId ? 'hidden' : 'flex'
+                        !activeId ? 'hidden md:flex' : 'flex'
                     }`}>
                             {/* KONDISI 1: EMPTY STATE (WHATSAPP WINDOWS AESTHETIC) */}
                             {!activeId && (
@@ -1717,12 +1717,9 @@ export default function ChatIndex({ initialConversations = [], initialActiveId =
 
                                     <div className="flex flex-col items-center max-w-md mx-auto">
                                         {/* WhatsApp Windows-inspired Hero Icon */}
-                                        <div className="relative mb-5">
+                                        <div className="mb-5">
                                             <div className="w-20 sm:w-24 h-20 sm:h-24 rounded-full bg-blue-50 dark:bg-blue-950/60 border border-blue-200/70 dark:border-blue-800/60 flex items-center justify-center text-blue-600 dark:text-blue-400 shadow-sm">
                                                 <MessageSquare className="w-10 sm:w-12 h-10 sm:h-12 stroke-[1.5]" />
-                                            </div>
-                                            <div className="absolute -bottom-1 -right-1 w-7 sm:w-8 h-7 sm:h-8 rounded-full bg-emerald-500 border-2 sm:border-3 border-white dark:border-slate-900 flex items-center justify-center text-white shadow-2xs">
-                                                <Check className="w-3.5 sm:w-4 h-3.5 sm:h-4 stroke-[3]" />
                                             </div>
                                         </div>
 
@@ -1769,24 +1766,22 @@ export default function ChatIndex({ initialConversations = [], initialActiveId =
                             {activeId === 'lili_ai' && (
                                 <div className="h-full flex flex-col min-h-0 bg-white dark:bg-slate-900">
                                     {/* Header (PINNED AT TOP, DOES NOT SCROLL) */}
-                                    <div className="h-16 px-4 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between shrink-0 bg-white dark:bg-slate-900 shadow-2xs">
-                                        <div className="flex items-center gap-3 overflow-hidden">
-                                            {isMobile && (
-                                                <button
-                                                    type="button"
-                                                    onClick={() => setActiveId(null)}
-                                                    className="p-1.5 rounded-lg text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800"
-                                                    title="Kembali ke daftar"
-                                                >
-                                                    <ArrowLeft className="w-4 h-4" />
-                                                </button>
-                                            )}
+                                    <div className="h-16 px-3 sm:px-4 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between shrink-0 bg-white dark:bg-slate-900 shadow-2xs">
+                                        <div className="flex items-center gap-2 sm:gap-3 overflow-hidden min-w-0 flex-1">
+                                            <button
+                                                type="button"
+                                                onClick={() => setActiveId(null)}
+                                                className="md:hidden p-2 -ml-1 rounded-xl text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer shrink-0"
+                                                title="Kembali ke daftar"
+                                            >
+                                                <ArrowLeft className="w-4 h-4" />
+                                            </button>
 
                                             <div className="relative shrink-0">
                                                 <img
                                                     src="/images/lili-avatar.png"
                                                     alt="LILI"
-                                                    className="w-10 h-10 rounded-full object-cover border-2 border-indigo-400"
+                                                    className="w-9 h-9 sm:w-10 sm:h-10 rounded-full object-cover border-2 border-indigo-400"
                                                     onError={(e) => {
                                                         e.target.style.display = 'none';
                                                         e.target.nextSibling.style.display = 'flex';
@@ -1794,22 +1789,22 @@ export default function ChatIndex({ initialConversations = [], initialActiveId =
                                                 />
                                                 <div
                                                     style={{ display: 'none' }}
-                                                    className="w-10 h-10 rounded-full bg-indigo-600 text-white font-bold text-xs items-center justify-center border-2 border-indigo-300"
+                                                    className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-indigo-600 text-white font-bold text-xs items-center justify-center border-2 border-indigo-300"
                                                 >
                                                     LI
                                                 </div>
-                                                <span className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 bg-emerald-500 border-2 border-white dark:border-slate-900 rounded-full" />
+                                                <span className="absolute -bottom-0.5 -right-0.5 w-3 h-3 sm:w-3.5 sm:h-3.5 bg-emerald-500 border-2 border-white dark:border-slate-900 rounded-full" />
                                             </div>
 
-                                            <div className="overflow-hidden">
-                                                <div className="flex items-center gap-2">
+                                            <div className="overflow-hidden min-w-0 flex-1">
+                                                <div className="flex items-center gap-1.5">
                                                     <h4 className="font-bold text-slate-800 dark:text-slate-100 text-xs sm:text-sm truncate">
                                                         LILI - Asisten Virtual
                                                     </h4>
                                                     <button
                                                         type="button"
                                                         onClick={playLiliVoice}
-                                                        className="p-1 rounded-full text-indigo-600 dark:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-950/60 transition-colors cursor-pointer"
+                                                        className="p-1 rounded-full text-indigo-600 dark:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-950/60 transition-colors cursor-pointer shrink-0"
                                                         title="Putar Ulang Suara Sapaan LILI"
                                                     >
                                                         <Volume2 className="w-3.5 h-3.5" />
@@ -1821,11 +1816,11 @@ export default function ChatIndex({ initialConversations = [], initialActiveId =
                                             </div>
                                         </div>
 
-                                        <div className="flex items-center gap-2">
+                                        <div className="flex items-center gap-1.5 shrink-0">
                                             <button
                                                 type="button"
                                                 onClick={handleResetLiliChat}
-                                                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 text-xs font-semibold transition-colors cursor-pointer"
+                                                className="inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-xl border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 text-xs font-semibold transition-colors cursor-pointer"
                                                 title="Mulai Percakapan Baru dengan LILI"
                                             >
                                                 <RotateCcw className="w-3.5 h-3.5 text-slate-500" />
@@ -1835,7 +1830,7 @@ export default function ChatIndex({ initialConversations = [], initialActiveId =
                                     </div>
 
                                     {/* Messages Stream (ONLY THIS AREA SCROLLS IN PANEL 2) */}
-                                    <div className="flex-1 min-h-0 overflow-y-auto p-4 space-y-4 bg-slate-50/60 dark:bg-slate-950/40 overscroll-contain">
+                                    <div className="flex-1 min-h-0 overflow-y-auto p-3 sm:p-4 space-y-3 sm:space-y-4 bg-slate-50/60 dark:bg-slate-950/40 overscroll-contain">
                                         {liliMessages.map((msg) => {
                                             const isUser = msg.role === 'user';
                                             return (
@@ -2024,7 +2019,7 @@ export default function ChatIndex({ initialConversations = [], initialActiveId =
                                     </div>
 
                                     {/* Input Footer (PINNED AT BOTTOM, DOES NOT SCROLL) */}
-                                    <div className="p-3 bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 flex items-end gap-2 shrink-0">
+                                    <div className="p-2.5 sm:p-3 bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 flex items-end gap-2 shrink-0">
                                         <div className="flex-1 relative flex items-center">
                                             <textarea
                                                 ref={textareaRef}
@@ -2053,29 +2048,27 @@ export default function ChatIndex({ initialConversations = [], initialActiveId =
                             {activeId && activeId !== 'lili_ai' && (
                                 <div className="h-full flex flex-col min-h-0 bg-white dark:bg-slate-900 relative">
                                     {/* Header (PINNED AT TOP, DOES NOT SCROLL) */}
-                                    <div className="h-16 px-4 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between shrink-0 bg-white dark:bg-slate-900 shadow-2xs">
-                                        <div className="flex items-center gap-3 overflow-hidden">
-                                            {isMobile && (
-                                                <button
-                                                    type="button"
-                                                    onClick={() => setActiveId(null)}
-                                                    className="p-1.5 rounded-lg text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800"
-                                                    title="Kembali ke daftar"
-                                                >
-                                                    <ArrowLeft className="w-4 h-4" />
-                                                </button>
-                                            )}
+                                    <div className="h-16 px-3 sm:px-4 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between shrink-0 bg-white dark:bg-slate-900 shadow-2xs">
+                                        <div className="flex items-center gap-2 sm:gap-3 overflow-hidden min-w-0 flex-1">
+                                            <button
+                                                type="button"
+                                                onClick={() => setActiveId(null)}
+                                                className="md:hidden p-2 -ml-1 rounded-xl text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer shrink-0"
+                                                title="Kembali ke daftar"
+                                            >
+                                                <ArrowLeft className="w-4 h-4" />
+                                            </button>
 
-                                            <div className="w-10 h-10 rounded-full bg-blue-600 text-white font-bold text-xs flex items-center justify-center shrink-0 shadow-2xs">
+                                            <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-blue-600 text-white font-bold text-xs flex items-center justify-center shrink-0 shadow-2xs">
                                                 {getInitials(
                                                     activeRoomData?.nama_pengirim || 'Pengguna',
                                                     'KP'
                                                 )}
                                             </div>
 
-                                            <div className="overflow-hidden">
-                                                <div className="flex items-center gap-1.5 flex-wrap">
-                                                    <span className="font-bold text-slate-800 dark:text-slate-100 text-xs sm:text-sm truncate">
+                                            <div className="overflow-hidden min-w-0 flex-1">
+                                                <div className="flex items-center gap-1.5 min-w-0">
+                                                    <span className="font-bold text-slate-800 dark:text-slate-100 text-xs sm:text-sm truncate max-w-[120px] sm:max-w-[200px]">
                                                         {formatCleanName(activeRoomData?.nama_pengirim) || 'Memuat...'}
                                                     </span>
                                                     {activeRoomData?.sender_role && (
@@ -2085,16 +2078,16 @@ export default function ChatIndex({ initialConversations = [], initialActiveId =
                                                         />
                                                     )}
                                                     {activeRoomData?.ticket_number && (
-                                                        <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-blue-50 dark:bg-blue-950/60 border border-blue-100 dark:border-blue-900/60 text-[10px] font-semibold text-blue-700 dark:text-blue-300">
+                                                        <span className="hidden sm:inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-blue-50 dark:bg-blue-950/60 border border-blue-100 dark:border-blue-900/60 text-[10px] font-semibold text-blue-700 dark:text-blue-300 shrink-0">
                                                             <Tag className="w-2.5 h-2.5" />
                                                             <span>{activeRoomData.ticket_number}</span>
                                                         </span>
                                                     )}
                                                     <span
-                                                        className={`inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider ${
+                                                        className={`inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider shrink-0 ${
                                                             activeRoomData?.status === 'closed'
-                                                                ? 'bg-slate-100 text-slate-500'
-                                                                : 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+                                                                ? 'bg-slate-100 dark:bg-slate-800 text-slate-500'
+                                                                : 'bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800/60'
                                                         }`}
                                                     >
                                                         {activeRoomData?.status === 'closed' ? 'Closed' : 'Open'}
@@ -2108,7 +2101,9 @@ export default function ChatIndex({ initialConversations = [], initialActiveId =
                                                             <span>{typingUser} sedang mengetik...</span>
                                                         </span>
                                                     ) : (
-                                                        activeRoomData?.layanan || activeRoomData?.bidang || 'Pusat Bantuan PILKB'
+                                                        activeRoomData?.layanan
+                                                            ? `${activeRoomData?.ticket_number ? '#' + activeRoomData.ticket_number + ' • ' : ''}${activeRoomData.layanan}`
+                                                            : (activeRoomData?.bidang || (activeRoomData?.ticket_number ? '#' + activeRoomData.ticket_number : 'Pusat Bantuan PILKB'))
                                                     )}
                                                 </p>
                                             </div>
@@ -2154,7 +2149,7 @@ export default function ChatIndex({ initialConversations = [], initialActiveId =
                                     <div
                                         ref={messagesContainerRef}
                                         onScroll={handleMessagesScroll}
-                                        className="flex-1 min-h-0 overflow-y-auto p-4 sm:p-5 space-y-3 bg-[#efeae2]/20 dark:bg-slate-950 overscroll-contain"
+                                        className="flex-1 min-h-0 overflow-y-auto p-3 sm:p-5 space-y-2.5 sm:space-y-3 bg-[#efeae2]/20 dark:bg-slate-950 overscroll-contain"
                                     >
                                         {loadingRoom ? (
                                             <div className="h-full flex flex-col items-center justify-center text-slate-400">
@@ -2184,7 +2179,7 @@ export default function ChatIndex({ initialConversations = [], initialActiveId =
                                                                 </span>
                                                             )}
                                                             <div
-                                                                className={`max-w-[80%] sm:max-w-[70%] rounded-2xl p-3 shadow-2xs text-xs ${
+                                                                className={`max-w-[85%] sm:max-w-[70%] rounded-2xl p-2.5 sm:p-3 shadow-2xs text-xs ${
                                                                     msg.isMe
                                                                         ? 'bg-blue-600 text-white rounded-tr-xs'
                                                                         : 'bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-100 rounded-tl-xs'
@@ -2266,7 +2261,7 @@ export default function ChatIndex({ initialConversations = [], initialActiveId =
 
                                     {/* Input Footer (PINNED AT BOTTOM, DOES NOT SCROLL) */}
                                     {activeRoomData?.status !== 'closed' && (
-                                        <div className="p-3 bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 flex items-end gap-2 relative shrink-0">
+                                        <div className="p-2.5 sm:p-3 bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 flex items-end gap-2 relative shrink-0">
                                             <div className="flex-1 relative flex items-center">
                                                 <textarea
                                                     ref={textareaRef}
@@ -2289,7 +2284,7 @@ export default function ChatIndex({ initialConversations = [], initialActiveId =
                                                     {emojiPickerOpen && (
                                                         <div
                                                             ref={emojiPickerRef}
-                                                            className="absolute bottom-full right-0 mb-3 w-64 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-xl p-3 z-50"
+                                                            className="absolute bottom-full right-0 mb-3 w-64 max-w-[calc(100vw-24px)] bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-xl p-3 z-50"
                                                         >
                                                             <div className="flex items-center justify-between pb-2 border-b border-slate-100 dark:border-slate-800 mb-2 text-xs font-semibold text-slate-700 dark:text-slate-300">
                                                                 <span>Pilih Emoji</span>
