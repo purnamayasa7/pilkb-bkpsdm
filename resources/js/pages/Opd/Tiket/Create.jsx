@@ -332,7 +332,7 @@ export default function Create({
                             </h1>
                         </div>
                         <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 pl-11">
-                            Lengkapi data usulan kepegawaian melalui 4 tahapan formulir terpandu.
+                            Lengkapi data usulan kepegawaian melalui 4 tahapan.
                         </p>
                     </div>
 
@@ -472,11 +472,11 @@ export default function Create({
                                         ) : (
                                             <Search className="w-4 h-4" />
                                         )}
-                                        <span>Cek SIMPEG</span>
+                                        <span>Cek Data</span>
                                     </button>
                                 </div>
                                 <p className="text-[11px] text-slate-400 mt-1">
-                                    Klik tombol Cek SIMPEG untuk memastikan ASN terdaftar pada instansi Anda.
+                                    Klik tombol Cek Data untuk memastikan ASN terdaftar pada instansi Anda.
                                 </p>
                             </div>
 
@@ -1184,7 +1184,7 @@ export default function Create({
                                 <div>
                                     <h4 className="font-bold text-slate-900 dark:text-white">Input NIP & Email</h4>
                                     <p className="text-slate-500 mt-0.5">
-                                        Ketik NIP pegawai dan klik "Cek SIMPEG" untuk memastikan identitas pegawai terdaftar di instansi Anda.
+                                        Ketik NIP pegawai dan klik "Cek Data" untuk memastikan identitas pegawai terdaftar di instansi Anda.
                                     </p>
                                 </div>
                             </div>

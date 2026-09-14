@@ -24,6 +24,7 @@ import {
 } from 'lucide-react';
 import MenuIcon from '../components/MenuIcon';
 import TicketSearch from '../components/TicketSearch';
+import Footer from '../components/Footer';
 import { getInitials, formatCleanName } from '@/utils/initials';
 
 export default function AuthenticatedLayout({ children, title, fullHeight = false, noPadding = false }) {
@@ -1099,6 +1100,9 @@ export default function AuthenticatedLayout({ children, title, fullHeight = fals
 
                     {children}
                 </main>
+
+                {/* Footer Portal */}
+                {!fullHeight && <Footer />}
             </div>
         </div>
     );
