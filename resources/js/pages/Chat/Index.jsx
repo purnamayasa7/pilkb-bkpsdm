@@ -2019,7 +2019,7 @@ export default function ChatIndex({ initialConversations = [], initialActiveId =
                                     </div>
 
                                     {/* Input Footer (PINNED AT BOTTOM, DOES NOT SCROLL) */}
-                                    <div className="p-2.5 sm:p-3 bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 flex items-end gap-2 shrink-0 relative z-10">
+                                    <div className="p-2.5 sm:p-3 pb-3.5 sm:pb-3 bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 flex items-end gap-2 shrink-0 relative z-10">
                                         <div className="flex-1 relative flex items-center">
                                             <textarea
                                                 ref={textareaRef}
@@ -2261,7 +2261,7 @@ export default function ChatIndex({ initialConversations = [], initialActiveId =
 
                                     {/* Input Footer (PINNED AT BOTTOM, DOES NOT SCROLL) */}
                                     {activeRoomData?.status !== 'closed' && (
-                                        <div className="p-2.5 sm:p-3 bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 flex items-end gap-2 relative shrink-0 z-10">
+                                        <div className="p-2.5 sm:p-3 pb-3.5 sm:pb-3 bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 flex items-end gap-2 relative shrink-0 z-10">
                                             <div className="flex-1 relative flex items-center">
                                                 <textarea
                                                     ref={textareaRef}

@@ -294,7 +294,7 @@ export default function AuthenticatedLayout({ children, title, fullHeight = fals
     const currentUrl = url ? url.split('?')[0] : (typeof window !== 'undefined' ? window.location.pathname : '');
 
     return (
-        <div className={`${fullHeight ? 'h-screen h-[100dvh] overflow-hidden' : 'min-h-screen'} bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-slate-100 flex transition-colors duration-200`}>
+        <div className={`${fullHeight ? 'fixed inset-0 overflow-hidden' : 'min-h-screen'} bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-slate-100 flex transition-colors duration-200`}>
             {/* Mobile Backdrop */}
             {sidebarOpen && (
                 <div
@@ -515,7 +515,7 @@ export default function AuthenticatedLayout({ children, title, fullHeight = fals
 
             {/* MAIN CONTENT AREA */}
             <div className={`flex-1 flex flex-col min-w-0 min-h-0 transition-all duration-300 ease-in-out ${
-                fullHeight ? 'h-screen h-[100dvh] overflow-hidden' : ''
+                fullHeight ? 'h-full overflow-hidden' : ''
             } ${
                 sidebarCollapsed ? 'lg:pl-20' : 'lg:pl-64'
             }`}>
