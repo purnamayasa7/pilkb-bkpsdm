@@ -613,7 +613,7 @@ export default function Index({
                                                         {/* Tombol Riwayat Tahapan (Biru) */}
                                                         <button
                                                             type="button"
-                                                            onClick={() => handleOpenHistory(item.no_tiket)}
+                                                            onClick={() => handleOpenHistory(item)}
                                                             className="p-1.5 rounded-lg text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-950/50 transition-colors"
                                                             title="Riwayat Tahapan Usulan"
                                                         >

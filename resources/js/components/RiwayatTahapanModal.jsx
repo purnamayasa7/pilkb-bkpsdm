@@ -12,19 +12,22 @@ export default function RiwayatTahapanModal({
     namaLayanan: propNamaLayanan,
     namaUkerja: propNamaUkerja,
 }) {
-    const activeTiket = tiket || (noTiket ? { 
-        no_tiket: noTiket, 
-        nip, 
-        nama, 
-        nama_layanan: propNamaLayanan, 
-        nama_ukerja: propNamaUkerja 
+    const resolvedTiket = typeof tiket === 'object' && tiket !== null ? tiket : null;
+    const resolvedNoTiket = typeof tiket === 'string' ? tiket : (noTiket || resolvedTiket?.no_tiket || null);
+
+    const activeTiket = resolvedTiket || (resolvedNoTiket ? { 
+        no_tiket: resolvedNoTiket, 
+        nip: nip || null, 
+        nama: nama || null, 
+        nama_layanan: propNamaLayanan || null, 
+        nama_ukerja: propNamaUkerja || null 
     } : null);
 
     const [historyLoading, setHistoryLoading] = useState(false);
     const [historyData, setHistoryData] = useState([]);
     const [extraTiket, setExtraTiket] = useState(null);
 
-    const targetNoTiket = activeTiket?.no_tiket || noTiket;
+    const targetNoTiket = resolvedNoTiket || activeTiket?.no_tiket;
 
     useEffect(() => {
         if (isOpen && targetNoTiket) {

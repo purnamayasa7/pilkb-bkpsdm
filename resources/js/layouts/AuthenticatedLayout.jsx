@@ -647,7 +647,83 @@ export default function AuthenticatedLayout({ children, title, fullHeight = fals
                                                     const title = item.data?.title || 'Pemberitahuan';
                                                     const message = item.data?.message || item.data?.pesan || '-';
                                                     const noTiket = item.data?.no_tiket || '';
+                                                    const notifType = item.data?.type || '';
                                                     const itemUrl = `/notifications/read/${item.id}`;
+
+                                                    // Tentukan styling dot berdasarkan progres / status usulan
+                                                    const getNotifDotStyle = () => {
+                                                        const typeLower = (notifType || '').toLowerCase();
+                                                        const textLower = `${title} ${message}`.toLowerCase();
+
+                                                        // Selesai / Disetujui (Hijau Emerald)
+                                                        if (
+                                                            typeLower === 'selesai' ||
+                                                            textLower.includes('selesai') ||
+                                                            textLower.includes('acc') ||
+                                                            textLower.includes('diterima') ||
+                                                            textLower.includes('disetujui') ||
+                                                            textLower.includes('pengambilan')
+                                                        ) {
+                                                            return {
+                                                                dot: isUnread
+                                                                    ? 'bg-emerald-500 dark:bg-emerald-400 ring-2 ring-emerald-200 dark:ring-emerald-900/50'
+                                                                    : 'bg-emerald-300 dark:bg-emerald-800/60',
+                                                            };
+                                                        }
+
+                                                        // BTL / Ditolak (Merah Rose)
+                                                        if (
+                                                            typeLower === 'berkas_tidak_lengkap' ||
+                                                            textLower.includes('btl') ||
+                                                            textLower.includes('tidak lengkap') ||
+                                                            textLower.includes('tolak') ||
+                                                            textLower.includes('batal')
+                                                        ) {
+                                                            return {
+                                                                dot: isUnread
+                                                                    ? 'bg-rose-500 dark:bg-rose-400 ring-2 ring-rose-200 dark:ring-rose-900/50'
+                                                                    : 'bg-rose-300 dark:bg-rose-800/60',
+                                                            };
+                                                        }
+
+                                                        // Perbaikan / Revisi (Kuning / Amber)
+                                                        if (
+                                                            typeLower === 'review_perbaikan' ||
+                                                            textLower.includes('perbaikan') ||
+                                                            textLower.includes('revisi') ||
+                                                            textLower.includes('tinjau ulang')
+                                                        ) {
+                                                            return {
+                                                                dot: isUnread
+                                                                    ? 'bg-amber-500 dark:bg-amber-400 ring-2 ring-amber-200 dark:ring-amber-900/50'
+                                                                    : 'bg-amber-300 dark:bg-amber-800/60',
+                                                            };
+                                                        }
+
+                                                        // Pengajuan Baru / Usulan Masuk (Biru Sky / Indigo)
+                                                        if (
+                                                            typeLower === 'usulan_baru' ||
+                                                            textLower.includes('usulan baru') ||
+                                                            textLower.includes('pengajuan baru') ||
+                                                            textLower.includes('pendaftaran') ||
+                                                            textLower.includes('baru dibuat')
+                                                        ) {
+                                                            return {
+                                                                dot: isUnread
+                                                                    ? 'bg-blue-600 dark:bg-blue-400 ring-2 ring-blue-200 dark:ring-blue-900/50'
+                                                                    : 'bg-blue-300 dark:bg-blue-800/60',
+                                                            };
+                                                        }
+
+                                                        // Sedang Diproses / Update Status Default (Biru Standar)
+                                                        return {
+                                                            dot: isUnread
+                                                                ? 'bg-blue-600 dark:bg-blue-400 ring-2 ring-blue-200 dark:ring-blue-900/50'
+                                                                : 'bg-slate-300 dark:bg-slate-700',
+                                                        };
+                                                    };
+
+                                                    const dotStyle = getNotifDotStyle();
 
                                                     return (
                                                         <a
@@ -662,11 +738,7 @@ export default function AuthenticatedLayout({ children, title, fullHeight = fals
                                                         >
                                                             <div className="flex items-start gap-2.5">
                                                                 <div className="mt-0.5 flex-shrink-0">
-                                                                    {isUnread ? (
-                                                                        <span className="w-2 h-2 rounded-full bg-blue-600 dark:bg-blue-400 block mt-1 ring-2 ring-blue-200 dark:ring-blue-900/50" />
-                                                                    ) : (
-                                                                        <span className="w-2 h-2 rounded-full bg-slate-300 dark:bg-slate-700 block mt-1" />
-                                                                    )}
+                                                                    <span className={`w-2 h-2 rounded-full block mt-1 transition-all ${dotStyle.dot}`} />
                                                                 </div>
 
                                                                 <div className="flex-1 min-w-0">
