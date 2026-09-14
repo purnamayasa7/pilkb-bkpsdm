@@ -64,17 +64,32 @@ export default function AuthenticatedLayout({ children, title, fullHeight = fals
     const [flashVisible, setFlashVisible] = useState(true);
     const [isNavigating, setIsNavigating] = useState(false);
 
-    // Listen to Inertia page navigation events for custom logo spinner
+    // Listen to Inertia page navigation events with threshold delay for custom logo spinner
     useEffect(() => {
+        let navTimer = null;
+
         const removeStart = router.on('start', (event) => {
             // Jangan memunculkan full-screen spinner jika ini partial/background reload
             if (event?.detail?.visit?.only && event.detail.visit.only.length > 0) {
                 return;
             }
-            setIsNavigating(true);
+            // Threshold delay 250ms: jika navigasi cepat (<250ms), spinner tidak akan berkedip sama sekali
+            if (navTimer) clearTimeout(navTimer);
+            navTimer = setTimeout(() => {
+                setIsNavigating(true);
+            }, 250);
         });
-        const removeFinish = router.on('finish', () => setIsNavigating(false));
+
+        const removeFinish = router.on('finish', () => {
+            if (navTimer) {
+                clearTimeout(navTimer);
+                navTimer = null;
+            }
+            setIsNavigating(false);
+        });
+
         return () => {
+            if (navTimer) clearTimeout(navTimer);
             removeStart();
             removeFinish();
         };
@@ -305,7 +320,7 @@ export default function AuthenticatedLayout({ children, title, fullHeight = fals
 
             {/* ── Page Navigation Logo Spinner (Center Screen) ── */}
             <div
-                className={`fixed inset-0 z-[9999] flex items-center justify-center bg-slate-950/20 dark:bg-slate-950/50 backdrop-blur-xs transition-all duration-200 ${
+                className={`fixed inset-0 z-[9999] flex items-center justify-center bg-slate-950/20 dark:bg-slate-950/50 transition-opacity duration-150 ${
                     isNavigating ? 'opacity-100 visible pointer-events-auto' : 'opacity-0 invisible pointer-events-none'
                 }`}
                 aria-hidden={!isNavigating}
