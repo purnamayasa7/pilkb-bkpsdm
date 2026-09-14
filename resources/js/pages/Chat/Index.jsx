@@ -1365,7 +1365,7 @@ export default function ChatIndex({ initialConversations = [], initialActiveId =
                     {/* --------------------------------------------------------------------- */}
                     {/* PANEL 1: DAFTAR PERCAKAPAN (SIDEBAR WA WINDOWS)                       */}
                     {/* --------------------------------------------------------------------- */}
-                    <div className={`w-full md:w-80 lg:w-96 shrink-0 flex-col h-full border-r border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 overflow-hidden ${
+                    <div className={`w-full md:w-80 lg:w-96 shrink-0 min-h-0 flex-col h-full border-r border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 overflow-hidden ${
                         activeId ? 'hidden md:flex' : 'flex'
                     }`}>
                             {/* Header Sidebar: User Profile (PINNED AT TOP, DOES NOT SCROLL) */}
@@ -1707,7 +1707,7 @@ export default function ChatIndex({ initialConversations = [], initialActiveId =
                     {/* --------------------------------------------------------------------- */}
                     {/* PANEL 2: RUANG PERCAKAPAN (MAIN PANEL WA WINDOWS)                     */}
                     {/* --------------------------------------------------------------------- */}
-                    <div className={`flex-1 min-w-0 flex-col h-full bg-slate-50/50 dark:bg-slate-950/30 overflow-hidden ${
+                    <div className={`w-full md:w-auto flex-1 min-w-0 min-h-0 flex-col h-full bg-slate-50/50 dark:bg-slate-950/30 overflow-hidden ${
                         !activeId ? 'hidden md:flex' : 'flex'
                     }`}>
                             {/* KONDISI 1: EMPTY STATE (WHATSAPP WINDOWS AESTHETIC) */}
@@ -1764,7 +1764,7 @@ export default function ChatIndex({ initialConversations = [], initialActiveId =
 
                             {/* KONDISI 2: ACTIVE ROOM - LILI AI */}
                             {activeId === 'lili_ai' && (
-                                <div className="h-full flex flex-col min-h-0 bg-white dark:bg-slate-900">
+                                <div className="w-full h-full flex-1 min-h-0 flex flex-col bg-white dark:bg-slate-900 relative">
                                     {/* Header (PINNED AT TOP, DOES NOT SCROLL) */}
                                     <div className="h-16 px-3 sm:px-4 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between shrink-0 bg-white dark:bg-slate-900 shadow-2xs">
                                         <div className="flex items-center gap-2 sm:gap-3 overflow-hidden min-w-0 flex-1">
@@ -2019,7 +2019,7 @@ export default function ChatIndex({ initialConversations = [], initialActiveId =
                                     </div>
 
                                     {/* Input Footer (PINNED AT BOTTOM, DOES NOT SCROLL) */}
-                                    <div className="p-2.5 sm:p-3 bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 flex items-end gap-2 shrink-0">
+                                    <div className="p-2.5 sm:p-3 bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 flex items-end gap-2 shrink-0 relative z-10">
                                         <div className="flex-1 relative flex items-center">
                                             <textarea
                                                 ref={textareaRef}
@@ -2046,7 +2046,7 @@ export default function ChatIndex({ initialConversations = [], initialActiveId =
 
                             {/* KONDISI 3: ACTIVE ROOM - TIKET PERCAKAPAN */}
                             {activeId && activeId !== 'lili_ai' && (
-                                <div className="h-full flex flex-col min-h-0 bg-white dark:bg-slate-900 relative">
+                                <div className="w-full h-full flex-1 min-h-0 flex flex-col bg-white dark:bg-slate-900 relative">
                                     {/* Header (PINNED AT TOP, DOES NOT SCROLL) */}
                                     <div className="h-16 px-3 sm:px-4 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between shrink-0 bg-white dark:bg-slate-900 shadow-2xs">
                                         <div className="flex items-center gap-2 sm:gap-3 overflow-hidden min-w-0 flex-1">
@@ -2261,7 +2261,7 @@ export default function ChatIndex({ initialConversations = [], initialActiveId =
 
                                     {/* Input Footer (PINNED AT BOTTOM, DOES NOT SCROLL) */}
                                     {activeRoomData?.status !== 'closed' && (
-                                        <div className="p-2.5 sm:p-3 bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 flex items-end gap-2 relative shrink-0">
+                                        <div className="p-2.5 sm:p-3 bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 flex items-end gap-2 relative shrink-0 z-10">
                                             <div className="flex-1 relative flex items-center">
                                                 <textarea
                                                     ref={textareaRef}

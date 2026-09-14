@@ -294,7 +294,7 @@ export default function AuthenticatedLayout({ children, title, fullHeight = fals
     const currentUrl = url ? url.split('?')[0] : (typeof window !== 'undefined' ? window.location.pathname : '');
 
     return (
-        <div className={`${fullHeight ? 'h-screen overflow-hidden' : 'min-h-screen'} bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-slate-100 flex transition-colors duration-200`}>
+        <div className={`${fullHeight ? 'h-screen h-[100dvh] overflow-hidden' : 'min-h-screen'} bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-slate-100 flex transition-colors duration-200`}>
             {/* Mobile Backdrop */}
             {sidebarOpen && (
                 <div
@@ -514,13 +514,13 @@ export default function AuthenticatedLayout({ children, title, fullHeight = fals
             </aside>
 
             {/* MAIN CONTENT AREA */}
-            <div className={`flex-1 flex flex-col min-w-0 transition-all duration-300 ease-in-out ${
+            <div className={`flex-1 flex flex-col min-w-0 min-h-0 transition-all duration-300 ease-in-out ${
                 fullHeight ? 'h-screen h-[100dvh] overflow-hidden' : ''
             } ${
                 sidebarCollapsed ? 'lg:pl-20' : 'lg:pl-64'
             }`}>
                 {/* Topbar Backdrop Blur */}
-                <header className="sticky top-0 z-30 w-full h-16 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 px-4 sm:px-6 flex items-center justify-between transition-colors">
+                <header className="sticky top-0 z-30 w-full h-16 shrink-0 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 px-4 sm:px-6 flex items-center justify-between transition-colors">
                     <div className="flex items-center gap-2.5 sm:gap-3">
                         {/* Mobile open button */}
                         <button
