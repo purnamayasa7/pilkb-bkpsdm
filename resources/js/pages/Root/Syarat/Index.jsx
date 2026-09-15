@@ -545,7 +545,7 @@ export default function RootSyaratIndex({
                 )}
             </div>
 
-            {/* Modal Detail Syarat */}
+            {/* Modal Deskripsi Layanan */}
             {detailModal.open && detailModal.item && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
                     <div className="w-full max-w-lg bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-xl overflow-hidden">
@@ -553,14 +553,14 @@ export default function RootSyaratIndex({
                         <div className="flex items-center justify-between px-6 py-4 border-b border-slate-200 dark:border-slate-800">
                             <div className="flex items-center gap-2.5">
                                 <div className="p-2 rounded-xl bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400">
-                                    <CheckSquare className="w-5 h-5" />
+                                    <FileText className="w-5 h-5" />
                                 </div>
                                 <div>
                                     <h3 className="text-sm font-bold text-slate-900 dark:text-white">
-                                        Rincian Persyaratan Dokumen
+                                        Deskripsi Layanan
                                     </h3>
                                     <p className="text-[11px] text-slate-400 truncate max-w-xs">
-                                        {detailModal.item.syarat}
+                                        {detailModal.item.layanan?.nama_layanan || '-'}
                                     </p>
                                 </div>
                             </div>
@@ -583,43 +583,27 @@ export default function RootSyaratIndex({
                                     </span>
                                 </div>
                                 <div className="flex items-center justify-between border-t border-slate-200/60 dark:border-slate-700/60 pt-2">
-                                    <span className="text-slate-400">Layanan:</span>
-                                    <span className="font-bold text-slate-900 dark:text-white">
+                                    <span className="text-slate-400">Nama Layanan:</span>
+                                    <span className="font-bold text-blue-600 dark:text-blue-400">
                                         {detailModal.item.layanan?.nama_layanan || '-'}
                                     </span>
                                 </div>
-                                <div className="flex items-center justify-between border-t border-slate-200/60 dark:border-slate-700/60 pt-2">
-                                    <span className="text-slate-400">Metode:</span>
-                                    {detailModal.item.metode === 'simpeg' ? (
-                                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold bg-blue-50 dark:bg-blue-950/60 text-blue-700 dark:text-blue-300">
-                                            <Cloud className="w-3 h-3" />
-                                            Tarik SIMPEG
-                                        </span>
-                                    ) : (
-                                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold bg-amber-50 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300">
-                                            <Upload className="w-3 h-3" />
-                                            Upload Manual
-                                        </span>
-                                    )}
-                                </div>
-                                {detailModal.item.kode_efile && (
+                                {detailModal.item.layanan?.waktu_penyelesaian && (
                                     <div className="flex items-center justify-between border-t border-slate-200/60 dark:border-slate-700/60 pt-2">
-                                        <span className="text-slate-400">Jenis E-File:</span>
-                                        <span className="font-mono text-slate-800 dark:text-slate-200">
-                                            {detailModal.item.kode_efile}
+                                        <span className="text-slate-400">Estimasi Waktu:</span>
+                                        <span className="font-semibold text-slate-700 dark:text-slate-300">
+                                            {detailModal.item.layanan.waktu_penyelesaian}
                                         </span>
                                     </div>
                                 )}
                             </div>
 
-                            {detailModal.item.deskripsi && (
-                                <div className="text-xs text-slate-700 dark:text-slate-300 whitespace-pre-line leading-relaxed bg-white dark:bg-slate-900 p-4 rounded-2xl border border-slate-200 dark:border-slate-800">
-                                    <span className="font-bold block text-slate-900 dark:text-white mb-1">
-                                        Petunjuk / Keterangan Dokumen:
-                                    </span>
-                                    {detailModal.item.deskripsi}
-                                </div>
-                            )}
+                            <div className="text-xs text-slate-700 dark:text-slate-300 whitespace-pre-line leading-relaxed bg-white dark:bg-slate-900 p-4 rounded-2xl border border-slate-200 dark:border-slate-800">
+                                <span className="font-bold block text-slate-900 dark:text-white mb-1">
+                                    Deskripsi / Penjelasan Layanan:
+                                </span>
+                                {detailModal.item.layanan?.deskripsi || 'Deskripsi detail belum diisi untuk layanan ini.'}
+                            </div>
                         </div>
 
                         {/* Modal Footer */}

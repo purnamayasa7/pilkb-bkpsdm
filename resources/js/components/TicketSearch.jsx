@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import {
     Search,
     X,
@@ -29,15 +30,28 @@ export default function TicketSearch() {
     const containerRef = useRef(null);
     const inputRef = useRef(null);
 
-    // Click outside to close dropdown
+    // Click outside to close dropdown & handle Escape key
     useEffect(() => {
         function handleClickOutside(event) {
             if (containerRef.current && !containerRef.current.contains(event.target)) {
                 setIsOpen(false);
             }
         }
+
+        function handleKeyDown(event) {
+            if (event.key === 'Escape') {
+                setIsOpen(false);
+                setMobileSearchOpen(false);
+                setSelectedTicket(null);
+            }
+        }
+
         document.addEventListener('mousedown', handleClickOutside);
-        return () => document.removeEventListener('mousedown', handleClickOutside);
+        document.addEventListener('keydown', handleKeyDown);
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+            document.removeEventListener('keydown', handleKeyDown);
+        };
     }, []);
 
     // Debounce search query
@@ -143,8 +157,8 @@ export default function TicketSearch() {
             </div>
 
             {/* Mobile Search Overlay Modal */}
-            {mobileSearchOpen && (
-                <div className="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-xs p-4 sm:hidden flex flex-col">
+            {typeof document !== 'undefined' && mobileSearchOpen && createPortal(
+                <div className="fixed inset-0 z-[9999] bg-slate-950/60 backdrop-blur-xs p-4 sm:hidden flex flex-col">
                     <div className="bg-white dark:bg-slate-900 rounded-2xl p-3 border border-slate-200 dark:border-slate-800 shadow-xl">
                         <div className="flex items-center gap-2">
                             <div className="relative flex-1">
@@ -209,7 +223,8 @@ export default function TicketSearch() {
                             ) : null}
                         </div>
                     </div>
-                </div>
+                </div>,
+                document.body
             )}
 
             {/* Desktop Dropdown Search Results */}
@@ -260,11 +275,16 @@ export default function TicketSearch() {
             )}
 
             {/* Detail Ticket Modal Popup */}
-            {(selectedTicket || detailLoading) && (
-                <div className="fixed inset-0 z-50 bg-slate-950/50 backdrop-blur-xs flex items-center justify-center p-4">
-                    <div className="bg-white dark:bg-slate-900 w-full max-w-lg rounded-3xl border border-slate-200 dark:border-slate-800 shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-150">
+            {typeof document !== 'undefined' && (selectedTicket || detailLoading) && createPortal(
+                <div
+                    className="fixed inset-0 z-[9999] bg-slate-950/60 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto"
+                    onClick={(e) => {
+                        if (e.target === e.currentTarget) setSelectedTicket(null);
+                    }}
+                >
+                    <div className="bg-white dark:bg-slate-900 w-full max-w-lg rounded-3xl border border-slate-200 dark:border-slate-800 shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-150 my-auto flex flex-col max-h-[90vh]">
                         {/* Modal Header */}
-                        <div className="px-6 py-4 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
+                        <div className="px-6 py-4 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between shrink-0">
                             <div className="flex items-center gap-2.5">
                                 <div className="w-8 h-8 rounded-xl bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 flex items-center justify-center">
                                     <Ticket className="w-4 h-4" />
@@ -283,7 +303,7 @@ export default function TicketSearch() {
                         </div>
 
                         {/* Modal Body */}
-                        <div className="p-6 space-y-4">
+                        <div className="p-6 space-y-4 overflow-y-auto flex-1">
                             {detailLoading ? (
                                 <div className="py-12 text-center text-xs text-slate-400 flex items-center justify-center gap-2">
                                     <Loader2 className="w-5 h-5 animate-spin text-blue-600" />
@@ -371,7 +391,7 @@ export default function TicketSearch() {
 
                         {/* Modal Footer */}
                         {selectedTicket && (
-                            <div className="px-6 py-4 bg-slate-50/80 dark:bg-slate-800/50 border-t border-slate-100 dark:border-slate-800 flex items-center justify-end gap-2.5">
+                            <div className="px-6 py-4 bg-slate-50/80 dark:bg-slate-800/50 border-t border-slate-100 dark:border-slate-800 flex items-center justify-end gap-2.5 shrink-0">
                                 {selectedTicket.print_url && (
                                     <a
                                         href={selectedTicket.print_url}
@@ -404,7 +424,8 @@ export default function TicketSearch() {
                             </div>
                         )}
                     </div>
-                </div>
+                </div>,
+                document.body
             )}
         </div>
     );

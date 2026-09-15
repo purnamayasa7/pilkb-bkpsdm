@@ -442,6 +442,7 @@ export default function SyaratBidangIndex({
                                             <th className="py-3.5 px-4">Dokumen Persyaratan</th>
                                             <th className="py-3.5 px-4">Metode Dokumen</th>
                                             <th className="py-3.5 px-4">Jenis E-File SIMPEG</th>
+                                            <th className="py-3.5 px-4 text-center w-24">Deskripsi</th>
                                             <th className="py-3.5 px-4 text-center w-28">Aksi</th>
                                         </tr>
                                     </thead>
@@ -514,21 +515,21 @@ export default function SyaratBidangIndex({
                                                         )}
                                                     </td>
 
-                                                    {/* 6. Aksi */}
+                                                    {/* 6. Deskripsi Layanan Modal */}
                                                     <td className="py-3.5 px-4 text-center">
-                                                        <div className="flex items-center justify-center gap-1">
-                                                            {/* Tombol Detail (Biru) */}
-                                                            <button
-                                                                type="button"
-                                                                onClick={() =>
-                                                                    setDetailModal({ open: true, item })
-                                                                }
-                                                                title="Detail Syarat"
-                                                                className="p-1.5 rounded-lg text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-950/50 transition-colors"
-                                                            >
-                                                                <Eye className="w-4 h-4" />
-                                                            </button>
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => setDetailModal({ open: true, item })}
+                                                            title="Lihat Deskripsi Layanan"
+                                                            className="p-1.5 rounded-lg text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 hover:bg-blue-50 dark:hover:bg-blue-950/50 transition-colors cursor-pointer"
+                                                        >
+                                                            <Eye className="w-4 h-4" />
+                                                        </button>
+                                                    </td>
 
+                                                    {/* 7. Aksi */}
+                                                    <td className="py-3.5 px-4 text-center">
+                                                        <div className="flex items-center justify-center gap-1.5">
                                                             {/* Tombol Edit (Orange / Amber) */}
                                                             <Link
                                                                 href={`/adminBidang/syarat/${item.id}`}
@@ -549,7 +550,7 @@ export default function SyaratBidangIndex({
                                                                     })
                                                                 }
                                                                 title="Hapus Syarat"
-                                                                className="p-1.5 rounded-lg text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/50 transition-colors"
+                                                                className="p-1.5 rounded-lg text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/50 transition-colors cursor-pointer"
                                                             >
                                                                 <Trash2 className="w-4 h-4" />
                                                             </button>
@@ -579,21 +580,21 @@ export default function SyaratBidangIndex({
                 </div>
             </div>
 
-            {/* MODAL DETAIL SYARAT */}
+            {/* MODAL DESKRIPSI LAYANAN */}
             {detailModal.open && detailModal.item && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-xs animate-in fade-in duration-150">
                     <div className="w-full max-w-lg rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-2xl p-6 space-y-5 animate-in zoom-in-95 duration-150">
                         <div className="flex items-start justify-between pb-3 border-b border-slate-100 dark:border-slate-800">
                             <div className="flex items-center gap-2.5">
                                 <span className="p-2 rounded-xl bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 border border-blue-200/80 dark:border-blue-900/40">
-                                    <CheckSquare className="w-5 h-5" />
+                                    <FileText className="w-5 h-5" />
                                 </span>
                                 <div>
                                     <h3 className="text-base font-bold text-slate-900 dark:text-white">
-                                        Detail Persyaratan
+                                        Deskripsi Layanan
                                     </h3>
-                                    <p className="text-xs text-slate-400">
-                                        Rincian informasi dokumen persyaratan
+                                    <p className="text-xs text-slate-400 truncate max-w-xs">
+                                        {detailModal.item.layanan?.nama_layanan || '-'}
                                     </p>
                                 </div>
                             </div>
@@ -607,65 +608,34 @@ export default function SyaratBidangIndex({
                         </div>
 
                         <div className="space-y-3.5 text-xs">
-                            <div className="bg-slate-50 dark:bg-slate-800/50 p-3 rounded-2xl border border-slate-100 dark:border-slate-800">
-                                <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider block">
-                                    Nama Layanan
-                                </span>
-                                <span className="text-xs font-bold text-blue-600 dark:text-blue-400 mt-1 block">
-                                    {detailModal.item.layanan?.nama_layanan || '-'}
-                                </span>
-                            </div>
-
-                            <div className="p-3 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 space-y-2">
-                                <div>
-                                    <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider block">
-                                        Nama Dokumen Persyaratan
-                                    </span>
-                                    <span className="text-xs font-semibold text-slate-900 dark:text-white mt-0.5 block">
-                                        {detailModal.item.syarat}
+                            <div className="bg-slate-50 dark:bg-slate-800/50 p-4 rounded-2xl border border-slate-100 dark:border-slate-800 space-y-2.5">
+                                <div className="flex items-center justify-between">
+                                    <span className="text-slate-400">Bidang Pengampu:</span>
+                                    <span className="font-semibold text-slate-800 dark:text-slate-200">
+                                        {detailModal.item.layanan?.bidang?.nama_bidang || bidang?.nama_bidang || '-'}
                                     </span>
                                 </div>
-
-                                <div className="pt-2 border-t border-slate-100 dark:border-slate-800 grid grid-cols-2 gap-3">
-                                    <div>
-                                        <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider block">
-                                            Metode Dokumen
-                                        </span>
-                                        <div className="mt-1">
-                                            {detailModal.item.metode === 'simpeg' ? (
-                                                <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-sky-50 dark:bg-sky-950/60 text-sky-700 dark:text-sky-300">
-                                                    <Cloud className="w-3 h-3" />
-                                                    <span>SIMPEG</span>
-                                                </span>
-                                            ) : (
-                                                <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-amber-50 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300">
-                                                    <Upload className="w-3 h-3" />
-                                                    <span>Upload PILKB</span>
-                                                </span>
-                                            )}
-                                        </div>
-                                    </div>
-
-                                    <div>
-                                        <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider block">
-                                            Jenis E-File SIMPEG
-                                        </span>
-                                        <span className="text-xs font-mono font-semibold text-slate-700 dark:text-slate-300 mt-1 block">
-                                            {detailModal.item.kode_efile || '-'}
-                                        </span>
-                                    </div>
+                                <div className="flex items-center justify-between border-t border-slate-200/60 dark:border-slate-700/60 pt-2">
+                                    <span className="text-slate-400">Nama Layanan:</span>
+                                    <span className="font-bold text-blue-600 dark:text-blue-400">
+                                        {detailModal.item.layanan?.nama_layanan || '-'}
+                                    </span>
                                 </div>
-
-                                {detailModal.item.deskripsi && (
-                                    <div className="pt-2 border-t border-slate-100 dark:border-slate-800">
-                                        <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider block">
-                                            Keterangan / Catatan
+                                {detailModal.item.layanan?.waktu_penyelesaian && (
+                                    <div className="flex items-center justify-between border-t border-slate-200/60 dark:border-slate-700/60 pt-2">
+                                        <span className="text-slate-400">Estimasi Waktu:</span>
+                                        <span className="font-semibold text-slate-700 dark:text-slate-300">
+                                            {detailModal.item.layanan.waktu_penyelesaian}
                                         </span>
-                                        <p className="text-xs text-slate-600 dark:text-slate-300 mt-1">
-                                            {detailModal.item.deskripsi}
-                                        </p>
                                     </div>
                                 )}
+                            </div>
+
+                            <div className="text-xs text-slate-700 dark:text-slate-300 whitespace-pre-line leading-relaxed bg-white dark:bg-slate-900 p-4 rounded-2xl border border-slate-200 dark:border-slate-800">
+                                <span className="font-bold block text-slate-900 dark:text-white mb-1">
+                                    Deskripsi / Penjelasan Layanan:
+                                </span>
+                                {detailModal.item.layanan?.deskripsi || 'Deskripsi detail belum diisi untuk layanan ini.'}
                             </div>
                         </div>
 
@@ -673,7 +643,7 @@ export default function SyaratBidangIndex({
                             <button
                                 type="button"
                                 onClick={() => setDetailModal({ open: false, item: null })}
-                                className="px-4 py-2 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-xs font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
+                                className="px-4 py-2 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-xs font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors shadow-2xs cursor-pointer"
                             >
                                 Tutup
                             </button>
