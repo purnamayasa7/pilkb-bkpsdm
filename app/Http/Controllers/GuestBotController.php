@@ -12,9 +12,7 @@ use Illuminate\Support\Facades\Cache;
 
 class GuestBotController extends Controller
 {
-    /**
-     * Cek status tiket dari nomor tiket (Optimized Single Query & Column Selection)
-     */
+    // Cek status tiket
     public function cekStatusTiket(Request $request)
     {
         $request->validate([
@@ -72,9 +70,7 @@ class GuestBotController extends Controller
         ]);
     }
 
-    /**
-     * Ambil semua layanan yang aktif (Cached in-memory 10 mins)
-     */
+    // Ambil semua layanan
     public function getSemuaLayanan()
     {
         $data = Cache::remember('guest_bot_semua_layanan', 600, function () {
@@ -101,9 +97,7 @@ class GuestBotController extends Controller
         return response()->json($data);
     }
 
-    /**
-     * Ambil daftar bidang dan layanan yang aktif (Cached in-memory 10 mins)
-     */
+    // Ambil bidang dan layanan
     public function getBidangLayanan()
     {
         $data = Cache::remember('guest_bot_bidang_layanan', 600, function () {
@@ -136,9 +130,7 @@ class GuestBotController extends Controller
         return response()->json($data);
     }
 
-    /**
-     * Ambil daftar syarat untuk layanan tertentu (Cached in-memory 10 mins)
-     */
+    // Ambil daftar syarat
     public function getSyaratLayanan($layananId)
     {
         $cacheKey = "guest_bot_syarat_{$layananId}";
@@ -199,9 +191,7 @@ class GuestBotController extends Controller
         ]);
     }
 
-    /**
-     * Tanya AI Kepegawaian
-     */
+    // Tanya AI
     public function tanyaAi(Request $request, KepegawaianAiService $aiService)
     {
         $request->validate([
@@ -227,9 +217,7 @@ class GuestBotController extends Controller
         return response()->json($result);
     }
 
-    /**
-     * Simpan feedback / rating respon AI (Thumbs up / Thumbs down).
-     */
+    // Simpan feedback
     public function simpanFeedback(Request $request)
     {
         $request->validate([

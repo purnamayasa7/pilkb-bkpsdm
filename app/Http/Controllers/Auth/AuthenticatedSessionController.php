@@ -13,9 +13,7 @@ use Inertia\Inertia;
 
 class AuthenticatedSessionController extends Controller
 {
-    /**
-     * Display the login view.
-     */
+    // Tampil halaman login
     public function create(): View
     {
         $faq = Faq::orderBy('pertanyaan')->get();
@@ -25,9 +23,7 @@ class AuthenticatedSessionController extends Controller
         return view('auth.login', compact('faq', 'bidang'));
     }
 
-    /**
-     * Handle an incoming authentication request.
-     */
+    // Proses login autentikasi
     public function store(Request $request): RedirectResponse
     {
         $credentials = $request->validate([
@@ -54,9 +50,7 @@ class AuthenticatedSessionController extends Controller
         return redirect()->intended(route('dashboard', absolute: false));
     }
 
-    /**
-     * Destroy an authenticated session.
-     */
+    // Logout sesi pengguna
     public function destroy(Request $request)
     {
         Auth::guard('web')->logout();

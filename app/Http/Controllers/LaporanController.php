@@ -25,9 +25,7 @@ class LaporanController extends Controller
         $allLayanan = Layanan::orderBy('nama_layanan')->get();
         $data = collect();
 
-        /**
-         * LOAD DROPDOWN LAYANAN
-         */
+        // Load dropdown layanan
         if ($request->filled('bidang') && $request->bidang != 'all') {
             $layananList = Layanan::where('kode_bidang', $request->bidang)
                 ->orderBy('nama_layanan')
@@ -36,9 +34,7 @@ class LaporanController extends Controller
             $layananList = $allLayanan;
         }
 
-        /**
-         * FILTER DATA
-         */
+        // Filter data
         if ($request->has('filter') || ($request->filled('tanggal_awal') && $request->filled('tanggal_akhir'))) {
 
             $request->validate([
@@ -55,9 +51,7 @@ class LaporanController extends Controller
                 'tahapTerakhir.statusRel'
             ]);
 
-            /**
-             * FILTER BIDANG
-             */
+            // Filter bidang
             if (
                 $request->filled('bidang') &&
                 $request->bidang != 'all'
@@ -70,9 +64,7 @@ class LaporanController extends Controller
                 });
             }
 
-            /**
-             * FILTER LAYANAN
-             */
+            // Filter layanan
             if (
                 $request->filled('layanan') &&
                 $request->layanan != 'all'
@@ -83,9 +75,7 @@ class LaporanController extends Controller
                 );
             }
 
-            /**
-             * FILTER TANGGAL
-             */
+            // Filter tanggal
             if (
                 $request->filled('tanggal_awal') &&
                 $request->filled('tanggal_akhir')
@@ -116,9 +106,7 @@ class LaporanController extends Controller
                 ->get();
         }
 
-        /**
-         * TENTUKAN VIEW BERDASARKAN ROLE
-         */
+        // Tentukan view berdasarkan role
         $user = Auth::user();
 
         if ($user->role->name == 'admin_bawah') {

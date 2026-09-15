@@ -219,7 +219,7 @@ class SyaratController extends Controller
         $syarat = Syarat::findOrFail($syaratId);
 
         $request->validate([
-            'syarat'      => 'required|string|max:255',
+            'syarat'      => 'required|string',
             'metode'      => 'required|in:simpeg,upload',
             'kode_efile'  => [
                 'nullable',
@@ -298,7 +298,7 @@ class SyaratController extends Controller
             ->findOrFail($syaratId);
 
         $request->validate([
-            'syarat'      => 'required|string|max:255',
+            'syarat'      => 'required|string',
             'metode'      => 'required|in:simpeg,upload',
             'kode_efile'  => [
                 'nullable',

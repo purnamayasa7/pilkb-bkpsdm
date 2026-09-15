@@ -11,9 +11,7 @@ use Illuminate\Support\Facades\Storage;
 
 class BackupController extends Controller
 {
-    /**
-     * Tampilkan halaman manajemen backup database.
-     */
+    // Tampilkan manajemen backup database
     public function index()
     {
         $disk = Storage::disk('backup');
@@ -86,9 +84,7 @@ class BackupController extends Controller
         ]);
     }
 
-    /**
-     * Jalankan proses backup database baru.
-     */
+    // Buat backup database
     public function createBackup()
     {
         // Berikan waktu eksekusi yang cukup untuk dump database
@@ -145,9 +141,7 @@ class BackupController extends Controller
         }
     }
 
-    /**
-     * Download file backup database.
-     */
+    // Download file backup
     public function download(string $filename)
     {
         // Cegah path traversal
@@ -172,9 +166,7 @@ class BackupController extends Controller
         return response()->download($disk->path($filePath), $safeFilename);
     }
 
-    /**
-     * Hapus file backup database.
-     */
+    // Hapus file backup
     public function destroy(string $filename)
     {
         // Cegah path traversal
@@ -204,9 +196,7 @@ class BackupController extends Controller
         );
     }
 
-    /**
-     * Fallback untuk route lama / kompatibilitas.
-     */
+    // Fallback route lama
     public function runBackup()
     {
         @set_time_limit(300);
@@ -257,9 +247,7 @@ class BackupController extends Controller
         }
     }
 
-    /**
-     * Cari relative path file backup di dalam disk.
-     */
+    // Cari relative path file backup
     protected function findBackupFilePath($disk, string $safeFilename): ?string
     {
         $allFiles = $disk->allFiles();
@@ -272,9 +260,7 @@ class BackupController extends Controller
         return null;
     }
 
-    /**
-     * Format byte ke string yang mudah dibaca (KB, MB, GB).
-     */
+    // Format byte
     protected function formatBytes($bytes, $precision = 2): string
     {
         if ($bytes <= 0) {
@@ -291,11 +277,7 @@ class BackupController extends Controller
         return round($bytes, $precision) . ' ' . $units[$pow];
     }
 
-    /**
-     * Memastikan environment variabel Windows (SystemRoot, SystemDrive, PATH)
-     * tersedia di $_SERVER dan getenv() agar Symfony Process tidak memblokir
-     * socket TCP/IP (Error 10106 / WSAEPROVIDERFAILEDINIT) saat mysqldump dijalankan.
-     */
+    // Penyesuaian environment Windows untuk mysqldump
     protected function fixWindowsEnvironment(): void
     {
         if (PHP_OS_FAMILY === 'Windows') {

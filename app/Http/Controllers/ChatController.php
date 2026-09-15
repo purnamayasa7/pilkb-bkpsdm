@@ -1005,10 +1005,7 @@ class ChatController extends Controller
         ]);
     }
 
-    /**
-     * Mark a specific conversation as read for the current user.
-     * Called via JS when user is inside the room and a new message arrives via WebSocket.
-     */
+    // Tandai obrolan telah dibaca
     public function markConversationRead(ChatConversation $conversation)
     {
         $user = Auth::user();
@@ -1312,9 +1309,7 @@ class ChatController extends Controller
         ]);
     }
 
-    /**
-     * Tentukan lawan chat (nama pengirim dan role) yang dilihat oleh user aktif.
-     */
+    // Tentukan lawan chat
     private function getConversationPartner(ChatConversation $conversation, User $currentUser): array
     {
         $isCreator = ((int) $conversation->created_by === (int) $currentUser->id);
