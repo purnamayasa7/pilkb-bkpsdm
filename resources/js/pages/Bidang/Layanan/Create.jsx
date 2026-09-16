@@ -182,12 +182,17 @@ export default function LayananBidangCreate({ userBidang = null }) {
                                 </div>
                             </div>
                             {/* Preview & Info SOP */}
-                            <div className="flex flex-col gap-1 mt-1">
+                            <div className="space-y-1.5 mt-2">
                                 {data.target_waktu && (
-                                    <p className="text-[11px] text-blue-600 dark:text-blue-400 flex items-center gap-1 font-medium">
-                                        <Clock className="w-3 h-3" />
-                                        Preview: <strong>{waktuPreview}</strong>
-                                    </p>
+                                    <div className="flex items-center gap-2">
+                                        <span className="text-[11px] font-medium text-slate-500 dark:text-slate-400">
+                                            Estimasi Waktu Layanan:
+                                        </span>
+                                        <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-bold bg-blue-50 dark:bg-blue-950/60 text-blue-700 dark:text-blue-300 border border-blue-200/80 dark:border-blue-900/50 shadow-2xs">
+                                            <Clock className="w-3 h-3 text-blue-600 dark:text-blue-400" />
+                                            <span>{waktuPreview}</span>
+                                        </span>
+                                    </div>
                                 )}
                                 <p className="text-[11px] text-slate-500 dark:text-slate-400 flex items-center gap-1.5">
                                     <Info className="w-3.5 h-3.5 text-blue-500 shrink-0" />
