@@ -40,6 +40,8 @@ export default function Dashboard({
     chartTahunLabels = [],
     chartTahunData = [],
     pengajuanTerakhirOpd = [],
+    permintaanTerakhirBidang = [],
+    namaBidang = '',
     year,
     heroConfig = {},
 }) {
@@ -109,7 +111,9 @@ export default function Dashboard({
                 labels: chartTahunLabels,
                 datasets: [
                     {
-                        label: 'Jumlah Pengajuan',
+                        label: user?.role === 'bidang' && (namaBidang || user?.nama_bidang)
+                            ? `Jumlah Pengajuan (${namaBidang || user?.nama_bidang})`
+                            : 'Jumlah Pengajuan',
                         data: chartTahunData,
                         tension: 0.45, // Kurva bergelombang lembut dan mengalir alami
                         fill: true,
@@ -207,7 +211,7 @@ export default function Dashboard({
                 chartInstanceRef.current.destroy();
             }
         };
-    }, [chartTahunData, chartTahunLabels]);
+    }, [chartTahunData, chartTahunLabels, namaBidang, user?.nama_bidang]);
 
     const maxBidang = Math.max(...chartBidangData, 5);
 
@@ -462,7 +466,7 @@ export default function Dashboard({
 
                 {/* BOTTOM SECTION: TIMELINE (OR BIDANG BAR CHART) & TAHUNAN AREA CHART */}
                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-                    {/* LEFT COLUMN: Timeline Usulan Terakhir (Admin OPD) ATAU Bar Chart Bidang */}
+                    {/* LEFT COLUMN: Render berbeda per role */}
                     <div className="lg:col-span-5 xl:col-span-4">
                         {user?.role === 'admin_opd' ? (
                             <div className="rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs p-5 sm:p-6 flex flex-col h-full">
@@ -498,11 +502,9 @@ export default function Dashboard({
 
                                             return (
                                                 <div key={idx} className="relative pl-6 pb-2 group">
-                                                    {/* Timeline connector line */}
                                                     {idx !== pengajuanTerakhirOpd.length - 1 && (
                                                         <span className="absolute left-2 top-3 bottom-0 w-0.5 bg-slate-200 dark:bg-slate-800" />
                                                     )}
-                                                    {/* Timeline dot */}
                                                     <span
                                                         className={`absolute left-0.5 top-1.5 w-3.5 h-3.5 rounded-full border-2 border-white dark:border-slate-900 ${
                                                             isDone
@@ -560,8 +562,100 @@ export default function Dashboard({
                                     </div>
                                 )}
                             </div>
+                        ) : user?.role === 'bidang' ? (
+                            /* Timeline Permintaan Masuk Terbaru untuk Role Bidang */
+                            <div className="rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs p-5 sm:p-6 flex flex-col h-full">
+                                <div className="flex items-center justify-between pb-4 border-b border-slate-100 dark:border-slate-800 mb-4">
+                                    <h3 className="text-sm font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                                        <Clock className="w-4 h-4 text-indigo-600" />
+                                        <span>Permintaan Masuk Terbaru</span>
+                                    </h3>
+                                    <a
+                                        href="/adminBidang/permintaan"
+                                        className="text-xs font-semibold text-indigo-600 dark:text-indigo-400 hover:underline inline-flex items-center gap-1"
+                                    >
+                                        <span>Lihat Semua</span>
+                                        <ChevronRight className="w-3.5 h-3.5" />
+                                    </a>
+                                </div>
+
+                                {permintaanTerakhirBidang.length > 0 ? (
+                                    <div className="space-y-4 flex-1">
+                                        {permintaanTerakhirBidang.slice(0, 4).map((tiket, idx, arr) => {
+                                            const statusLower = (tiket.status || '').toLowerCase();
+                                            const isDone =
+                                                statusLower.includes('selesai') ||
+                                                statusLower.includes('diterima') ||
+                                                tiket.archives === 1;
+                                            const isBad =
+                                                statusLower.includes('btl') ||
+                                                statusLower.includes('tolak') ||
+                                                statusLower.includes('batal');
+                                            const isWarning =
+                                                statusLower.includes('perbaikan') ||
+                                                statusLower.includes('revisi');
+
+                                            return (
+                                                <div key={idx} className="relative pl-6 pb-2 group">
+                                                    {idx !== arr.length - 1 && (
+                                                        <span className="absolute left-2 top-3 bottom-0 w-0.5 bg-slate-200 dark:bg-slate-800" />
+                                                    )}
+                                                    <span
+                                                        className={`absolute left-0.5 top-1.5 w-3.5 h-3.5 rounded-full border-2 border-white dark:border-slate-900 ${
+                                                            isDone
+                                                                ? 'bg-emerald-500'
+                                                                : isBad
+                                                                ? 'bg-rose-500'
+                                                                : isWarning
+                                                                ? 'bg-amber-500'
+                                                                : 'bg-blue-600'
+                                                        }`}
+                                                    />
+
+                                                    <div>
+                                                        <div className="flex items-center justify-between gap-2">
+                                                            <span className="text-xs font-bold text-indigo-600 dark:text-indigo-400">
+                                                                #{tiket.no_tiket}
+                                                            </span>
+                                                            <span
+                                                                className={`text-[10px] font-semibold px-2 py-0.5 rounded-full border ${
+                                                                    isDone
+                                                                        ? 'bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 border-emerald-200'
+                                                                        : isBad
+                                                                        ? 'bg-rose-50 dark:bg-rose-950/60 text-rose-600 border-rose-200'
+                                                                        : isWarning
+                                                                        ? 'bg-amber-50 dark:bg-amber-950/60 text-amber-600 border-amber-200'
+                                                                        : 'bg-blue-50 dark:bg-blue-950/60 text-blue-600 border-blue-200'
+                                                                }`}
+                                                            >
+                                                                {tiket.status}
+                                                            </span>
+                                                        </div>
+
+                                                        <p className="text-xs font-semibold text-slate-800 dark:text-slate-200 mt-1 truncate">
+                                                            {tiket.layanan}
+                                                        </p>
+
+                                                        <div className="flex items-center justify-between text-[11px] text-slate-400 mt-0.5">
+                                                            <span>{tiket.nama || tiket.nip || '-'}</span>
+                                                            <span title={tiket.tanggal_lengkap}>
+                                                                {tiket.tanggal}
+                                                            </span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            );
+                                        })}
+                                    </div>
+                                ) : (
+                                    <div className="py-12 text-center text-slate-400 flex-1 flex flex-col items-center justify-center">
+                                        <Inbox className="w-10 h-10 text-slate-300 dark:text-slate-700 mb-2" />
+                                        <p className="text-xs">Belum ada permintaan masuk saat ini.</p>
+                                    </div>
+                                )}
+                            </div>
                         ) : (
-                            /* Bar Chart Pengajuan Per Bidang (Non OPD) */
+                            /* Bar Chart Pengajuan Per Bidang (Non OPD, Non Bidang) */
                             <div className="rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs p-5 sm:p-6 flex flex-col h-full">
                                 <div className="flex items-center justify-between pb-4 border-b border-slate-100 dark:border-slate-800 mb-4">
                                     <h3 className="text-sm font-bold text-slate-900 dark:text-white flex items-center gap-2">
@@ -602,18 +696,25 @@ export default function Dashboard({
                         <div className="rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs p-5 sm:p-6 flex flex-col h-full">
                             <div className="flex items-center justify-between pb-4 border-b border-slate-100 dark:border-slate-800 mb-4">
                                 <div>
-                                    <h3 className="text-sm font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                                    <h3 className="text-sm font-bold text-slate-900 dark:text-white flex items-center flex-wrap gap-2">
                                         <Activity className="w-4 h-4 text-blue-600" />
                                         <span>Tren Pengajuan Tahun {year}</span>
+                                        {user?.role === 'bidang' && (namaBidang || user?.nama_bidang) && (
+                                            <span className="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 border border-blue-200 dark:border-blue-900/50">
+                                                {namaBidang || user?.nama_bidang}
+                                            </span>
+                                        )}
                                     </h3>
                                     <p className="text-[11px] text-slate-400 mt-0.5">
-                                        Grafik rekapitulasi volume pengajuan usulan per bulan
+                                        {user?.role === 'bidang' && (namaBidang || user?.nama_bidang)
+                                            ? `Grafik rekapitulasi volume pengajuan usulan per bulan`
+                                            : 'Grafik rekapitulasi volume pengajuan usulan per bulan'}
                                     </p>
                                 </div>
-                                <span className="inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded-lg bg-blue-50 dark:bg-blue-950/60 text-blue-700 dark:text-blue-300">
+                                {/* <span className="inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded-lg bg-blue-50 dark:bg-blue-950/60 text-blue-700 dark:text-blue-300">
                                     <span className="w-2 h-2 rounded-full bg-blue-600"></span>
                                     <span>Tahun {year}</span>
-                                </span>
+                                </span> */}
                             </div>
 
                             {/* Chart.js Smooth Canvas Container (Responsive on iPad & Mobile) */}

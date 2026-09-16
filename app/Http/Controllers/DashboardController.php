@@ -295,13 +295,17 @@ class DashboardController extends Controller
     ')
             ->whereYear('tanggal', $year);
 
-        // FILTER ADMIN OPD
+        // FILTER ADMIN OPD & BIDANG
         if ($user->role->name == 'admin_opd') {
 
             $chartTahunQuery->where(
                 'kode_ukerja',
                 $user->kode_ukerja
             );
+        } elseif ($user->role->name == 'bidang') {
+            $chartTahunQuery->whereHas('layanan', function ($q) use ($user) {
+                $q->where('kode_bidang', $user->bidang_id);
+            });
         }
 
         $chartTahun = $chartTahunQuery
@@ -326,6 +330,23 @@ class DashboardController extends Controller
                 ->orderBy('created_at', 'desc')
                 ->orderBy('tanggal', 'desc')
                 ->limit(4)
+                ->get();
+        }
+
+        // 5 Permintaan Terbaru untuk role Bidang
+        $permintaanTerakhirBidang = collect();
+        if ($user->role->name == 'bidang') {
+            $permintaanTerakhirBidang = Regtiket::with([
+                'layanan',
+                'tahapTerakhir.statusRel'
+            ])
+                ->whereHas('layanan', function ($q) use ($user) {
+                    $q->where('kode_bidang', $user->bidang_id);
+                })
+                ->where('archives', 0)
+                ->orderBy('created_at', 'desc')
+                ->orderBy('tanggal', 'desc')
+                ->limit(5)
                 ->get();
         }
 
@@ -359,6 +380,8 @@ class DashboardController extends Controller
 
         $config = $dashboardConfig[$role] ?? $dashboardConfig['root'];
 
+        $namaBidang = $user->bidang?->nama_bidang ?? ($user->nama_bidang ?? null);
+
         return inertia('Dashboard', [
             'user' => [
                 'nama' => $user->nama,
@@ -366,7 +389,9 @@ class DashboardController extends Controller
                 'nip' => $nip,
                 'email' => $email,
                 'role' => $user->role->name ?? 'User',
+                'nama_bidang' => $namaBidang,
             ],
+            'namaBidang' => $namaBidang,
             'ket_ukerja' => $ket_ukerja,
             'nip' => $nip,
             'email' => $email,
@@ -394,6 +419,18 @@ class DashboardController extends Controller
                     'nama' => $item->nama,
                     'nip' => $item->nip,
                     'archives' => (int) $item->archives,
+                ];
+            }),
+            'permintaanTerakhirBidang' => $permintaanTerakhirBidang->map(function ($item) {
+                return [
+                    'no_tiket'       => $item->no_tiket,
+                    'layanan'        => $item->layanan->nama_layanan ?? '-',
+                    'status'         => $item->tahapTerakhir?->statusRel?->status ?? 'Tahap Awal',
+                    'tanggal'        => Carbon::parse($item->tanggal)->translatedFormat('d M'),
+                    'tanggal_lengkap'=> Carbon::parse($item->tanggal)->translatedFormat('d F Y'),
+                    'nama'           => $item->nama,
+                    'nip'            => $item->nip,
+                    'archives'       => (int) $item->archives,
                 ];
             }),
             'year' => (int) $year,
