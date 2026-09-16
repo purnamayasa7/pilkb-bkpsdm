@@ -532,8 +532,8 @@ export default function Create({
 
                         {/* Summary Pegawai Banner */}
                         <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/80 dark:border-slate-800 flex items-center gap-3.5">
-                            <div className="w-10 h-10 rounded-xl bg-blue-600 text-white font-bold text-xs flex items-center justify-center flex-shrink-0">
-                                {getInitials(sessionData.nama, 'A')}
+                            <div className="w-10 h-10 rounded-xl bg-blue-600 text-white flex items-center justify-center flex-shrink-0 shadow-2xs">
+                                <User className="w-5 h-5" />
                             </div>
                             <div className="min-w-0 flex-1">
                                 <p className="text-xs font-semibold text-slate-400">Pegawai Terpilih:</p>
@@ -674,9 +674,21 @@ export default function Create({
 
                         {/* DAFTAR PERSYARATAN */}
                         <div className="space-y-3">
-                            <h3 className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
-                                Berkas Persyaratan ({syarat.length} Dokumen)
-                            </h3>
+                            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                                <h3 className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                                    Berkas Persyaratan ({syarat.length} Dokumen)
+                                </h3>
+                                <span className="text-[11px] font-medium text-slate-400">
+                                    {Object.values(checkedSyarat).filter(Boolean).length} dari {syarat.length} terkonfirmasi
+                                </span>
+                            </div>
+
+                            <div className="p-3 rounded-2xl bg-blue-50/70 dark:bg-blue-950/40 border border-blue-200/80 dark:border-blue-900/40 text-blue-800 dark:text-blue-300 text-xs flex items-start gap-2.5">
+                                <Info className="w-4 h-4 text-blue-600 dark:text-blue-400 mt-0.5 shrink-0" />
+                                <p className="text-[11px] leading-relaxed">
+                                    <strong>Petunjuk:</strong>Untuk berkas yang <strong>bersifat opsional</strong>, Anda dapat langsung mencentang kotak verifikasi untuk mengonfirmasi kelengkapan.
+                                </p>
+                            </div>
 
                             {syarat.length === 0 ? (
                                 <div className="py-8 text-center text-slate-400 border border-dashed border-slate-200 dark:border-slate-800 rounded-2xl">
@@ -689,6 +701,24 @@ export default function Create({
                                     const isSimpeg = sy.metode === 'simpeg';
                                     const isTersediaSimpeg = item.tersedia;
                                     const uploadedFile = uploadedFiles[sy.id];
+                                    const isChecked = !!checkedSyarat[sy.id];
+
+                                    // Tentukan label dan warna status yang adaptif:
+                                    let statusLabel = 'Belum\nTerpenuhi';
+                                    let statusColor = 'text-slate-400';
+
+                                    if (isChecked) {
+                                        if (isSimpeg && isTersediaSimpeg) {
+                                            statusLabel = 'Terpenuhi (SIMPEG) ✓';
+                                            statusColor = 'text-emerald-600 dark:text-emerald-400';
+                                        } else if (uploadedFile) {
+                                            statusLabel = 'Terunggah ✓';
+                                            statusColor = 'text-emerald-600 dark:text-emerald-400';
+                                        } else {
+                                            statusLabel = 'Dikonfirmasi (Opsional) ✓';
+                                            statusColor = 'text-teal-600 dark:text-teal-400';
+                                        }
+                                    }
 
                                     return (
                                         <div
@@ -743,20 +773,26 @@ export default function Create({
                                                     </div>
                                                 </div>
 
-                                                {/* Kolom Kanan: Checkbox "Syarat Terpenuhi" (Hanya tercentang otomatis via SIMPEG atau Upload; tidak bisa di-uncheck manual) */}
-                                                <div className="flex flex-col items-center gap-1 pt-0.5 flex-shrink-0 min-w-[80px] border-l border-slate-100 dark:border-slate-700 pl-3">
-                                                    <div className="flex flex-col items-center gap-1.5 select-none" title={checkedSyarat[sy.id] ? 'Syarat telah terpenuhi' : 'Syarat belum terpenuhi'}>
+                                                {/* Kolom Kanan: Checkbox "Syarat Terpenuhi" (Bisa di-toggle mandiri untuk syarat opsional) */}
+                                                <div className="flex flex-col items-center gap-1 pt-0.5 flex-shrink-0 min-w-[90px] border-l border-slate-100 dark:border-slate-700 pl-3">
+                                                    <label
+                                                        className="flex flex-col items-center gap-1.5 cursor-pointer select-none group p-1 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-700/40 transition-colors"
+                                                        title={
+                                                            isChecked
+                                                                ? 'Klik untuk membatalkan konfirmasi'
+                                                                : 'Klik untuk konfirmasi berkas terpenuhi / opsional'
+                                                        }
+                                                    >
                                                         <input
                                                             type="checkbox"
-                                                            checked={!!checkedSyarat[sy.id]}
-                                                            disabled
-                                                            readOnly
-                                                            className="w-5 h-5 rounded-md accent-blue-600 cursor-not-allowed opacity-90 disabled:opacity-100"
+                                                            checked={isChecked}
+                                                            onChange={() => handleCheckToggle(sy.id)}
+                                                            className="w-5 h-5 rounded-md text-blue-600 border-slate-300 dark:border-slate-600 focus:ring-blue-500 cursor-pointer transition-transform group-hover:scale-105"
                                                         />
-                                                        <span className={`text-[10px] font-semibold text-center leading-tight ${checkedSyarat[sy.id] ? 'text-emerald-600 dark:text-emerald-400' : 'text-slate-400'}`}>
-                                                            {checkedSyarat[sy.id] ? 'Terpenuhi ✓' : 'Belum\nTerpenuhi'}
+                                                        <span className={`text-[10px] font-semibold text-center leading-tight transition-colors ${statusColor}`}>
+                                                            {statusLabel}
                                                         </span>
-                                                    </div>
+                                                    </label>
                                                 </div>
                                             </div>
 
@@ -1123,9 +1159,14 @@ export default function Create({
                             </div>
                         </div>
 
-                        <p className="text-xs text-slate-600 dark:text-slate-300 bg-slate-50 dark:bg-slate-800/60 p-3.5 rounded-2xl border border-slate-100 dark:border-slate-800">
-                            Setelah diajukan, nomor tiket resmi akan diterbitkan dan berkas usulan akan langsung diteruskan ke tim verifikator BKPSDM.
-                        </p>
+                        <div className="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-800 space-y-1 text-xs">
+                            <p className="text-slate-600 dark:text-slate-300">
+                                Setelah diajukan, nomor tiket resmi akan diterbitkan dan berkas usulan akan langsung diteruskan ke tim verifikator BKPSDM.
+                            </p>
+                            <p className="text-[11px] font-semibold text-blue-600 dark:text-blue-400 pt-1 border-t border-slate-200/60 dark:border-slate-700/60">
+                                Total berkas terkonfirmasi: {Object.values(checkedSyarat).filter(Boolean).length} dari {syarat.length} dokumen.
+                            </p>
+                        </div>
 
                         <div className="flex items-center justify-end gap-2 pt-2">
                             <button

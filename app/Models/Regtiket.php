@@ -62,6 +62,10 @@ class Regtiket extends Model
                     );
                 });
 
+                // Pimpinan (Kepala Badan & Sekretaris) – Read-only global
+            case 5:
+                return $query;
+
             default:
                 return $query->whereRaw('1 = 0');
         }
@@ -100,5 +104,10 @@ class Regtiket extends Model
             'no_tiket',
             'no_tiket'
         );
+    }
+
+    public function review()
+    {
+        return $this->hasOne(LayananReview::class, 'no_tiket', 'no_tiket');
     }
 }

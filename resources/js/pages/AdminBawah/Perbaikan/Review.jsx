@@ -196,15 +196,6 @@ export default function Review({
 
             {/* Container Full Width Sesuai Standard.md Bagian 3 Poin 2 */}
             <div className="space-y-6">
-                {/* FLASH MESSAGE ALERT */}
-                {flash.success && (
-                    <div className="p-4 rounded-2xl bg-emerald-50 dark:bg-emerald-950/50 border border-emerald-200 dark:border-emerald-900 text-emerald-800 dark:text-emerald-200 flex items-center justify-between text-xs shadow-xs animate-in fade-in duration-150">
-                        <div className="flex items-center gap-2">
-                            <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
-                            <span className="font-medium">{flash.success}</span>
-                        </div>
-                    </div>
-                )}
 
                 {/* ERROR ALERT NOTIFICATION */}
                 {errorAlert && (
@@ -470,7 +461,7 @@ export default function Review({
                                                             ) : (
                                                                 <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-medium bg-amber-50 dark:bg-amber-950/60 text-amber-700 dark:text-amber-400 border border-amber-200/60 dark:border-amber-900/40">
                                                                     <Upload className="w-2.5 h-2.5" />
-                                                                    <span>Upload Mandiri</span>
+                                                                    <span>Upload di PILKB</span>
                                                                 </span>
                                                             )}
                                                             {hasManualUpload && metodeSyarat === 'simpeg' && (

@@ -24,6 +24,10 @@ class DashboardController extends Controller
     {
         $user = Auth::user();
 
+        if ($user->role?->name === 'pimpinan') {
+            return redirect()->route('pimpinan.dashboard');
+        }
+
         // GET DATA API
         $pegawai = $this->pegawaiService
             ->getPegawaiByNip($user->username);

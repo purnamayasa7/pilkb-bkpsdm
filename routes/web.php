@@ -9,11 +9,13 @@ use App\Http\Controllers\DetailTiketController;
 use App\Http\Controllers\FaQController;
 use App\Http\Controllers\LaporanController;
 use App\Http\Controllers\LayananController;
+use App\Http\Controllers\LayananReviewController;
 use App\Http\Controllers\LogController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\PengambilanController;
 use App\Http\Controllers\PerbaikanController;
 use App\Http\Controllers\PermintaanController;
+use App\Http\Controllers\PimpinanController;
 use App\Http\Controllers\SearchController;
 use App\Http\Controllers\StatusController;
 use App\Http\Controllers\SyaratController;
@@ -79,7 +81,7 @@ Route::middleware(['auth', 'force.password'])->group(function () {
 
     /* Dashboard */
     Route::get('/dashboard', [DashboardController::class, 'index'])
-        ->middleware('role:admin_bawah,admin_opd,root,bidang')
+        ->middleware('role:admin_bawah,admin_opd,root,bidang,pimpinan')
         ->name('dashboard');
 
     Route::post('/logout', [AuthenticatedSessionController::class, 'destroy'])
@@ -130,7 +132,13 @@ Route::middleware(['auth', 'force.password'])->group(function () {
     // Search
     Route::get('/search-ticket', [SearchController::class, 'ticket'])->name('search.ticket');
     Route::get('/ticket/detail/{no_tiket}', [SearchController::class, 'detail'])->name('ticket.detail');
+
+    // SKM Review — Admin OPD submit ulasan kepuasan tiket yang sudah selesai
+    Route::post('/tiket/{no_tiket}/review', [LayananReviewController::class, 'store'])
+        ->middleware('role:admin_opd')
+        ->name('tiket.review.store');
 });
+
 
 /* ROOT */
 
@@ -407,6 +415,23 @@ Route::prefix('adminBawah')
         Route::post('pindah/{no_tiket}', [TiketController::class, 'updatePindah'])->name('pindah.updatePindah');
         Route::get('pindah/get-layanan/{bidang}', [TiketController::class, 'getLayananPindah'])->name('pindah.getLayanan');
         Route::get('pindah/get-syarat/{layanan}', [TiketController::class, 'getSyaratPindah'])->name('pindah.getSyarat');
+    });
+
+/* PIMPINAN (Kepala Badan & Sekretaris BKPSDM) */
+
+Route::prefix('pimpinan')
+    ->name('pimpinan.')
+    ->middleware(['auth', 'role:pimpinan'])
+    ->group(function () {
+        // Dashboard Eksekutif
+        Route::get('dashboard', [PimpinanController::class, 'dashboard'])->name('dashboard');
+        // Monitoring Beban & Antrean (SLA)
+        Route::get('monitoring', [PimpinanController::class, 'monitoring'])->name('monitoring');
+        // Evaluasi Kepuasan (SKM)
+        Route::get('kepuasan', [PimpinanController::class, 'kepuasan'])->name('kepuasan');
+        // Laporan Eksekutif
+        Route::get('laporan', [PimpinanController::class, 'laporan'])->name('laporan');
+        Route::get('laporan/export-pdf', [PimpinanController::class, 'exportPdfLaporan'])->name('laporan.exportPdf');
     });
 
 /* Auth (Breeze) */

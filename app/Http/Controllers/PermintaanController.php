@@ -527,19 +527,30 @@ class PermintaanController extends Controller
                 'comment' => $request->catatan ?? '-'
             ]);
 
+            // Cek apakah status yang dipilih adalah "Selesai"
+            $statusObj = Status::find($request->status_tahap);
+            $isSelesai = $statusObj && strtolower(trim($statusObj->status)) === 'selesai';
+
+            $updateTiketData = [
+                'data_baru' => 0,
+                'diperbaiki' => 0,
+                'diperbaiki_tgl' => now(),
+            ];
+
+            if ($isSelesai) {
+                $updateTiketData['archives'] = 1;
+                $updateTiketData['operator_archives'] = Auth::user()->username;
+            }
+
             Regtiket::where('no_tiket', $no_tiket)
-                ->update([
-                    'data_baru' => 0,
-                    'diperbaiki' => 0,
-                    'diperbaiki_tgl' => now()
-                ]);
+                ->update($updateTiketData);
 
             DB::commit();
 
             ActivityLogService::log(
                 'Manajemen Data Tiket',
                 'CREATE',
-                'Submit Review Tiket',
+                $isSelesai ? 'Submit Review Tiket - Status Selesai (Diarsipkan)' : 'Submit Review Tiket',
                 [],
                 $tahap->toArray()
             );
@@ -556,15 +567,18 @@ class PermintaanController extends Controller
             foreach ($adminOpd as $user) {
 
                 if ($semuaValid) {
+                    $judulNotif = $isSelesai ? 'Usulan Selesai Diproses' : 'Status Usulan Diperbarui';
+                    $pesanNotif = $isSelesai
+                        ? 'No Tiket: ' . $tahap->no_tiket . ' telah selesai diproses.'
+                        : 'No Tiket: ' . $tahap->no_tiket . ' status sudah diperbarui menjadi ' . ($tahap->statusRel->status ?? 'Diproses');
+
                     $user->notify(
                         new TiketNotification(
-                            'Status Usulan Diperbarui',
-                            'No Tiket: ' . $tahap->no_tiket .
-                                ' status sudah diperbarui menjadi ' .
-                                $tahap->statusRel->status,
+                            $judulNotif,
+                            $pesanNotif,
                             route('adminOpd.tiket.indexProses'),
                             $tahap->no_tiket,
-                            'status_update'
+                            $isSelesai ? 'selesai' : 'status_update'
                         )
                     );
                 } else {
@@ -586,24 +600,30 @@ class PermintaanController extends Controller
             // Notifikasi Email langsung ke ASN bersangkutan (email dari input Step 1)
             if (!empty($tiket->email)) {
                 $pesanAsn = $semuaValid
-                    ? 'Status pengajuan usulan Anda dengan No Tiket: ' . $tahap->no_tiket . ' telah diperbarui menjadi ' . ($tahap->statusRel->status ?? 'Sedang Diproses') . '.'
+                    ? ($isSelesai
+                        ? 'Pengajuan usulan Anda dengan No Tiket: ' . $tahap->no_tiket . ' telah selesai diproses. Silakan hubungi BKPSDM untuk informasi pengambilan dokumen atau tahapan selanjutnya.'
+                        : 'Status pengajuan usulan Anda dengan No Tiket: ' . $tahap->no_tiket . ' telah diperbarui menjadi ' . ($tahap->statusRel->status ?? 'Sedang Diproses') . '.')
                     : 'Pengajuan usulan Anda dengan No Tiket: ' . $tahap->no_tiket . ' memerlukan perbaikan dokumen berkas. Silakan koordinasi dengan Admin OPD Anda.';
 
                 Notification::route('mail', $tiket->email)
                     ->notify(
                         new TiketNotification(
-                            $semuaValid ? 'Status Usulan Diperbarui' : 'Perbaikan Berkas Diperlukan',
+                            $semuaValid ? ($isSelesai ? 'Layanan Anda Telah Selesai Diproses' : 'Status Usulan Diperbarui') : 'Perbaikan Berkas Diperlukan',
                             $pesanAsn,
                             route('tiket.public', $tahap->no_tiket),
                             $tahap->no_tiket,
-                            $semuaValid ? 'status_update' : 'berkas_tidak_lengkap'
+                            $semuaValid ? ($isSelesai ? 'selesai' : 'status_update') : 'berkas_tidak_lengkap'
                         )
                     );
             }
 
+            $successMsg = $isSelesai
+                ? 'Review berhasil disimpan dan usulan telah selesai diproses (diarsipkan).'
+                : 'Review berhasil disimpan.';
+
             return redirect()
                 ->route('adminBidang.permintaan.index')
-                ->with('success', 'Review berhasil disimpan.');
+                ->with('success', $successMsg);
         } catch (\Exception $e) {
             DB::rollBack();
 

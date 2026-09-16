@@ -237,23 +237,6 @@ export default function Index({
 
             {/* Container Baku Standard.md (space-y-6 lebar penuh tanpa batasan max-w) */}
             <div className="space-y-6">
-                {/* Alert Notifikasi Flash */}
-                {flash.success && (
-                    <div className="p-4 rounded-2xl bg-emerald-50 dark:bg-emerald-950/50 border border-emerald-200 dark:border-emerald-900 text-emerald-800 dark:text-emerald-200 flex items-center justify-between text-xs shadow-xs animate-in fade-in duration-150">
-                        <div className="flex items-center gap-2">
-                            <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
-                            <span className="font-medium">{flash.success}</span>
-                        </div>
-                    </div>
-                )}
-                {flash.error && (
-                    <div className="p-4 rounded-2xl bg-rose-50 dark:bg-rose-950/50 border border-rose-200 dark:border-rose-900 text-rose-800 dark:text-rose-200 flex items-center justify-between text-xs shadow-xs animate-in fade-in duration-150">
-                        <div className="flex items-center gap-2">
-                            <AlertCircle className="w-4 h-4 text-rose-600 dark:text-rose-400 shrink-0" />
-                            <span className="font-medium">{flash.error}</span>
-                        </div>
-                    </div>
-                )}
 
                 {/* 1. PAGE HEADER (Bagian 4 Poin 1 Standard.md) */}
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">

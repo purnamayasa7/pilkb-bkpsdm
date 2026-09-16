@@ -17,6 +17,8 @@ class Layanan extends Model
         'nama_layanan',
         'rangkap',
         'waktu_penyelesaian',
+        'target_waktu',
+        'satuan_waktu',
         'aktif',
         'no_wa',
         'deskripsi',
@@ -54,5 +56,10 @@ class Layanan extends Model
     public function regtiket()
     {
         return $this->hasMany(Regtiket::class, 'kode_layanan', 'id');
+    }
+
+    public function reviews()
+    {
+        return $this->hasMany(LayananReview::class, 'kode_layanan', 'id');
     }
 }

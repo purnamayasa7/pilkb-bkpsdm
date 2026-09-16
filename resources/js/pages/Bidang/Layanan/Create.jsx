@@ -9,6 +9,7 @@ import {
     Clock,
     AlertCircle,
     CheckCircle2,
+    ChevronDown,
 } from 'lucide-react';
 
 export default function LayananBidangCreate({ userBidang = null }) {
@@ -17,9 +18,15 @@ export default function LayananBidangCreate({ userBidang = null }) {
 
     const { data, setData, post, processing, errors } = useForm({
         nama_layanan: '',
-        waktu_penyelesaian: '',
+        target_waktu: '',
+        satuan_waktu: 'hari',
         deskripsi: '',
     });
+
+    // Preview teks SLA
+    const satuanLabel = { hari: 'Hari', bulan: 'Bulan', hari_kerja: 'Hari', hari_kalender: 'Hari' };
+    const waktuPreview = data.target_waktu ? `${data.target_waktu} ${satuanLabel[data.satuan_waktu] ?? data.satuan_waktu}` : '-';
+
 
     const handleSubmit = (e) => {
         if (e) e.preventDefault();
@@ -129,34 +136,54 @@ export default function LayananBidangCreate({ userBidang = null }) {
                             )}
                         </div>
 
-                        {/* Waktu Penyelesaian */}
+                        {/* Waktu Penyelesaian (SLA) */}
                         <div>
                             <label
-                                htmlFor="waktu_penyelesaian"
                                 className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5"
                             >
-                                Waktu Penyelesaian <span className="text-rose-500">*</span>
+                                Target Waktu Penyelesaian (SLA) <span className="text-rose-500">*</span>
                             </label>
-                            <div className="relative">
-                                <Clock className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
-                                <input
-                                    id="waktu_penyelesaian"
-                                    type="text"
-                                    value={data.waktu_penyelesaian}
-                                    onChange={(e) => setData('waktu_penyelesaian', e.target.value)}
-                                    placeholder="Contoh: 3 Hari Kerja"
-                                    required
-                                    className={`w-full pl-10 pr-4 py-2.5 rounded-xl border text-xs text-slate-800 dark:text-slate-200 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 transition-all ${
-                                        errors.waktu_penyelesaian
-                                            ? 'border-rose-500 ring-rose-500/20'
-                                            : 'border-slate-200 dark:border-slate-800 focus:ring-blue-500/20 focus:border-blue-500'
-                                    }`}
-                                />
+                            <div className="flex gap-2">
+                                {/* Input Angka */}
+                                <div className="relative flex-1">
+                                    <Clock className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+                                    <input
+                                        type="number"
+                                        min={1}
+                                        value={data.target_waktu}
+                                        onChange={(e) => setData('target_waktu', e.target.value)}
+                                        placeholder="Contoh: 3"
+                                        required
+                                        className={`w-full pl-10 pr-4 py-2.5 rounded-xl border text-xs text-slate-800 dark:text-slate-200 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 transition-all ${
+                                            errors.target_waktu
+                                                ? 'border-rose-500 ring-rose-500/20'
+                                                : 'border-slate-200 dark:border-slate-800 focus:ring-blue-500/20 focus:border-blue-500'
+                                        }`}
+                                    />
+                                </div>
+                                {/* Dropdown Satuan */}
+                                <div className="relative w-44">
+                                    <select
+                                        value={data.satuan_waktu}
+                                        onChange={(e) => setData('satuan_waktu', e.target.value)}
+                                        className="w-full appearance-none pl-4 pr-9 py-2.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-xs font-semibold text-slate-700 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all cursor-pointer"
+                                    >
+                                        <option value="hari">Hari</option>
+                                        <option value="bulan">Bulan</option>
+                                    </select>
+                                    <ChevronDown className="w-3.5 h-3.5 text-slate-400 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+                                </div>
                             </div>
-                            {errors.waktu_penyelesaian && (
+                            {data.target_waktu && (
+                                <p className="text-[11px] text-blue-600 dark:text-blue-400 flex items-center gap-1 mt-1">
+                                    <Clock className="w-3 h-3" />
+                                    Preview: <strong>{waktuPreview}</strong>
+                                </p>
+                            )}
+                            {errors.target_waktu && (
                                 <p className="text-xs text-rose-600 mt-1 flex items-center gap-1">
                                     <AlertCircle className="w-3.5 h-3.5" />
-                                    <span>{errors.waktu_penyelesaian}</span>
+                                    <span>{errors.target_waktu}</span>
                                 </p>
                             )}
                         </div>

@@ -3,6 +3,7 @@ import { Head, Link, router } from '@inertiajs/react';
 import AuthenticatedLayout from '@/layouts/AuthenticatedLayout';
 import StatusBadge from '@/components/StatusBadge';
 import RiwayatTahapanModal from '@/components/RiwayatTahapanModal';
+import ReviewModal from '@/components/ReviewModal';
 import Pagination from '@/components/Pagination';
 import { getInitials } from '@/utils/initials';
 import {
@@ -22,6 +23,7 @@ import {
     X,
     ArrowUpDown,
     RotateCcw,
+    Star,
 } from 'lucide-react';
 
 const MONTH_NAMES = [
@@ -50,6 +52,13 @@ export default function Index({ auth, tiket = [], month = new Date().getMonth() 
     // Modal Riwayat State
     const [modalOpen, setModalOpen] = useState(false);
     const [selectedTiket, setSelectedTiket] = useState(null);
+
+    // Modal Review SKM State
+    const [reviewModalOpen, setReviewModalOpen] = useState(false);
+    const [reviewTiket, setReviewTiket] = useState(null);
+    const [isFromPrint, setIsFromPrint] = useState(false);
+    const [pendingPrintTiket, setPendingPrintTiket] = useState(null);
+    const [bannerDismissed, setBannerDismissed] = useState(false);
 
     // Pagination State
     const [currentPage, setCurrentPage] = useState(1);
@@ -95,6 +104,40 @@ export default function Index({ auth, tiket = [], month = new Date().getMonth() 
         setSelectedTiket(item);
         setModalOpen(true);
     };
+
+    // Open Modal Review SKM
+    const handleOpenReview = (item, fromPrint = false) => {
+        setReviewTiket(item);
+        setIsFromPrint(fromPrint);
+        if (fromPrint) {
+            setPendingPrintTiket(item.no_tiket);
+        } else {
+            setPendingPrintTiket(null);
+        }
+        setReviewModalOpen(true);
+    };
+
+    // Handler Cetak Tiket (Opsi 1: Soft-gating jika usulan telah selesai tapi belum diulas)
+    const handlePrintTiket = (item) => {
+        if (item.archives == 1 && !item.review) {
+            handleOpenReview(item, true);
+            return;
+        }
+        window.open(`/tiket/cetak/${encodeURIComponent(item.no_tiket)}`, '_blank');
+    };
+
+    // Callback setelah ulasan sukses terkirim
+    const handleReviewSuccess = (noTiket) => {
+        if (pendingPrintTiket === noTiket) {
+            window.open(`/tiket/cetak/${encodeURIComponent(noTiket)}`, '_blank');
+            setPendingPrintTiket(null);
+        }
+    };
+
+    // Usulan Selesai yang Belum Diulas oleh Admin OPD (Opsi 3)
+    const pendingReviewTiket = useMemo(() => {
+        return tiket.filter((item) => item.archives == 1 && !item.review);
+    }, [tiket]);
 
     // Client-side Filtered List
     const filteredTiket = useMemo(() => {
@@ -318,6 +361,62 @@ export default function Index({ auth, tiket = [], month = new Date().getMonth() 
                     </div>
                 </div>
 
+                {/* OPSI 3: BANNER PENGINGAT ULASAN TIKET SELESAI */}
+                {pendingReviewTiket.length > 0 && !bannerDismissed && (
+                    <div className="rounded-3xl border border-amber-200/90 dark:border-amber-800/70 bg-gradient-to-r from-amber-50/80 via-orange-50/40 to-amber-50/80 dark:from-amber-950/30 dark:via-orange-950/20 dark:to-amber-950/30 p-4 sm:p-5 shadow-xs transition-all animate-in fade-in duration-200">
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                            <div className="flex items-start sm:items-center gap-3.5">
+                                <div className="p-2.5 rounded-2xl bg-amber-100 dark:bg-amber-900/60 text-amber-600 dark:text-amber-400 border border-amber-200/80 dark:border-amber-800/60 flex-shrink-0">
+                                    <Star className="w-5 h-5 fill-amber-500 text-amber-500" />
+                                </div>
+                                <div>
+                                    <div className="flex items-center gap-2 flex-wrap">
+                                        <h4 className="text-xs sm:text-sm font-bold text-slate-900 dark:text-white">
+                                            Bantu Kami Meningkatkan Mutu Layanan
+                                        </h4>
+                                        <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-200/80 dark:bg-amber-900/80 text-amber-800 dark:text-amber-300">
+                                            {pendingReviewTiket.length} Usulan Selesai
+                                        </span>
+                                    </div>
+                                    <p className="text-xs text-slate-600 dark:text-slate-300 mt-1 leading-relaxed">
+                                        {pendingReviewTiket.length === 1 ? (
+                                            <>
+                                                Usulan nomor{' '}
+                                                <span className="font-semibold text-slate-900 dark:text-white font-mono">
+                                                    {pendingReviewTiket[0].no_tiket}
+                                                </span>{' '}
+                                                ({pendingReviewTiket[0].layanan?.nama_layanan || 'Layanan'}) telah selesai diproses. Mohon luangkan waktu anda untuk memberikan ulasan demi peningkatan layanan kami.
+                                            </>
+                                        ) : (
+                                            <>
+                                                Terdapat <span className="font-semibold text-slate-900 dark:text-white">{pendingReviewTiket.length} usulan</span> yang telah selesai dan siap diulas. Masukan Anda sangat berarti bagi evaluasi pelayanan BKPSDM Buleleng.
+                                            </>
+                                        )}
+                                    </p>
+                                </div>
+                            </div>
+
+                            <div className="flex items-center gap-2 self-start sm:self-center flex-shrink-0">
+                                <button
+                                    type="button"
+                                    onClick={() => handleOpenReview(pendingReviewTiket[0], false)}
+                                    className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-white font-semibold text-xs transition-colors shadow-2xs cursor-pointer"
+                                >
+                                    <span>Beri Ulasan Sekarang</span>
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={() => setBannerDismissed(true)}
+                                    title="Tutup Pengingat"
+                                    className="p-2 rounded-xl text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-amber-100/60 dark:hover:bg-amber-900/40 transition-colors cursor-pointer"
+                                >
+                                    <X className="w-4 h-4" />
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                )}
+
                 {/* FILTER TOOLBAR CARD */}
                 <div className="rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs p-4 sm:p-5">
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-3.5 items-center">
@@ -528,15 +627,38 @@ export default function Index({ auth, tiket = [], month = new Date().getMonth() 
                                                                 <Eye className="w-4 h-4" />
                                                             </button>
 
-                                                            <a
-                                                                href={`/tiket/cetak/${encodeURIComponent(item.no_tiket)}`}
-                                                                target="_blank"
-                                                                rel="noreferrer"
-                                                                title="Cetak Bukti Tiket"
-                                                                className="p-1.5 rounded-lg text-amber-600 hover:text-amber-700 hover:bg-amber-50 dark:hover:bg-amber-950/50 border border-amber-200 dark:border-amber-800 transition-colors"
+                                                            <button
+                                                                type="button"
+                                                                onClick={() => handlePrintTiket(item)}
+                                                                title={item.archives == 1 && !item.review ? 'Beri ulasan kepuasan untuk mencetak bukti tiket' : 'Cetak Bukti Tiket'}
+                                                                className="p-1.5 rounded-lg text-amber-600 hover:text-amber-700 hover:bg-amber-50 dark:hover:bg-amber-950/50 border border-amber-200 dark:border-amber-800 transition-colors cursor-pointer"
                                                             >
                                                                 <Printer className="w-4 h-4" />
-                                                            </a>
+                                                            </button>
+
+                                                            {/* Tombol Beri Ulasan — hanya tampil jika tiket Selesai (archives=1) */}
+                                                            {item.archives == 1 && (
+                                                                item.review ? (
+                                                                    /* Sudah diulas — tampil badge hijau */
+                                                                    <span
+                                                                        title="Ulasan sudah dikirim"
+                                                                        className="inline-flex items-center gap-1 px-2 py-1 rounded-lg text-[10px] font-semibold bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 border border-emerald-200/80 dark:border-emerald-900/50"
+                                                                    >
+                                                                        <Star className="w-3 h-3 fill-emerald-500 text-emerald-500" />
+                                                                        Sudah Diulas
+                                                                    </span>
+                                                                ) : (
+                                                                    /* Belum diulas — tombol bintang */
+                                                                    <button
+                                                                        type="button"
+                                                                        onClick={() => handleOpenReview(item)}
+                                                                        title="Beri Ulasan Kepuasan"
+                                                                        className="p-1.5 rounded-lg text-amber-500 hover:text-amber-600 hover:bg-amber-50 dark:hover:bg-amber-950/50 border border-amber-200 dark:border-amber-800 transition-colors"
+                                                                    >
+                                                                        <Star className="w-4 h-4" />
+                                                                    </button>
+                                                                )
+                                                            )}
                                                         </div>
                                                     </td>
                                                 </tr>
@@ -564,6 +686,21 @@ export default function Index({ auth, tiket = [], month = new Date().getMonth() 
                 isOpen={modalOpen}
                 onClose={() => setModalOpen(false)}
                 tiket={selectedTiket}
+            />
+
+            {/* MODAL REVIEW SKM */}
+            <ReviewModal
+                isOpen={reviewModalOpen}
+                onClose={() => {
+                    setReviewModalOpen(false);
+                    setReviewTiket(null);
+                    setIsFromPrint(false);
+                    setPendingPrintTiket(null);
+                }}
+                noTiket={reviewTiket?.no_tiket}
+                namaLayanan={reviewTiket?.layanan?.nama_layanan || ''}
+                isFromPrint={isFromPrint}
+                onSuccess={handleReviewSuccess}
             />
         </AuthenticatedLayout>
     );

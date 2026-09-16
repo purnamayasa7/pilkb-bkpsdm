@@ -63,6 +63,15 @@ export default function Edit({
     const [submitting, setSubmitting] = useState(false);
     const [errorAlert, setErrorAlert] = useState(null);
 
+    // Deteksi apakah status yang dipilih di combobox adalah "Selesai"
+    const selectedStatusObj = useMemo(() => {
+        return statusList.find((st) => String(st.id) === String(statusTahap));
+    }, [statusList, statusTahap]);
+
+    const isSelesaiSelected = useMemo(() => {
+        return selectedStatusObj?.status?.toLowerCase().trim() === 'selesai';
+    }, [selectedStatusObj]);
+
     // Modal SIMPEG preview
     const [simpegModalOpen, setSimpegModalOpen] = useState(false);
     const [activeSimpegDocs, setActiveSimpegDocs] = useState([]);
@@ -169,6 +178,7 @@ export default function Edit({
             catatan: catatanTahap || '-',
             status: {},
             comment: commentListState,
+            archives: isSelesaiSelected ? 1 : 0,
         };
 
         Object.entries(statusListState).forEach(([id, isValid]) => {
@@ -369,7 +379,11 @@ export default function Edit({
                                         value={statusTahap}
                                         onChange={(e) => setStatusTahap(e.target.value)}
                                         required
-                                        className="w-full px-3.5 py-2.5 pr-9 rounded-xl text-xs font-semibold bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500 appearance-none cursor-pointer"
+                                        className={`w-full px-3.5 py-2.5 pr-9 rounded-xl text-xs font-semibold bg-slate-50 dark:bg-slate-800 border ${
+                                            isSelesaiSelected
+                                                ? 'border-emerald-500 dark:border-emerald-600 ring-1 ring-emerald-500/30 text-emerald-900 dark:text-emerald-200'
+                                                : 'border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-200'
+                                        } focus:outline-none focus:ring-2 focus:ring-blue-500 appearance-none cursor-pointer transition-all`}
                                     >
                                         <option value="">-- Pilih Status Tahapan --</option>
                                         {statusList.map((st) => (
@@ -380,9 +394,23 @@ export default function Edit({
                                     </select>
                                     <ChevronDown className="w-4 h-4 absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
                                 </div>
-                                <p className="text-[11px] text-slate-400 mt-1">
-                                    Pilih tahapan status yang sesuai dengan progres verifikasi layanan saat ini.
-                                </p>
+                                {isSelesaiSelected ? (
+                                    <div className="mt-2.5 flex items-start gap-2.5 p-3 rounded-2xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 text-emerald-800 dark:text-emerald-200 text-xs shadow-2xs animate-in fade-in duration-200">
+                                        <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400 mt-0.5 shrink-0" />
+                                        <div className="space-y-0.5">
+                                            <p className="font-semibold text-emerald-900 dark:text-emerald-100">
+                                                Status Selesai Dipilih
+                                            </p>
+                                            <p className="text-[11px] text-emerald-700 dark:text-emerald-300/90 leading-relaxed">
+                                                Nilai <strong>Archives</strong> akan otomatis diperbarui menjadi <strong>1</strong> (usulan otomatis diarsipkan dan selesai tanpa proses terpisah).
+                                            </p>
+                                        </div>
+                                    </div>
+                                ) : (
+                                    <p className="text-[11px] text-slate-400 mt-1">
+                                        Pilih tahapan status yang sesuai dengan progres verifikasi layanan saat ini.
+                                    </p>
+                                )}
                             </div>
 
                             <div>
@@ -633,12 +661,21 @@ export default function Edit({
                         <button
                             type="submit"
                             disabled={submitting}
-                            className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white text-xs font-semibold shadow-xs transition-all disabled:opacity-50 cursor-pointer"
+                            className={`w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-2.5 rounded-xl text-white text-xs font-semibold shadow-xs transition-all disabled:opacity-50 cursor-pointer ${
+                                isSelesaiSelected
+                                    ? 'bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800'
+                                    : 'bg-blue-600 hover:bg-blue-700 active:bg-blue-800'
+                            }`}
                         >
                             {submitting ? (
                                 <>
                                     <Loader2 className="w-4 h-4 animate-spin" />
                                     <span>Menyimpan Perubahan...</span>
+                                </>
+                            ) : isSelesaiSelected ? (
+                                <>
+                                    <CheckCircle2 className="w-4 h-4" />
+                                    <span>Simpan & Selesaikan Usulan (Arsipkan)</span>
                                 </>
                             ) : (
                                 <>

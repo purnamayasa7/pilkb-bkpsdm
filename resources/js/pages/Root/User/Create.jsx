@@ -135,6 +135,15 @@ export default function RootUserCreate({ bidang = [] }) {
         return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
     };
 
+    // Helper: label role/bidang
+    const getRoleLabel = (id) => {
+        if (id === 'admin_bawah') return 'Admin Bawah (Front Office / Loket)';
+        if (id === 'admin_opd') return 'Admin OPD (Pengusul SKPD)';
+        if (id === 'pimpinan') return 'Pimpinan (Kepala Badan / Sekretaris)';
+        const found = bidang.find((b) => String(b.id) === String(id));
+        return found ? `Bidang: ${found.nama_bidang}` : id || '-';
+    };
+
     return (
         <AuthenticatedLayout>
             <Head title="Tambah User Baru - PILKB" />
@@ -383,6 +392,7 @@ export default function RootUserCreate({ bidang = [] }) {
                                         <option value="" disabled>Pilih Penempatan Bidang / Role</option>
                                         <option value="admin_bawah">Admin Bawah (Front Office / Loket)</option>
                                         <option value="admin_opd">Admin OPD (Pengusul SKPD)</option>
+                                        <option value="pimpinan">Pimpinan (Kepala Badan / Sekretaris)</option>
                                         {bidang.map((b) => (
                                             <option key={b.id} value={b.id}>
                                                 Bidang: {b.nama_bidang}
@@ -527,6 +537,12 @@ export default function RootUserCreate({ bidang = [] }) {
                                     <span className="text-slate-400">Email:</span>
                                     <span className="font-medium text-slate-800 dark:text-slate-200 truncate max-w-[220px]">
                                         {email}
+                                    </span>
+                                </div>
+                                <div className="flex justify-between">
+                                    <span className="text-slate-400">Penempatan / Role:</span>
+                                    <span className="font-semibold text-slate-800 dark:text-slate-200 truncate max-w-[220px]">
+                                        {getRoleLabel(bidangId)}
                                     </span>
                                 </div>
                             </div>

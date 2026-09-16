@@ -31,5 +31,8 @@ class RoleSeeder extends Seeder
             'id' => '4',
             'name' => 'bidang',
         ]);
+
+        // Role 5: Pimpinan (Kepala Badan & Sekretaris BKPSDM)
+        Role::firstOrCreate(['id' => 5], ['name' => 'pimpinan']);
     }
 }

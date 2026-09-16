@@ -454,11 +454,72 @@ return [
         ],
 
         [
-            'type' => 'item',
-            'title' => 'Cetak Syarat',
-            'path' => 'adminBidang/cetakSyarat',
-            'icon' => 'file-text',
+            'type'       => 'item',
+            'title'      => 'Cetak Syarat',
+            'path'       => 'adminBidang/cetakSyarat',
+            'icon'       => 'file-text',
             'active_key' => 'cetak-syarat',
+        ],
+    ],
+
+    // Role ID = 5 -> Pimpinan (Kepala Badan & Sekretaris BKPSDM)
+    5 => [
+        // Heading
+        [
+            'type'  => 'heading',
+            'title' => 'Dashboard',
+        ],
+
+        [
+            'type'       => 'item',
+            'title'      => 'Dashboard',
+            'path'       => 'pimpinan/dashboard',
+            'icon'       => 'bar-chart-2',
+            'active_key' => 'pimpinan-dashboard',
+        ],
+
+        // Heading
+        [
+            'type'  => 'heading',
+            'title' => 'Monitoring & Evaluasi',
+        ],
+
+        [
+            'type'       => 'item',
+            'title'      => 'Monitoring Layanan',
+            'path'       => 'pimpinan/monitoring',
+            'icon'       => 'clock',
+            'active_key' => 'pimpinan-monitoring',
+        ],
+
+        [
+            'type'       => 'item',
+            'title'      => 'Evaluasi Kepuasan',
+            'path'       => 'pimpinan/kepuasan',
+            'icon'       => 'star',
+            'active_key' => 'pimpinan-kepuasan',
+        ],
+
+        [
+            'type'       => 'item',
+            'title'      => 'Laporan',
+            'path'       => 'pimpinan/laporan',
+            'icon'       => 'file-text',
+            'active_key' => 'pimpinan-laporan',
+        ],
+
+        // Heading
+        [
+            'type'  => 'heading',
+            'title' => 'Lainnya',
+        ],
+
+        [
+            'type'       => 'item',
+            'title'      => 'Percakapan',
+            'path'       => 'chat',
+            'icon'       => 'message-square',
+            'active_key' => 'chat-center',
         ],
     ],
 ];

@@ -25,7 +25,8 @@ import {
 export default function RootUserEdit({ profile = {}, bidang = [], pegawai = {} }) {
     // Form state
     const [email, setEmail] = useState(profile.email || '');
-    const [bidangId, setBidangId] = useState(profile.bidang_id || '');
+    const initialBidang = profile.bidang_id || (profile.role === 'pimpinan' ? 'pimpinan' : (profile.role === 'admin_bawah' ? 'admin_bawah' : (profile.role === 'admin_opd' ? 'admin_opd' : '')));
+    const [bidangId, setBidangId] = useState(initialBidang);
     const [password, setPassword] = useState('');
     const [errors, setErrors] = useState({});
 
@@ -81,6 +82,15 @@ export default function RootUserEdit({ profile = {}, bidang = [], pegawai = {} }
         const parts = String(nama).trim().split(/\s+/);
         if (parts.length === 1) return parts[0].substring(0, 2).toUpperCase();
         return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+    };
+
+    // Helper: label role/bidang
+    const getRoleLabel = (id) => {
+        if (id === 'admin_bawah') return 'Admin Bawah (Front Office / Loket)';
+        if (id === 'admin_opd') return 'Admin OPD (Pengusul SKPD)';
+        if (id === 'pimpinan') return 'Pimpinan (Kepala Badan / Sekretaris)';
+        const found = bidang.find((b) => String(b.id) === String(id));
+        return found ? `Bidang: ${found.nama_bidang}` : id || '-';
     };
 
     const namaLengkap = pegawai.nama_lengkap || profile.nama || '-';
@@ -279,6 +289,7 @@ export default function RootUserEdit({ profile = {}, bidang = [], pegawai = {} }
                                         <option value="" disabled>Pilih Penempatan Bidang / Role</option>
                                         <option value="admin_bawah">Admin Bawah (Front Office / Loket)</option>
                                         <option value="admin_opd">Admin OPD (Pengusul SKPD)</option>
+                                        <option value="pimpinan">Pimpinan (Kepala Badan / Sekretaris)</option>
                                         {bidang.map((b) => (
                                             <option key={b.id} value={b.id}>
                                                 Bidang: {b.nama_bidang}
@@ -423,6 +434,12 @@ export default function RootUserEdit({ profile = {}, bidang = [], pegawai = {} }
                                     <span className="text-slate-400">Email:</span>
                                     <span className="font-medium text-slate-800 dark:text-slate-200 truncate max-w-[220px]">
                                         {email}
+                                    </span>
+                                </div>
+                                <div className="flex justify-between">
+                                    <span className="text-slate-400">Penempatan / Role:</span>
+                                    <span className="font-semibold text-slate-800 dark:text-slate-200 truncate max-w-[220px]">
+                                        {getRoleLabel(bidangId)}
                                     </span>
                                 </div>
                                 {password.trim() && (

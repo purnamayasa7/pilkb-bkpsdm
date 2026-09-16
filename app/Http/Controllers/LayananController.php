@@ -107,18 +107,26 @@ class LayananController extends Controller
     public function storeBidang(Request $request)
     {
         $request->validate([
-            'nama_layanan' => 'required',
-            'waktu_penyelesaian' => 'required',
+            'nama_layanan'  => 'required',
+            'target_waktu'  => 'required|integer|min:1',
+            'satuan_waktu'  => 'required|in:hari,bulan,hari_kerja,hari_kalender',
         ]);
 
         $kode_bidang = Auth::user()->bidang_id;
 
+        // Auto-generate string waktu_penyelesaian agar modul lama tetap berjalan
+        $satuanValue = in_array($request->satuan_waktu, ['hari', 'hari_kerja', 'hari_kalender']) ? 'hari' : 'bulan';
+        $satuanLabel = $satuanValue === 'bulan' ? 'Bulan' : 'Hari';
+        $waktuString = $request->target_waktu . ' ' . $satuanLabel;
+
         $layanan = Layanan::create([
-            'kode_bidang' => $kode_bidang,
-            'nama_layanan' => $request->nama_layanan,
-            'waktu_penyelesaian' => $request->waktu_penyelesaian,
-            'aktif' => true,
-            'deskripsi' => $request->deskripsi,
+            'kode_bidang'        => $kode_bidang,
+            'nama_layanan'       => $request->nama_layanan,
+            'waktu_penyelesaian' => $waktuString,
+            'target_waktu'       => $request->target_waktu,
+            'satuan_waktu'       => $satuanValue,
+            'aktif'              => true,
+            'deskripsi'          => $request->deskripsi,
         ]);
 
         ActivityLogService::log(
@@ -136,19 +144,26 @@ class LayananController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'kode_bidang' => 'required|exists:tb_bidang,id',
+            'kode_bidang'  => 'required|exists:tb_bidang,id',
             'nama_layanan' => 'required',
-            'waktu_penyelesaian' => 'required',
+            'target_waktu' => 'required|integer|min:1',
+            'satuan_waktu' => 'required|in:hari,bulan,hari_kerja,hari_kalender',
         ]);
 
         $kode_bidang = $request->kode_bidang;
 
+        $satuanValue = in_array($request->satuan_waktu, ['hari', 'hari_kerja', 'hari_kalender']) ? 'hari' : 'bulan';
+        $satuanLabel = $satuanValue === 'bulan' ? 'Bulan' : 'Hari';
+        $waktuString = $request->target_waktu . ' ' . $satuanLabel;
+
         $layanan = Layanan::create([
-            'kode_bidang' => $kode_bidang,
-            'nama_layanan' => $request->nama_layanan,
-            'waktu_penyelesaian' => $request->waktu_penyelesaian,
-            'aktif' => true,
-            'deskripsi' => $request->deskripsi,
+            'kode_bidang'        => $kode_bidang,
+            'nama_layanan'       => $request->nama_layanan,
+            'waktu_penyelesaian' => $waktuString,
+            'target_waktu'       => $request->target_waktu,
+            'satuan_waktu'       => $satuanValue,
+            'aktif'              => true,
+            'deskripsi'          => $request->deskripsi,
         ]);
 
         ActivityLogService::log(
@@ -168,31 +183,38 @@ class LayananController extends Controller
         $layanan = Layanan::findOrFail($layananId);
 
         $request->validate([
-            'kode_bidang' => 'required|exists:tb_bidang,id',
+            'kode_bidang'  => 'required|exists:tb_bidang,id',
             'nama_layanan' => 'required',
-            'waktu_penyelesaian' => 'required',
+            'target_waktu' => 'required|integer|min:1',
+            'satuan_waktu' => 'required|in:hari,bulan,hari_kerja,hari_kalender',
         ]);
 
+        $satuanValue = in_array($request->satuan_waktu, ['hari', 'hari_kerja', 'hari_kalender']) ? 'hari' : 'bulan';
+        $satuanLabel = $satuanValue === 'bulan' ? 'Bulan' : 'Hari';
+        $waktuString = $request->target_waktu . ' ' . $satuanLabel;
+
         $oldData = [
-            'nama_layanan' => $layanan->nama_layanan,
+            'nama_layanan'       => $layanan->nama_layanan,
             'waktu_penyelesaian' => $layanan->waktu_penyelesaian,
-            'deskripsi' => $layanan->deskripsi,
-            'aktif' => $layanan->aktif,
+            'deskripsi'          => $layanan->deskripsi,
+            'aktif'              => $layanan->aktif,
         ];
 
         $layanan->update([
-            'kode_bidang' => $request->kode_bidang,
-            'nama_layanan' => $request->nama_layanan,
-            'waktu_penyelesaian' => $request->waktu_penyelesaian,
-            'deskripsi' => $request->deskripsi,
-            'aktif' => $request->aktif,
+            'kode_bidang'        => $request->kode_bidang,
+            'nama_layanan'       => $request->nama_layanan,
+            'waktu_penyelesaian' => $waktuString,
+            'target_waktu'       => $request->target_waktu,
+            'satuan_waktu'       => $satuanValue,
+            'deskripsi'          => $request->deskripsi,
+            'aktif'              => $request->aktif,
         ]);
 
         $newData = [
-            'nama_layanan' => $layanan->fresh()->nama_layanan,
+            'nama_layanan'       => $layanan->fresh()->nama_layanan,
             'waktu_penyelesaian' => $layanan->fresh()->waktu_penyelesaian,
-            'deskripsi' => $layanan->fresh()->deskripsi,
-            'aktif' => $layanan->fresh()->aktif,
+            'deskripsi'          => $layanan->fresh()->deskripsi,
+            'aktif'              => $layanan->fresh()->aktif,
         ];
 
         ActivityLogService::log(
@@ -215,28 +237,35 @@ class LayananController extends Controller
 
         $request->validate([
             'nama_layanan' => 'required',
-            'waktu_penyelesaian' => 'required',
+            'target_waktu' => 'required|integer|min:1',
+            'satuan_waktu' => 'required|in:hari,bulan,hari_kerja,hari_kalender',
         ]);
 
+        $satuanValue = in_array($request->satuan_waktu, ['hari', 'hari_kerja', 'hari_kalender']) ? 'hari' : 'bulan';
+        $satuanLabel = $satuanValue === 'bulan' ? 'Bulan' : 'Hari';
+        $waktuString = $request->target_waktu . ' ' . $satuanLabel;
+
         $oldData = [
-            'nama_layanan' => $layanan->nama_layanan,
+            'nama_layanan'       => $layanan->nama_layanan,
             'waktu_penyelesaian' => $layanan->waktu_penyelesaian,
-            'deskripsi' => $layanan->deskripsi,
-            'aktif' => $layanan->aktif,
+            'deskripsi'          => $layanan->deskripsi,
+            'aktif'              => $layanan->aktif,
         ];
 
         $layanan->update([
-            'nama_layanan' => $request->nama_layanan,
-            'waktu_penyelesaian' => $request->waktu_penyelesaian,
-            'deskripsi' => $request->deskripsi,
-            'aktif' => $request->aktif,
+            'nama_layanan'       => $request->nama_layanan,
+            'waktu_penyelesaian' => $waktuString,
+            'target_waktu'       => $request->target_waktu,
+            'satuan_waktu'       => $satuanValue,
+            'deskripsi'          => $request->deskripsi,
+            'aktif'              => $request->aktif,
         ]);
 
         $newData = [
-            'nama_layanan' => $layanan->fresh()->nama_layanan,
+            'nama_layanan'       => $layanan->fresh()->nama_layanan,
             'waktu_penyelesaian' => $layanan->fresh()->waktu_penyelesaian,
-            'deskripsi' => $layanan->fresh()->deskripsi,
-            'aktif' => $layanan->fresh()->aktif,
+            'deskripsi'          => $layanan->fresh()->deskripsi,
+            'aktif'              => $layanan->fresh()->aktif,
         ];
 
         ActivityLogService::log(

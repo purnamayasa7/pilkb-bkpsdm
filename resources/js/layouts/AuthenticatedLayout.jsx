@@ -65,6 +65,13 @@ export default function AuthenticatedLayout({ children, title, fullHeight = fals
     const [flashVisible, setFlashVisible] = useState(true);
     const [isNavigating, setIsNavigating] = useState(false);
 
+    // Reset flash visibility when flash message changes
+    useEffect(() => {
+        if (flash?.success || flash?.error) {
+            setFlashVisible(true);
+        }
+    }, [flash?.success, flash?.error]);
+
     // Listen to Inertia page navigation events with threshold delay for custom logo spinner
     useEffect(() => {
         let navTimer = null;

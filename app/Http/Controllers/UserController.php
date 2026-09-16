@@ -191,6 +191,7 @@ class UserController extends Controller
         $roleMap = [
             'admin_bawah' => 2,
             'admin_opd' => 3,
+            'pimpinan' => 5,
         ];
 
         $role_id = null;
@@ -279,6 +280,7 @@ class UserController extends Controller
         $roleMap = [
             'admin_bawah' => 2,
             'admin_opd' => 3,
+            'pimpinan' => 5,
         ];
 
         if (isset($roleMap[$request->bidang_id])) {

@@ -71,6 +71,7 @@ class User extends Authenticatable
             'root' => 'Root',
             'admin_bawah' => 'Admin Bawah',
             'admin_opd' => 'Admin OPD',
+            'pimpinan' => 'Pimpinan',
         ];
 
         return $this->bidang->nama_bidang

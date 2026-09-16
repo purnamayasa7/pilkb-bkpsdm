@@ -255,12 +255,23 @@ class UpdateStatusController extends Controller
                     'comment' => $request->catatan ?? '-'
                 ]);
 
+                // Cek apakah status yang dipilih adalah "Selesai"
+                $statusObj = Status::find($request->status_tahap);
+                $isSelesai = $statusObj && strtolower(trim($statusObj->status)) === 'selesai';
+
+                if ($isSelesai) {
+                    $tiket->update([
+                        'archives' => 1,
+                        'operator_archives' => Auth::user()->username,
+                    ]);
+                }
+
                 DB::commit();
 
                 ActivityLogService::log(
                     'Manajemen Data Tiket',
                     'CREATE',
-                    'Menambah Tahap Tiket ID: ' . $tahap->no_tiket,
+                    $isSelesai ? 'Menambah Tahap Tiket - Status Selesai (Diarsipkan) ID: ' . $tahap->no_tiket : 'Menambah Tahap Tiket ID: ' . $tahap->no_tiket,
                     [],
                     $tahap->toArray()
                 );

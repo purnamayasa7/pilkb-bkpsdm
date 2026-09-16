@@ -187,9 +187,9 @@ class TiketController extends Controller
 
         $tiket = Regtiket::with([
             'layanan',
-            'tahapTerakhir.statusRel'
+            'tahapTerakhir.statusRel',
+            'review',           // Untuk keperluan tombol/badge SKM
         ])
-            ->where('archives', 0)
             ->where('kode_ukerja', Auth::user()->kode_ukerja)
             ->whereMonth('tanggal', $month)
             ->whereYear('tanggal', $year)
@@ -199,7 +199,7 @@ class TiketController extends Controller
         return inertia('Opd/Tiket/Index', [
             'tiket' => $tiket,
             'month' => $month,
-            'year' => $year,
+            'year'  => $year,
         ]);
     }
 
