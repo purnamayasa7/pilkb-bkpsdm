@@ -30,6 +30,7 @@ import {
     Sparkles,
     ShieldCheck,
     ExternalLink,
+    Clock,
 } from 'lucide-react';
 
 export default function Create({
@@ -131,6 +132,13 @@ export default function Create({
     const [layananList, setLayananList] = useState([]);
     const [loadingLayanan, setLoadingLayanan] = useState(false);
     const [step2Error, setStep2Error] = useState(null);
+
+    const selectedLayananObj = layananList.find((l) => String(l.id) === String(selectedLayanan));
+    const satuanMap = { hari: 'Hari', minggu: 'Minggu', bulan: 'Bulan', hari_kerja: 'Hari', hari_kalender: 'Hari' };
+    const getEstimasiWaktu = (target, satuan) => {
+        if (!target) return null;
+        return `${target} ${satuanMap[satuan] ?? satuan ?? 'Hari'}`;
+    };
 
     // Fetch Layanan saat Bidang berubah
     useEffect(() => {
@@ -606,6 +614,51 @@ export default function Create({
                                 </div>
                             </div>
 
+                            {/* Card Ringkasan Informasi Layanan & Target Waktu (SOP) */}
+                            {selectedLayananObj && (
+                                <div className="p-4 sm:p-5 rounded-2xl bg-slate-50/80 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-800 space-y-3">
+                                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 pb-3 border-b border-slate-200/60 dark:border-slate-700/60">
+                                        <div className="flex items-center gap-2.5">
+                                            <div className="p-2 rounded-xl bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 border border-blue-200/60 dark:border-blue-900/40 shrink-0">
+                                                <Briefcase className="w-4 h-4" />
+                                            </div>
+                                            <div>
+                                                <span className="text-[10px] uppercase font-bold tracking-wider text-slate-400 block">
+                                                    Layanan Terpilih
+                                                </span>
+                                                <h4 className="text-xs sm:text-sm font-bold text-slate-900 dark:text-white">
+                                                    {selectedLayananObj.nama_layanan}
+                                                </h4>
+                                            </div>
+                                        </div>
+
+                                        {selectedLayananObj.target_waktu && (
+                                            <div className="flex items-center gap-2 self-start sm:self-auto">
+                                                <span className="text-[11px] font-medium text-slate-500 dark:text-slate-400">
+                                                    Target Waktu:
+                                                </span>
+                                                <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-bold bg-blue-50 dark:bg-blue-950/60 text-blue-700 dark:text-blue-300 border border-blue-200/80 dark:border-blue-900/50 shadow-2xs">
+                                                    <Clock className="w-3 h-3 text-blue-600 dark:text-blue-400" />
+                                                    <span>{getEstimasiWaktu(selectedLayananObj.target_waktu, selectedLayananObj.satuan_waktu)}</span>
+                                                </span>
+                                            </div>
+                                        )}
+                                    </div>
+
+                                    <div className="flex flex-col gap-1 text-[11px] text-slate-500 dark:text-slate-400">
+                                        <p className="flex items-center gap-1.5">
+                                            <Info className="w-3.5 h-3.5 text-blue-500 shrink-0" />
+                                            <span>Estimasi waktu penyelesaian mengacu pada Standar Operasional Prosedur (SOP) resmi BKPSDM.</span>
+                                        </p>
+                                        {selectedLayananObj.deskripsi && (
+                                            <p className="mt-1 text-slate-600 dark:text-slate-300 bg-white dark:bg-slate-900/80 p-3 rounded-xl border border-slate-200/60 dark:border-slate-800 leading-relaxed text-xs">
+                                                {selectedLayananObj.deskripsi}
+                                            </p>
+                                        )}
+                                    </div>
+                                </div>
+                            )}
+
                             {/* Action Buttons */}
                             <div className="flex items-center justify-between gap-3 pt-4">
                                 <Link
@@ -958,6 +1011,15 @@ export default function Create({
                                             {tiket.layanan?.nama_layanan || '-'}
                                         </span>
                                     </div>
+                                    {tiket.layanan?.target_waktu && (
+                                        <div className="flex justify-between py-1.5 border-b border-blue-50 dark:border-slate-800">
+                                            <span className="text-slate-400">Target Penyelesaian</span>
+                                            <span className="inline-flex items-center gap-1.5 font-semibold text-blue-600 dark:text-blue-400 text-right">
+                                                <Clock className="w-3 h-3" />
+                                                <span>{getEstimasiWaktu(tiket.layanan.target_waktu, tiket.layanan.satuan_waktu)}</span>
+                                            </span>
+                                        </div>
+                                    )}
                                     <div className="flex justify-between py-1.5 border-b border-blue-50 dark:border-slate-800">
                                         <span className="text-slate-400">Unit Kerja</span>
                                         <span className="font-semibold text-slate-800 dark:text-slate-200 text-right">

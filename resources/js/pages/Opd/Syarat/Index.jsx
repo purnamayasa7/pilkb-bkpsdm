@@ -13,7 +13,9 @@ import {
     X,
     CheckCircle2,
     Layers,
-    ExternalLink
+    ExternalLink,
+    Clock,
+    Info,
 } from 'lucide-react';
 
 export default function Index({
@@ -267,6 +269,56 @@ export default function Index({
                         </div>
                     </div>
                 </div>
+
+                {/* SERVICE HIGHLIGHT BANNER (SOP & TARGET WAKTU) */}
+                {hasSelectedLayanan && selectedLayanan && (
+                    <div className="rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-5 shadow-xs space-y-3">
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-100 dark:border-slate-800">
+                            <div className="flex items-center gap-3">
+                                <div className="p-2 rounded-xl bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 border border-blue-200/80 dark:border-blue-900/40 shrink-0">
+                                    <Briefcase className="w-5 h-5" />
+                                </div>
+                                <div>
+                                    <span className="text-[10px] uppercase font-bold tracking-wider text-slate-400 block">
+                                        Layanan Terpilih
+                                    </span>
+                                    <h3 className="text-sm font-bold text-slate-900 dark:text-white">
+                                        {selectedLayanan.nama_layanan}
+                                    </h3>
+                                </div>
+                            </div>
+
+                            {selectedLayanan.target_waktu && (
+                                <div className="flex items-center gap-2 self-start sm:self-auto">
+                                    <span className="text-xs text-slate-500 dark:text-slate-400 font-medium">
+                                        Target Waktu:
+                                    </span>
+                                    <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-bold bg-blue-50 dark:bg-blue-950/60 text-blue-700 dark:text-blue-300 border border-blue-200/80 dark:border-blue-900/50 shadow-2xs">
+                                        <Clock className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" />
+                                        <span>
+                                            {selectedLayanan.target_waktu}{' '}
+                                            {['bulan', 'minggu'].includes(selectedLayanan.satuan_waktu)
+                                                ? selectedLayanan.satuan_waktu.charAt(0).toUpperCase() + selectedLayanan.satuan_waktu.slice(1)
+                                                : 'Hari'}
+                                        </span>
+                                    </span>
+                                </div>
+                            )}
+                        </div>
+
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-[11px] text-slate-500 dark:text-slate-400">
+                            <p className="flex items-center gap-1.5">
+                                <Info className="w-3.5 h-3.5 text-blue-500 shrink-0" />
+                                <span>Target waktu penyelesaian mengacu pada Standar Operasional Prosedur (SOP) resmi BKPSDM.</span>
+                            </p>
+                            {selectedLayanan.deskripsi && (
+                                <span className="text-slate-600 dark:text-slate-300 italic text-right max-w-md line-clamp-1" title={selectedLayanan.deskripsi}>
+                                    "{selectedLayanan.deskripsi}"
+                                </span>
+                            )}
+                        </div>
+                    </div>
+                )}
 
                 {/* RESULTS SECTION */}
                 {!hasSelectedLayanan ? (

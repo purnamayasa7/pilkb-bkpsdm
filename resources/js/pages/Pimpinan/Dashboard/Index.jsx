@@ -427,14 +427,14 @@ export default function PimpinanDashboard({
                         <table className="w-full">
                             <thead>
                                 <tr className="bg-slate-50 dark:bg-slate-800/50">
-                                    <th className="text-left px-5 py-3 text-[11px] font-semibold text-slate-400 uppercase tracking-wider w-10">#</th>
+                                    <th className="text-left px-5 py-3 text-[11px] font-semibold text-slate-400 uppercase tracking-wider w-12">#</th>
                                     <th className="text-left px-5 py-3 text-[11px] font-semibold text-slate-400 uppercase tracking-wider">
                                         Nama OPD / Unit Kerja
                                     </th>
-                                    <th className="text-center px-5 py-3 text-[11px] font-semibold text-slate-400 uppercase tracking-wider">
+                                    <th className="text-center px-5 py-3 text-[11px] font-semibold text-slate-400 uppercase tracking-wider w-36 whitespace-nowrap">
                                         Total Selesai
                                     </th>
-                                    <th className="text-center px-5 py-3 text-[11px] font-semibold text-slate-400 uppercase tracking-wider">
+                                    <th className="text-center px-5 py-3 text-[11px] font-semibold text-slate-400 uppercase tracking-wider w-36 whitespace-nowrap">
                                         Total Usulan
                                     </th>
                                 </tr>
@@ -445,10 +445,10 @@ export default function PimpinanDashboard({
                                         <tr key={idx} className="hover:bg-slate-50/60 dark:hover:bg-slate-800/30 transition-colors">
                                             <td className="px-5 py-3 font-bold text-slate-400">
                                                 {idx < 3 ? (
-                                                    <span className={`inline-flex items-center justify-center w-6 h-6 rounded-full text-[11px] font-black ${
-                                                        idx === 0 ? 'bg-amber-100 text-amber-600' :
-                                                        idx === 1 ? 'bg-slate-100 text-slate-600' :
-                                                        'bg-orange-100 text-orange-600'
+                                                    <span className={`inline-flex items-center justify-center w-6 h-6 rounded-full text-[11px] font-black shadow-sm ${
+                                                        idx === 0 ? 'bg-gradient-to-br from-amber-400 to-amber-500 text-white shadow-amber-500/30 ring-1 ring-amber-300/50' :
+                                                        idx === 1 ? 'bg-gradient-to-br from-slate-400 to-slate-500 text-white shadow-slate-400/30 ring-1 ring-slate-300/50' :
+                                                        'bg-gradient-to-br from-amber-700 to-orange-700 text-white shadow-orange-700/30 ring-1 ring-orange-400/40'
                                                     }`}>{idx + 1}</span>
                                                 ) : (
                                                     <span className="pl-1.5">{idx + 1}</span>
@@ -459,18 +459,18 @@ export default function PimpinanDashboard({
                                                     <div className="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-600 dark:text-slate-300 font-bold text-[11px] flex-shrink-0">
                                                         {getInitials(opd.nama_ukerja, 'OP')}
                                                     </div>
-                                                    <span className="font-semibold text-slate-900 dark:text-white truncate max-w-[220px]" title={opd.nama_ukerja}>
+                                                    <span className="font-semibold text-slate-900 dark:text-white truncate max-w-[300px] sm:max-w-[450px] md:max-w-[600px] lg:max-w-none" title={opd.nama_ukerja}>
                                                         {opd.nama_ukerja || '-'}
                                                     </span>
                                                 </div>
                                             </td>
-                                            <td className="px-5 py-3 text-center">
+                                            <td className="px-5 py-3 text-center whitespace-nowrap">
                                                 <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300">
                                                     <CheckCircle2 className="w-3 h-3" />
                                                     {opd.selesai ?? 0}
                                                 </span>
                                             </td>
-                                            <td className="px-5 py-3 text-center font-semibold text-slate-600 dark:text-slate-400">
+                                            <td className="px-5 py-3 text-center font-semibold text-slate-600 dark:text-slate-400 whitespace-nowrap">
                                                 {opd.total ?? 0}
                                             </td>
                                         </tr>
