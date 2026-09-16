@@ -270,12 +270,6 @@ export default function MonitoringIndex({
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
                         {beban_per_bidang.map((b) => {
                             const isSelected = String(selectedBidang) === String(b.id);
-                            const badgeColor =
-                                b.status_beban === 'Kritis'
-                                    ? 'bg-rose-50 text-rose-700 border-rose-200 dark:bg-rose-950/60 dark:text-rose-300'
-                                    : b.status_beban === 'Padat'
-                                    ? 'bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-950/60 dark:text-amber-300'
-                                    : 'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/60 dark:text-emerald-300';
 
                             return (
                                 <div
@@ -295,9 +289,6 @@ export default function MonitoringIndex({
                                         <h4 className="text-xs font-bold text-slate-900 dark:text-white truncate" title={b.nama_lengkap || b.nama}>
                                             {b.nama}
                                         </h4>
-                                        <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border shrink-0 ${badgeColor}`}>
-                                            {b.status_beban}
-                                        </span>
                                     </div>
 
                                     <div className="mt-3 flex items-baseline justify-between">

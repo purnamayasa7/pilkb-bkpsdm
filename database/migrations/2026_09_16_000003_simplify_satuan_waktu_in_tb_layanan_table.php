@@ -34,8 +34,8 @@ return new class extends Migration
                 'waktu_penyelesaian' => DB::raw("REPLACE(waktu_penyelesaian, 'Hari Kalender', 'Hari')")
             ]);
 
-        // 4. Kunci enum hanya ke 'hari' dan 'bulan'
-        DB::statement("ALTER TABLE tb_layanan MODIFY COLUMN satuan_waktu ENUM('hari', 'bulan') NOT NULL DEFAULT 'hari'");
+        // 4. Kunci enum hanya ke 'hari', 'minggu', dan 'bulan'
+        DB::statement("ALTER TABLE tb_layanan MODIFY COLUMN satuan_waktu ENUM('hari', 'minggu', 'bulan') NOT NULL DEFAULT 'hari'");
 
         // 5. Pastikan role 5 (pimpinan) terdaftar di tabel roles
         if (Schema::hasTable('roles')) {

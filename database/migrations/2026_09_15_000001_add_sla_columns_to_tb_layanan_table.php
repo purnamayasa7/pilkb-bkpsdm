@@ -17,7 +17,7 @@ return new class extends Migration
     {
         Schema::table('tb_layanan', function (Blueprint $table) {
             $table->unsignedInteger('target_waktu')->nullable()->after('rangkap');
-            $table->enum('satuan_waktu', ['hari', 'bulan'])
+            $table->enum('satuan_waktu', ['hari', 'minggu', 'bulan'])
                   ->default('hari')
                   ->after('target_waktu');
         });

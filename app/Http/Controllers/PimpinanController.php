@@ -54,11 +54,11 @@ class PimpinanController extends Controller
         // 3. Metrik Utama untuk Tahun Terpilih (1 Query Agregat Tunggal)
         $metricsRow = Regtiket::where('dihapus', 0)
             ->whereBetween('tanggal', [$startOfYear, $endOfYear])
-            ->selectRaw('
+            ->selectRaw("
                 COUNT(*) as total_usulan,
                 SUM(CASE WHEN archives = 1 THEN 1 ELSE 0 END) as total_selesai,
-                SUM(CASE WHEN diperbaiki = 1 THEN 1 ELSE 0 END) as total_btl
-            ')
+                SUM(CASE WHEN EXISTS(SELECT 1 FROM tb_det_tiket d WHERE d.no_tiket = tb_regtiket.no_tiket AND d.status = 2) THEN 1 ELSE 0 END) as total_btl
+            ")
             ->first();
 
         $totalUsulan  = (int) ($metricsRow->total_usulan ?? 0);
@@ -85,7 +85,7 @@ class PimpinanController extends Controller
                 'tb_layanan.kode_bidang',
                 DB::raw('COUNT(*) as total'),
                 DB::raw('SUM(CASE WHEN tb_regtiket.archives = 1 THEN 1 ELSE 0 END) as selesai'),
-                DB::raw('SUM(CASE WHEN tb_regtiket.diperbaiki = 1 THEN 1 ELSE 0 END) as btl')
+                DB::raw("SUM(CASE WHEN EXISTS(SELECT 1 FROM tb_det_tiket d WHERE d.no_tiket = tb_regtiket.no_tiket AND d.status = 2) THEN 1 ELSE 0 END) as btl")
             )
             ->groupBy('tb_layanan.kode_bidang')
             ->get()
@@ -274,9 +274,12 @@ class PimpinanController extends Controller
             ->whereBetween('tb_regtiket.tanggal', [$startOfYear, $endOfYear])
             ->selectRaw("
                 SUM(CASE WHEN tb_regtiket.archives = 0 THEN 1 ELSE 0 END) as total_antrean_aktif,
-                SUM(CASE WHEN tb_regtiket.archives = 0 AND tb_regtiket.diperbaiki = 1 THEN 1 ELSE 0 END) as total_btl,
+                SUM(CASE WHEN tb_regtiket.archives = 0 AND EXISTS(SELECT 1 FROM tb_det_tiket d WHERE d.no_tiket = tb_regtiket.no_tiket AND d.status = 2) THEN 1 ELSE 0 END) as total_btl,
                 SUM(CASE WHEN tb_regtiket.archives = 1 THEN 1 ELSE 0 END) as total_selesai,
-                SUM(CASE WHEN tb_regtiket.archives = 0 AND DATEDIFF(NOW(), tb_regtiket.tanggal) > (CASE WHEN tb_layanan.satuan_waktu LIKE '%bulan%' THEN COALESCE(tb_layanan.target_waktu, 1) * 30 ELSE COALESCE(tb_layanan.target_waktu, 7) END) THEN 1 ELSE 0 END) as total_overdue
+                SUM(CASE WHEN tb_regtiket.archives = 0
+                    AND NOT EXISTS(SELECT 1 FROM tb_det_tiket d WHERE d.no_tiket = tb_regtiket.no_tiket AND d.status = 2)
+                    AND DATEDIFF(NOW(), tb_regtiket.tanggal) > (CASE WHEN tb_layanan.satuan_waktu LIKE '%bulan%' THEN COALESCE(tb_layanan.target_waktu, 1) * 30 WHEN tb_layanan.satuan_waktu LIKE '%minggu%' THEN COALESCE(tb_layanan.target_waktu, 1) * 7 ELSE COALESCE(tb_layanan.target_waktu, 7) END)
+                THEN 1 ELSE 0 END) as total_overdue
             ")
             ->first();
 
@@ -295,8 +298,8 @@ class PimpinanController extends Controller
             ->select(
                 'tb_layanan.kode_bidang',
                 DB::raw('COUNT(*) as total_aktif'),
-                DB::raw('SUM(CASE WHEN tb_regtiket.diperbaiki = 1 THEN 1 ELSE 0 END) as total_btl'),
-                DB::raw("SUM(CASE WHEN DATEDIFF(NOW(), tb_regtiket.tanggal) > (CASE WHEN tb_layanan.satuan_waktu LIKE '%bulan%' THEN COALESCE(tb_layanan.target_waktu, 1) * 30 ELSE COALESCE(tb_layanan.target_waktu, 7) END) THEN 1 ELSE 0 END) as total_overdue")
+                DB::raw("SUM(CASE WHEN EXISTS(SELECT 1 FROM tb_det_tiket d WHERE d.no_tiket = tb_regtiket.no_tiket AND d.status = 2) THEN 1 ELSE 0 END) as total_btl"),
+                DB::raw("SUM(CASE WHEN NOT EXISTS(SELECT 1 FROM tb_det_tiket d WHERE d.no_tiket = tb_regtiket.no_tiket AND d.status = 2) AND DATEDIFF(NOW(), tb_regtiket.tanggal) > (CASE WHEN tb_layanan.satuan_waktu LIKE '%bulan%' THEN COALESCE(tb_layanan.target_waktu, 1) * 30 WHEN tb_layanan.satuan_waktu LIKE '%minggu%' THEN COALESCE(tb_layanan.target_waktu, 1) * 7 ELSE COALESCE(tb_layanan.target_waktu, 7) END) THEN 1 ELSE 0 END) as total_overdue")
             )
             ->groupBy('tb_layanan.kode_bidang')
             ->get()
@@ -308,13 +311,6 @@ class PimpinanController extends Controller
             $totalOverdue = (int) ($stat->total_overdue ?? 0);
             $totalBtl = (int) ($stat->total_btl ?? 0);
 
-            $statusBeban = 'Normal';
-            if ($totalAktif >= 50 || $totalOverdue >= 15) {
-                $statusBeban = 'Kritis';
-            } elseif ($totalAktif >= 20 || $totalOverdue >= 5) {
-                $statusBeban = 'Padat';
-            }
-
             $namaLengkap = $b->nama_bidang ?? $b->name ?? $b->id;
             $namaSingkat = $this->formatNamaBidangSingkat($namaLengkap);
 
@@ -325,7 +321,6 @@ class PimpinanController extends Controller
                 'total_aktif'   => $totalAktif,
                 'total_overdue' => $totalOverdue,
                 'total_btl'     => $totalBtl,
-                'status_beban'  => $statusBeban,
             ];
         });
 
@@ -333,6 +328,8 @@ class PimpinanController extends Controller
         $query = Regtiket::with([
             'layanan.bidang',
             'tahapTerakhir.statusRel',
+            // Eager-load hanya detail BTL (status=2) untuk efisiensi transform SLA
+            'detail' => fn($q) => $q->where('status', 2)->select('no_tiket', 'status'),
         ])
         ->where('tb_regtiket.archives', 0)
         ->where('tb_regtiket.dihapus', 0)
@@ -352,17 +349,22 @@ class PimpinanController extends Controller
         }
 
         if ($slaFilter && $slaFilter !== 'all') {
-            if ($slaFilter === 'overdue') {
-                $query->whereRaw("DATEDIFF(NOW(), tb_regtiket.tanggal) > (SELECT (CASE WHEN l.satuan_waktu LIKE '%bulan%' THEN COALESCE(l.target_waktu, 1) * 30 ELSE COALESCE(l.target_waktu, 7) END) FROM tb_layanan l WHERE l.id = tb_regtiket.kode_layanan)");
-            } elseif ($slaFilter === 'btl') {
-                $query->where('diperbaiki', 1);
+            if ($slaFilter === 'btl') {
+                // BTL = ada syarat berkas dengan status = 2 di tb_det_tiket
+                $query->whereHas('detail', fn($q) => $q->where('status', 2));
+            } elseif ($slaFilter === 'overdue') {
+                // Overdue = melewati target, bukan BTL
+                $query->whereDoesntHave('detail', fn($q) => $q->where('status', 2))
+                      ->whereRaw("DATEDIFF(NOW(), tb_regtiket.tanggal) > (SELECT (CASE WHEN l.satuan_waktu LIKE '%bulan%' THEN COALESCE(l.target_waktu, 1) * 30 WHEN l.satuan_waktu LIKE '%minggu%' THEN COALESCE(l.target_waktu, 1) * 7 ELSE COALESCE(l.target_waktu, 7) END) FROM tb_layanan l WHERE l.id = tb_regtiket.kode_layanan)");
             } elseif ($slaFilter === 'warning') {
-                $query->where('diperbaiki', 0)
-                      ->whereRaw("DATEDIFF(NOW(), tb_regtiket.tanggal) <= (SELECT (CASE WHEN l.satuan_waktu LIKE '%bulan%' THEN COALESCE(l.target_waktu, 1) * 30 ELSE COALESCE(l.target_waktu, 7) END) FROM tb_layanan l WHERE l.id = tb_regtiket.kode_layanan)")
-                      ->whereRaw("DATEDIFF(NOW(), tb_regtiket.tanggal) >= (SELECT (CASE WHEN l.satuan_waktu LIKE '%bulan%' THEN COALESCE(l.target_waktu, 1) * 30 ELSE COALESCE(l.target_waktu, 7) END) * 0.7 FROM tb_layanan l WHERE l.id = tb_regtiket.kode_layanan)");
+                // Warning = 70%-100% dari target, bukan BTL
+                $query->whereDoesntHave('detail', fn($q) => $q->where('status', 2))
+                      ->whereRaw("DATEDIFF(NOW(), tb_regtiket.tanggal) <= (SELECT (CASE WHEN l.satuan_waktu LIKE '%bulan%' THEN COALESCE(l.target_waktu, 1) * 30 WHEN l.satuan_waktu LIKE '%minggu%' THEN COALESCE(l.target_waktu, 1) * 7 ELSE COALESCE(l.target_waktu, 7) END) FROM tb_layanan l WHERE l.id = tb_regtiket.kode_layanan)")
+                      ->whereRaw("DATEDIFF(NOW(), tb_regtiket.tanggal) >= (SELECT (CASE WHEN l.satuan_waktu LIKE '%bulan%' THEN COALESCE(l.target_waktu, 1) * 30 WHEN l.satuan_waktu LIKE '%minggu%' THEN COALESCE(l.target_waktu, 1) * 7 ELSE COALESCE(l.target_waktu, 7) END) * 0.7 FROM tb_layanan l WHERE l.id = tb_regtiket.kode_layanan)");
             } elseif ($slaFilter === 'on_track') {
-                $query->where('diperbaiki', 0)
-                      ->whereRaw("DATEDIFF(NOW(), tb_regtiket.tanggal) < (SELECT (CASE WHEN l.satuan_waktu LIKE '%bulan%' THEN COALESCE(l.target_waktu, 1) * 30 ELSE COALESCE(l.target_waktu, 7) END) * 0.7 FROM tb_layanan l WHERE l.id = tb_regtiket.kode_layanan)");
+                // On-Track = di bawah 70% target, bukan BTL
+                $query->whereDoesntHave('detail', fn($q) => $q->where('status', 2))
+                      ->whereRaw("DATEDIFF(NOW(), tb_regtiket.tanggal) < (SELECT (CASE WHEN l.satuan_waktu LIKE '%bulan%' THEN COALESCE(l.target_waktu, 1) * 30 WHEN l.satuan_waktu LIKE '%minggu%' THEN COALESCE(l.target_waktu, 1) * 7 ELSE COALESCE(l.target_waktu, 7) END) * 0.7 FROM tb_layanan l WHERE l.id = tb_regtiket.kode_layanan)");
             }
         }
 
@@ -379,13 +381,20 @@ class PimpinanController extends Controller
                 $targetVal = (int) ($layanan->target_waktu ?: 0);
                 if ($targetVal > 0) {
                     $satuan = strtolower($layanan->satuan_waktu ?? 'hari');
-                    $targetHari = str_contains($satuan, 'bulan') ? ($targetVal * 30) : $targetVal;
+                    if (str_contains($satuan, 'bulan')) {
+                        $targetHari = $targetVal * 30;
+                    } elseif (str_contains($satuan, 'minggu')) {
+                        $targetHari = $targetVal * 7;
+                    } else {
+                        $targetHari = $targetVal;
+                    }
                 }
             }
 
-            $isBtl = (bool) $tiket->diperbaiki;
-            $isOverdue = $hariBerjalan > $targetHari;
-            $isWarning = !$isOverdue && ($hariBerjalan >= ($targetHari * 0.7));
+            // BTL: eager-loaded detail sudah difilter hanya status=2 — zero extra query
+            $isBtl     = $tiket->detail->isNotEmpty();
+            $isOverdue = !$isBtl && ($hariBerjalan > $targetHari);
+            $isWarning = !$isBtl && !$isOverdue && ($hariBerjalan >= ($targetHari * 0.7));
 
             $slaStatus = 'on_track';
             if ($isBtl) {
@@ -506,9 +515,11 @@ class PimpinanController extends Controller
             if ($statusFilter === 'selesai') {
                 $baseQuery->where('tb_regtiket.archives', 1);
             } elseif ($statusFilter === 'proses') {
-                $baseQuery->where('tb_regtiket.archives', 0)->where('tb_regtiket.diperbaiki', 0);
+                $baseQuery->where('tb_regtiket.archives', 0)
+                          ->whereDoesntHave('detail', fn($q) => $q->where('status', 2));
             } elseif ($statusFilter === 'btl') {
-                $baseQuery->where('tb_regtiket.diperbaiki', 1);
+                // BTL = ada berkas dengan status = 2 di tb_det_tiket
+                $baseQuery->whereHas('detail', fn($q) => $q->where('status', 2));
             }
         }
 
@@ -517,7 +528,7 @@ class PimpinanController extends Controller
             ->selectRaw("
                 COUNT(*) as total_usulan,
                 SUM(CASE WHEN tb_regtiket.archives = 1 THEN 1 ELSE 0 END) as total_selesai,
-                SUM(CASE WHEN tb_regtiket.diperbaiki = 1 THEN 1 ELSE 0 END) as total_btl
+                SUM(CASE WHEN EXISTS(SELECT 1 FROM tb_det_tiket d WHERE d.no_tiket = tb_regtiket.no_tiket AND d.status = 2) THEN 1 ELSE 0 END) as total_btl
             ")
             ->first();
 
@@ -602,9 +613,10 @@ class PimpinanController extends Controller
             if ($request->status === 'selesai') {
                 $query->where('tb_regtiket.archives', 1);
             } elseif ($request->status === 'proses') {
-                $query->where('tb_regtiket.archives', 0)->where('tb_regtiket.diperbaiki', 0);
+                $query->where('tb_regtiket.archives', 0)
+                      ->whereDoesntHave('detail', fn($q) => $q->where('status', 2));
             } elseif ($request->status === 'btl') {
-                $query->where('tb_regtiket.diperbaiki', 1);
+                $query->whereHas('detail', fn($q) => $q->where('status', 2));
             }
         }
 

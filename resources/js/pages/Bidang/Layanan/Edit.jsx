@@ -20,13 +20,13 @@ export default function LayananBidangEdit({ layanan, bidang = [] }) {
     const { data, setData, put, processing, errors } = useForm({
         nama_layanan: layanan?.nama_layanan || '',
         target_waktu: layanan?.target_waktu || '',
-        satuan_waktu: layanan?.satuan_waktu === 'bulan' ? 'bulan' : 'hari',
+        satuan_waktu: ['bulan', 'minggu'].includes(layanan?.satuan_waktu) ? layanan.satuan_waktu : 'hari',
         deskripsi: layanan?.deskripsi || '',
         aktif: layanan?.aktif ?? 1,
     });
 
     // Preview teks SLA
-    const satuanLabel = { hari: 'Hari', bulan: 'Bulan', hari_kerja: 'Hari', hari_kalender: 'Hari' };
+    const satuanLabel = { hari: 'Hari', minggu: 'Minggu', bulan: 'Bulan', hari_kerja: 'Hari', hari_kalender: 'Hari' };
     const waktuPreview = data.target_waktu ? `${data.target_waktu} ${satuanLabel[data.satuan_waktu] ?? data.satuan_waktu}` : '-';
 
 
@@ -171,6 +171,7 @@ export default function LayananBidangEdit({ layanan, bidang = [] }) {
                                         className="w-full appearance-none pl-4 pr-9 py-2.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-xs font-semibold text-slate-700 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all cursor-pointer"
                                     >
                                         <option value="hari">Hari</option>
+                                        <option value="minggu">Minggu</option>
                                         <option value="bulan">Bulan</option>
                                     </select>
                                     <ChevronDown className="w-3.5 h-3.5 text-slate-400 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />

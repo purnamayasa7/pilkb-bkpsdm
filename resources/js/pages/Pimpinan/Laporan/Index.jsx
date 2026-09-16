@@ -208,7 +208,7 @@ export default function LaporanIndex({
                             </div>
                             <span className="text-[11px] px-2 py-0.5 rounded-full bg-amber-50 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300 font-medium flex items-center gap-1">
                                 <Star className="w-3 h-3 fill-amber-400 text-amber-400" />
-                                <span>IKM</span>
+                                <span>Indeks Kepuasan</span>
                             </span>
                         </div>
                     </div>

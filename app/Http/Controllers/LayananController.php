@@ -109,14 +109,22 @@ class LayananController extends Controller
         $request->validate([
             'nama_layanan'  => 'required',
             'target_waktu'  => 'required|integer|min:1',
-            'satuan_waktu'  => 'required|in:hari,bulan,hari_kerja,hari_kalender',
+            'satuan_waktu'  => 'required|in:hari,minggu,bulan,hari_kerja,hari_kalender',
         ]);
 
         $kode_bidang = Auth::user()->bidang_id;
 
         // Auto-generate string waktu_penyelesaian agar modul lama tetap berjalan
-        $satuanValue = in_array($request->satuan_waktu, ['hari', 'hari_kerja', 'hari_kalender']) ? 'hari' : 'bulan';
-        $satuanLabel = $satuanValue === 'bulan' ? 'Bulan' : 'Hari';
+        $satuanValue = match ($request->satuan_waktu) {
+            'bulan'  => 'bulan',
+            'minggu' => 'minggu',
+            default  => 'hari',
+        };
+        $satuanLabel = match ($satuanValue) {
+            'bulan'  => 'Bulan',
+            'minggu' => 'Minggu',
+            default  => 'Hari',
+        };
         $waktuString = $request->target_waktu . ' ' . $satuanLabel;
 
         $layanan = Layanan::create([
@@ -147,13 +155,21 @@ class LayananController extends Controller
             'kode_bidang'  => 'required|exists:tb_bidang,id',
             'nama_layanan' => 'required',
             'target_waktu' => 'required|integer|min:1',
-            'satuan_waktu' => 'required|in:hari,bulan,hari_kerja,hari_kalender',
+            'satuan_waktu' => 'required|in:hari,minggu,bulan,hari_kerja,hari_kalender',
         ]);
 
         $kode_bidang = $request->kode_bidang;
 
-        $satuanValue = in_array($request->satuan_waktu, ['hari', 'hari_kerja', 'hari_kalender']) ? 'hari' : 'bulan';
-        $satuanLabel = $satuanValue === 'bulan' ? 'Bulan' : 'Hari';
+        $satuanValue = match ($request->satuan_waktu) {
+            'bulan'  => 'bulan',
+            'minggu' => 'minggu',
+            default  => 'hari',
+        };
+        $satuanLabel = match ($satuanValue) {
+            'bulan'  => 'Bulan',
+            'minggu' => 'Minggu',
+            default  => 'Hari',
+        };
         $waktuString = $request->target_waktu . ' ' . $satuanLabel;
 
         $layanan = Layanan::create([
@@ -186,11 +202,19 @@ class LayananController extends Controller
             'kode_bidang'  => 'required|exists:tb_bidang,id',
             'nama_layanan' => 'required',
             'target_waktu' => 'required|integer|min:1',
-            'satuan_waktu' => 'required|in:hari,bulan,hari_kerja,hari_kalender',
+            'satuan_waktu' => 'required|in:hari,minggu,bulan,hari_kerja,hari_kalender',
         ]);
 
-        $satuanValue = in_array($request->satuan_waktu, ['hari', 'hari_kerja', 'hari_kalender']) ? 'hari' : 'bulan';
-        $satuanLabel = $satuanValue === 'bulan' ? 'Bulan' : 'Hari';
+        $satuanValue = match ($request->satuan_waktu) {
+            'bulan'  => 'bulan',
+            'minggu' => 'minggu',
+            default  => 'hari',
+        };
+        $satuanLabel = match ($satuanValue) {
+            'bulan'  => 'Bulan',
+            'minggu' => 'Minggu',
+            default  => 'Hari',
+        };
         $waktuString = $request->target_waktu . ' ' . $satuanLabel;
 
         $oldData = [
@@ -238,11 +262,19 @@ class LayananController extends Controller
         $request->validate([
             'nama_layanan' => 'required',
             'target_waktu' => 'required|integer|min:1',
-            'satuan_waktu' => 'required|in:hari,bulan,hari_kerja,hari_kalender',
+            'satuan_waktu' => 'required|in:hari,minggu,bulan,hari_kerja,hari_kalender',
         ]);
 
-        $satuanValue = in_array($request->satuan_waktu, ['hari', 'hari_kerja', 'hari_kalender']) ? 'hari' : 'bulan';
-        $satuanLabel = $satuanValue === 'bulan' ? 'Bulan' : 'Hari';
+        $satuanValue = match ($request->satuan_waktu) {
+            'bulan'  => 'bulan',
+            'minggu' => 'minggu',
+            default  => 'hari',
+        };
+        $satuanLabel = match ($satuanValue) {
+            'bulan'  => 'Bulan',
+            'minggu' => 'Minggu',
+            default  => 'Hari',
+        };
         $waktuString = $request->target_waktu . ' ' . $satuanLabel;
 
         $oldData = [
