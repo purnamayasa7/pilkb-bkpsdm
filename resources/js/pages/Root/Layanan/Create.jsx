@@ -14,6 +14,7 @@ import {
     X,
     Check,
     FileText,
+    Info,
 } from 'lucide-react';
 
 export default function RootLayananCreate({ bidang = [] }) {
@@ -224,9 +225,14 @@ export default function RootLayananCreate({ bidang = [] }) {
 
                         {/* Field Waktu Penyelesaian (SLA) */}
                         <div className="space-y-1.5">
-                            <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">
-                                Target Waktu Penyelesaian (SLA) <span className="text-rose-500">*</span>
-                            </label>
+                            <div className="flex items-center justify-between">
+                                <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">
+                                    Target Waktu Penyelesaian <span className="text-rose-500">*</span>
+                                </label>
+                                <span className="text-[11px] font-medium text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/50 px-2 py-0.5 rounded-md border border-amber-200/60 dark:border-amber-900/40">
+                                    Wajib sesuai SOP
+                                </span>
+                            </div>
                             <div className="flex gap-2">
                                 {/* Input Angka */}
                                 <div className="relative flex-1">
@@ -261,13 +267,19 @@ export default function RootLayananCreate({ bidang = [] }) {
                                     <ChevronDown className="w-3.5 h-3.5 text-slate-400 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
                                 </div>
                             </div>
-                            {/* Preview otomatis */}
-                            {targetWaktu && (
-                                <p className="text-[11px] text-blue-600 dark:text-blue-400 flex items-center gap-1">
-                                    <Clock className="w-3 h-3" />
-                                    Preview: <strong>{waktuPreview}</strong>
+                            {/* Preview & Info SOP */}
+                            <div className="flex flex-col gap-1 mt-1">
+                                {targetWaktu && (
+                                    <p className="text-[11px] text-blue-600 dark:text-blue-400 flex items-center gap-1 font-medium">
+                                        <Clock className="w-3 h-3" />
+                                        Preview: <strong>{waktuPreview}</strong>
+                                    </p>
+                                )}
+                                <p className="text-[11px] text-slate-500 dark:text-slate-400 flex items-center gap-1.5">
+                                    <Info className="w-3.5 h-3.5 text-blue-500 shrink-0" />
+                                    <span>Pastikan target waktu penyelesaian telah disesuaikan dengan Standar Operasional Prosedur (SOP) layanan ini.</span>
                                 </p>
-                            )}
+                            </div>
                             {errors.target_waktu && (
                                 <p className="text-[11px] text-rose-600 dark:text-rose-400 flex items-center gap-1 mt-1">
                                     <AlertCircle className="w-3.5 h-3.5 shrink-0" />
@@ -382,7 +394,7 @@ export default function RootLayananCreate({ bidang = [] }) {
                                         </span>
                                     </div>
                                     <div>
-                                        <span className="text-slate-400 block text-[11px]">Target Waktu (SLA):</span>
+                                        <span className="text-slate-400 block text-[11px]">Target Waktu:</span>
                                         <span className="font-semibold text-slate-800 dark:text-slate-200">
                                             {waktuPreview}
                                         </span>
