@@ -160,7 +160,7 @@ export default function RootUserCreate({ bidang = [] }) {
                                 Tambah User Baru
                             </h1>
                             <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-                                Daftarkan akun pegawai baru ke dalam sistem informasi kepegawaian PILKB.
+                                Daftarkan akun pegawai baru ke dalam sistem PILKB.
                             </p>
                         </div>
                     </div>
@@ -390,7 +390,7 @@ export default function RootUserCreate({ bidang = [] }) {
                                         }`}
                                     >
                                         <option value="" disabled>Pilih Penempatan Bidang / Role</option>
-                                        <option value="admin_bawah">Admin Bawah (Front Office / Loket)</option>
+                                        <option value="admin_bawah">Admin Bawah (Front Office)</option>
                                         <option value="admin_opd">Admin OPD (Pengusul SKPD)</option>
                                         <option value="pimpinan">Pimpinan (Kepala Badan / Sekretaris)</option>
                                         {bidang.map((b) => (

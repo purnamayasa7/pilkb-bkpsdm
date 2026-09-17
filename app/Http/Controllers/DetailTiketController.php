@@ -1761,14 +1761,7 @@ class DetailTiketController extends Controller
         $isAdminBawah = Auth::user()?->role?->name === 'admin_bawah';
         $data = $this->getData($request, $isAdminBawah);
 
-        $pegawaiList = $this->pegawaiService->getPegawaiByNips(
-            $data->pluck('nip')
-                ->filter()
-                ->unique()
-                ->values()
-        );
-
-        return Excel::download(new ListPerbaikanUsulanExport($data, $pegawaiList), 'perbaikan_usulan.xlsx');
+        return Excel::download(new ListPerbaikanUsulanExport($data), 'perbaikan_usulan.xlsx');
     }
 
     public function exportPdf(Request $request)
@@ -1776,16 +1769,9 @@ class DetailTiketController extends Controller
         $isAdminBawah = Auth::user()?->role?->name === 'admin_bawah';
         $data = $this->getData($request, $isAdminBawah);
 
-        $pegawaiList = $this->pegawaiService->getPegawaiByNips(
-            $data->pluck('nip')
-                ->filter()
-                ->unique()
-                ->values()
-        );
-
         $pdf = Pdf::loadView(
             'pages.opd.perbaikan.export.export-pdf',
-            compact('data', 'pegawaiList')
+            compact('data')
         );
 
         $pdf->setPaper('a4', 'landscape');

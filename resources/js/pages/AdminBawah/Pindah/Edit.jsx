@@ -220,17 +220,17 @@ export default function Edit({
                     </Link>
                 </div>
 
-                {/* FLASH ERROR / VALIDATION ALERT */}
-                {(validationError || flash?.error) && (
+                {/* CLIENT VALIDATION ERROR ALERT */}
+                {validationError && (
                     <div className="p-4 rounded-2xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900/60 text-rose-700 dark:text-rose-300 text-xs flex items-start gap-3 shadow-2xs animate-in fade-in">
                         <AlertCircle className="w-4 h-4 flex-shrink-0 mt-0.5 text-rose-600" />
                         <div className="flex-1 font-semibold">
-                            {validationError || flash?.error}
+                            {validationError}
                         </div>
                         <button
                             type="button"
                             onClick={() => setValidationError('')}
-                            className="p-1 rounded-lg text-rose-500 hover:bg-rose-100 dark:hover:bg-rose-900/40 transition-colors"
+                            className="p-1 rounded-lg text-rose-500 hover:bg-rose-100 dark:hover:bg-rose-900/40 transition-colors cursor-pointer"
                         >
                             <X className="w-3.5 h-3.5" />
                         </button>

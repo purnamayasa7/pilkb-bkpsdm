@@ -242,19 +242,6 @@ export default function Index({
                     </div>
                 </div>
 
-                {/* FLASH NOTIFICATIONS */}
-                {flash?.success && (
-                    <div className="p-4 rounded-2xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200/80 dark:border-emerald-800 text-emerald-800 dark:text-emerald-200 flex items-start gap-3 text-xs sm:text-sm animate-in fade-in duration-200">
-                        <CheckCircle2 className="w-5 h-5 flex-shrink-0 text-emerald-600 dark:text-emerald-400 mt-0.5" />
-                        <div className="flex-1 font-medium">{flash.success}</div>
-                    </div>
-                )}
-                {flash?.error && (
-                    <div className="p-4 rounded-2xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200/80 dark:border-rose-800 text-rose-800 dark:text-rose-200 flex items-start gap-3 text-xs sm:text-sm animate-in fade-in duration-200">
-                        <AlertCircle className="w-5 h-5 flex-shrink-0 text-rose-600 dark:text-rose-400 mt-0.5" />
-                        <div className="flex-1 font-medium">{flash.error}</div>
-                    </div>
-                )}
 
                 {/* 2. STATS METRIC CARDS */}
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">

@@ -38,11 +38,12 @@ export default function Edit({
 }) {
     const { auth } = usePage().props;
 
-    // Initial status checklist: detail.status === 1 (valid) or not 2
+    // Initial status checklist: hanya status == 1 yang dianggap valid (checked)
+    // Gunakan Number() karena nilai dari DB bisa datang sebagai string "1" atau integer 1
     const initialStatus = useMemo(() => {
         const map = {};
         detail.forEach((d) => {
-            map[d.id] = d.status === 1 || d.status !== 2;
+            map[d.id] = Number(d.status) === 1; // null→0, "1"/1→1(valid), "2"/2→0(BTL)
         });
         return map;
     }, [detail]);
@@ -103,10 +104,10 @@ export default function Edit({
     };
 
     // Quick Action: Check / Uncheck All
-    const handleSetAllChecklist = (isValid) => {
+    const handleSetAllChecklist = (isValidVal) => {
         const nextMap = {};
         detail.forEach((d) => {
-            nextMap[d.id] = isValid;
+            nextMap[d.id] = isValidVal;
         });
         setStatusListState(nextMap);
     };
@@ -280,7 +281,7 @@ export default function Edit({
                                 </div>
 
                                 <div>
-                                    <span className="text-slate-400 font-medium">Bidang Pengampu Layanan:</span>
+                                    <span className="text-slate-400 font-medium">Bidang Layanan:</span>
                                     <p className="font-semibold text-slate-800 dark:text-slate-200 mt-0.5">
                                         {tiket.layanan?.bidang?.nama_bidang || '-'}
                                     </p>
@@ -503,7 +504,7 @@ export default function Edit({
                                         <th className="py-3 px-4 text-center w-12">No</th>
                                         <th className="py-3 px-4 lg:px-6 min-w-[220px]">Persyaratan Dokumen</th>
                                         <th className="py-3 px-4 text-center min-w-[150px]">E-File / Berkas</th>
-                                        <th className="py-3 px-4 text-center w-28">Verifikasi</th>
+                                        <th className="py-3 px-4 text-center w-28">Valid</th>
                                         <th className="py-3 px-4 lg:px-6 min-w-[240px]">Catatan / Alasan</th>
                                     </tr>
                                 </thead>
@@ -541,20 +542,15 @@ export default function Edit({
                                                             {d.syarat?.syarat || '-'}
                                                         </p>
                                                         <div className="flex items-center gap-2">
-                                                            {hasManualUpload ? (
+                                                            {hasManualUpload || metodeSyarat !== 'simpeg' ? (
                                                                 <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-950/60 px-2 py-0.5 rounded-md border border-indigo-200/80 dark:border-indigo-900/40">
                                                                     <Upload className="w-2.5 h-2.5" />
-                                                                    <span>Sumber: {metodeSyarat === 'simpeg' ? 'Upload Manual (Pengganti)' : 'Upload OPD'}</span>
+                                                                    <span>Sumber: Upload PILKB</span>
                                                                 </span>
-                                                            ) : metodeSyarat === 'simpeg' ? (
+                                                            ) : (
                                                                 <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/60 px-2 py-0.5 rounded-md border border-blue-200/80 dark:border-blue-900/40">
                                                                     <Database className="w-2.5 h-2.5" />
                                                                     <span>Sumber: SIMPEG</span>
-                                                                </span>
-                                                            ) : (
-                                                                <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-950/60 px-2 py-0.5 rounded-md border border-indigo-200/80 dark:border-indigo-900/40">
-                                                                    <Upload className="w-2.5 h-2.5" />
-                                                                    <span>Sumber: Upload OPD</span>
                                                                 </span>
                                                             )}
                                                         </div>
@@ -636,11 +632,13 @@ export default function Edit({
                                                 {/* Catatan / Alasan */}
                                                 <td className="py-3.5 px-4 lg:px-6 align-middle">
                                                     {isValid ? (
+                                                        // Status: Valid (checkbox dicentang)
                                                         <div className="flex items-center gap-1.5 text-emerald-600 dark:text-emerald-400 text-xs font-medium">
                                                             <CheckCircle2 className="w-4 h-4" />
                                                             <span>Tervalidasi & Sesuai</span>
                                                         </div>
                                                     ) : (
+                                                        // Status: Checkbox tidak tercentang (BTL / Menunggu Verifikasi) -> langsung tampilkan textbox catatan
                                                         <div className="space-y-1">
                                                             <input
                                                                 type="text"

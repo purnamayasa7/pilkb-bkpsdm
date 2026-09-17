@@ -6,7 +6,6 @@ use App\Exports\ListPerbaikanUsulanExport;
 use App\Models\DetailTiket;
 use App\Models\Layanan;
 use App\Models\Regtiket;
-use App\Services\PegawaiService;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -14,9 +13,6 @@ use Maatwebsite\Excel\Facades\Excel;
 
 class PerbaikanController extends Controller
 {
-    public function __construct(
-        protected PegawaiService $pegawaiService
-    ) {}
 
     public function getData($request)
     {
@@ -122,16 +118,9 @@ class PerbaikanController extends Controller
     {
         $data = $this->getData($request);
 
-        $pegawaiList = $this->pegawaiService->getPegawaiByNips(
-            $data->pluck('nip')
-                ->filter()
-                ->unique()
-                ->values()
-        );
-
         $pdf = Pdf::loadView(
             'pages.bidang.perbaikan.export-pdf',
-            compact('data', 'pegawaiList')
+            compact('data')
         );
 
         $pdf->setPaper('a4', 'landscape');
@@ -143,13 +132,9 @@ class PerbaikanController extends Controller
     {
         $data = $this->getData($request);
 
-        $pegawaiList = $this->pegawaiService->getPegawaiByNips(
-            $data->pluck('nip')
-                ->filter()
-                ->unique()
-                ->values()
+        return Excel::download(
+            new ListPerbaikanUsulanExport($data, [], 'pages.bidang.perbaikan.export-excel'),
+            'perbaikan_usulan.xlsx'
         );
-
-        return Excel::download(new ListPerbaikanUsulanExport($data, $pegawaiList), 'perbaikan_usulan.xlsx');
     }
 }

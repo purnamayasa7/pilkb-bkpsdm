@@ -70,9 +70,9 @@
                     <td class="text-center">{{ $item->tiket->no_tiket ?? '-' }}</td>
                     <td class="cell-break">
                         <div class="pegawai-nip">{{ $item->tiket->nip ?? '-' }}</div>
-                        <div class="pegawai-nama">{{ $pegawaiList[$item->tiket->nip ?? '']['nama_lengkap'] ?? ($item->tiket->nama ?? '-') }}</div>
+                        <div class="pegawai-nama">{{ $item->tiket->nama ?? '-' }}</div>
                     </td>
-                    <td class="cell-break">{{ $pegawaiList[$item->tiket->nip ?? '']['ket_ukerja'] ?? ($item->tiket->nama_ukerja ?? '-') }}</td>
+                    <td class="cell-break">{{ $item->tiket->nama_ukerja ?? '-' }}</td>
                     <td class="cell-break">{{ $item->tiket->layanan->nama_layanan ?? '-' }}</td>
                     <td class="text-center">{{ \Carbon\Carbon::parse($item->tanggal_pengambilan)->translatedFormat('d-m-Y') }}</td>
                     <td class="cell-break">{{ $item->nama_pengambil ?? '-' }}</td>

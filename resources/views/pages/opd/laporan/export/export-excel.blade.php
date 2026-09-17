@@ -46,7 +46,7 @@
                 <td>{{ $i + 1 }}</td>
                 <td>{{ $item->no_tiket }}</td>
                 <td>'{{ $item->regtiket->nip ?? '-' }}</td>
-                <td>-</td>
+                <td>{{ $item->regtiket->nama ?? '-' }}</td>
                 <td>{{ $item->regtiket->layanan->nama_layanan ?? '-' }}</td>
                 <td>{{ $item->tanggal }}</td>
                 <td>{{ $item->statusRel->status ?? '-' }}</td>

@@ -241,7 +241,7 @@ export default function Index({
                             </h1>
                         </div>
                         <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 pl-11">
-                            Daftar permohonan usulan kepegawaian yang masuk ke bidang Anda untuk periode{' '}
+                            Daftar permohonan usulan kepegawaian yang masuk ke bidang Anda untuk tahun{' '}
                             <span className="font-semibold text-slate-700 dark:text-slate-300">
                                 {MONTH_NAMES.find((m) => m.value === Number(selectedMonth))?.label} {selectedYear}
                             </span>

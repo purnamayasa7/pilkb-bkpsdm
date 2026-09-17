@@ -45,7 +45,7 @@ export default function RootLayananEdit({ layanan, bidang = [] }) {
 
         const newErrors = {};
         if (!kodeBidang) {
-            newErrors.kode_bidang = 'Pilih bidang pengampu layanan.';
+            newErrors.kode_bidang = 'Pilih bidang layanan.';
         }
         if (!namaLayanan.trim()) {
             newErrors.nama_layanan = 'Nama layanan wajib diisi.';

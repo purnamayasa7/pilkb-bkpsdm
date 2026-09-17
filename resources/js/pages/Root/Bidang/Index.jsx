@@ -138,7 +138,7 @@ export default function RootBidangIndex({ bidang = [] }) {
                                 Master Data Bidang
                             </h1>
                             <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-                                Kelola data bidang organisasi BKPSDM dan status keaktifan layanan
+                                Kelola data bidang organisasi BKPSDM
                             </p>
                         </div>
                     </div>

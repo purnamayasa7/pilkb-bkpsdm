@@ -65,13 +65,6 @@ export default function AuthenticatedLayout({ children, title, fullHeight = fals
     const [flashVisible, setFlashVisible] = useState(true);
     const [isNavigating, setIsNavigating] = useState(false);
 
-    // Reset flash visibility when flash message changes
-    useEffect(() => {
-        if (flash?.success || flash?.error) {
-            setFlashVisible(true);
-        }
-    }, [flash?.success, flash?.error]);
-
     // Listen to Inertia page navigation events with threshold delay for custom logo spinner
     useEffect(() => {
         let navTimer = null;
@@ -1079,26 +1072,30 @@ export default function AuthenticatedLayout({ children, title, fullHeight = fals
 
                 {/* Content Body */}
                 <main className={`flex-1 min-h-0 ${noPadding ? 'p-0 overflow-hidden flex flex-col' : 'p-4 sm:p-6 lg:p-8'}`}>
-                    {flashVisible && (flash?.success || flash?.error) && (
+                    {flashVisible && (flash?.success || flash?.error || flash?.warning) && (
                         <div
-                            className={`mb-6 p-4 rounded-2xl border flex items-center justify-between text-xs transition-all ${
+                            className={`mb-6 p-4 rounded-2xl border flex items-center justify-between text-xs transition-all shadow-xs animate-in fade-in duration-200 ${
                                 flash.success
                                     ? 'bg-emerald-50 dark:bg-emerald-950/40 border-emerald-200 dark:border-emerald-800 text-emerald-800 dark:text-emerald-200'
+                                    : flash.warning
+                                    ? 'bg-amber-50 dark:bg-amber-950/40 border-amber-200 dark:border-amber-800 text-amber-800 dark:text-amber-200'
                                     : 'bg-rose-50 dark:bg-rose-950/40 border-rose-200 dark:border-rose-800 text-rose-800 dark:text-rose-200'
                             }`}
                         >
                             <div className="flex items-center gap-2.5">
                                 {flash.success ? (
                                     <CheckCircle2 className="w-4 h-4 text-emerald-500 flex-shrink-0" />
+                                ) : flash.warning ? (
+                                    <AlertCircle className="w-4 h-4 text-amber-500 flex-shrink-0" />
                                 ) : (
                                     <AlertCircle className="w-4 h-4 text-rose-500 flex-shrink-0" />
                                 )}
-                                <span className="font-medium">{flash.success || flash.error}</span>
+                                <span className="font-medium">{flash.success || flash.warning || flash.error}</span>
                             </div>
                             <button
                                 type="button"
                                 onClick={() => setFlashVisible(false)}
-                                className="p-1 hover:opacity-75 transition-opacity"
+                                className="p-1 hover:opacity-75 transition-opacity cursor-pointer text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
                             >
                                 <X className="w-3.5 h-3.5" />
                             </button>

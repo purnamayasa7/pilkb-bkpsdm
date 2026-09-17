@@ -213,7 +213,7 @@ export default function Index({ auth, tiket = [], month = new Date().getMonth() 
                             </h1>
                         </div>
                         <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 pl-11">
-                            Proses pengajuan usulan kepegawaian instansi Anda untuk periode{' '}
+                            Proses pengajuan usulan kepegawaian instansi Anda untuk bulan{' '}
                             <span className="font-semibold text-slate-700 dark:text-slate-300">
                                 {MONTH_NAMES.find((m) => m.value === Number(selectedMonth))?.label} {selectedYear}
                             </span>

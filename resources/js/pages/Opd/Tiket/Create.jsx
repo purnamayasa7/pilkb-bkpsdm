@@ -366,19 +366,6 @@ export default function Create({
                     </div>
                 </div>
 
-                {/* FLASH ALERT NOTIFICATIONS */}
-                {flash.error && (
-                    <div className="p-4 rounded-2xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200/80 dark:border-rose-800 text-rose-800 dark:text-rose-200 flex items-start gap-3 text-xs sm:text-sm">
-                        <AlertCircle className="w-5 h-5 flex-shrink-0 mt-0.5 text-rose-600" />
-                        <div className="flex-1">{flash.error}</div>
-                    </div>
-                )}
-                {flash.warning && (
-                    <div className="p-4 rounded-2xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200/80 dark:border-amber-800 text-amber-800 dark:text-amber-200 flex items-start gap-3 text-xs sm:text-sm">
-                        <AlertCircle className="w-5 h-5 flex-shrink-0 mt-0.5 text-amber-600" />
-                        <div className="flex-1">{flash.warning}</div>
-                    </div>
-                )}
 
                 {/* STEPPER WIZARD TRACKER */}
                 <div className="rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs p-4 sm:p-6">
@@ -441,7 +428,7 @@ export default function Create({
                                 <span>Tahap 1: Masukkan NIP Pegawai</span>
                             </h2>
                             <p className="text-xs text-slate-400 mt-1">
-                                Masukkan NIP ASN yang bersangkutan dan periksa data pegawai secara otomatis ke database SIMPEG BKPSDM.
+                                Masukkan NIP yang bersangkutan dan cek data pegawai di database SIMPEG.
                             </p>
                         </div>
 

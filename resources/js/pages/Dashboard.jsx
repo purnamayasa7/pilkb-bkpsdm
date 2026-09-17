@@ -66,8 +66,7 @@ export default function Dashboard({
             setCurrentDateStr(now.toLocaleDateString('id-ID', options));
             const hours = String(now.getHours()).padStart(2, '0');
             const minutes = String(now.getMinutes()).padStart(2, '0');
-            const seconds = String(now.getSeconds()).padStart(2, '0');
-            setCurrentTime(`${hours}:${minutes}:${seconds}`);
+            setCurrentTime(`${hours}:${minutes}`);
         };
 
         updateTime();
@@ -232,7 +231,7 @@ export default function Dashboard({
                             </span>
                             <span>•</span>
                             <span className="font-mono text-slate-700 dark:text-slate-300">
-                                {currentTime || '--:--:--'} WITA
+                                {currentTime || '--:--'} WITA
                             </span>
                         </div>
                     </div>

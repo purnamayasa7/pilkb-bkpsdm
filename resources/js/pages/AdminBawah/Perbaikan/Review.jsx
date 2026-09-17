@@ -263,7 +263,7 @@ export default function Review({
                                 </div>
 
                                 <div>
-                                    <span className="text-slate-400 font-medium">Bidang Pengampu Layanan:</span>
+                                    <span className="text-slate-400 font-medium">Bidang Layanan:</span>
                                     <p className="font-semibold text-slate-800 dark:text-slate-200 mt-0.5">
                                         {tiket.layanan?.bidang?.nama_bidang || '-'}
                                     </p>

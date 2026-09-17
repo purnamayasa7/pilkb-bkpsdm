@@ -1,7 +1,7 @@
 <table>
     <thead>
         <tr>
-            <th colspan="7" style="text-align:center; font-weight:bold;">
+            <th colspan="8" style="text-align:center; font-weight:bold;">
                 LAPORAN PERBAIKAN USULAN
             </th>
         </tr>
@@ -12,6 +12,7 @@
             <th>No Tiket</th>
             <th>NIP</th>
             <th>Nama</th>
+            <th>Unit Kerja</th>
             <th>Layanan</th>
             <th>Syarat BTL</th>
         </tr>
@@ -23,7 +24,8 @@
             <td>{{ $d->is_belum ? 'Belum' : 'Sudah' }}</td>
             <td>{{ $d->no_tiket }}</td>
             <td>'{{ $d->nip }}</td>
-            <td>{{ $pegawaiList[$d->nip]['nama_lengkap'] ?? '-' }}</td>
+            <td>{{ $d->nama ?? '-' }}</td>
+            <td>{{ $d->nama_ukerja ?? '-' }}</td>
             <td>{{ $d->layanan->nama_layanan ?? '-' }}</td>
             <td>{{ $d->jumlah_btl }}</td>
         </tr>

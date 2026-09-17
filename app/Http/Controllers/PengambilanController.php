@@ -336,19 +336,10 @@ class PengambilanController extends Controller
             ->orderBy('tanggal_pengambilan', 'desc')
             ->get();
 
-        $pegawaiList = $this->pegawaiService->getPegawaiByNips(
-            $pengambilan
-                ->pluck('tiket.nip')
-                ->filter()
-                ->unique()
-                ->values()
-        );
-
         $pdf = Pdf::loadView(
             'pages.admin-bawah.pengambilan.pdf',
             compact(
                 'pengambilan',
-                'pegawaiList',
                 'year'
             )
         )->setPaper('a4', 'landscape');
@@ -388,13 +379,11 @@ class PengambilanController extends Controller
 
         $tanggal_awal = $request->tanggal_awal;
         $tanggal_akhir = $request->tanggal_akhir;
-        $pegawaiList = [];
 
         $pdf = Pdf::loadView(
             'pages.admin-bawah.archives.pdf',
             compact(
                 'data',
-                'pegawaiList',
                 'tanggal_awal',
                 'tanggal_akhir'
             )

@@ -73,11 +73,7 @@ export default function RootUserIndex({ users = [] }) {
         const total = users.length;
         const aktif = users.filter((u) => u.aktif === true || u.aktif === 1).length;
         const nonaktif = total - aktif;
-        const opdBidang = users.filter((u) => {
-            const r = String(u.role || '').toLowerCase();
-            return r === 'admin_opd' || r === 'bidang';
-        }).length;
-        return { total, aktif, nonaktif, opdBidang };
+        return { total, aktif, nonaktif };
     }, [users]);
 
     // Filtered data
@@ -225,7 +221,7 @@ export default function RootUserIndex({ users = [] }) {
                                 Manajemen User
                             </h1>
                             <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-                                Kelola data akun pengguna, hak akses peranan (role), dan status aktifasi sistem PILKB.
+                                Kelola data akun pengguna, hak akses (role) dan status aktifasi sistem PILKB.
                             </p>
                         </div>
                     </div>
@@ -279,7 +275,7 @@ export default function RootUserIndex({ users = [] }) {
                 </div>
 
                 {/* 2. Kartu Ringkasan Statistik */}
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                     {/* Total User */}
                     <div
                         onClick={() => {
@@ -345,31 +341,6 @@ export default function RootUserIndex({ users = [] }) {
                             </span>
                             <span className="text-[11px] px-2 py-0.5 rounded-full font-medium bg-rose-50 dark:bg-rose-950/60 text-rose-700 dark:text-rose-300 border border-rose-200/80 dark:border-rose-900/50">
                                 Nonaktif
-                            </span>
-                        </div>
-                    </div>
-
-                    {/* Bidang & OPD */}
-                    <div
-                        onClick={() => {
-                            if (roleFilter === 'admin_opd') setRoleFilter('ALL');
-                            else setRoleFilter('admin_opd');
-                        }}
-                        className={`cursor-pointer rounded-2xl p-4 bg-white dark:bg-slate-900 border transition-all ${
-                            roleFilter === 'admin_opd'
-                                ? 'border-amber-500 ring-2 ring-amber-500/20 shadow-xs'
-                                : 'border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700'
-                        }`}
-                    >
-                        <div className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">
-                            OPD & Bidang
-                        </div>
-                        <div className="mt-2 flex items-baseline justify-between">
-                            <span className="text-2xl font-extrabold text-slate-900 dark:text-white">
-                                {stats.opdBidang}
-                            </span>
-                            <span className="text-[11px] px-2 py-0.5 rounded-full font-medium bg-amber-50 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300 border border-amber-200/80 dark:border-amber-900/50">
-                                Unit
                             </span>
                         </div>
                     </div>

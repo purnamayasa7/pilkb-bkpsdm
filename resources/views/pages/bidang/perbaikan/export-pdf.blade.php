@@ -70,9 +70,9 @@
                     <td class="text-center">{{ $item->no_tiket }}</td>
                     <td class="cell-break">
                         <div class="pegawai-nip">{{ $item->nip }}</div>
-                        <div class="pegawai-nama">{{ $pegawaiList[$item->nip]['nama_lengkap'] ?? ($item->nama ?? '-') }}</div>
+                        <div class="pegawai-nama">{{ $item->nama ?? '-' }}</div>
                     </td>
-                    <td class="cell-break">{{ $pegawaiList[$item->nip]['ket_ukerja'] ?? ($item->nama_ukerja ?? '-') }}</td>
+                    <td class="cell-break">{{ $item->nama_ukerja ?? '-' }}</td>
                     <td class="cell-break">{{ $item->layanan->nama_layanan ?? '-' }}</td>
                     <td class="text-center">{{ $item->is_belum ? 'Belum' : 'Sudah' }}</td>
                     <td class="text-center">{{ $item->jumlah_btl }} Dokumen</td>

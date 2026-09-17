@@ -177,17 +177,20 @@ export default function Edit({
                     </div>
                 </div>
 
-                {/* FLASH & ERROR ALERTS */}
-                {flash?.success && (
-                    <div className="p-4 rounded-2xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200/80 dark:border-emerald-800 text-emerald-800 dark:text-emerald-200 flex items-start gap-3 text-xs sm:text-sm animate-in fade-in duration-200">
-                        <CheckCircle2 className="w-5 h-5 flex-shrink-0 text-emerald-600 dark:text-emerald-400 mt-0.5" />
-                        <div className="flex-1 font-medium">{flash.success}</div>
-                    </div>
-                )}
-                {(flash?.error || clientError) && (
-                    <div className="p-4 rounded-2xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200/80 dark:border-rose-800 text-rose-800 dark:text-rose-200 flex items-start gap-3 text-xs sm:text-sm animate-in fade-in duration-200">
-                        <AlertCircle className="w-5 h-5 flex-shrink-0 text-rose-600 dark:text-rose-400 mt-0.5" />
-                        <div className="flex-1 font-medium">{flash.error || clientError}</div>
+                {/* CLIENT VALIDATION ERROR ALERT */}
+                {clientError && (
+                    <div className="p-4 rounded-2xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200/80 dark:border-rose-800 text-rose-800 dark:text-rose-200 flex items-start justify-between gap-3 text-xs sm:text-sm animate-in fade-in duration-200">
+                        <div className="flex items-start gap-2.5">
+                            <AlertCircle className="w-4 h-4 flex-shrink-0 text-rose-600 dark:text-rose-400 mt-0.5" />
+                            <div className="flex-1 font-medium">{clientError}</div>
+                        </div>
+                        <button
+                            type="button"
+                            onClick={() => setClientError(null)}
+                            className="p-1 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 cursor-pointer"
+                        >
+                            <X className="w-4 h-4" />
+                        </button>
                     </div>
                 )}
 
@@ -213,7 +216,7 @@ export default function Edit({
                             </div>
 
                             <div>
-                                <span className="text-slate-400 font-medium">Bidang Pengampu Layanan:</span>
+                                <span className="text-slate-400 font-medium">Bidang Layanan:</span>
                                 <p className="font-semibold text-slate-800 dark:text-slate-200 mt-0.5">
                                     {tiket?.layanan?.bidang?.nama_bidang || '-'}
                                 </p>
@@ -306,7 +309,7 @@ export default function Edit({
                             Petunjuk Pengunggahan Berkas Revisi
                         </h4>
                         <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
-                            Silakan unggah ulang dokumen yang perlu diperbaiki (ditandai dengan status <span className="font-bold text-rose-600 dark:text-rose-400">Tidak Valid</span>). Periksa secara saksama catatan yang diberikan oleh verifikator. Dokumen yang diunggah harus berformat <b>PDF</b> dengan ukuran maksimal <b>1 MB</b>.
+                            Silakan unggah ulang dokumen yang perlu diperbaiki (ditandai dengan status <span className="font-bold text-rose-600 dark:text-rose-400">Tidak Valid (BTL)</span>). Periksa catatan yang diberikan oleh verifikator BKPSDM. Dokumen yang diunggah harus berformat <b>PDF</b> dengan ukuran maksimal <b>1 MB</b>.
                         </p>
                     </div>
                 </div>
@@ -339,8 +342,8 @@ export default function Edit({
                                     const urlManual = d.file_path ? `/adminOpd/perbaikan/dokumen/${encodeURIComponent(d.id)}` : (dokReview.url || null);
                                     const daftarDokumen = dokReview.dokumen || [];
                                     const hasSimpegDocs = Boolean(dokReview.metode === 'simpeg' && daftarDokumen.length > 0);
-                                    const isBtl = d.status === 2;
-                                    const isValid = d.status === 1;
+                                    const isBtl = Number(d.status) === 2;   // "2" atau 2 → BTL
+                                    const isValid = Number(d.status) === 1; // "1" atau 1 → Valid, null → 0 → Menunggu Verifikasi
                                     const selectedFile = selectedFiles[d.id];
 
                                     return (
@@ -394,7 +397,7 @@ export default function Edit({
 
                                                                 {/* Badge Sumber / Metode */}
                                                                 <span className="text-[10px] font-semibold text-slate-400 px-2 py-0.5 rounded-md bg-slate-100 dark:bg-slate-800">
-                                                                    Sumber: {hasManualUpload ? (metodeSyarat === 'simpeg' ? 'Upload Manual (Revisi)' : 'Upload Manual') : (metodeSyarat === 'simpeg' ? 'SIMPEG' : 'Upload Manual')}
+                                                                    Sumber: {hasManualUpload || metodeSyarat !== 'simpeg' ? 'Upload PILKB' : 'SIMPEG'}
                                                                 </span>
 
                                                                 {/* Tautan Tunggal Lihat Dokumen (Tetap hanya 1 button) */}
@@ -507,11 +510,11 @@ export default function Edit({
                                                                     <span>
                                                                         {isBtl
                                                                             ? 'Pilih File PDF Pengganti'
-                                                                            : 'Ganti File (Opsional)'}
+                                                                            : 'Ganti File'}
                                                                     </span>
                                                                 </div>
                                                                 <span className="text-[10px] text-slate-400 block mt-0.5">
-                                                                    Klik untuk memilih berkas dari komputer
+                                                                    Klik untuk upload berkas
                                                                 </span>
                                                             </label>
                                                         )}

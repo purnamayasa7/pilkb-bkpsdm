@@ -620,7 +620,7 @@ export default function Index({
                             Tidak Ada Data Laporan
                         </h4>
                         <p className="text-xs text-slate-400 mt-1 max-w-sm mx-auto">
-                            Tidak ditemukan usulan layanan kepegawaian pada rentang periode yang Anda pilih. Silakan ubah filter tanggal atau layanan.
+                            Tidak ditemukan usulan layanan kepegawaian pada rentang yang Anda pilih. Silakan ubah filter tanggal atau layanan.
                         </p>
                     </div>
                 ) : (
