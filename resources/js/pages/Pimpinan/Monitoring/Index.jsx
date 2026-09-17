@@ -18,7 +18,8 @@ import {
     Activity,
     ChevronDown,
     Calendar,
-    List
+    List,
+    ExternalLink,
 } from 'lucide-react';
 
 export default function MonitoringIndex({
@@ -427,7 +428,15 @@ export default function MonitoringIndex({
                                         >
                                             {/* No Tiket */}
                                             <td className="px-5 py-3.5 font-bold text-slate-900 dark:text-white whitespace-nowrap">
-                                                {item.no_tiket}
+                                                <a
+                                                    href={`/cek-tiket/${encodeURIComponent(item.no_tiket)}`}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    className="hover:text-blue-600 dark:hover:text-blue-400 hover:underline transition-colors"
+                                                    title="Lihat Detail Usulan (Cek Tiket Publik)"
+                                                >
+                                                    {item.no_tiket}
+                                                </a>
                                             </td>
 
                                             {/* Pemohon */}
@@ -483,17 +492,29 @@ export default function MonitoringIndex({
 
                                             {/* Aksi */}
                                             <td className="px-5 py-3.5 text-right whitespace-nowrap">
-                                                <button
-                                                    onClick={() => {
-                                                        setSelectedTiketHistory(item.no_tiket);
-                                                        setHistoryModalOpen(true);
-                                                    }}
-                                                    className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 hover:bg-blue-50 dark:hover:bg-blue-950/50 transition-colors cursor-pointer"
-                                                    title="Lihat Kronologi Riwayat Tahapan"
-                                                >
-                                                    <History className="w-3.5 h-3.5" />
-                                                    <span>Alur</span>
-                                                </button>
+                                                <div className="flex items-center justify-end gap-1.5">
+                                                    <a
+                                                        href={`/cek-tiket/${encodeURIComponent(item.no_tiket)}`}
+                                                        target="_blank"
+                                                        rel="noopener noreferrer"
+                                                        className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
+                                                        title="Lihat Detail Usulan di Tab Baru (Cek Tiket Publik)"
+                                                    >
+                                                        <ExternalLink className="w-3.5 h-3.5" />
+                                                        <span>Detail</span>
+                                                    </a>
+                                                    <button
+                                                        onClick={() => {
+                                                            setSelectedTiketHistory(item.no_tiket);
+                                                            setHistoryModalOpen(true);
+                                                        }}
+                                                        className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 hover:bg-blue-50 dark:hover:bg-blue-950/50 transition-colors cursor-pointer"
+                                                        title="Lihat Kronologi Riwayat Tahapan"
+                                                    >
+                                                        <History className="w-3.5 h-3.5" />
+                                                        <span>Alur</span>
+                                                    </button>
+                                                </div>
                                             </td>
                                         </tr>
                                     ))

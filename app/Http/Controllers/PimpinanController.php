@@ -179,25 +179,54 @@ class PimpinanController extends Controller
      */
     public function kepuasan(Request $request)
     {
+        $currentYear  = (int) date('Y');
+        $year         = (int) $request->input('year', $currentYear);
+        if ($year < 2000 || $year > 2100) {
+            $year = $currentYear;
+        }
+
+        $availableYears = Cache::remember('pimpinan_available_years', 3600, function () use ($currentYear) {
+            $years = Regtiket::where('dihapus', 0)
+                ->selectRaw('DISTINCT YEAR(tanggal) as yr')
+                ->whereNotNull('tanggal')
+                ->orderByDesc('yr')
+                ->pluck('yr')
+                ->map(fn($y) => (int) $y)
+                ->toArray();
+
+            if (empty($years)) {
+                $years = [$currentYear];
+            } elseif (!in_array($currentYear, $years)) {
+                array_unshift($years, $currentYear);
+                rsort($years);
+            }
+            return $years;
+        });
+
         $bidangFilter = $request->bidang;
+        $perPage      = (int) $request->input('per_page', 10);
+        $perPage      = in_array($perPage, [5, 10, 20, 50]) ? $perPage : 10;
 
         $reviews = LayananReview::with(['layanan.bidang', 'tiket', 'user'])
+            ->whereYear('created_at', $year)
             ->when($bidangFilter, function ($q) use ($bidangFilter) {
                 $q->whereHas('layanan', fn($q2) => $q2->where('kode_bidang', $bidangFilter));
             })
             ->orderByDesc('created_at')
-            ->paginate(20)
+            ->paginate($perPage)
             ->withQueryString();
 
-        // Distribusi bintang global
-        $distribusi = LayananReview::selectRaw('rating, COUNT(*) as jumlah')
+        // Distribusi bintang global per tahun terpilih
+        $distribusi = LayananReview::whereYear('created_at', $year)
+            ->selectRaw('rating, COUNT(*) as jumlah')
             ->groupBy('rating')
             ->orderBy('rating')
             ->get()
             ->keyBy('rating');
 
-        // Rata-rata per bidang (dioptimasi 1 query agregat join)
+        // Rata-rata per bidang per tahun terpilih (dioptimasi 1 query agregat join)
         $reviewStats = LayananReview::join('tb_layanan', 'tb_layanan_review.kode_layanan', '=', 'tb_layanan.id')
+            ->whereYear('tb_layanan_review.created_at', $year)
             ->select(
                 'tb_layanan.kode_bidang',
                 DB::raw('AVG(rating) as avg_rating'),
@@ -221,11 +250,14 @@ class PimpinanController extends Controller
         });
 
         return Inertia::render('Pimpinan/Kepuasan/Index', [
-            'reviews'        => $reviews,
-            'distribusi'     => $distribusi,
-            'rata_per_bidang'=> $rataPerBidang,
-            'bidang'         => Bidang::all(),
-            'bidangFilter'   => $bidangFilter,
+            'reviews'         => $reviews,
+            'distribusi'      => $distribusi,
+            'rata_per_bidang' => $rataPerBidang,
+            'bidang'          => Bidang::all(),
+            'bidangFilter'    => $bidangFilter,
+            'perPage'         => $perPage,
+            'selected_year'   => $year,
+            'available_years' => $availableYears,
         ]);
     }
 

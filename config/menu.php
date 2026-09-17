@@ -233,14 +233,6 @@ return [
 
         [
             'type' => 'item',
-            'title' => 'Aktivitas Anda',
-            'path' => 'log-aktivitas',
-            'icon' => 'activity',
-            'active_key' => 'aktivitas',
-        ],
-
-        [
-            'type' => 'item',
             'title' => 'Laporan',
             'path' => 'adminBawah/laporan',
             'icon' => 'bar-chart-2',
@@ -328,14 +320,6 @@ return [
             'path' => 'chat',
             'icon' => 'message-square',
             'active_key' => 'chat-center',
-        ],
-
-        [
-            'type' => 'item',
-            'title' => 'Aktivitas Instansi',
-            'path' => 'log-aktivitas',
-            'icon' => 'activity',
-            'active_key' => 'aktivitas',
         ],
 
         [
@@ -435,14 +419,6 @@ return [
             'path' => 'chat',
             'icon' => 'message-square',
             'active_key' => 'chat-center',
-        ],
-
-        [
-            'type' => 'item',
-            'title' => 'Aktivitas Bidang',
-            'path' => 'log-aktivitas',
-            'icon' => 'activity',
-            'active_key' => 'aktivitas',
         ],
 
         [

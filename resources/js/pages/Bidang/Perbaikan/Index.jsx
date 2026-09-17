@@ -481,8 +481,7 @@ export default function Index({
                                                 {/* Status Perbaikan */}
                                                 <td className="py-3.5 px-4 text-center whitespace-nowrap">
                                                     {item.diperbaiki === 0 ? (
-                                                        <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-amber-50 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300 border border-amber-200/80 dark:border-amber-900/50">
-                                                            <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse" />
+                                                        <span className="inline-flex items-center px-2.5 py-1 rounded-full text-[11px] font-semibold bg-amber-50 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300 border border-amber-200/80 dark:border-amber-900/50">
                                                             Belum Diperbaiki
                                                         </span>
                                                     ) : (

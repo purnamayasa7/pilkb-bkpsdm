@@ -14,6 +14,7 @@ use App\Notifications\TiketNotification;
 use App\Services\PegawaiService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Notification;
 use Inertia\Inertia;
@@ -32,6 +33,49 @@ class ChatController extends Controller
     {
         $user = Auth::user();
 
+        $roomParam = $request->query('room') ?? $request->query('id');
+        $initialActiveId = $roomParam ? (is_numeric($roomParam) ? (int) $roomParam : $roomParam) : null;
+        $tiketParam = $request->query('tiket');
+        $pendingTicket = null;
+
+        if ($tiketParam) {
+            $existingConv = ChatConversation::where('no_tiket', $tiketParam)
+                ->where('type', 'ticket')
+                ->first();
+
+            if ($existingConv) {
+                ChatParticipant::firstOrCreate(
+                    [
+                        'conversation_id' => $existingConv->id,
+                        'user_id' => $user->id,
+                    ],
+                    [
+                        'role' => $user->role?->name === 'admin_opd' ? 'creator' : 'responder'
+                    ]
+                );
+                $initialActiveId = (int) $existingConv->id;
+            } else {
+                $regTiket = Regtiket::with([
+                    'layanan.bidang',
+                    'tahapTerakhir.statusRel'
+                ])->where('no_tiket', $tiketParam)->first();
+
+                if ($regTiket) {
+                    $initialActiveId = 'pending_ticket';
+                    $pendingTicket = [
+                        'no_tiket' => $regTiket->no_tiket,
+                        'nip' => $regTiket->nip,
+                        'nama' => $regTiket->nama,
+                        'layanan' => $regTiket->layanan?->nama_layanan ?? '-',
+                        'bidang' => $regTiket->layanan?->bidang?->nama_bidang ?? '-',
+                        'bidang_id' => $regTiket->layanan?->kode_bidang ?? null,
+                        'status' => $regTiket->tahapTerakhir?->statusRel?->status ?? 'Perlu Perbaikan',
+                        'tanggal' => $regTiket->tanggal,
+                    ];
+                }
+            }
+        }
+
         $conversations = ChatConversation::with([
             'creator.role',
             'guest',
@@ -46,9 +90,6 @@ class ChatController extends Controller
             })
             ->orderByDesc('last_message_id')
             ->get();
-
-        $roomParam = $request->query('room') ?? $request->query('id');
-        $initialActiveId = $roomParam ? (is_numeric($roomParam) ? (int) $roomParam : $roomParam) : null;
 
         if ($initialActiveId && is_numeric($initialActiveId)) {
             $convToRead = $conversations->firstWhere('id', (int) $initialActiveId);
@@ -103,6 +144,7 @@ class ChatController extends Controller
         return Inertia::render('Chat/Index', [
             'initialConversations' => $formatted,
             'initialActiveId' => $initialActiveId,
+            'pendingTicket' => $pendingTicket,
         ]);
     }
 
@@ -238,6 +280,136 @@ class ChatController extends Controller
         ]);
     }
 
+    public function startAndSendMessage(Request $request)
+    {
+        $request->validate([
+            'no_tiket' => 'required|string',
+            'message' => 'required|string',
+        ]);
+
+        $user = Auth::user();
+
+        $tiket = Regtiket::with('layanan.bidang')
+            ->where('no_tiket', $request->no_tiket)
+            ->first();
+
+        if (!$tiket) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Nomor tiket tidak ditemukan'
+            ], 404);
+        }
+
+        return DB::transaction(function () use ($request, $user, $tiket) {
+            $conversation = ChatConversation::firstOrCreate(
+                [
+                    'no_tiket' => $tiket->no_tiket,
+                    'type' => 'ticket'
+                ],
+                [
+                    'created_by' => $user->id,
+                    'bidang_id' => $tiket->layanan->kode_bidang ?? null,
+                    'status' => 'open',
+                    'need_reply' => false,
+                ]
+            );
+
+            // Creator participant
+            ChatParticipant::firstOrCreate(
+                [
+                    'conversation_id' => $conversation->id,
+                    'user_id' => $user->id,
+                ],
+                [
+                    'role' => $user->role?->name === 'admin_opd' ? 'creator' : 'responder'
+                ]
+            );
+
+            // Bidang responder participants
+            if ($conversation->bidang_id) {
+                $adminBidang = User::where('bidang_id', $conversation->bidang_id)
+                    ->whereHas('role', fn($q) => $q->where('name', 'bidang'))
+                    ->get();
+
+                foreach ($adminBidang as $admin) {
+                    ChatParticipant::firstOrCreate(
+                        [
+                            'conversation_id' => $conversation->id,
+                            'user_id' => $admin->id,
+                        ],
+                        [
+                            'role' => 'responder'
+                        ]
+                    );
+                }
+            }
+
+            // Create first message
+            $message = ChatMessage::create([
+                'conversation_id' => $conversation->id,
+                'sender_user_id' => $user->id,
+                'message' => $request->message,
+            ]);
+
+            ChatParticipant::where('conversation_id', $conversation->id)
+                ->where('user_id', $user->id)
+                ->update([
+                    'last_read_message_id' => $message->id
+                ]);
+
+            $needReply = false;
+            if ($conversation->type === 'ticket') {
+                if ($user->role?->name !== 'bidang') {
+                    $needReply = true;
+                }
+            }
+
+            $conversation->update([
+                'last_message_id' => $message->id,
+                'need_reply' => $needReply,
+            ]);
+
+            try {
+                app(\App\Services\FirebaseChatService::class)->broadcastMessage($message);
+            } catch (\Throwable $e) {
+                Log::warning('Firebase broadcastMessage failed: ' . $e->getMessage());
+            }
+
+            $partner = $this->getConversationPartner($conversation, $user);
+
+            $layananNama = $tiket->layanan?->nama_layanan ?? null;
+            $bidangNama = $tiket->layanan?->bidang?->nama_bidang ?? null;
+
+            return response()->json([
+                'success' => true,
+                'conversation' => [
+                    'id' => $conversation->id,
+                    'no_tiket' => $conversation->no_tiket,
+                    'status' => $conversation->status ?? 'open',
+                    'last_message_id' => $conversation->last_message_id,
+                    'nama_pengirim' => $partner['nama_pengirim'],
+                    'sender_role' => $partner['sender_role'],
+                    'sender_role_label' => $partner['sender_role_label'],
+                    'layanan' => $layananNama,
+                    'bidang' => $bidangNama,
+                    'last_message' => $message->message,
+                    'last_message_time' => $message->created_at->format('Y-m-d H:i:s'),
+                    'is_last_from_me' => true,
+                    'unread' => 0,
+                    'need_reply' => (bool) $conversation->need_reply,
+                    'type' => $conversation->type,
+                ],
+                'message' => [
+                    'id' => $message->id,
+                    'conversation_id' => $conversation->id,
+                    'sender_user_id' => $message->sender_user_id,
+                    'message' => $message->message,
+                    'created_at' => $message->created_at->format('Y-m-d H:i:s'),
+                    'sender_name' => $user->nama ?? $user->name,
+                ]
+            ]);
+        });
+    }
 
     public function searchTicket(Request $request)
     {

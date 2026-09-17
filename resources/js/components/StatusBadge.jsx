@@ -52,7 +52,7 @@ export function getStatusStyle(statusName) {
 export default function StatusBadge({
     status = 'Menunggu Verifikasi',
     size = 'md',
-    showDot = true,
+    showDot = false,
     showIcon = false,
     className = '',
 }) {

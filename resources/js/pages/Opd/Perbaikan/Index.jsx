@@ -487,13 +487,11 @@ export default function Index({ data = [], layananList = [] }) {
                                                     {/* Status Perbaikan */}
                                                     <td className="py-3.5 px-4 lg:px-6 align-middle text-center">
                                                         {isSudah ? (
-                                                            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold border bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border-emerald-200/80 dark:border-emerald-800/60">
-                                                                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                                                            <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold border bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border-emerald-200/80 dark:border-emerald-800/60">
                                                                 <span>Sudah Diperbaiki</span>
                                                             </span>
                                                         ) : (
-                                                            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold border bg-rose-50 dark:bg-rose-950/40 text-rose-700 dark:text-rose-300 border-rose-200/80 dark:border-rose-800/60">
-                                                                <span className="w-1.5 h-1.5 rounded-full bg-rose-500" />
+                                                            <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold border bg-rose-50 dark:bg-rose-950/40 text-rose-700 dark:text-rose-300 border-rose-200/80 dark:border-rose-800/60">
                                                                 <span>Belum Diperbaiki</span>
                                                             </span>
                                                         )}

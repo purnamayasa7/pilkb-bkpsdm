@@ -25,41 +25,9 @@ export default function Index({
 }) {
     const { auth } = usePage().props;
 
-    // Role-based dynamics
-    const userRole = auth?.user?.role_id;
-    const isBidang = userRole === 4;
-    const isOpd = userRole === 3;
-    const isAdminBawah = userRole === 2;
-
-    // Detect bidang name from logs if available
-    const namaBidang = useMemo(() => {
-        const found = (logs || []).find((l) => l.user?.bidang?.nama_bidang);
-        return found?.user?.bidang?.nama_bidang || '';
-    }, [logs]);
-
-    const pageTitle = isBidang
-        ? `Aktivitas Bidang${namaBidang ? ` - ${namaBidang}` : ''} - PILKB`
-        : isOpd
-        ? 'Aktivitas Instansi - PILKB'
-        : isAdminBawah
-        ? 'Aktivitas Anda - PILKB'
-        : 'Log Aktivitas - PILKB';
-
-    const headerTitle = isBidang
-        ? `Aktivitas Bidang${namaBidang ? ` - ${namaBidang}` : ''}`
-        : isOpd
-        ? 'Aktivitas Instansi'
-        : isAdminBawah
-        ? 'Aktivitas Anda'
-        : 'Log Aktivitas';
-
-    const headerSubtitle = isBidang
-        ? 'Audit trail dan rekaman log aktivitas internal bidang kepegawaian'
-        : isOpd
-        ? 'Audit trail dan rekaman aktivitas pengguna sistem kepegawaian'
-        : isAdminBawah
-        ? 'Audit trail dan rekaman log aktivitas akun pelayanan Anda'
-        : 'Audit trail dan rekaman seluruh aktivitas pengguna sistem kepegawaian';
+    const pageTitle = 'Log Aktivitas - PILKB';
+    const headerTitle = 'Log Aktivitas';
+    const headerSubtitle = 'Audit trail dan rekaman seluruh aktivitas pengguna sistem kepegawaian';
 
     // Filter states
     const [startDate, setStartDate] = useState(tanggal_awal || '');
@@ -550,7 +518,7 @@ export default function Index({
                             Rentang Tanggal Belum Dipilih
                         </h4>
                         <p className="text-xs text-slate-400 max-w-sm mx-auto mt-1">
-                            Silakan tentukan <span className="font-semibold text-slate-700 dark:text-slate-300">Tanggal Mulai</span> dan <span className="font-semibold text-slate-700 dark:text-slate-300">Tanggal Selesai</span> pada kolom di atas atau gunakan tombol <span className="font-semibold text-blue-600 dark:text-blue-400">Filter Cepat</span> untuk memuat rekaman {isAdminBawah ? 'aktivitas akun pelayanan Anda' : isBidang ? 'aktivitas bidang' : isOpd ? 'aktivitas instansi' : 'log aktivitas'}.
+                            Silakan tentukan <span className="font-semibold text-slate-700 dark:text-slate-300">Tanggal Mulai</span> dan <span className="font-semibold text-slate-700 dark:text-slate-300">Tanggal Selesai</span> pada kolom di atas atau gunakan tombol <span className="font-semibold text-blue-600 dark:text-blue-400">Filter Cepat</span> untuk memuat rekaman log aktivitas.
                         </p>
                     </div>
                 ) : (

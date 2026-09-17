@@ -21,28 +21,6 @@ class LaporanAktivitasExport implements FromView
     {
         $query = Log::with(['user', 'user.role', 'user.bidang']);
 
-        $user = Auth::user();
-
-        // ROLE FILTER
-        switch ($user->role_id) {
-
-            case 1: // ROOT
-                break;
-
-            case 2: // ADMIN BAWAH
-                $query->where('user_id', $user->id);
-                break;
-
-            case 3: // ADMIN OPD
-                $query->where('kode_ukerja', $user->kode_ukerja);
-                break;
-
-            case 4: // BIDANG
-                $query->whereHas('user', function ($q) use ($user) {
-                    $q->where('bidang_id', $user->bidang_id);
-                });
-                break;
-        }
 
         // FILTER TANGGAL
         if ($this->request->filled('tanggal_awal') && $this->request->filled('tanggal_akhir')) {

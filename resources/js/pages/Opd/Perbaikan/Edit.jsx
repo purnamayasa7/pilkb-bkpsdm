@@ -162,10 +162,13 @@ export default function Edit({
 
                     {/* Header Actions */}
                     <div className="flex flex-wrap items-center gap-2.5 self-start md:self-auto">
-                        <span className="inline-flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl text-xs font-semibold bg-rose-50 dark:bg-rose-950/60 text-rose-700 dark:text-rose-300 border border-rose-200/80 dark:border-rose-900/40 shadow-xs">
-                            <ShieldAlert className="w-4 h-4 text-rose-500" />
-                            <span>{btlCount} Berkas Perlu Diperbaiki</span>
-                        </span>
+                        <Link
+                            href={`/chat?tiket=${encodeURIComponent(tiket.no_tiket || '')}`}
+                            className="inline-flex items-center gap-2 px-3.5 py-2.5 rounded-xl border border-blue-200 dark:border-blue-900/60 bg-blue-50/70 dark:bg-blue-950/40 text-xs font-semibold text-blue-700 dark:text-blue-300 hover:bg-blue-100 dark:hover:bg-blue-900/60 transition-colors shadow-2xs cursor-pointer"
+                        >
+                            <MessageSquare className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+                            <span>Hubungi Admin</span>
+                        </Link>
 
                         <Link
                             href="/adminOpd/perbaikan"

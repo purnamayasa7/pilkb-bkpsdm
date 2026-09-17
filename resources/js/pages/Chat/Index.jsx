@@ -182,9 +182,14 @@ function FormattedLiliText({ text }) {
     );
 }
 
-export default function ChatIndex({ initialConversations = [], initialActiveId = null }) {
+export default function ChatIndex({
+    initialConversations = [],
+    initialActiveId = null,
+    pendingTicket = null
+}) {
     const { auth, firebase: firebaseConfig } = usePage().props;
     const currentUser = auth?.user;
+    const [pendingDraft, setPendingDraft] = useState(pendingTicket);
     const userRoleName = typeof currentUser?.role === 'string'
         ? currentUser.role
         : (currentUser?.role?.name || '');
@@ -311,6 +316,7 @@ export default function ChatIndex({ initialConversations = [], initialActiveId =
     ]);
     const [liliLoading, setLiliLoading] = useState(false);
     const [copiedMsgId, setCopiedMsgId] = useState(null);
+    const [liliPrivacyModalOpen, setLiliPrivacyModalOpen] = useState(false);
 
     const messagesEndRef = useRef(null);
     const textareaRef = useRef(null);
@@ -439,7 +445,7 @@ export default function ChatIndex({ initialConversations = [], initialActiveId =
 
     // Firebase Typing Whisper & Stop
     const whisperTyping = () => {
-        if (!activeId || activeId === 'lili_ai' || !currentUser?.id || !window.FirebaseDB) return;
+        if (!activeId || activeId === 'lili_ai' || activeId === 'pending_ticket' || !currentUser?.id || !window.FirebaseDB) return;
         const now = Date.now();
         if (now - lastWhisperTimeRef.current < 1500) return;
         lastWhisperTimeRef.current = now;
@@ -455,7 +461,7 @@ export default function ChatIndex({ initialConversations = [], initialActiveId =
     };
 
     const stopTypingWhisper = () => {
-        if (!activeId || activeId === 'lili_ai' || !currentUser?.id || !window.FirebaseDB) return;
+        if (!activeId || activeId === 'lili_ai' || activeId === 'pending_ticket' || !currentUser?.id || !window.FirebaseDB) return;
         try {
             window.FirebaseDB.ref(`conversations/${activeId}/typing/${currentUser.id}`).remove();
         } catch (err) {}
@@ -720,11 +726,53 @@ export default function ChatIndex({ initialConversations = [], initialActiveId =
         }, 50);
     };
 
-    // Auto-buka room jika diarahkan dari navbar atau URL query parameter (?room=... atau ?id=...)
+    const handleSelectPendingDraft = useCallback(() => {
+        if (selectionMode || !pendingDraft) return;
+        if (activeId && activeId !== 'lili_ai' && messagesContainerRef.current) {
+            roomScrollPosRef.current.set(activeId, messagesContainerRef.current.scrollTop);
+            roomCacheRef.current.set(activeId, {
+                roomData: activeRoomData,
+                messages: messages
+            });
+        }
+        setRoomNewMessagesCount(0);
+        setActiveId('pending_ticket');
+        setActiveRoomData({
+            ticket_number: pendingDraft.no_tiket,
+            status: 'open',
+            layanan: pendingDraft.layanan,
+            bidang: pendingDraft.bidang,
+            sender_role: 'bidang',
+            sender_role_label: 'Bidang',
+            nama_pengirim: `Admin ${pendingDraft.bidang || 'Bidang'}`,
+            is_pending: true,
+            pegawai_nama: pendingDraft.nama,
+            pegawai_nip: pendingDraft.nip,
+        });
+        setMessages([]);
+        if (scrollBtnRef.current) {
+            scrollBtnRef.current.style.display = 'none';
+        }
+        setTimeout(() => {
+            scrollToActiveSidebarItem('smooth');
+        }, 50);
+    }, [selectionMode, pendingDraft, activeId, activeRoomData, messages, scrollToActiveSidebarItem]);
+
+    // Auto-buka room jika diarahkan dari navbar atau URL query parameter (?room=... atau ?id=... atau ?tiket=...)
     const lastOpenedTargetRef = useRef(null);
     useEffect(() => {
         const urlParams = typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : null;
         const targetRoomParam = initialActiveId || urlParams?.get('room') || urlParams?.get('id');
+        const tiketParam = urlParams?.get('tiket');
+
+        if (initialActiveId === 'pending_ticket' || (tiketParam && pendingDraft)) {
+            if (lastOpenedTargetRef.current !== 'pending_ticket') {
+                lastOpenedTargetRef.current = 'pending_ticket';
+                handleSelectPendingDraft();
+            }
+            return;
+        }
+
         if (!targetRoomParam) return;
 
         if (lastOpenedTargetRef.current === String(targetRoomParam)) return;
@@ -741,7 +789,7 @@ export default function ChatIndex({ initialConversations = [], initialActiveId =
             lastOpenedTargetRef.current = String(targetRoomId);
             handleSelectConversation(found);
         }
-    }, [initialActiveId, conversations]);
+    }, [initialActiveId, conversations, pendingDraft, handleSelectPendingDraft]);
 
     // =========================================================================
     // 4. FIREBASE REALTIME LIVE CHAT (Request 4)
@@ -889,7 +937,7 @@ export default function ChatIndex({ initialConversations = [], initialActiveId =
     }, [currentUser?.id, firebaseConfig]);
 
     useEffect(() => {
-        if (!activeId || activeId === 'lili_ai' || !window.FirebaseDB) return;
+        if (!activeId || activeId === 'lili_ai' || activeId === 'pending_ticket' || !window.FirebaseDB) return;
 
         const roomMsgRef = window.FirebaseDB.ref(`conversations/${activeId}/last_message`);
         const roomStatusRef = window.FirebaseDB.ref(`conversations/${activeId}/status`);
@@ -978,7 +1026,7 @@ export default function ChatIndex({ initialConversations = [], initialActiveId =
 
     // Fallback polling jika Firebase offline atau tertunda (12 detik agar sangat ringan)
     useEffect(() => {
-        if (!activeId || activeId === 'lili_ai') return;
+        if (!activeId || activeId === 'lili_ai' || activeId === 'pending_ticket') return;
 
         const interval = setInterval(async () => {
             const lastMsgId = messages.length > 0 ? messages[messages.length - 1].id : 0;
@@ -1043,6 +1091,77 @@ export default function ChatIndex({ initialConversations = [], initialActiveId =
 
         if (activeId === 'lili_ai') {
             sendLiliMessage(text);
+            return;
+        }
+
+        if (activeId === 'pending_ticket') {
+            if (!pendingDraft?.no_tiket) return;
+            setSending(true);
+            setInputText('');
+            stopTypingWhisper();
+
+            if (messagesContainerRef.current) {
+                messagesContainerRef.current.scrollTop = messagesContainerRef.current.scrollHeight;
+            }
+
+            try {
+                const res = await axios.post('/chat/start-and-send', {
+                    no_tiket: pendingDraft.no_tiket,
+                    message: text
+                });
+
+                if (res.data?.success && res.data?.conversation && res.data?.message) {
+                    const newConv = res.data.conversation;
+                    const newMsg = {
+                        id: res.data.message.id,
+                        conversation_id: newConv.id,
+                        message: res.data.message.message,
+                        sender_user_id: currentUser?.id,
+                        sender_name: currentUser?.nama || 'Saya',
+                        created_at: res.data.message.created_at || new Date().toISOString()
+                    };
+
+                    knownMessageIdsRef.current.add(Number(newMsg.id));
+                    readRoomIdsRef.current.add(newConv.id);
+
+                    setConversations(prev => [newConv, ...prev.filter(c => c.id !== newConv.id)]);
+
+                    setActiveId(newConv.id);
+                    const newRoomData = {
+                        ticket_number: newConv.no_tiket,
+                        status: newConv.status || 'open',
+                        layanan: newConv.layanan,
+                        bidang: newConv.bidang,
+                        sender_role: newConv.sender_role,
+                        sender_role_label: newConv.sender_role_label,
+                        nama_pengirim: newConv.nama_pengirim,
+                    };
+                    setActiveRoomData(newRoomData);
+                    setMessages([newMsg]);
+
+                    roomCacheRef.current.set(newConv.id, {
+                        roomData: newRoomData,
+                        messages: [newMsg]
+                    });
+
+                    setPendingDraft(null);
+
+                    if (typeof window !== 'undefined' && window.history?.replaceState) {
+                        window.history.replaceState({}, '', `/chat?room=${newConv.id}`);
+                    }
+
+                    if (messagesContainerRef.current) {
+                        messagesContainerRef.current.scrollTop = messagesContainerRef.current.scrollHeight;
+                    }
+                    scrollToBottom('auto');
+                    setTimeout(() => scrollToBottom('smooth'), 40);
+                }
+            } catch (err) {
+                console.error('Failed to start ticket conversation and send message', err);
+            } finally {
+                setSending(false);
+                if (textareaRef.current) textareaRef.current.focus();
+            }
             return;
         }
 
@@ -1605,6 +1724,52 @@ export default function ChatIndex({ initialConversations = [], initialActiveId =
                                     </div>
                                 )}
 
+                                {/* PENDING DRAFT TICKET CONVERSATION (BEFORE 1ST MESSAGE) */}
+                                {pendingDraft && (
+                                    <div
+                                        id="sidebar-item-pending_ticket"
+                                        onClick={handleSelectPendingDraft}
+                                        className={`p-2.5 sm:p-3 hover:bg-slate-50 dark:hover:bg-slate-800/50 cursor-pointer transition-colors relative flex items-start gap-2.5 sm:gap-3 ${
+                                            activeId === 'pending_ticket'
+                                                ? 'bg-blue-50/80 dark:bg-blue-950/50'
+                                                : 'bg-amber-50/40 dark:bg-amber-950/20'
+                                        }`}
+                                    >
+                                        {activeId === 'pending_ticket' && (
+                                            <div className="absolute left-0 top-0 bottom-0 w-1 bg-blue-600 rounded-r pointer-events-none" />
+                                        )}
+
+                                        <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-amber-600 text-white font-bold text-xs flex items-center justify-center shrink-0 shadow-2xs mt-0.5">
+                                            {getInitials(`Admin ${pendingDraft.bidang || 'Bidang'}`, 'KP')}
+                                        </div>
+
+                                        <div className="flex-1 min-w-0">
+                                            <div className="flex items-center justify-between gap-1">
+                                                <div className="flex items-center gap-1.5 flex-wrap">
+                                                    <RoleBadge
+                                                        role="bidang"
+                                                        label="Bidang"
+                                                    />
+                                                    <span className="inline-flex items-center px-1.5 py-0.5 rounded bg-amber-100 dark:bg-amber-950/80 border border-amber-300 dark:border-amber-800 text-[10px] font-bold text-amber-800 dark:text-amber-200 uppercase tracking-wide">
+                                                        Draf Baru
+                                                    </span>
+                                                </div>
+                                                <span className="text-[10px] font-medium text-slate-400">
+                                                    Belum dibuat
+                                                </span>
+                                            </div>
+
+                                            <h5 className="font-bold text-slate-800 dark:text-slate-100 text-xs mt-1 truncate">
+                                                Admin {pendingDraft.bidang || 'Bidang'}
+                                            </h5>
+
+                                            <p className="text-[11px] text-slate-500 dark:text-slate-400 truncate mt-0.5">
+                                                #{pendingDraft.no_tiket} • {pendingDraft.layanan}
+                                            </p>
+                                        </div>
+                                    </div>
+                                )}
+
                                 {/* 2. TICKET CONVERSATIONS */}
                                 {filteredConversations.length > 0 ? (
                                     filteredConversations.map((conv) => {
@@ -1819,6 +1984,16 @@ export default function ChatIndex({ initialConversations = [], initialActiveId =
                                         <div className="flex items-center gap-1.5 shrink-0">
                                             <button
                                                 type="button"
+                                                onClick={() => setLiliPrivacyModalOpen(true)}
+                                                className="inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-xl border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 text-xs font-semibold transition-colors cursor-pointer"
+                                                title="Kebijakan Privasi & Batasan Layanan AI"
+                                            >
+                                                <Shield className="w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400" />
+                                                <span className="hidden sm:inline">Kebijakan Privasi</span>
+                                            </button>
+
+                                            <button
+                                                type="button"
                                                 onClick={handleResetLiliChat}
                                                 className="inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-xl border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 text-xs font-semibold transition-colors cursor-pointer"
                                                 title="Mulai Percakapan Baru dengan LILI"
@@ -2019,27 +2194,39 @@ export default function ChatIndex({ initialConversations = [], initialActiveId =
                                     </div>
 
                                     {/* Input Footer (PINNED AT BOTTOM, DOES NOT SCROLL) */}
-                                    <div className="p-2.5 sm:p-3 pb-3.5 sm:pb-3 bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 flex items-end gap-2 shrink-0 relative z-10">
-                                        <div className="flex-1 relative flex items-center">
-                                            <textarea
-                                                ref={textareaRef}
-                                                rows={1}
-                                                value={inputText}
-                                                onChange={(e) => setInputText(e.target.value)}
-                                                onKeyDown={handleKeyDown}
-                                                placeholder="Tanyakan regulasi, syarat layanan, atau panduan kepegawaian..."
-                                                className="w-full px-3.5 py-2.5 bg-slate-100/90 dark:bg-slate-800/90 border border-transparent focus:border-indigo-500 focus:bg-white dark:focus:bg-slate-900 rounded-xl text-xs text-slate-800 dark:text-slate-200 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 resize-none transition-all"
-                                            />
+                                    <div className="p-2.5 sm:p-3 pb-3 sm:pb-2.5 bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 shrink-0 relative z-10">
+                                        <div className="flex items-end gap-2">
+                                            <div className="flex-1 relative flex items-center">
+                                                <textarea
+                                                    ref={textareaRef}
+                                                    rows={1}
+                                                    value={inputText}
+                                                    onChange={(e) => setInputText(e.target.value)}
+                                                    onKeyDown={handleKeyDown}
+                                                    placeholder="Tanyakan regulasi, syarat layanan, atau panduan kepegawaian..."
+                                                    className="w-full px-3.5 py-2.5 bg-slate-100/90 dark:bg-slate-800/90 border border-transparent focus:border-indigo-500 focus:bg-white dark:focus:bg-slate-900 rounded-xl text-xs text-slate-800 dark:text-slate-200 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 resize-none transition-all"
+                                                />
+                                            </div>
+                                            <button
+                                                type="button"
+                                                disabled={!inputText.trim() || liliLoading}
+                                                onClick={() => handleSendMessage()}
+                                                className="p-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 disabled:opacity-40 text-white font-semibold transition-colors shadow-2xs cursor-pointer shrink-0"
+                                                title="Kirim Pertanyaan ke LILI"
+                                            >
+                                                <Send className="w-4 h-4" />
+                                            </button>
                                         </div>
-                                        <button
-                                            type="button"
-                                            disabled={!inputText.trim() || liliLoading}
-                                            onClick={() => handleSendMessage()}
-                                            className="p-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 disabled:opacity-40 text-white font-semibold transition-colors shadow-2xs cursor-pointer shrink-0"
-                                            title="Kirim Pertanyaan ke LILI"
-                                        >
-                                            <Send className="w-4 h-4" />
-                                        </button>
+                                        <div className="text-center mt-2 px-1 text-[11px] text-slate-400 dark:text-slate-500 leading-tight">
+                                            Layanan informasi resmi &amp; literasi kepegawaian BKPSDM.{' '}
+                                            <button
+                                                type="button"
+                                                onClick={() => setLiliPrivacyModalOpen(true)}
+                                                className="underline text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 font-medium cursor-pointer transition-colors"
+                                            >
+                                                Kebijakan Privasi
+                                            </button>
+                                        </div>
                                     </div>
                                 </div>
                             )}
@@ -2085,12 +2272,14 @@ export default function ChatIndex({ initialConversations = [], initialActiveId =
                                                     )}
                                                     <span
                                                         className={`inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider shrink-0 ${
-                                                            activeRoomData?.status === 'closed'
+                                                            activeRoomData?.is_pending
+                                                                ? 'bg-amber-100 dark:bg-amber-950/80 text-amber-800 dark:text-amber-200 border border-amber-300 dark:border-amber-800'
+                                                                : activeRoomData?.status === 'closed'
                                                                 ? 'bg-slate-100 dark:bg-slate-800 text-slate-500'
                                                                 : 'bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800/60'
                                                         }`}
                                                     >
-                                                        {activeRoomData?.status === 'closed' ? 'Closed' : 'Open'}
+                                                        {activeRoomData?.is_pending ? 'Draf Baru' : (activeRoomData?.status === 'closed' ? 'Closed' : 'Open')}
                                                     </span>
                                                 </div>
 
@@ -2109,40 +2298,42 @@ export default function ChatIndex({ initialConversations = [], initialActiveId =
                                             </div>
                                         </div>
 
-                                        <div className="relative" ref={roomMenuRef}>
-                                            <button
-                                                type="button"
-                                                onClick={() => setRoomMenuOpen(!roomMenuOpen)}
-                                                className="p-2 rounded-xl text-slate-500 hover:text-slate-800 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
-                                                title="Menu opsi obrolan"
-                                            >
-                                                <MoreVertical className="w-4 h-4" />
-                                            </button>
+                                        {!activeRoomData?.is_pending && (
+                                            <div className="relative" ref={roomMenuRef}>
+                                                <button
+                                                    type="button"
+                                                    onClick={() => setRoomMenuOpen(!roomMenuOpen)}
+                                                    className="p-2 rounded-xl text-slate-500 hover:text-slate-800 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
+                                                    title="Menu opsi obrolan"
+                                                >
+                                                    <MoreVertical className="w-4 h-4" />
+                                                </button>
 
-                                            {roomMenuOpen && (
-                                                <div className="absolute right-0 top-full mt-1.5 w-40 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-lg py-1.5 z-50 text-xs font-semibold">
-                                                    {activeRoomData?.status === 'closed' ? (
-                                                        <button
-                                                            type="button"
-                                                            onClick={handleToggleChatStatus}
-                                                            className="w-full px-3.5 py-2 text-left text-emerald-600 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-950/40 flex items-center gap-2 cursor-pointer"
-                                                        >
-                                                            <RotateCcw className="w-3.5 h-3.5" />
-                                                            <span>Buka Chat</span>
-                                                        </button>
-                                                    ) : (
-                                                        <button
-                                                            type="button"
-                                                            onClick={handleToggleChatStatus}
-                                                            className="w-full px-3.5 py-2 text-left text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 flex items-center gap-2 cursor-pointer"
-                                                        >
-                                                            <Lock className="w-3.5 h-3.5" />
-                                                            <span>Tutup Chat</span>
-                                                        </button>
-                                                    )}
-                                                </div>
-                                            )}
-                                        </div>
+                                                {roomMenuOpen && (
+                                                    <div className="absolute right-0 top-full mt-1.5 w-40 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-lg py-1.5 z-50 text-xs font-semibold">
+                                                        {activeRoomData?.status === 'closed' ? (
+                                                            <button
+                                                                type="button"
+                                                                onClick={handleToggleChatStatus}
+                                                                className="w-full px-3.5 py-2 text-left text-emerald-600 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-950/40 flex items-center gap-2 cursor-pointer"
+                                                            >
+                                                                <RotateCcw className="w-3.5 h-3.5" />
+                                                                <span>Buka Chat</span>
+                                                            </button>
+                                                        ) : (
+                                                            <button
+                                                                type="button"
+                                                                onClick={handleToggleChatStatus}
+                                                                className="w-full px-3.5 py-2 text-left text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 flex items-center gap-2 cursor-pointer"
+                                                            >
+                                                                <Lock className="w-3.5 h-3.5" />
+                                                                <span>Tutup Chat</span>
+                                                            </button>
+                                                        )}
+                                                    </div>
+                                                )}
+                                            </div>
+                                        )}
                                     </div>
 
                                     {/* Messages Stream (ONLY THIS AREA SCROLLS IN PANEL 2) */}
@@ -2201,6 +2392,28 @@ export default function ChatIndex({ initialConversations = [], initialActiveId =
                                                     </React.Fragment>
                                                 );
                                             })
+                                        ) : activeId === 'pending_ticket' ? (
+                                            <div className="h-full flex flex-col items-center justify-center text-center p-6 max-w-md mx-auto">
+                                                <div className="w-14 h-14 rounded-2xl bg-blue-50 dark:bg-blue-950/60 border border-blue-200/80 dark:border-blue-900/40 text-blue-600 dark:text-blue-400 flex items-center justify-center shadow-xs mb-3.5">
+                                                    <MessageSquare className="w-7 h-7" />
+                                                </div>
+                                                <h4 className="text-sm font-bold text-slate-800 dark:text-slate-100 mb-1">
+                                                    Hubungi Admin Bidang Terkait
+                                                </h4>
+                                                <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed mb-4">
+                                                    Anda akan berkonsultasi mengenai usulan <span className="font-semibold text-slate-700 dark:text-slate-300">#{pendingDraft?.no_tiket}</span> ({pendingDraft?.layanan})
+                                                    {pendingDraft?.nama ? ` untuk pegawai ${pendingDraft.nama}` : ''}.
+                                                </p>
+                                                <div className="w-full p-3.5 rounded-xl bg-blue-50/80 dark:bg-blue-950/40 border border-blue-200/80 dark:border-blue-900/60 text-blue-900 dark:text-blue-200 text-left text-xs space-y-1.5 shadow-2xs">
+                                                    <div className="font-bold flex items-center gap-1.5 text-blue-800 dark:text-blue-300">
+                                                        <AlertCircle className="w-4 h-4 text-blue-600 dark:text-blue-400 shrink-0" />
+                                                        <span>Ruang Percakapan Baru</span>
+                                                    </div>
+                                                    <p className="text-[11px] text-blue-700 dark:text-blue-300 leading-relaxed">
+                                                        Ketik dan kirim pesan pertama Anda pada kolom di bawah. Tiket ruang percakapan akan otomatis dibuat dan tersambung langsung ke Admin Bidang.
+                                                    </p>
+                                                </div>
+                                            </div>
                                         ) : (
                                             <div className="h-full flex flex-col items-center justify-center text-center p-6 text-slate-400">
                                                 <MessageSquare className="w-8 h-8 text-slate-300 dark:text-slate-700 mx-auto mb-2" />
@@ -2443,6 +2656,88 @@ export default function ChatIndex({ initialConversations = [], initialActiveId =
                                 </button>
                             </div>
                         )}
+                    </div>
+                </div>
+            )}
+
+            {/* ========================================================================= */}
+            {/* MODAL KEBIJAKAN PRIVASI & DISCLAIMER AI LILI                              */}
+            {/* ========================================================================= */}
+            {liliPrivacyModalOpen && (
+                <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-in fade-in duration-150">
+                    <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl max-w-lg w-full shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
+                        {/* Modal Header */}
+                        <div className="p-4 sm:p-5 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between shrink-0 bg-slate-50/50 dark:bg-slate-800/40">
+                            <div className="flex items-center gap-3">
+                                <div className="p-2.5 rounded-xl bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 border border-indigo-200/80 dark:border-indigo-900/40">
+                                    <Shield className="w-5 h-5" />
+                                </div>
+                                <div>
+                                    <h3 className="font-bold text-slate-800 dark:text-slate-100 text-sm">
+                                        Kebijakan Privasi &amp; Batasan Layanan AI
+                                    </h3>
+                                    <p className="text-[11px] text-slate-400 dark:text-slate-500 mt-0.5">
+                                        LILI - BKPSDM Kabupaten Buleleng
+                                    </p>
+                                </div>
+                            </div>
+                            <button
+                                type="button"
+                                onClick={() => setLiliPrivacyModalOpen(false)}
+                                className="p-1.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
+                            >
+                                <X className="w-4 h-4" />
+                            </button>
+                        </div>
+
+                        {/* Modal Body */}
+                        <div className="p-5 sm:p-6 overflow-y-auto space-y-4 text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
+                            <div className="p-3.5 rounded-2xl bg-indigo-50/60 dark:bg-indigo-950/30 border border-indigo-100 dark:border-indigo-900/40">
+                                <h4 className="font-bold text-indigo-900 dark:text-indigo-300 mb-1 flex items-center gap-1.5 text-xs">
+                                    <Sparkles className="w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400" />
+                                    <span>1. Asisten Virtual Berbasis AI</span>
+                                </h4>
+                                <p className="text-[11.5px] leading-relaxed">
+                                    <strong>LILI</strong> <em>(Layanan Informasi &amp; Literasi Kepegawaian Interaktif)</em> adalah asisten virtual berbasis Generative AI yang dirancang untuk membantu pencarian informasi regulasi ASN dan persyaratan layanan di BKPSDM Kabupaten Buleleng.
+                                </p>
+                            </div>
+
+                            <div className="p-3.5 rounded-2xl bg-amber-50/60 dark:bg-amber-950/30 border border-amber-100 dark:border-amber-900/40">
+                                <h4 className="font-bold text-amber-900 dark:text-amber-300 mb-1 flex items-center gap-1.5 text-xs">
+                                    <Lock className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />
+                                    <span>2. Perlindungan Data Pribadi (UU No. 27/2022)</span>
+                                </h4>
+                                <p className="text-[11.5px] leading-relaxed">
+                                    Pengguna diimbau untuk <strong>TIDAK mengirimkan informasi rahasia</strong> seperti kata sandi (password), PIN, data rekening, maupun rahasia jabatan saat berinteraksi dengan AI.
+                                </p>
+                            </div>
+
+                            <div className="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/80 dark:border-slate-700/80">
+                                <h4 className="font-bold text-slate-800 dark:text-slate-200 mb-1 flex items-center gap-1.5 text-xs">
+                                    <AlertCircle className="w-3.5 h-3.5 text-slate-500" />
+                                    <span>3. Batasan Tanggung Jawab &amp; Akurasi Informasi</span>
+                                </h4>
+                                <p className="text-[11.5px] leading-relaxed">
+                                    Jawaban yang dihasilkan oleh LILI bersifat <strong>informasi &amp; literasi awal</strong>. Jawaban ini <strong>tidak menggantikan</strong> Surat Keputusan (SK) resmi atau penetapan tertulis dari Pejabat Pembina Kepegawaian (PPK) BKPSDM Kabupaten Buleleng.
+                                </p>
+                            </div>
+
+                            <div className="p-3 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200/80 dark:border-emerald-900/40 flex items-center gap-2.5 text-[11.5px] text-emerald-800 dark:text-emerald-300 font-medium">
+                                <Check className="w-4 h-4 text-emerald-600 shrink-0" />
+                                <span>Dengan menggunakan LILI, Anda memahami dan menyetujui ketentuan layanan ini.</span>
+                            </div>
+                        </div>
+
+                        {/* Modal Footer */}
+                        <div className="p-4 border-t border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/40 flex justify-end shrink-0">
+                            <button
+                                type="button"
+                                onClick={() => setLiliPrivacyModalOpen(false)}
+                                className="px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-xs transition-colors shadow-2xs cursor-pointer"
+                            >
+                                Saya Mengerti
+                            </button>
+                        </div>
                     </div>
                 </div>
             )}

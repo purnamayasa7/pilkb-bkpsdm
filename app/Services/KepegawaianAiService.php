@@ -36,10 +36,14 @@ KEPRIBADIAN & GAYA KOMUNIKASI:
    - JIKA PENGGUNA HANYA MENYAPA (misal: "Halo", "Hai", "Selamat Pagi", "Om Swastyastu"):
      Balas sapaan dengan wajar, ramah, dan ringkas:
      "Halo, selamat pagi! 😊 Selamat datang di LILI (Layanan Informasi & Literasi Kepegawaian Interaktif) BKPSDM Kabupaten Buleleng. Ada yang bisa LILI bantu terkait kepegawaian hari ini?"
+   - JIKA PENGGUNA MENGUCAPKAN TERIMA KASIH, MENUTUP PERCAKAPAN, ATAU MENYATAKAN SUDAH PAHAM (misal: "Terima kasih", "Terimakasih", "Makasih", "Matur suksma", "Sudah cukup", "Sudah jelas", "Baik", "Siap", "Oke"):
+     Balas dengan hangat, ramah, dan penuh apresiasi:
+     "Sama-sama! 😊 Senang sekali LILI bisa membantu. Jika di kemudian hari memerlukan informasi kepegawaian lainnya, jangan ragu untuk menyapa LILI kembali. Semoga tugas kedinasan dan aktivitas Anda lancar selalu! ✨"
+     DILARANG KERAS mencari nomor tiket, menganggap kata terima kasih/penutup sebagai tiket, atau menyatakan tiket tidak ditemukan!
    - JIKA PENGGUNA MEMINTA IZIN BERTANYA (misal: "Boleh tanya?", "Saya boleh bertanya?"):
      Balas dengan ramah:
      "Tentu saja boleh! 😊 Silakan sampaikan pertanyaan Anda seputar regulasi ASN, cuti, kenaikan pangkat, pensiun, izin belajar, disiplin pegawai, atau layanan kepegawaian lainnya."
-   - JIKA PENGGUNA MENANYAKAN PERTANYAAN UMUM KEPEGAWAIAN (misal: jam kerja, sanksi disiplin PP 94/2021, jenis-jenis cuti, batas usia pensiun, periode kenaikan pangkat 6 kali setahun, ketentuan tugas belajar, tugas BKPSDM, hak & kewajiban ASN):
+   - JIKA PENGGUNA MENANYAKAN PERTANYAAN UMUM KEPEGAWAIAN (misal: jam kerja, sanksi disiplin PP 94/2021, jenis-jenis cuti, batas usia pensiun, periode kenaikan pangkat 6 kali setahun, ketentuan tugas belajar, evaluasi kinerja SKP, kenaikan gaji berkala, tugas BKPSDM, hak & kewajiban ASN):
      JAWABLAH SECARA TEPAT, LENGKAP, EDUKATIF, DAN TERSTRUKTUR SESUAI DENGAN PERTANYAAN TERSEBUT.
      DILARANG memaksakan mengaitkan pertanyaan umum dengan cek status tiket, nomor tiket, atau mewajibkan unduh syarat jika pengguna tidak menanyakannya.
    - JIKA PENGGUNA MENANYAKAN PERSYARATAN / BERKAS LAYANAN SPESIFIK:
@@ -47,6 +51,47 @@ KEPRIBADIAN & GAYA KOMUNIKASI:
    - JIKA PENGGUNA LANGSUNG MENANYAKAN TOPIK LAIN:
      LANGSUNG jawab inti pertanyaannya secara jelas, padat, dan terstruktur (JANGAN awali dengan 'Tentu saja boleh').
 5. Di akhir penjelasan, berikan kalimat penutup yang ramah dan solutif (misalnya: "Apakah ada bagian dari informasi di atas yang ingin LILI jelaskan lebih lanjut? 😊").
+
+BASIS PENGETAHUAN REGULASI RESMI ASN & BKPSDM KABUPATEN BULELENG:
+1. CUTI ASN (Peraturan BKN No. 24/2017 jo Peraturan BKN No. 7/2021):
+   - Cuti Tahunan: 12 hari kerja setelah 1 tahun bekerja terus menerus. Hak cuti tahun berjalan yang tidak digunakan dapat ditangguhkan ke tahun berikutnya maksimal 6 hari kerja.
+   - Cuti Besar: Masa kerja minimal 5 tahun terus menerus, durasi hingga 3 bulan (menangguhkan cuti tahunan pada tahun bersangkutan).
+   - Cuti Sakit: 1-14 hari wajib surat dokter; lebih dari 14 hari wajib surat dokter pemerintah/RS pemerintah (maksimal 1 tahun, dapat diperpanjang 6 bulan).
+   - Cuti Melahirkan: 3 bulan untuk anak ke-1, ke-2, dan ke-3.
+   - Cuti Karena Alasan Penting (CAP): Keluarga sakit keras/meninggal dunia, melangsungkan pernikahan pertama, tertimpa musibah kebakaran/bencana.
+   - Cuti Bersama: Mengikuti Keppres (tidak memotong cuti tahunan).
+   - Cuti di Luar Tanggungan Negara (CLTN): Minimal masa kerja 5 tahun, untuk urusan pribadi/keluarga mendesak, masa kerja terhenti sementara dan tanpa penghasilan negara.
+
+2. KENAIKAN PANGKAT (Peraturan BKN No. 4/2023):
+   - Berlaku 6 periode dalam setahun: 1 Februari, 1 April, 1 Juni, 1 Agustus, 1 Oktober, dan 1 Desember (kecuali KP Anumerta dan Pengabdian).
+   - KP Reguler: Minimal 4 tahun dalam pangkat terakhir dengan predikat kinerja (SKP) minimal 'Baik' selama 2 tahun berturut-turut.
+   - KP Pilihan (Fungsional): Berdasarkan akumulasi Angka Kredit dari konversi predikat kinerja tahunan dan formasi jenjang jabatan.
+   - KP Penyesuaian Ijazah: Bagi PNS yang memperoleh ijazah lebih tinggi dan lulus Ujian Penyesuaian Kenaikan Pangkat (UPKP).
+
+3. BATAS USIA PENSIUN (PP No. 11/2017 jo PP No. 17/2020):
+   - 58 Tahun: Pejabat Administrasi, Pejabat Pelaksana, Pejabat Fungsional Ahli Pertama & Ahli Muda.
+   - 60 Tahun: Pejabat Pimpinan Tinggi (JPT) Utama/Madya/Pratama & Pejabat Fungsional Ahli Madya.
+   - 65 Tahun: Pejabat Fungsional Ahli Utama.
+   - Pensiun Atas Permintaan Sendiri (APS): Minimal berusia 50 tahun dan masa kerja minimal 20 tahun. Pengusulan berkas pensiun disarankan 6-12 bulan sebelum mencapai BUP.
+
+4. PENGEMBANGAN KOMPETENSI (SE MenPAN-RB No. 28/2021):
+   - Tugas Belajar (TB): Dibiayai beasiswa sponsor / APBD / APBN, dibebaskan penuh dari tugas kedinasan sehari-hari.
+   - Izin Belajar (IB): Biaya mandiri, perkuliahan di luar jam dinas kerja, tetap melaksanakan tugas kedinasan penuh.
+   - Pencantuman Gelar: Pengakuan kualifikasi akademik baru pada data BKN dan SK kepegawaian setelah verifikasi BKPSDM.
+
+5. DISIPLIN PNS & JAM KERJA (PP No. 94/2021):
+   - Kewajiban jam kerja, netralitas pemilu/pilkada, dan kepatuhan kode etik ASN.
+   - Tingkat Hukuman Disiplin:
+     a. Ringan: Teguran lisan, teguran tertulis, pernyataan tidak puas tertulis.
+     b. Sedang: Pemotongan tukin 25% selama 6, 9, atau 12 bulan.
+     c. Berat: Penurunan jabatan setingkat lebih rendah (12 bulan), pembebasan jabatan menjadi pelaksana (12 bulan), atau PTDH.
+
+6. EVALUASI KINERJA SKP (PermenPAN-RB No. 6/2022):
+   - Penilaian berbasis dialog kinerja, ekspektasi pimpinan, dan perilaku kerja BerAKHLAK (Berorientasi Pelayanan, Akuntabel, Kompeten, Harmonis, Loyal, Adaptif, Kolaboratif).
+
+7. SISTEM INFORMASI PILKB KABUPATEN BULELENG:
+   - Portal pelayanan administrasi kepegawaian terpadu BKPSDM Kabupaten Buleleng.
+   - Pelacakan usulan dilakukan menggunakan Nomor Tiket (format alfanumerik tanggal, contoh: 290826XLCT) atau 18 digit NIP resmi pegawai.
 
 PANTANGAN PENTING:
 - HINDARI kata atau singkatan "SOP" dalam semua jawaban Anda. Gunakan istilah "persyaratan layanan", "ketentuan berkas", atau "panduan regulasi kepegawaian".
@@ -94,6 +139,12 @@ EOT;
                 'actions' => [],
                 'source'  => 'scope_guardrail'
             ];
+        }
+
+        // 2b. PERCAKAPAN RAMAH: Deteksi Ucapan Terima Kasih, Konfirmasi Selesai, dan Sapaan Ramah
+        $pleasantryResult = $this->handleGratitudeOrPleasantry($sanitizedQuestion, $userInfo);
+        if ($pleasantryResult !== null) {
+            return $pleasantryResult;
         }
 
         // 3. CEK STATUS TIKET & NIP LANGSUNG DARI DATABASE PILKB (Zero Hallucination)
@@ -469,6 +520,11 @@ EOT;
                 if (is_numeric($tok) && (strlen($tok) === 4 || strlen($tok) === 18)) {
                     continue;
                 }
+                // Token tiket implisit WAJIB mengandung setidaknya satu angka (misal pola PILKB: dmy + 4 karakter).
+                // Kata murni alfabet (seperti "terimakasih", "kepegawaian", "persyaratan") TIDAK BOLEH dijadikan kandidat tiket implisit!
+                if (!preg_match('/[0-9]/', $tok)) {
+                    continue;
+                }
                 $ticketCandidates[] = $tok;
             }
         }
@@ -540,12 +596,13 @@ EOT;
             // Jika token tiket tidak ditemukan di database PILKB
             // Pastikan tidak pernah bocor ke LLM agar tidak terjadi simulasi tiket fiktif
             $wordCount = count(preg_split('/\s+/', trim($question)));
+            $hasNumber = (bool) preg_match('/[0-9]/', $question);
             $isExplicitCheckTicket = (
                 str_contains($qLower, 'tiket') ||
                 preg_match('/(?:cek|status|lacak|progres|posisi|tracking).*(?:tiket|usulan)/i', $qLower) ||
                 preg_match('/(?:tiket|no(?:mor)?\s*tiket)\s*[:\s#]/i', $qLower) ||
-                $wordCount <= 3 ||
-                preg_match('/^[A-Za-z0-9]{6,16}$/', trim($question))
+                ($wordCount <= 3 && $hasNumber) ||
+                (preg_match('/^[A-Za-z0-9]{6,16}$/', trim($question)) && $hasNumber)
             );
 
             if ($isExplicitCheckTicket) {
@@ -932,14 +989,224 @@ EOT;
             ];
         }
 
+        // 10. EVALUASI KINERJA ASN / SKP
+        if (str_contains($qLower, 'kinerja') || str_contains($qLower, 'skp') || str_contains($qLower, 'berakhlak')) {
+            return [
+                'success' => true,
+                'reply'   => "Berdasarkan **PermenPAN-RB No. 6 Tahun 2022 tentang Pengelolaan Kinerja Pegawai ASN**, penilaian kinerja difokuskan pada dialog kinerja berkelanjutan:\n\n" .
+                    "1. **Hasil Kerja:** Penetapan Sasaran Kinerja Pegawai (SKP) yang selaras dengan rencana strategis OPD dan organisasi.\n" .
+                    "2. **Perilaku Kerja (Core Values BerAKHLAK):**\n" .
+                    "   - Berorientasi Pelayanan, Akuntabel, Kompeten, Harmonis, Loyal, Adaptif, dan Kolaboratif.\n" .
+                    "3. **Predikat Kinerja:** Sangat Baik, Baik, Butuh Perbaikan, Kurang, atau Sangat Kurang.\n\n" .
+                    "Predikat kinerja ini menjadi dasar utama untuk usulan kenaikan pangkat (KP) dan pembayaran TPP/Tukin. Ada yang ingin ditanyakan seputar SKP? 😊",
+                'actions' => [],
+                'source'  => 'fallback_kinerja'
+            ];
+        }
+
+        // 11. KENAIKAN GAJI BERKALA (KGB)
+        if (str_contains($qLower, 'gaji berkala') || str_contains($qLower, 'kgb') || (str_contains($qLower, 'kenaikan gaji') && !str_contains($qLower, 'pangkat'))) {
+            return [
+                'success' => true,
+                'reply'   => "Kenaikan Gaji Berkala (KGB) bagi Pegawai Negeri Sipil diberikan secara berkala dengan ketentuan umum:\n\n" .
+                    "1. **Periode Waktu:** Diberikan setiap **2 tahun sekali** sejak TMT gaji berkala terakhir.\n" .
+                    "2. **Penilaian Kinerja:** Memiliki predikat kinerja (SKP) minimal 'Baik' dalam 2 tahun terakhir.\n" .
+                    "3. **Mekanisme Pengusulan:** Diusulkan oleh Subbag Kepegawaian OPD masing-masing melalui surat pengantar dan SK berkala/pangkat terakhir ke BKPSDM Kabupaten Buleleng.\n\n" .
+                    "Apakah Anda ingin mengetahui persyaratan berkas usulan KGB di BKPSDM? 😊",
+                'actions' => [
+                    [
+                        'type'   => 'prompt',
+                        'label'  => '📄 Syarat Usulan KGB',
+                        'prompt' => 'Apa syarat kenaikan gaji berkala di BKPSDM Buleleng?'
+                    ]
+                ],
+                'source'  => 'fallback_kgb'
+            ];
+        }
+
         $followUps = $this->generateFollowUpSuggestions($question, $serviceData, 'fallback');
 
         return [
             'success' => true,
-            'reply'   => "Terima kasih atas pertanyaan Anda. 😊\n\nSebagai asisten virtual LILI di BKPSDM Kabupaten Buleleng, saya siap membantu menjelaskan regulasi kepegawaian, ketentuan cuti, kenaikan pangkat, pensiun, tugas belajar, maupun disiplin ASN. Silakan sampaikan pertanyaan spesifik yang ingin Anda ketahui.",
+            'reply'   => "Terima kasih atas pertanyaan Anda. 😊\n\nSebagai asisten virtual LILI di BKPSDM Kabupaten Buleleng, saya siap membantu menjelaskan regulasi kepegawaian, ketentuan cuti, kenaikan pangkat, pensiun, tugas belajar, evaluasi kinerja SKP, maupun disiplin ASN. Silakan sampaikan pertanyaan spesifik yang ingin Anda ketahui.",
             'actions' => array_merge($actions, $followUps),
             'source'  => 'fallback_general'
         ];
+    }
+
+    /**
+     * Tangani percakapan ramah, ucapan terima kasih, konfirmasi selesai, dan salam
+     * tanpa memicu query tiket atau fallback tidak relevan.
+     */
+    private function handleGratitudeOrPleasantry(string $question, ?array $userInfo = null): ?array
+    {
+        $qTrimmed = trim($question);
+        $qLower = mb_strtolower($qTrimmed, 'UTF-8');
+        $cleanLettersOnly = preg_replace('/[^\p{L}\s]/u', ' ', $qLower);
+        $cleanLettersOnly = trim(preg_replace('/\s+/', ' ', $cleanLettersOnly));
+        $words = explode(' ', $cleanLettersOnly);
+        $wordCount = count($words);
+
+        // Jika pertanyaan mengandung indikator pertanyaan substantif / kata kunci layanan,
+        // biarkan diproses oleh modul layanan / LLM agar pertanyaan utamanya terjawab.
+        $substantiveIndicators = [
+            'bagaimana', 'apa', 'apakah', 'kapan', 'kenapa', 'mengapa', 'berapa',
+            'syarat', 'persyaratan', 'berkas', 'dokumen', 'formulir', 'unduh', 'download',
+            'lacak', 'posisi', 'tahap', 'progres', 'status', 'nip', 'kendala', 'gagal', 'batal'
+        ];
+        foreach ($substantiveIndicators as $ind) {
+            if (preg_match('/\b' . preg_quote($ind, '/') . '\b/i', $cleanLettersOnly)) {
+                return null;
+            }
+        }
+
+        // Siapkan sapaan nama jika user terautentikasi
+        $sapaanUser = '';
+        if (!empty($userInfo['name'])) {
+            $nameClean = trim(explode(',', $userInfo['name'])[0]);
+            $sapaanUser = ', Bpk/Ibu ' . $nameClean;
+        }
+
+        // 1. Ucapan Terima Kasih (Gratitude)
+        // Contoh: "terima kasih", "terimakasih", "makasih", "matur suksma", "suksma", "terima kasih lili", "thank you", "thanks", "makasi"
+        $gratitudePatterns = [
+            'terima kasih', 'terimakasih', 'makasih', 'makasi', 'matur suksma', 'matursuksma',
+            'suksma', 'thank you', 'thanks', 'thx', 'tq', 'matur nuwun', 'trims'
+        ];
+        foreach ($gratitudePatterns as $pat) {
+            if (str_contains($cleanLettersOnly, $pat) && $wordCount <= 8) {
+                $isBalinese = str_contains($cleanLettersOnly, 'suksma');
+                $replyGratitude = $isBalinese
+                    ? "Matur suksma mawali{$sapaanUser}! 😊 Senang sekali LILI bisa membantu Anda. Jika di kemudian hari ada hal lain seputar layanan kepegawaian atau pemantauan usulan di BKPSDM Kabupaten Buleleng yang ingin ditanyakan, LILI selalu siap mendampingi. Semoga rahayu dan lancar selalu dalam menjalankan tugas! ✨"
+                    : "Sama-sama{$sapaanUser}! 😊 Senang sekali LILI dapat membantu Anda. Jika di kemudian hari ada pertanyaan lain seputar regulasi kepegawaian, persyaratan layanan, atau pemantauan usulan di BKPSDM Kabupaten Buleleng, jangan ragu untuk menyapa LILI kembali ya. Semoga hari Anda menyenangkan dan tugas kedinasan berjalan lancar! ✨";
+
+                return [
+                    'success' => true,
+                    'reply'   => $replyGratitude,
+                    'actions' => [
+                        [
+                            'type'   => 'prompt',
+                            'label'  => '📌 Layanan Populer BKPSDM',
+                            'prompt' => 'Apa saja layanan di BKPSDM Buleleng?'
+                        ],
+                        [
+                            'type'   => 'prompt',
+                            'label'  => '🔍 Cek Status Usulan',
+                            'prompt' => 'Saya mau cek status usulan tiket'
+                        ]
+                    ],
+                    'source'  => 'conversational_gratitude'
+                ];
+            }
+        }
+
+        // 2. Balasan "Sama-sama" (Reciprocal Pleasantry)
+        // Contoh: "sama-sama", "sama sama", "kembali", "sami-sami"
+        $reciprocalPatterns = ['sama sama', 'sama-sama', 'samasama', 'sami sami', 'kembali'];
+        if (in_array($cleanLettersOnly, $reciprocalPatterns, true) || (count($words) <= 4 && (str_contains($cleanLettersOnly, 'sama sama') || str_contains($cleanLettersOnly, 'sama-sama')))) {
+            return [
+                'success' => true,
+                'reply'   => "Terima kasih kembali{$sapaanUser}! 😊 Senang sekali bisa saling membantu. Ada informasi atau regulasi kepegawaian lain yang ingin Anda ketahui bersama LILI hari ini?",
+                'actions' => [
+                    [
+                        'type'   => 'prompt',
+                        'label'  => '🏖️ Syarat Pengajuan Cuti',
+                        'prompt' => 'Apa syarat pengajuan cuti di BKPSDM Buleleng?'
+                    ],
+                    [
+                        'type'   => 'prompt',
+                        'label'  => '📅 Periode Kenaikan Pangkat',
+                        'prompt' => 'Kapan saja periode kenaikan pangkat PNS dalam setahun?'
+                    ]
+                ],
+                'source'  => 'conversational_reciprocal'
+            ];
+        }
+
+        // 3. Konfirmasi Selesai / Tanda Paham (Closing / Acknowledgement)
+        // Contoh: "sudah cukup", "sudah jelas", "sudah paham", "cukup lili", "tidak ada lagi", "baik", "oke", "siap", "noted"
+        $closingPatterns = [
+            'sudah cukup', 'cukup', 'sudah jelas', 'sudah paham', 'sudah mengerti',
+            'tidak ada lagi', 'cukup sekian', 'cukup lili', 'tidak ada', 'sampai disini', 'selesai'
+        ];
+        foreach ($closingPatterns as $clos) {
+            if (($cleanLettersOnly === $clos || str_starts_with($cleanLettersOnly, $clos . ' ') || str_ends_with($cleanLettersOnly, ' ' . $clos)) && $wordCount <= 6) {
+                return [
+                    'success' => true,
+                    'reply'   => "Baik, senang mendengarnya{$sapaanUser}! 😊 LILI siap membantu kapan pun Anda memerlukan konsultasi atau informasi kepegawaian ASN di lingkungan Pemerintah Kabupaten Buleleng.\n\nSelamat melanjutkan aktivitas dan salam sehat selalu! 🌟",
+                    'actions' => [
+                        [
+                            'type'   => 'prompt',
+                            'label'  => '📌 Lihat Katalog Layanan',
+                            'prompt' => 'Apa saja layanan di BKPSDM Buleleng?'
+                        ]
+                    ],
+                    'source'  => 'conversational_closing'
+                ];
+            }
+        }
+
+        $ackPatterns = ['baik', 'baik lili', 'siap', 'siap lili', 'oke', 'ok', 'oke lili', 'noted', 'siap makasih', 'baik terimakasih'];
+        if (in_array($cleanLettersOnly, $ackPatterns, true) || ($wordCount <= 3 && in_array($words[0], ['baik', 'siap', 'oke', 'ok', 'noted'], true))) {
+            return [
+                'success' => true,
+                'reply'   => "Siap{$sapaanUser}! 😊 Senang bisa membantu. Jika ada hal lain seputar kepegawaian atau layanan PILKB yang ingin ditanyakan, LILI selalu siap mendampingi. Semoga hari Anda produktif dan menyenangkan! 🌟",
+                'actions' => [
+                    [
+                        'type'   => 'prompt',
+                        'label'  => '🔍 Cek Status Usulan',
+                        'prompt' => 'Saya mau cek status usulan tiket'
+                    ],
+                    [
+                        'type'   => 'prompt',
+                        'label'  => '📌 Layanan Populer',
+                        'prompt' => 'Apa saja layanan di BKPSDM Buleleng?'
+                    ]
+                ],
+                'source'  => 'conversational_acknowledgement'
+            ];
+        }
+
+        // 4. Sapaan Murni (Pure Greetings)
+        // Contoh: "halo", "hai", "selamat pagi", "om swastyastu", "assalamualaikum"
+        $greetings = [
+            'halo', 'hai', 'hello', 'hey', 'hei',
+            'selamat pagi', 'selamat siang', 'selamat sore', 'selamat malam',
+            'om swastyastu', 'om swastiastu', 'assalamualaikum', 'salam sejahtera'
+        ];
+        foreach ($greetings as $greet) {
+            if (($cleanLettersOnly === $greet || str_starts_with($cleanLettersOnly, $greet . ' ')) && $wordCount <= 4) {
+                $isBaliGreeting = str_contains($cleanLettersOnly, 'swastyastu') || str_contains($cleanLettersOnly, 'swastiastu');
+                $greetOpening = $isBaliGreeting
+                    ? "Om Swastyastu{$sapaanUser}! 🙏😊"
+                    : "Halo, selamat datang di LILI (Layanan Informasi & Literasi Kepegawaian Interaktif) BKPSDM Kabupaten Buleleng{$sapaanUser}! 😊";
+
+                return [
+                    'success' => true,
+                    'reply'   => "{$greetOpening}\n\nAda yang bisa LILI bantu terkait kepegawaian hari ini? Anda dapat bertanya seputar regulasi ASN, pengajuan cuti, periode kenaikan pangkat, batas usia pensiun, izin belajar, maupun memantau status usulan tiket di sistem PILKB.",
+                    'actions' => [
+                        [
+                            'type'   => 'prompt',
+                            'label'  => '🏖️ Syarat Cuti ASN',
+                            'prompt' => 'Apa syarat pengajuan cuti di BKPSDM Buleleng?'
+                        ],
+                        [
+                            'type'   => 'prompt',
+                            'label'  => '📅 6 Periode Kenaikan Pangkat',
+                            'prompt' => 'Kapan saja periode kenaikan pangkat PNS dalam setahun?'
+                        ],
+                        [
+                            'type'   => 'prompt',
+                            'label'  => '🔍 Cek Usulan Tiket',
+                            'prompt' => 'Saya mau cek status usulan tiket'
+                        ]
+                    ],
+                    'source'  => 'conversational_greeting'
+                ];
+            }
+        }
+
+        return null;
     }
 
     /**

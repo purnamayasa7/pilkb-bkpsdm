@@ -104,10 +104,10 @@ Route::middleware(['auth', 'force.password'])->group(function () {
     Route::post('/notifications/delete-all', [NotificationController::class, 'deleteAll'])->name('notifications.deleteAll');
     Route::delete('/notifications/{id}', [NotificationController::class, 'destroy'])->name('notifications.destroy');
 
-    // Log Aktivitas
-    Route::get('/log-aktivitas', [LogController::class, 'index'])->middleware('role:root,admin_bawah,admin_opd,bidang')->name('log.index');
-    Route::get('/log-aktivitas/get-data', [LogController::class, 'getData'])->middleware('role:root,admin_bawah,admin_opd,bidang')->name('log.getData');
-    Route::get('/log-aktivitas/export-excel', [LogController::class, 'exportExcel'])->middleware('role:root,admin_bawah,admin_opd,bidang')->name('log.exportExcel');
+    // Log Aktivitas (Hanya Root)
+    Route::get('/log-aktivitas', [LogController::class, 'index'])->middleware('role:root')->name('log.index');
+    Route::get('/log-aktivitas/get-data', [LogController::class, 'getData'])->middleware('role:root')->name('log.getData');
+    Route::get('/log-aktivitas/export-excel', [LogController::class, 'exportExcel'])->middleware('role:root')->name('log.exportExcel');
 
     // Cetak QR & Riwayat Tiket
     Route::get('/tiket/{no_tiket}/qr', [TiketController::class, 'showQr'])->name('tiket.qr');
@@ -119,6 +119,7 @@ Route::middleware(['auth', 'force.password'])->group(function () {
     Route::get('/chat/{conversation}', [ChatController::class, 'show'])->whereNumber('conversation')->name('chat.show');
     Route::post('/chat/search-ticket', [ChatController::class, 'searchTicket'])->name('chat.search-ticket');
     Route::post('/chat/start-ticket', [ChatController::class, 'startTicketConversation'])->name('chat.start-ticket');
+    Route::post('/chat/start-and-send', [ChatController::class, 'startAndSendMessage'])->name('chat.start-and-send');
     Route::post('/chat/start-global', [ChatController::class, 'startGlobalChat'])->name('chat.start-global');
     Route::get('/chat/{conversation}/messages', [ChatController::class, 'loadMessages'])->whereNumber('conversation')->name('chat.messages');
     Route::post('/chat/{conversation}/message', [ChatController::class, 'sendMessage'])->whereNumber('conversation')->name('chat.message.send');

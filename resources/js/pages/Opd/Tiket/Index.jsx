@@ -285,7 +285,7 @@ export default function Index({ auth, tiket = [], month = new Date().getMonth() 
                         }`}
                     >
                         <div className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">
-                            Total Periode Ini
+                            Total Bulan Ini
                         </div>
                         <div className="mt-1 flex items-baseline justify-between">
                             <span className="text-2xl font-extrabold text-slate-900 dark:text-white">
