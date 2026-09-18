@@ -213,7 +213,7 @@ export default function PengumumanIndex({
                         </div>
                         <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 pl-11">
                             {currentRoleId === 4
-                                ? `Kelola banner pengumuman & informasi khusus untuk ${userBidangNama ? `Bidang ${userBidangNama}` : 'bidang Anda'}.`
+                                ? `Kelola banner pengumuman & informasi untuk halaman dashboard.`
                                 : 'Kelola informasi darurat, batas waktu usulan, maupun pemeliharaan sistem di dashboard seluruh bidang.'}
                         </p>
                     </div>
