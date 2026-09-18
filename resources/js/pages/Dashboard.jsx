@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Head, router } from '@inertiajs/react';
 import AuthenticatedLayout from '../layouts/AuthenticatedLayout';
+import AnnouncementSlider from '@/components/AnnouncementSlider';
 import {
     Calendar,
     ArrowRight,
@@ -222,7 +223,7 @@ export default function Dashboard({
                 {/* PAGE HEADER: Title, Live Date/Clock & Month Filter */}
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                     <div>
-                        <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">
+                        <h1 className="text-[20px] sm:text-[26px] font-extrabold text-slate-900 dark:text-white tracking-tight">
                             Dashboard
                         </h1>
                         <div className="flex items-center gap-2 text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1 font-medium">
@@ -239,7 +240,7 @@ export default function Dashboard({
                     {/* Month Picker Filter */}
                     <div className="flex items-center self-start sm:self-auto">
                         <div className="relative inline-flex items-center">
-                            <Calendar className="absolute left-3 w-4 h-4 text-slate-400 pointer-events-none" />
+                            <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none z-10" />
                             <input
                                 type="month"
                                 value={selectedDate || ''}
@@ -250,6 +251,9 @@ export default function Dashboard({
                         </div>
                     </div>
                 </div>
+
+                {/* BROADCAST ANNOUNCEMENT SLIDER */}
+                <AnnouncementSlider />
 
                 {/* HERO WELCOME CARD & USER INFO (Modern Wave Background) */}
                 <div className="relative rounded-3xl bg-gradient-to-br from-blue-50/70 via-white to-slate-50/60 dark:from-slate-900 dark:via-slate-900 dark:to-blue-950/20 border border-slate-200 dark:border-slate-800 p-5 sm:p-7 shadow-xs overflow-hidden">

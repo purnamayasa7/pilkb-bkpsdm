@@ -119,6 +119,57 @@ select {
 .relative > svg.left-3 + select,
 .relative > svg.left-3\.5 + select,
 select.pl-9,
-select.pl-10 {
+select.pl-10,
+.relative > svg.absolute.left-3 + input[type="month"],
+.relative > svg.absolute.left-3\.5 + input[type="month"],
+.relative > svg.left-3 + input[type="month"],
+.relative > svg.left-3\.5 + input[type="month"],
+input[type="month"].pl-9,
+input[type="month"].pl-10 {
     padding-left: 2.5rem !important; /* 40px memastikan teks rapi dan proporsional setelah icon */
+}
+
+/* Penyesuaian webkit month indicator agar proporsional dan tidak merusak layout mobile */
+input[type="month"]::-webkit-calendar-picker-indicator {
+    cursor: pointer;
+    opacity: 0.65;
+    padding: 2px;
+    border-radius: 4px;
+    margin-left: 4px;
+    transition: opacity 0.2s;
+}
+
+input[type="month"]::-webkit-calendar-picker-indicator:hover {
+    opacity: 1;
+}
+
+/* Animasi Slide Horizontal Halus & Santai untuk Announcement Slider (Standard.md) */
+@keyframes announcementSlideRight {
+    0% {
+        opacity: 0;
+        transform: translateX(50px);
+    }
+    100% {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes announcementSlideLeft {
+    0% {
+        opacity: 0;
+        transform: translateX(-50px);
+    }
+    100% {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+.animate-slide-right {
+    animation: announcementSlideRight 1s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.animate-slide-left {
+    animation: announcementSlideLeft 1s cubic-bezier(0.16, 1, 0.3, 1) both;
 }

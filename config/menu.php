@@ -110,6 +110,14 @@ return [
 
         [
             'type' => 'item',
+            'title' => 'Papan Informasi',
+            'path' => 'pengumuman',
+            'icon' => 'megaphone',
+            'active_key' => 'pengumuman',
+        ],
+
+        [
+            'type' => 'item',
             'title' => 'Laporan',
             'path' => 'root/laporan',
             'icon' => 'bar-chart-2',
@@ -436,6 +444,14 @@ return [
             'icon'       => 'file-text',
             'active_key' => 'cetak-syarat',
         ],
+
+        [
+            'type'       => 'item',
+            'title'      => 'Papan Informasi',
+            'path'       => 'pengumuman',
+            'icon'       => 'megaphone',
+            'active_key' => 'pengumuman',
+        ],
     ],
 
     // Role ID = 5 -> Pimpinan (Kepala Badan & Sekretaris BKPSDM)
@@ -496,6 +512,14 @@ return [
             'path'       => 'chat',
             'icon'       => 'message-square',
             'active_key' => 'chat-center',
+        ],
+
+        [
+            'type'       => 'item',
+            'title'      => 'Papan Informasi',
+            'path'       => 'pengumuman',
+            'icon'       => 'megaphone',
+            'active_key' => 'pengumuman',
         ],
     ],
 ];

@@ -28,6 +28,7 @@ import {
     Search,
     AlertCircle,
     Star,
+    Megaphone,
 } from 'lucide-react';
 
 const iconMap = {
@@ -59,6 +60,7 @@ const iconMap = {
     search: Search,
     'alert-circle': AlertCircle,
     star: Star,
+    megaphone: Megaphone,
 };
 
 export default function MenuIcon({ name, className = 'w-5 h-5' }) {

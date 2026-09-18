@@ -13,6 +13,7 @@ use App\Http\Controllers\LayananReviewController;
 use App\Http\Controllers\LogController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\PengambilanController;
+use App\Http\Controllers\PengumumanController;
 use App\Http\Controllers\PerbaikanController;
 use App\Http\Controllers\PermintaanController;
 use App\Http\Controllers\PimpinanController;
@@ -434,6 +435,15 @@ Route::prefix('pimpinan')
         Route::get('laporan', [PimpinanController::class, 'laporan'])->name('laporan');
         Route::get('laporan/export-pdf', [PimpinanController::class, 'exportPdfLaporan'])->name('laporan.exportPdf');
     });
+
+/* Broadcast Pengumuman / Maintenance Banner (Root, Bidang, Pimpinan) */
+Route::middleware(['auth', 'force.password', 'role:root,bidang,pimpinan'])->group(function () {
+    Route::get('/pengumuman', [PengumumanController::class, 'index'])->name('pengumuman.index');
+    Route::post('/pengumuman', [PengumumanController::class, 'store'])->name('pengumuman.store');
+    Route::put('/pengumuman/{id}', [PengumumanController::class, 'update'])->name('pengumuman.update');
+    Route::put('/pengumuman/{id}/toggle-aktif', [PengumumanController::class, 'toggleAktif'])->name('pengumuman.toggle-aktif');
+    Route::delete('/pengumuman/{id}', [PengumumanController::class, 'destroy'])->name('pengumuman.destroy');
+});
 
 /* Auth (Breeze) */
 require __DIR__ . '/auth.php';

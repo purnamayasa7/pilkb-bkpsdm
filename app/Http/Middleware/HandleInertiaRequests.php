@@ -61,6 +61,36 @@ class HandleInertiaRequests extends Middleware
                 'warning' => fn () => $request->session()->get('warning'),
                 'info' => fn () => $request->session()->get('info'),
             ],
+            'broadcast_announcements' => function () use ($user) {
+                if (!$user) {
+                    return [];
+                }
+                try {
+                    \App\Models\Pengumuman::autoNonaktifkanExpired();
+
+                    return \App\Models\Pengumuman::with(['bidang:id,nama_bidang', 'author:id,nama,username'])
+                        ->sedangTayang()
+                        ->get()
+                        ->map(function ($item) {
+                            return [
+                                'id'           => $item->id,
+                                'judul'        => $item->judul,
+                                'pesan'        => $item->pesan,
+                                'tipe'         => $item->tipe,
+                                'mulai_pada'   => $item->mulai_pada ? $item->mulai_pada->format('Y-m-d H:i') : null,
+                                'selesai_pada' => $item->selesai_pada ? $item->selesai_pada->format('Y-m-d H:i') : null,
+                                'tautan'       => $item->tautan,
+                                'label_tautan' => $item->label_tautan,
+                                'bidang_nama'  => $item->bidang?->nama_bidang,
+                                'author_nama'  => $item->author?->nama ?? $item->author?->username,
+                                'created_at'   => $item->created_at ? $item->created_at->toISOString() : null,
+                            ];
+                        })
+                        ->toArray();
+                } catch (\Throwable $e) {
+                    return [];
+                }
+            },
             'notifications' => function () use ($user) {
                 if (!$user) {
                     return [

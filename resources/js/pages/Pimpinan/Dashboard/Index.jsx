@@ -1,6 +1,7 @@
 import React, { useRef, useEffect } from 'react';
 import { Head, Link, router } from '@inertiajs/react';
 import AuthenticatedLayout from '@/layouts/AuthenticatedLayout';
+import AnnouncementSlider from '@/components/AnnouncementSlider';
 import Chart from 'chart.js/auto';
 import {
     BarChart2,
@@ -238,6 +239,9 @@ export default function PimpinanDashboard({
                         </Link> */}
                     </div>
                 </div>
+
+                {/* BROADCAST BANNER SLIDER */}
+                <AnnouncementSlider />
 
                 {/* 2. Kartu Ringkasan Statistik (Standard.md Bab 4.2 & Bab 5) */}
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
