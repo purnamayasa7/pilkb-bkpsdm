@@ -348,7 +348,7 @@
     "isEntry": true
   },
   "resources/js/app.jsx": {
-    "file": "assets/app-BlIiAhQI.js",
+    "file": "assets/app-B7pSIHSP.js",
     "name": "app",
     "src": "resources/js/app.jsx",
     "isEntry": true,
@@ -851,7 +851,7 @@
     ]
   },
   "resources/js/pages/Chat/Index.jsx": {
-    "file": "assets/Index-DX5Irbnb.js",
+    "file": "assets/Index-52VUEAZa.js",
     "name": "Index",
     "src": "resources/js/pages/Chat/Index.jsx",
     "isDynamicEntry": true,
@@ -1055,7 +1055,7 @@
     ]
   },
   "resources/js/pages/Pengumuman/Index.jsx": {
-    "file": "assets/Index-Drh5XC9n.js",
+    "file": "assets/Index-DRXC9Es7.js",
     "name": "Index",
     "src": "resources/js/pages/Pengumuman/Index.jsx",
     "isDynamicEntry": true,
