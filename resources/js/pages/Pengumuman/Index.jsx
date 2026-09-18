@@ -194,7 +194,7 @@ export default function PengumumanIndex({
                             <h1 className="text-lg sm:text-xl font-bold tracking-tight text-slate-900 dark:text-white">
                                 Manajemen Informasi
                             </h1>
-                            {currentRoleId === 4 && (
+                            {/* {currentRoleId === 4 && (
                                 <span className="px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-blue-50 dark:bg-blue-950/70 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-900/60 flex items-center gap-1">
                                     <Building2 className="w-3 h-3" />
                                     {userBidangNama ? `Bidang ${userBidangNama}` : 'Admin Bidang'}
@@ -209,7 +209,7 @@ export default function PengumumanIndex({
                                 <span className="px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-indigo-50 dark:bg-indigo-950/70 text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-900/60">
                                     Akses Pimpinan (Semua Bidang)
                                 </span>
-                            )}
+                            )} */}
                         </div>
                         <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 pl-11">
                             {currentRoleId === 4
