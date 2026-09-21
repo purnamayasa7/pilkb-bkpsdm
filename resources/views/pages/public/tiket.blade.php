@@ -335,7 +335,7 @@
                                 <td class="info-val">{{ $tiket->layanan->nama_layanan ?? '-' }}</td>
                             </tr>
                             <tr>
-                                <td class="info-label">Bidang Pengampu</td>
+                                <td class="info-label">Bidang</td>
                                 <td class="info-sep">:</td>
                                 <td class="info-val">{{ $tiket->layanan->bidang->nama_bidang ?? '-' }}</td>
                             </tr>

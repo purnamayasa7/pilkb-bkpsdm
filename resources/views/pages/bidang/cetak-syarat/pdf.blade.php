@@ -40,7 +40,7 @@
         <div class="card-header-title">Informasi Layanan Kepegawaian</div>
         <table class="data-table">
             <tr>
-                <td class="data-label">Bidang Pengampu</td>
+                <td class="data-label">Bidang</td>
                 <td class="data-sep">:</td>
                 <td class="data-val">{{ $bidang->nama_bidang ?? '-' }}</td>
             </tr>

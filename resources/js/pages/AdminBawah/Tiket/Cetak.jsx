@@ -118,7 +118,7 @@ export default function Cetak({ data = [], keyword = '' }) {
 
     return (
         <AuthenticatedLayout user={auth?.user}>
-            <Head title="PILKB - Cetak Ulang Tiket" />
+            <Head title="Cetak Ulang Tiket - PILKB" />
 
             {/* Container Baku Standard.md (space-y-6 lebar penuh tanpa batasan max-w) */}
             <div className="space-y-6">

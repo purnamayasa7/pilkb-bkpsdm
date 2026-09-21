@@ -235,7 +235,7 @@ export default function Dashboard({
 
     return (
         <AuthenticatedLayout title="Dashboard">
-            <Head title="PILKB - Dashboard" />
+            <Head title="Dashboard - PILKB" />
 
             <div className="space-y-6 max-w-7xl mx-auto">
                 {/* PAGE HEADER: Title, Live Date/Clock & Month Filter */}

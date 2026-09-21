@@ -98,7 +98,7 @@ export default function RootLayananEdit({ layanan, bidang = [] }) {
 
     return (
         <AuthenticatedLayout>
-            <Head title={`Edit Layanan - ${layanan?.nama_layanan || ''}`} />
+            <Head title={`Edit Layanan - ${layanan?.nama_layanan || ''} - PILKB`} />
 
             <div className="space-y-6">
                 {/* 1. Page Header */}
@@ -175,7 +175,7 @@ export default function RootLayananEdit({ layanan, bidang = [] }) {
                                     }`}
                                 >
                                     <option value="" disabled>
-                                        -- Pilih Bidang Pengampu --
+                                        -- Pilih Bidang --
                                     </option>
                                     {bidang.map((b) => (
                                         <option key={b.id} value={b.id}>

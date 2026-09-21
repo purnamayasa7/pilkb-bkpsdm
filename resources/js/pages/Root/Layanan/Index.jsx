@@ -165,7 +165,7 @@ export default function RootLayananIndex({ layanan = [], bidang = [], bidangId =
 
     return (
         <AuthenticatedLayout>
-            <Head title="Master Data Layanan" />
+            <Head title="Master Data Layanan - PILKB" />
 
             <div className="space-y-6">
                 {/* 1. Page Header */}
@@ -411,7 +411,7 @@ export default function RootLayananIndex({ layanan = [], bidang = [], bidangId =
                                 <thead>
                                     <tr className="border-b border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-950/50 text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
                                         <th className="py-3 px-4 text-center w-14">No</th>
-                                        <th className="py-3 px-4 w-52">Bidang Pengampu</th>
+                                        <th className="py-3 px-4 w-52">Bidang</th>
                                         <th className="py-3 px-4">Nama Layanan</th>
                                         <th className="py-3 px-4 w-44">Waktu Penyelesaian</th>
                                         <th className="py-3 px-4 text-center w-24">Deskripsi</th>
@@ -583,7 +583,7 @@ export default function RootLayananIndex({ layanan = [], bidang = [], bidangId =
                         <div className="p-6 space-y-4 max-h-[60vh] overflow-y-auto">
                             <div className="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700/60 flex items-center justify-between text-xs">
                                 <div>
-                                    <span className="text-slate-400 block text-[11px]">Bidang Pengampu:</span>
+                                    <span className="text-slate-400 block text-[11px]">Bidang:</span>
                                     <span className="font-semibold text-slate-800 dark:text-slate-200">
                                         {deskripsiModal.item.bidang?.nama_bidang || '-'}
                                     </span>

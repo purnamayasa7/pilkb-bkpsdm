@@ -71,7 +71,7 @@ export default function RootFaqEdit({ faq = {} }) {
 
     return (
         <AuthenticatedLayout>
-            <Head title={`Edit FAQ #${faq.id} - Root`} />
+            <Head title={`Edit FAQ #${faq.id} - PILKB`} />
 
             <div className="space-y-6">
                 {/* 1. Page Header */}

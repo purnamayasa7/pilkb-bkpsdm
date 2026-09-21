@@ -115,7 +115,7 @@ export default function Index({ data = [], keyword = '' }) {
 
     return (
         <AuthenticatedLayout>
-            <Head title="PILKB - Pindah Data Tiket" />
+            <Head title="Pindah Layanan Tiket - PILKB" />
 
             <div className="space-y-6">
                 {/* 1. PAGE HEADER (Bagian 4 Poin 1 Standard.md) */}

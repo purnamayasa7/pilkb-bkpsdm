@@ -144,7 +144,7 @@ export default function Index({
 
     return (
         <AuthenticatedLayout user={auth?.user}>
-            <Head title="Cetak Syarat Layanan - Admin BKPSDM" />
+            <Head title="Cetak Syarat Layanan - PILKB" />
 
             <div className="space-y-6">
                 {/* 1. PAGE HEADER (Bagian 4 Poin 1 Standard.md) */}

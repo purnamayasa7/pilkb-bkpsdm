@@ -56,7 +56,7 @@ export default function RootStatusCreate({
 
         const newErrors = {};
         if (!selectedBidang) {
-            newErrors.bidang = 'Pilih bidang pengampu terlebih dahulu.';
+            newErrors.bidang = 'Pilih bidang terlebih dahulu.';
         }
         if (!kodeLayanan) {
             newErrors.kode_layanan = 'Pilih layanan terkait tahapan status ini.';
@@ -113,7 +113,7 @@ export default function RootStatusCreate({
 
     return (
         <AuthenticatedLayout>
-            <Head title="Tambah Status Layanan - Root - PILKB" />
+            <Head title="Tambah Status Layanan - PILKB" />
 
             {/* Kontainer Standar Lebar Penuh (Bagian 3.2 Standard.md) */}
             <div className="space-y-6">
@@ -169,7 +169,7 @@ export default function RootStatusCreate({
                             {/* Bidang Selector */}
                             <div>
                                 <label className="block text-xs font-semibold text-slate-700 dark:text-slate-200 mb-2">
-                                    Bidang Pengampu <span className="text-rose-500">*</span>
+                                    Bidang <span className="text-rose-500">*</span>
                                 </label>
                                 <div className="relative">
                                     <Building2 className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
@@ -179,7 +179,7 @@ export default function RootStatusCreate({
                                         required
                                         className="w-full pl-10 pr-9 py-2.5 text-xs font-semibold text-slate-800 dark:text-slate-100 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-600 transition-all appearance-none cursor-pointer"
                                     >
-                                        <option value="">-- Pilih Bidang Pengampu --</option>
+                                        <option value="">-- Pilih Bidang --</option>
                                         {bidang.map((b) => (
                                             <option key={b.id} value={String(b.id)}>
                                                 {b.nama_bidang}

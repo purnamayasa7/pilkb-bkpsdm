@@ -193,7 +193,7 @@ export default function PimpinanDashboard({
 
     return (
         <AuthenticatedLayout>
-            <Head title="PILKB - Dashboard" />
+            <Head title="Dashboard - PILKB" />
 
             <div className="space-y-6">
                 {/* 1. Page Header (Standard.md Bab 4.1) */}

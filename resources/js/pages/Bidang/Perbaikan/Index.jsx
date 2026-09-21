@@ -178,7 +178,7 @@ export default function Index({
 
     return (
         <AuthenticatedLayout user={auth?.user}>
-            <Head title={`List Perbaikan Usulan - ${namaBidang} - PILKB`} />
+            <Head title={`Daftar Perbaikan Usulan - ${namaBidang} - PILKB`} />
 
             <div className="space-y-6">
                 {/* 1. PAGE HEADER */}

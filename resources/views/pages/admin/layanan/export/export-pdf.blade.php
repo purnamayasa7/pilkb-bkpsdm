@@ -55,7 +55,7 @@
         <thead>
             <tr>
                 <th style="width: 4%;">No</th>
-                <th style="width: 24%;">Bidang Pengampu</th>
+                <th style="width: 24%;">Bidang</th>
                 <th style="width: 26%;">Nama Layanan</th>
                 <th style="width: 14%;">Waktu Penyelesaian</th>
                 <th style="width: 10%;">Status</th>

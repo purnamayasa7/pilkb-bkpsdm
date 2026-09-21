@@ -76,7 +76,7 @@ export default function RootBidangEdit({ bidang }) {
 
     return (
         <AuthenticatedLayout>
-            <Head title={`Edit Bidang - ${bidang?.nama_bidang || ''}`} />
+            <Head title={`Edit Bidang - ${bidang?.nama_bidang || ''} - PILKB`} />
 
             <div className="space-y-6">
                 {/* 1. Page Header */}

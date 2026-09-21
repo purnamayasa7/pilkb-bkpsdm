@@ -10,9 +10,13 @@ const appName = import.meta.env.VITE_APP_NAME || 'PILKB';
 createInertiaApp({
     title: (title) => {
         if (!title) return 'PILKB';
-        let clean = title.replace(/\bLaravel\b/gi, '').replace(/\s*-\s*$/, '').replace(/^\s*-\s*/, '').trim();
-        if (!clean) return 'PILKB';
-        return clean.includes('PILKB') ? clean : `${clean} - PILKB`;
+        let clean = String(title).trim();
+        clean = clean.replace(/\bLaravel\b/gi, '').trim();
+        clean = clean.replace(/^PILKB\s*[-–|:]\s*/i, '').trim();
+        clean = clean.replace(/\s*[-–|:]\s*PILKB$/i, '').trim();
+        clean = clean.replace(/^[-–|:]\s*|\s*[-–|:]$/g, '').trim();
+        if (!clean || clean.toUpperCase() === 'PILKB') return 'PILKB';
+        return `${clean} - PILKB`;
     },
     resolve: (name) =>
         resolvePageComponent(

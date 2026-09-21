@@ -146,7 +146,7 @@ export default function Index({
 
     return (
         <AuthenticatedLayout user={auth?.user}>
-            <Head title="PILKB - List Perbaikan Usulan" />
+            <Head title="Daftar Perbaikan Usulan - PILKB" />
 
             {/* Container Full Width Sesuai Standard.md Bagian 3 Poin 2 */}
             <div className="space-y-6">

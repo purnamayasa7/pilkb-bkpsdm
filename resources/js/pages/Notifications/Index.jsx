@@ -105,7 +105,7 @@ export default function NotificationsIndex({
 
     return (
         <AuthenticatedLayout>
-            <Head title="Notifikasi" />
+            <Head title="Notifikasi - PILKB" />
 
             <div className="space-y-6">
                 {/* 1. Page Header */}

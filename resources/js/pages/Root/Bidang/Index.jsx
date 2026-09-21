@@ -124,7 +124,7 @@ export default function RootBidangIndex({ bidang = [] }) {
 
     return (
         <AuthenticatedLayout>
-            <Head title="Master Data Bidang" />
+            <Head title="Master Data Bidang - PILKB" />
 
             <div className="space-y-6">
                 {/* 1. Page Header */}

@@ -249,7 +249,7 @@ export default function RootTiketIndex({
 
     return (
         <AuthenticatedLayout>
-            <Head title="List Permintaan Layanan - Administrator" />
+            <Head title="Daftar Permintaan Layanan - PILKB" />
 
             <div className="space-y-6">
                 {/* 1. PAGE HEADER (Bagian 4.1 Standard.md & Acuan Resmi Bidang/Layanan/Index.jsx & Opd/Tiket/Index.jsx) */}

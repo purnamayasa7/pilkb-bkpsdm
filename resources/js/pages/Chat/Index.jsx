@@ -1473,7 +1473,7 @@ export default function ChatIndex({
 
     return (
         <AuthenticatedLayout fullHeight={true} noPadding={true}>
-            <Head title="PILKB - Pusat Komunikasi & Bantuan" />
+            <Head title="Pusat Komunikasi & Bantuan - PILKB" />
 
             {/* FULL-VIEWPORT WRAPPER (NO PAGE SCROLL, EXACTLY LIKE WHATSAPP WINDOWS) */}
             <div className="flex-1 min-h-0 flex flex-col p-0 md:p-3 lg:p-4 bg-slate-50/80 dark:bg-slate-950 overflow-hidden h-full">

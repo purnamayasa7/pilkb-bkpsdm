@@ -610,7 +610,7 @@ export default function SyaratBidangIndex({
                         <div className="space-y-3.5 text-xs">
                             <div className="bg-slate-50 dark:bg-slate-800/50 p-4 rounded-2xl border border-slate-100 dark:border-slate-800 space-y-2.5">
                                 <div className="flex items-center justify-between">
-                                    <span className="text-slate-400">Bidang Pengampu:</span>
+                                    <span className="text-slate-400">Bidang:</span>
                                     <span className="font-semibold text-slate-800 dark:text-slate-200">
                                         {detailModal.item.layanan?.bidang?.nama_bidang || bidang?.nama_bidang || '-'}
                                     </span>

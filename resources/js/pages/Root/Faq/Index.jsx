@@ -80,7 +80,7 @@ export default function RootFaqIndex({ faqs = [] }) {
 
     return (
         <AuthenticatedLayout>
-            <Head title="Manajemen FAQ - Root" />
+            <Head title="Manajemen FAQ - PILKB" />
 
             <div className="space-y-6">
                 {/* 1. Header Halaman (Bagian 4 Poin 1 Standard.md) */}

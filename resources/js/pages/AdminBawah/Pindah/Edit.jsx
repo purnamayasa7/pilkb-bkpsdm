@@ -183,7 +183,7 @@ export default function Edit({
 
     return (
         <AuthenticatedLayout>
-            <Head title={`Pindah Layanan - ${tiket.no_tiket || 'Tiket'}`} />
+            <Head title={`Pindah Layanan #${tiket.no_tiket || ''} - PILKB`} />
 
             <div className="space-y-6">
                 {/* 1. PAGE HEADER */}
@@ -261,7 +261,7 @@ export default function Edit({
 
                             {/* Bidang Pengampu */}
                             <div>
-                                <span className="text-slate-400 block">Bidang Pengampu Saat Ini:</span>
+                                <span className="text-slate-400 block">Bidang Saat Ini:</span>
                                 <p className="font-semibold text-slate-800 dark:text-slate-200 mt-0.5">
                                     {tiket.layanan?.bidang?.nama_bidang || '-'}
                                 </p>

@@ -113,7 +113,7 @@ export default function LaporanIndex({
 
     return (
         <AuthenticatedLayout>
-            <Head title="PILKB - Laporan" />
+            <Head title="Laporan Layanan - PILKB" />
 
             <div className="space-y-6">
                 {/* 1. Header (Standard.md Bab 4.1) */}

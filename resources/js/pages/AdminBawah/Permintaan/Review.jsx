@@ -191,7 +191,7 @@ export default function Review({
 
     return (
         <AuthenticatedLayout user={auth?.user}>
-            <Head title={`Review Usulan - ${tiket.no_tiket || ''} - Front Office - PILKB`} />
+            <Head title={`Review Usulan #${tiket.no_tiket || ''} - PILKB`} />
 
             {/* Container Full Width Sesuai Standard.md Bagian 3 Poin 2 */}
             <div className="space-y-6">
@@ -262,7 +262,7 @@ export default function Review({
                                 </div>
 
                                 <div>
-                                    <span className="text-slate-400 font-medium">Bidang Pengampu:</span>
+                                    <span className="text-slate-400 font-medium">Bidang:</span>
                                     <p className="font-semibold text-slate-800 dark:text-slate-200 mt-0.5">
                                         {tiket.layanan?.bidang?.nama_bidang || '-'}
                                     </p>

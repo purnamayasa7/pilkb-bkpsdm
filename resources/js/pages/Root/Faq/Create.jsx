@@ -71,7 +71,7 @@ export default function RootFaqCreate() {
 
     return (
         <AuthenticatedLayout>
-            <Head title="Tambah FAQ Baru - Root" />
+            <Head title="Tambah FAQ Baru - PILKB" />
 
             <div className="space-y-6">
                 {/* 1. Page Header */}

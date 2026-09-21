@@ -146,7 +146,7 @@ export default function RootStatusIndex({
 
     return (
         <AuthenticatedLayout>
-            <Head title="Master Status Layanan - Root - PILKB" />
+            <Head title="Master Status Layanan - PILKB" />
 
             <div className="space-y-6">
                 {/* 1. PAGE HEADER (Bagian 4.1 Standard.md) */}
@@ -209,7 +209,7 @@ export default function RootStatusIndex({
                     <div className="rounded-2xl p-4 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs">
                         <div className="flex items-center justify-between">
                             <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">
-                                Bidang Pengampu
+                                Bidang
                             </span>
                             <span className="p-1.5 rounded-lg bg-emerald-50 dark:bg-emerald-950/50 text-emerald-600 dark:text-emerald-400 border border-emerald-200/60 dark:border-emerald-900/40">
                                 <Building2 className="w-4 h-4" />
@@ -518,7 +518,7 @@ export default function RootStatusIndex({
 
                                 <div className="pt-2 border-t border-slate-200/60 dark:border-slate-700/50">
                                     <span className="text-[11px] font-medium text-slate-400 block">
-                                        Bidang Pengampu
+                                        Bidang
                                     </span>
                                     <p className="font-semibold text-slate-700 dark:text-slate-300 mt-0.5">
                                         {selectedDetail.layanan?.bidang?.nama_bidang || '-'}

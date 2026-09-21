@@ -67,7 +67,7 @@ export default function RootBidangCreate() {
 
     return (
         <AuthenticatedLayout>
-            <Head title="Tambah Bidang Baru" />
+            <Head title="Tambah Bidang Baru - PILKB" />
 
             <div className="space-y-6">
                 {/* 1. Page Header */}

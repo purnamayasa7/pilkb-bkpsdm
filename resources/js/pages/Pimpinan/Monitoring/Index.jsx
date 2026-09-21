@@ -137,7 +137,7 @@ export default function MonitoringIndex({
 
     return (
         <AuthenticatedLayout>
-            <Head title="PILKB - Monitoring Layanan" />
+            <Head title="Monitoring Layanan - PILKB" />
 
             <div className="space-y-6">
                 {/* 1. Header (Standard.md Bab 4.1) */}

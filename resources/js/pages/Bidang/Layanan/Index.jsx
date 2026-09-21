@@ -257,7 +257,7 @@ export default function LayananBidangIndex({ layanan = [], bidang = null }) {
                     {/* Bidang Info */}
                     <div className="rounded-2xl p-4 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
                         <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider block">
-                            Bidang Pengampu
+                            Bidang
                         </span>
                         <div className="flex items-center justify-between mt-2">
                             <span className="text-xs font-bold text-slate-800 dark:text-slate-200 truncate max-w-[140px]" title={namaBidang}>
@@ -420,12 +420,12 @@ export default function LayananBidangIndex({ layanan = [], bidang = null }) {
                                                     <td className="py-3.5 px-4 text-center">
                                                         {isAktif ? (
                                                             <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 border border-emerald-200/80 dark:border-emerald-900/60">
-                                                                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                                                                {/* <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" /> */}
                                                                 Aktif
                                                             </span>
                                                         ) : (
                                                             <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-rose-50 dark:bg-rose-950/60 text-rose-600 dark:text-rose-400 border border-rose-200/80 dark:border-rose-900/60">
-                                                                <span className="w-1.5 h-1.5 rounded-full bg-rose-500" />
+                                                                {/* <span className="w-1.5 h-1.5 rounded-full bg-rose-500" /> */}
                                                                 Tidak Aktif
                                                             </span>
                                                         )}

@@ -92,7 +92,7 @@ export default function RootLayananCreate({ bidang = [] }) {
 
     return (
         <AuthenticatedLayout>
-            <Head title="Tambah Layanan Baru" />
+            <Head title="Tambah Layanan Baru - PILKB" />
 
             <div className="space-y-6">
                 {/* 1. Page Header */}
@@ -150,7 +150,7 @@ export default function RootLayananCreate({ bidang = [] }) {
                         <div className="space-y-1.5">
                             <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 flex items-center justify-between">
                                 <span>
-                                    Bidang Pengampu <span className="text-rose-500">*</span>
+                                    Bidang <span className="text-rose-500">*</span>
                                 </span>
                             </label>
                             <div className="relative">
@@ -170,7 +170,7 @@ export default function RootLayananCreate({ bidang = [] }) {
                                     }`}
                                 >
                                     <option value="" disabled>
-                                        -- Pilih Bidang Pengampu --
+                                        -- Pilih Bidang --
                                     </option>
                                     {bidang.map((b) => (
                                         <option key={b.id} value={b.id}>

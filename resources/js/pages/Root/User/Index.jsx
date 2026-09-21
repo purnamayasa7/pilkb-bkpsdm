@@ -207,7 +207,7 @@ export default function RootUserIndex({ users = [] }) {
 
     return (
         <AuthenticatedLayout>
-            <Head title="Manajemen Data Pengguna - Root" />
+            <Head title="Manajemen Data Pengguna - PILKB" />
 
             <div className="space-y-6">
                 {/* 1. Header Halaman */}

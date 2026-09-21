@@ -39,7 +39,7 @@
     <div class="card-info">
         <table class="data-table">
             <tr>
-                <td class="data-label">Bidang Pengampu</td>
+                <td class="data-label">Bidang</td>
                 <td class="data-sep">:</td>
                 <td class="data-val">{{ $bidang->nama_bidang ?? 'Semua Bidang' }}</td>
                 <td style="width: 30px;"></td>

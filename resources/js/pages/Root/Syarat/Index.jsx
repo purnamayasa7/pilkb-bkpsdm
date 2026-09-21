@@ -187,7 +187,7 @@ export default function RootSyaratIndex({
 
     return (
         <AuthenticatedLayout>
-            <Head title="Master Persyaratan Layanan" />
+            <Head title="Master Persyaratan Layanan - PILKB" />
 
             <div className="space-y-6">
                 {/* 1. Page Header */}
@@ -577,7 +577,7 @@ export default function RootSyaratIndex({
                         <div className="p-6 space-y-4 max-h-[60vh] overflow-y-auto">
                             <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700/60 space-y-3 text-xs">
                                 <div className="flex items-center justify-between">
-                                    <span className="text-slate-400">Bidang Pengampu:</span>
+                                    <span className="text-slate-400">Bidang:</span>
                                     <span className="font-semibold text-slate-800 dark:text-slate-200">
                                         {detailModal.item.layanan?.bidang?.nama_bidang || '-'}
                                     </span>

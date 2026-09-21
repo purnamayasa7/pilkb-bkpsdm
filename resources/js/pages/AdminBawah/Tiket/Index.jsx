@@ -181,7 +181,7 @@ export default function Index({
 
     return (
         <AuthenticatedLayout user={auth.user}>
-            <Head title="PILKB - Daftar Tiket Usulan" />
+            <Head title="Daftar Tiket Usulan - PILKB" />
 
             {/* Container Baku Standard.md (space-y-6 lebar penuh tanpa batasan max-w) */}
             <div className="space-y-6">
