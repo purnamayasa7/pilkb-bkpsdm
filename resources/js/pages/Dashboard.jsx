@@ -351,7 +351,7 @@ export default function Dashboard({
                 {/* 4 STATISTIC METRIC CARDS (Responsive: 1 col mobile, 2 cols tablet/iPad, 4 cols desktop) */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
                     {/* Card 1: Hari Ini */}
-                    <div className="p-5 rounded-2xl bg-white dark:bg-slate-900 border-l-4 border-l-blue-600 border border-slate-200 dark:border-slate-800 shadow-xs flex items-center justify-between">
+                    <div className="p-5 rounded-2xl border border-blue-300/80 dark:border-blue-800/80 bg-gradient-to-r from-blue-50/40 via-white to-white dark:from-blue-950/20 dark:via-slate-900 dark:to-slate-900 shadow-xs flex items-center justify-between">
                         <div className="space-y-1">
                             <p className="text-xs font-bold uppercase tracking-wider text-blue-600 dark:text-blue-400">
                                 Pengajuan Hari Ini
@@ -374,13 +374,13 @@ export default function Dashboard({
                                 <span className="text-slate-400 text-[11px]">Dibanding kemarin</span>
                             </div>
                         </div>
-                        <div className="w-12 h-12 rounded-2xl bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 flex items-center justify-center flex-shrink-0">
+                        <div className="w-12 h-12 rounded-2xl bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 border border-blue-200/80 dark:border-blue-900/40 flex items-center justify-center flex-shrink-0">
                             <FileText className="w-6 h-6" />
                         </div>
                     </div>
 
                     {/* Card 2: Bulan Ini */}
-                    <div className="p-5 rounded-2xl bg-white dark:bg-slate-900 border-l-4 border-l-indigo-600 border border-slate-200 dark:border-slate-800 shadow-xs flex items-center justify-between">
+                    <div className="p-5 rounded-2xl border border-indigo-300/80 dark:border-indigo-800/80 bg-gradient-to-r from-indigo-50/40 via-white to-white dark:from-indigo-950/20 dark:via-slate-900 dark:to-slate-900 shadow-xs flex items-center justify-between">
                         <div className="space-y-1">
                             <p className="text-xs font-bold uppercase tracking-wider text-indigo-600 dark:text-indigo-400">
                                 Pengajuan Bulan Ini
@@ -403,13 +403,13 @@ export default function Dashboard({
                                 <span className="text-slate-400 text-[11px]">Dibanding bulan lalu</span>
                             </div>
                         </div>
-                        <div className="w-12 h-12 rounded-2xl bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 flex items-center justify-center flex-shrink-0">
+                        <div className="w-12 h-12 rounded-2xl bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 border border-indigo-200/80 dark:border-indigo-900/40 flex items-center justify-center flex-shrink-0">
                             <Calendar className="w-6 h-6" />
                         </div>
                     </div>
 
                     {/* Card 3: BTL Bulan Ini */}
-                    <div className="p-5 rounded-2xl bg-white dark:bg-slate-900 border-l-4 border-l-rose-500 border border-slate-200 dark:border-slate-800 shadow-xs flex items-center justify-between">
+                    <div className="p-5 rounded-2xl border border-rose-300/80 dark:border-rose-800/80 bg-gradient-to-r from-rose-50/40 via-white to-white dark:from-rose-950/20 dark:via-slate-900 dark:to-slate-900 shadow-xs flex items-center justify-between">
                         <div className="space-y-1">
                             <p className="text-xs font-bold uppercase tracking-wider text-rose-600 dark:text-rose-400">
                                 Jumlah BTL Bulan Ini
@@ -432,13 +432,13 @@ export default function Dashboard({
                                 <span className="text-slate-400 text-[11px]">Dibanding bulan lalu</span>
                             </div>
                         </div>
-                        <div className="w-12 h-12 rounded-2xl bg-rose-50 dark:bg-rose-950/60 text-rose-600 dark:text-rose-400 flex items-center justify-center flex-shrink-0">
+                        <div className="w-12 h-12 rounded-2xl bg-rose-50 dark:bg-rose-950/60 text-rose-600 dark:text-rose-400 border border-rose-200/80 dark:border-rose-900/40 flex items-center justify-center flex-shrink-0">
                             <XCircle className="w-6 h-6" />
                         </div>
                     </div>
 
                     {/* Card 4: Selesai Diproses */}
-                    <div className="p-5 rounded-2xl bg-white dark:bg-slate-900 border-l-4 border-l-emerald-500 border border-slate-200 dark:border-slate-800 shadow-xs flex items-center justify-between">
+                    <div className="p-5 rounded-2xl border border-emerald-300/80 dark:border-emerald-800/80 bg-gradient-to-r from-emerald-50/40 via-white to-white dark:from-emerald-950/20 dark:via-slate-900 dark:to-slate-900 shadow-xs flex items-center justify-between">
                         <div className="space-y-1">
                             <p className="text-xs font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400">
                                 Tiket Selesai Diproses
@@ -461,7 +461,7 @@ export default function Dashboard({
                                 <span className="text-slate-400 text-[11px]">Dibanding bulan lalu</span>
                             </div>
                         </div>
-                        <div className="w-12 h-12 rounded-2xl bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 flex items-center justify-center flex-shrink-0">
+                        <div className="w-12 h-12 rounded-2xl bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 border border-emerald-200/80 dark:border-emerald-900/40 flex items-center justify-center flex-shrink-0">
                             <CheckCircle2 className="w-6 h-6" />
                         </div>
                     </div>
