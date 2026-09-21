@@ -348,7 +348,7 @@
     "isEntry": true
   },
   "resources/js/app.jsx": {
-    "file": "assets/app-z3mOaifN.js",
+    "file": "assets/app-DD79MbPS.js",
     "name": "app",
     "src": "resources/js/app.jsx",
     "isEntry": true,
@@ -851,7 +851,7 @@
     ]
   },
   "resources/js/pages/Chat/Index.jsx": {
-    "file": "assets/Index-UdiSx7PP.js",
+    "file": "assets/Index-gPZn_OLx.js",
     "name": "Index",
     "src": "resources/js/pages/Chat/Index.jsx",
     "isDynamicEntry": true,
@@ -872,7 +872,7 @@
     ]
   },
   "resources/js/pages/Dashboard.jsx": {
-    "file": "assets/Dashboard-CdtNSCkt.js",
+    "file": "assets/Dashboard-Mp8-OAAI.js",
     "name": "Dashboard",
     "src": "resources/js/pages/Dashboard.jsx",
     "isDynamicEntry": true,

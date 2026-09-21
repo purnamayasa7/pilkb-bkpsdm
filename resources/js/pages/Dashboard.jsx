@@ -20,6 +20,48 @@ import {
 
 import Chart from 'chart.js/auto';
 
+/**
+ * DashboardClock
+ * Sub-komponen jam digital terisolasi agar interval 1000ms hanya
+ * me-render ulang teks jam kecil ini, tanpa membebani komponen utama Dashboard.
+ */
+function DashboardClock() {
+    const [time, setTime] = useState('');
+    const [dateStr, setDateStr] = useState('');
+
+    useEffect(() => {
+        const updateTime = () => {
+            const now = new Date();
+            const options = {
+                weekday: 'long',
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+            };
+            setDateStr(now.toLocaleDateString('id-ID', options));
+            const hours = String(now.getHours()).padStart(2, '0');
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            setTime(`${hours}:${minutes}`);
+        };
+
+        updateTime();
+        const interval = setInterval(updateTime, 1000);
+        return () => clearInterval(interval);
+    }, []);
+
+    return (
+        <div className="flex items-center gap-2 text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1 font-medium">
+            <span className="text-blue-600 dark:text-blue-400 font-semibold">
+                {dateStr || 'Memuat...'}
+            </span>
+            <span>•</span>
+            <span className="font-mono text-slate-700 dark:text-slate-300">
+                {time || '--:--'} WITA
+            </span>
+        </div>
+    );
+}
+
 export default function Dashboard({
     auth,
     user: propUser,
@@ -50,30 +92,6 @@ export default function Dashboard({
     const userNip = propNip || user?.nip || user?.username || '-';
     const userEmail = propEmail || user?.email || '-';
     const userUnitKerja = ket_ukerja || user?.instansi?.nama || '-';
-
-    // Realtime Clock (WITA)
-    const [currentTime, setCurrentTime] = useState('');
-    const [currentDateStr, setCurrentDateStr] = useState('');
-
-    useEffect(() => {
-        const updateTime = () => {
-            const now = new Date();
-            const options = {
-                weekday: 'long',
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric',
-            };
-            setCurrentDateStr(now.toLocaleDateString('id-ID', options));
-            const hours = String(now.getHours()).padStart(2, '0');
-            const minutes = String(now.getMinutes()).padStart(2, '0');
-            setCurrentTime(`${hours}:${minutes}`);
-        };
-
-        updateTime();
-        const interval = setInterval(updateTime, 1000);
-        return () => clearInterval(interval);
-    }, []);
 
     // Filter Month change handler
     const handleMonthChange = (e) => {
@@ -226,15 +244,7 @@ export default function Dashboard({
                         <h1 className="text-[20px] sm:text-[26px] font-extrabold text-slate-900 dark:text-white tracking-tight">
                             Dashboard
                         </h1>
-                        <div className="flex items-center gap-2 text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1 font-medium">
-                            <span className="text-blue-600 dark:text-blue-400 font-semibold">
-                                {currentDateStr || 'Memuat...'}
-                            </span>
-                            <span>•</span>
-                            <span className="font-mono text-slate-700 dark:text-slate-300">
-                                {currentTime || '--:--'} WITA
-                            </span>
-                        </div>
+                        <DashboardClock />
                     </div>
 
                     {/* Month Picker Filter */}

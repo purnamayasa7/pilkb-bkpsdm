@@ -16,7 +16,7 @@
     <!-- Stylesheets -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
-    <link rel="stylesheet" href="{{ asset('css/login.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/login.css') }}?v={{ filemtime(public_path('css/login.css')) }}">
     <link rel="stylesheet" href="{{ asset('css/chat-widget.css') }}?v={{ filemtime(public_path('css/chat-widget.css')) }}">
 </head>
 
@@ -225,34 +225,51 @@
             <div class="col-md-6 left-box">
                 <div class="left-content">
 
-                    <!-- Institution Header Badge -->
-                    <div class="brand-badge">
-                        <img src="{{ asset('images/KabBuleleng.png') }}" class="logo" alt="Logo Kabupaten Buleleng">
-                        <div class="brand-text-wrap">
-                            <div class="brand-text text-uppercase">
-                                BKPSDM BULELENG
-                            </div>
-                            <div class="brand-subtext">Pemerintah Kabupaten Buleleng</div>
+                    <!-- Unified Brand Header -->
+                    <div class="brand-header-unified">
+                        <img src="{{ asset('images/KabBuleleng.png') }}" class="logo-unified" alt="Logo Kabupaten Buleleng">
+                        <div class="brand-titles">
+                            <h1 class="brand-app-name">PILKB</h1>
+                            <span class="brand-agency-name">Sistem Layanan Kepegawaian Digital</span>
                         </div>
                     </div>
 
-                    <!-- Application Title & Accent -->
-                    <div class="app-title-wrap">
-                        <h1 class="app-title">PILKB</h1>
-                        <div class="accent-line"></div>
+                    <!-- Core Features Highlight -->
+                    <div class="features-list">
+                        <div class="feature-item">
+                            <div class="feature-icon">
+                                <i data-feather="check-circle"></i>
+                            </div>
+                            <div class="feature-text">
+                                <div class="feature-title">Pelacakan Usulan Transparan</div>
+                                <div class="feature-desc">Cek progres status usulan layanan kepegawaian transparan via No Tiket.</div>
+                            </div>
+                        </div>
+
+                        <div class="feature-item">
+                            <div class="feature-icon">
+                                <i data-feather="message-circle"></i>
+                            </div>
+                            <div class="feature-text">
+                                <div class="feature-title">Konsultasi secara <i>Real-time</i></div>
+                                <div class="feature-desc">Terhubung langsung secara <i>real-time</i> dengan Admin BKPSDM dan Asisten Virtual LILI.</div>
+                            </div>
+                        </div>
+
+                        <div class="feature-item">
+                            <div class="feature-icon">
+                                <i data-feather="file-text"></i>
+                            </div>
+                            <div class="feature-text">
+                                <div class="feature-title">Informasi Syarat &amp; Dokumen Resmi</div>
+                                <div class="feature-desc">Cek kelengkapan berkas serta unduh checklist persyaratan layanan kepegawaian mandiri.</div>
+                            </div>
+                        </div>
                     </div>
 
-                    <!-- Tagline -->
-                    <p class="tagline">
-                        Pusat Informasi Layanan Kepegawaian BKPSDM<br>Buleleng
-                    </p>
-
-                    <!-- System Badge -->
-                    <div class="version-badge-wrap">
-                        <span class="version-badge">
-                            <span class="pulse-dot"></span>
-                            Sistem Layanan Kepegawaian
-                        </span>
+                    <!-- Bottom Copyright in Card -->
+                    <div class="left-panel-footer">
+                        <span>&copy; {{ date('Y') }} BKPSDM Kabupaten Buleleng. All rights reserved.</span>
                     </div>
 
                 </div>
