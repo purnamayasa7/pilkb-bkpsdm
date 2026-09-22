@@ -53,6 +53,20 @@ KEPRIBADIAN & GAYA KOMUNIKASI:
 5. Di akhir penjelasan, berikan kalimat penutup yang ramah dan solutif (misalnya: "Apakah ada bagian dari informasi di atas yang ingin LILI jelaskan lebih lanjut? 😊").
 
 BASIS PENGETAHUAN REGULASI RESMI ASN & BKPSDM KABUPATEN BULELENG:
+0. KONSEP KEPEGAWAIAN, ASN & MANAJEMEN ASN (UU No. 20 Tahun 2023):
+   - Definisi Kepegawaian: Segala hal terkait pengelolaan sumber daya manusia aparatur negara secara terpadu, mulai dari perencanaan pengadaan, pengangkatan, penempatan, pengembangan kompetensi/karier, penilaian kinerja, penghargaan & penghasilan, penegakan disiplin, hingga pemberhentian dan pensiun/hari tua.
+   - Pegawai ASN: Terdiri dari Pegawai Negeri Sipil (PNS) dan Pegawai Pemerintah dengan Perjanjian Kerja (PPPK) yang diangkat oleh Pejabat Pembina Kepegawaian (PPK).
+   - Perbedaan PNS dan PPPK:
+     * PNS: Pegawai tetap dengan NIP nasional, memiliki jenjang kepangkatan/golongan ruang secara berjenjang, dan menduduki jabatan struktural/fungsional pemerintahan secara berkelanjutan.
+     * PPPK: Pegawai ASN berdasarkan perjanjian kerja waktu tertentu untuk melaksanakan tugas pemerintahan, memiliki NI PPPK, berbasis golongan gaji, dan sesuai UU 20/2023 memiliki hak pengembangan kompetensi dan jaminan sosial hari tua yang setara.
+   - Sistem Merit: Kebijakan dan manajemen ASN berdasarkan kualifikasi, kompetensi, dan kinerja secara adil dan wajar tanpa diskriminasi latar belakang politik, suku, agama, ras, gender, atau kondisi fisik.
+   - Core Values BerAKHLAK (Employer Branding: Bangga Melayani Bangsa): Berorientasi Pelayanan, Akuntabel, Kompeten, Harmonis, Loyal, Adaptif, dan Kolaboratif.
+   - Netralitas ASN: Pegawai ASN wajib bebas dari pengaruh dan intervensi politik praktis, tidak memihak dalam pemilu/pilkada, serta menjaga martabat dan etika birokrasi.
+   - Struktur Jabatan ASN Modern:
+     * Jabatan Manajerial: JPT (Utama, Madya, Pratama), Jabatan Administrator, Jabatan Pengawas.
+     * Jabatan Non-Manajerial: Jabatan Fungsional (keahlian dan keterampilan) serta Jabatan Pelaksana (operasional pelayanan).
+   - Hak & Kewajiban ASN: Penghasilan, tunjangan/TPP, cuti, jaminan sosial (kesehatan, kecelakaan kerja, kematian, pensiun, hari tua), pengembangan kompetensi, dan bantuan hukum, dengan kewajiban setia pada Pancasila, UUD 1945, NKRI, dan pemerintah yang sah.
+
 1. CUTI ASN (Peraturan BKN No. 24/2017 jo Peraturan BKN No. 7/2021):
    - Cuti Tahunan: 12 hari kerja setelah 1 tahun bekerja terus menerus. Hak cuti tahun berjalan yang tidak digunakan dapat ditangguhkan ke tahun berikutnya maksimal 6 hari kerja.
    - Cuti Besar: Masa kerja minimal 5 tahun terus menerus, durasi hingga 3 bulan (menangguhkan cuti tahunan pada tahun bersangkutan).
@@ -262,8 +276,8 @@ EOT;
 
                 $lastResponse = Http::withoutVerifying()
                     ->withOptions([
-                        'connect_timeout'  => 3,
-                        'timeout'          => 7,
+                        'connect_timeout'  => 5,
+                        'timeout'          => 15,
                         'force_ip_resolve' => 'v4',
                     ])
                     ->withHeaders([
@@ -872,31 +886,268 @@ EOT;
 
         $qLower = mb_strtolower(trim($question), 'UTF-8');
 
-        // 2. Deteksi sapaan ramah / greeting
-        $greetings = ['halo', 'hai', 'hello', 'hey', 'pagi', 'siang', 'sore', 'malam', 'assalam', 'swastiastu', 'om swastyastu'];
-        foreach ($greetings as $g) {
-            if (str_starts_with($qLower, $g) || $qLower === $g) {
+        // 2. Deteksi sapaan ramah / greeting (hanya jika pesan murni sapaan tanpa pertanyaan substansi)
+        $isSubstantiveInquiry = str_contains($qLower, 'kepegawaian') || str_contains($qLower, 'asn') ||
+            str_contains($qLower, 'pns') || str_contains($qLower, 'pppk') || str_contains($qLower, 'cuti') ||
+            str_contains($qLower, 'pangkat') || str_contains($qLower, 'pensiun') || str_contains($qLower, 'belajar') ||
+            str_contains($qLower, 'disiplin') || str_contains($qLower, 'syarat') || str_contains($qLower, 'layanan') ||
+            str_contains($qLower, 'tiket') || str_contains($qLower, 'nip') || str_contains($qLower, 'tpp') ||
+            str_contains($qLower, 'skp') || str_contains($qLower, 'kinerja') || str_contains($qLower, 'merit') ||
+            str_contains($qLower, 'berakhlak') || str_contains($qLower, 'netralitas') || str_contains($qLower, 'kode etik') ||
+            str_contains($qLower, 'jabatan') || str_contains($qLower, 'kewajiban') || str_contains($qLower, 'hak');
+
+        if (!$isSubstantiveInquiry) {
+            $greetings = ['halo', 'hai', 'hello', 'hey', 'pagi', 'siang', 'sore', 'malam', 'assalam', 'swastiastu', 'om swastyastu'];
+            foreach ($greetings as $g) {
+                if ($qLower === $g || str_starts_with($qLower, $g . ' ') || str_starts_with($qLower, $g . ',') || str_starts_with($qLower, $g . '!')) {
+                    return [
+                        'success' => true,
+                        'reply'   => "Halo! Selamat datang di LILI (Layanan Informasi & Literasi Kepegawaian Interaktif) BKPSDM Kabupaten Buleleng. 😊\n\nAda yang bisa LILI bantu terkait kepegawaian hari ini? Anda dapat bertanya seputar regulasi ASN, cuti, kenaikan pangkat, pensiun, mutasi, atau layanan kepegawaian lainnya.",
+                        'actions' => [
+                            [
+                                'type'   => 'prompt',
+                                'label'  => '📖 Konsep Kepegawaian',
+                                'prompt' => 'Apa itu kepegawaian menurut anda?'
+                            ],
+                            [
+                                'type'   => 'prompt',
+                                'label'  => '📌 Layanan Populer BKPSDM',
+                                'prompt' => 'Apa saja layanan di BKPSDM Buleleng?'
+                            ]
+                        ],
+                        'source'  => 'fallback_greeting'
+                    ];
+                }
+            }
+
+            // 3. Deteksi izin bertanya murni
+            if (str_contains($qLower, 'boleh tanya') || str_contains($qLower, 'mau tanya') || str_contains($qLower, 'izin bertanya') || str_contains($qLower, 'bisa tanya') || str_contains($qLower, 'boleh bertanya') || str_contains($qLower, 'apakah bisa bantu')) {
                 return [
                     'success' => true,
-                    'reply'   => "Halo! Selamat datang di LILI (Layanan Informasi & Literasi Kepegawaian Interaktif) BKPSDM Kabupaten Buleleng. 😊\n\nAda yang bisa LILI bantu terkait kepegawaian hari ini? Anda dapat bertanya seputar regulasi ASN, cuti, kenaikan pangkat, pensiun, mutasi, atau layanan kepegawaian lainnya.",
+                    'reply'   => "Tentu saja boleh! 😊 LILI siap membantu Anda seputar regulasi kepegawaian ASN di lingkungan BKPSDM Kabupaten Buleleng.\n\nSilakan tanyakan mengenai:\n- **Konsep Kepegawaian & Manajemen ASN** (UU 20/2023)\n- **Perbedaan PNS & PPPK**\n- **Regulasi & Disiplin ASN** (PP 94/2021)\n- **Hak & Ketentuan Cuti ASN**\n- **Syarat & 6 Periode Kenaikan Pangkat**\n- **Batas Usia Pensiun & Prosedurnya**\n- **Izin Belajar vs Tugas Belajar**\n- **Cek Status Usulan (dengan NIP / Nomor Tiket)**\n\nTopik apa yang ingin Anda tanyakan hari ini?",
                     'actions' => [],
-                    'source'  => 'fallback_greeting'
+                    'source'  => 'fallback_scope'
                 ];
             }
         }
 
-        // 3. Deteksi izin bertanya
-        if (str_contains($qLower, 'boleh') || str_contains($qLower, 'bertanya') || str_contains($qLower, 'nanya') || str_contains($qLower, 'tanya') || str_contains($qLower, 'bisa bantu') || str_contains($qLower, 'bantu saya')) {
+        // 4. KONSEP KEPEGAWAIAN & MANAJEMEN ASN (UU No. 20 Tahun 2023)
+        if (str_contains($qLower, 'kepegawaian') || str_contains($qLower, 'manajemen kepegawaian') || str_contains($qLower, 'sdm aparatur')) {
             return [
                 'success' => true,
-                'reply'   => "Tentu saja boleh! 😊 LILI siap membantu Anda seputar regulasi kepegawaian ASN di lingkungan BKPSDM Kabupaten Buleleng.\n\nSilakan tanyakan mengenai:\n- **Regulasi & Disiplin ASN** (PP 94/2021)\n- **Hak & Ketentuan Cuti ASN**\n- **Syarat & Periode Kenaikan Pangkat**\n- **Batas Usia Pensiun & Prosedurnya**\n- **Izin Belajar vs Tugas Belajar**\n- **Cek Status Usulan (dengan NIP / Nomor Tiket)**\n\nTopik apa yang ingin Anda tanyakan hari ini?",
-                'actions' => [],
-                'source'  => 'fallback_scope'
+                'reply'   => "Menurut regulasi dan literasi manajemen aparatur negara, **kepegawaian** adalah segala hal yang berkaitan dengan kedudukan, kewajiban, hak, pembinaan, serta tata kelola sumber daya manusia aparatur pemerintah secara menyeluruh dan berkesinambungan.\n\n" .
+                    "Dalam birokrasi Republik Indonesia (mengacu pada **UU No. 20 Tahun 2023 tentang Aparatur Sipil Negara**), manajemen kepegawaian dikelola melalui **Sistem Merit** yang mencakup seluruh siklus perjalanan karier pegawai:\n\n" .
+                    "1. **Perencanaan & Pengadaan:** Penetapan kebutuhan formasi dan proses seleksi terbuka CASN (PNS & PPPK).\n" .
+                    "2. **Pengangkatan & Penempatan:** Penetapan SK jabatan serta penempatan tugas sesuai kualifikasi dan kompetensi.\n" .
+                    "3. **Pengembangan Kompetensi & Karier:** Pelatihan, tugas belajar, izin belajar, dan mobilitas talenta.\n" .
+                    "4. **Penilaian Kinerja:** Evaluasi berkelanjutan berbasis capaian SKP dan perilaku kerja Core Values BerAKHLAK.\n" .
+                    "5. **Penggajian & Kesejahteraan:** Gaji pokok, TPP/Tukin, serta jaminan sosial hari tua.\n" .
+                    "6. **Penegakan Disiplin & Etika:** Pembinaan kode etik, asas netralitas, dan penerapan sanksi sesuai PP 94/2021.\n" .
+                    "7. **Pemberhentian & Pensiun:** Pengakhiran dinas secara terhormat saat mencapai Batas Usia Pensiun (BUP).\n\n" .
+                    "Tujuan utama manajemen kepegawaian adalah mewujudkan birokrasi berkelas dunia yang profesional, netral, berintegritas tinggi, dan melayani masyarakat dengan prima. Ada aspek kepegawaian tertentu yang ingin Anda diskusikan lebih lanjut? 😊",
+                'actions' => [
+                    [
+                        'type'   => 'prompt',
+                        'label'  => '👥 Perbedaan PNS & PPPK',
+                        'prompt' => 'Apa perbedaan antara PNS dan PPPK?'
+                    ],
+                    [
+                        'type'   => 'prompt',
+                        'label'  => '🏛️ Tugas BKPSDM Buleleng',
+                        'prompt' => 'Apa tugas dan fungsi BKPSDM Kabupaten Buleleng?'
+                    ],
+                    [
+                        'type'   => 'prompt',
+                        'label'  => '📋 Layanan Populer PILKB',
+                        'prompt' => 'Apa saja layanan kepegawaian di BKPSDM Buleleng?'
+                    ]
+                ],
+                'source'  => 'fallback_konsep_kepegawaian'
             ];
         }
 
-        // 4. Tugas dan Fungsi BKPSDM
-        if (str_contains($qLower, 'fungsi bkpsdm') || str_contains($qLower, 'tugas bkpsdm') || str_contains($qLower, 'tentang bkpsdm') || str_contains($qLower, 'apa itu bkpsdm')) {
+        // 5. ASN & UU NO. 20 TAHUN 2023
+        if (str_contains($qLower, 'uu 20') || str_contains($qLower, 'uu no 20') || str_contains($qLower, 'uu no. 20') || str_contains($qLower, 'uu asn') || str_contains($qLower, 'apa itu asn') || str_contains($qLower, 'aparatur sipil negara') || str_contains($qLower, 'definisi asn')) {
+            return [
+                'success' => true,
+                'reply'   => "**Aparatur Sipil Negara (ASN)** berdasarkan **UU No. 20 Tahun 2023** adalah profesi bagi Pegawai Negeri Sipil (PNS) dan Pegawai Pemerintah dengan Perjanjian Kerja (PPPK) yang bekerja pada instansi pemerintah pusat maupun daerah.\n\n" .
+                    "📌 **Poin-Poin Utama UU No. 20 Tahun 2023:**\n" .
+                    "1. **Unifikasi Sistem Pegawai ASN:** Pegawai ASN terdiri dari **PNS** (pegawai tetap) dan **PPPK** (perjanjian kerja). Penataan tenaga honorer/non-ASN dituntaskan per 2024.\n" .
+                    "2. **Kesetaraan Jaminan Sosial:** Perlindungan jaminan pensiun dan hari tua kini diberikan secara terpadu untuk seluruh ASN (PNS maupun PPPK).\n" .
+                    "3. **Fleksibilitas Mobilitas Talenta:** Mempermudah mutasi talenta ASN antardaerah dan instansi pusat guna mengatasi ketimpangan kualitas pelayanan publik.\n" .
+                    "4. **Digitalisasi Manajemen ASN:** Percepatan integrasi layanan kepegawaian digital nasional (SIASN BKN) yang terhubung dengan portal daerah seperti PILKB BKPSDM Kabupaten Buleleng.\n\n" .
+                    "Apakah ada materi dalam UU ASN No. 20/2023 yang ingin Anda ketahui lebih lanjut? 😊",
+                'actions' => [
+                    [
+                        'type'   => 'prompt',
+                        'label'  => '👥 Perbedaan PNS & PPPK',
+                        'prompt' => 'Apa perbedaan antara PNS dan PPPK?'
+                    ],
+                    [
+                        'type'   => 'prompt',
+                        'label'  => '⭐ Apa itu Sistem Merit?',
+                        'prompt' => 'Apa itu sistem merit dalam kepegawaian?'
+                    ]
+                ],
+                'source'  => 'fallback_konsep_asn'
+            ];
+        }
+
+        // 6. PERBEDAAN PNS DAN PPPK
+        if (str_contains($qLower, 'pns dan pppk') || str_contains($qLower, 'pns vs pppk') || str_contains($qLower, 'beda pns') || str_contains($qLower, 'perbedaan pns') || str_contains($qLower, 'apa itu pppk') || str_contains($qLower, 'status pppk') || str_contains($qLower, 'apakah pppk bisa jadi pns')) {
+            return [
+                'success' => true,
+                'reply'   => "Berdasarkan **UU No. 20 Tahun 2023 tentang ASN**, PNS dan PPPK sama-sama berstatus sebagai Pegawai ASN dengan karakteristik regulasi sebagai berikut:\n\n" .
+                    "1. **Status Hubungan Kerja:**\n" .
+                    "   - **PNS:** Pegawai tetap yang diangkat oleh PPK dan memiliki Nomor Induk Pegawai (NIP) secara nasional.\n" .
+                    "   - **PPPK:** Pegawai ASN yang diangkat berdasarkan perjanjian kerja untuk jangka waktu tertentu (minimal 1 tahun, dapat diperpanjang sesuai kebutuhan instansi dan hasil evaluasi kinerja tahunan).\n\n" .
+                    "2. **Pengisian Jabatan & Pola Karier:**\n" .
+                    "   - **PNS:** Dapat menduduki seluruh jenjang jabatan (Manajerial seperti JPT, Administrator, Pengawas, maupun Non-Manajerial) melalui kenaikan pangkat berkala.\n" .
+                    "   - **PPPK:** Difokuskan pada Jabatan Fungsional dan Jabatan Pimpinan Tinggi tertentu sesuai kebutuhan formasi prioritas.\n\n" .
+                    "3. **Kesejahteraan & Pensiun:**\n" .
+                    "   - Dalam UU No. 20/2023, skema jaminan pensiun dan hari tua disetarakan secara terpadu melalui skema jaminan sosial nasional bagi seluruh ASN.\n\n" .
+                    "📌 *Catatan:* PPPK yang bermaksud beralih menjadi PNS wajib mengikuti seleksi terbuka CPNS sesuai formasi dan persyaratan yang diumumkan secara resmi. Ada hal lain yang ingin Anda ketahui? 😊",
+                'actions' => [
+                    [
+                        'type'   => 'prompt',
+                        'label'  => '📈 Kenaikan Pangkat PNS',
+                        'prompt' => 'Bagaimana periode dan syarat kenaikan pangkat PNS?'
+                    ],
+                    [
+                        'type'   => 'prompt',
+                        'label'  => '🏖️ Hak Cuti ASN',
+                        'prompt' => 'Apa saja hak cuti untuk ASN?'
+                    ]
+                ],
+                'source'  => 'fallback_pns_pppk'
+            ];
+        }
+
+        // 7. SISTEM MERIT & MANAJEMEN TALENTA
+        if (str_contains($qLower, 'sistem merit') || str_contains($qLower, 'meritokrasi') || str_contains($qLower, 'merit system') || str_contains($qLower, 'manajemen talenta') || str_contains($qLower, 'talent pool') || str_contains($qLower, '9 box') || str_contains($qLower, 'sembilan kotak')) {
+            return [
+                'success' => true,
+                'reply'   => "**Sistem Merit** adalah kebijakan dan tata kelola manajemen ASN yang mendasarkan pengangkatan, penempatan, promosi, dan penggajian pegawai pada:\n\n" .
+                    "1. **Kualifikasi Akademik:** Kesesuaian tingkat dan bidang keilmuan pendidikan formal.\n" .
+                    "2. **Kompetensi:** Kemampuan teknis, manajerial, dan sosial-kultural yang teruji melalui uji kompetensi/assessment center.\n" .
+                    "3. **Kinerja Nyata:** Bukti capaian Sasaran Kinerja Pegawai (SKP) dan implementasi Core Values BerAKHLAK.\n\n" .
+                    "Sistem Merit menjamin perlakuan yang **adil, objektif, dan transparan tanpa diskriminasi** suku, agama, ras, gender, usia, maupun afiliasi politik.\n\n" .
+                    "Di lingkungan **Pemerintah Kabupaten Buleleng**, penerapan Sistem Merit diwujudkan melalui **Manajemen Talenta** dan pemetaan kuadran talenta (*9-box matrix*) untuk suksesi kepemimpinan birokrasi secara terukur. Ada yang ingin ditanyakan seputar uji kompetensi atau seleksi terbuka? 😊",
+                'actions' => [],
+                'source'  => 'fallback_sistem_merit'
+            ];
+        }
+
+        // 8. CORE VALUES ASN BerAKHLAK
+        if (str_contains($qLower, 'berakhlak') || str_contains($qLower, 'nilai dasar asn') || str_contains($qLower, 'core values') || str_contains($qLower, 'bangga melayani')) {
+            return [
+                'success' => true,
+                'reply'   => "**Core Values ASN 'BerAKHLAK'** dan Employer Branding **'Bangga Melayani Bangsa'** diresmikan oleh Presiden Republik Indonesia sebagai fondasi budaya kerja seragam seluruh pegawai ASN:\n\n" .
+                    "1. **Berorientasi Pelayanan:** Berkomitmen memberikan pelayanan prima demi kepuasan masyarakat.\n" .
+                    "2. **Akuntabel:** Bertanggung jawab atas kepercayaan yang diberikan serta cermat dalam pemanfaatan fasilitas dan anggaran dinas.\n" .
+                    "3. **Kompeten:** Terus belajar dan mengembangkan kapabilitas diri guna menjawab dinamika tugas birokrasi.\n" .
+                    "4. **Harmonis:** Saling peduli, menjaga kerukunan, dan menghargai keberagaman latar belakang.\n" .
+                    "5. **Loyal:** Berdedikasi dan mengutamakan kepentingan bangsa serta negara di atas kepentingan pribadi/golongan.\n" .
+                    "6. **Adaptif:** Terus berinovasi dan antusias menghadapi perubahan zaman dan transformasi digital.\n" .
+                    "7. **Kolaboratif:** Membangun sinergi kerja sama produktif antarsektor dan antar-OPD.\n\n" .
+                    "Nilai BerAKHLAK ini dinilai secara berkala dalam komponen perilaku kerja SKP ASN. Ada yang ingin Anda ketahui seputar hubungannya dengan SKP? 😊",
+                'actions' => [
+                    [
+                        'type'   => 'prompt',
+                        'label'  => '📊 Evaluasi Kinerja SKP',
+                        'prompt' => 'Bagaimana evaluasi kinerja SKP ASN berdasarkan PermenPAN-RB No 6 Tahun 2022?'
+                    ]
+                ],
+                'source'  => 'fallback_berakhlak'
+            ];
+        }
+
+        // 9. ASAS NETRALITAS ASN & KODE ETIK
+        if (str_contains($qLower, 'netralitas') || str_contains($qLower, 'politik praktis') || str_contains($qLower, 'kode etik') || str_contains($qLower, 'pemilu') || str_contains($qLower, 'pilkada') || str_contains($qLower, 'kampanye') || str_contains($qLower, 'netral')) {
+            return [
+                'success' => true,
+                'reply'   => "**Asas Netralitas ASN** diatur secara tegas dalam **UU No. 20 Tahun 2023**, **PP No. 94 Tahun 2021**, dan Surat Keputusan Bersama (SKB) Netralitas ASN:\n\n" .
+                    "📌 **Prinsip Dasar Netralitas:**\n" .
+                    "Setiap pegawai ASN (PNS maupun PPPK) wajib bebas dari pengaruh, intervensi, maupun tekanan politik praktis, serta dilarang memihak kepada kepentingan pasangan calon/partai politik manapun.\n\n" .
+                    "🚫 **Larangan Utama Saat Pemilu / Pilkada:**\n" .
+                    "1. Menghadiri deklarasi atau kampanye politik partai/paslon.\n" .
+                    "2. Mengunggah, memberi *like*, berkomentar, atau membagikan materi kampanye di media sosial.\n" .
+                    "3. Menggunakan aset negara atau jabatan kedinasan untuk kepentingan politik praktis.\n" .
+                    "4. Berfoto bersama calon dengan gestur jari yang mengindikasikan nomor urut/dukungan.\n\n" .
+                    "⚠️ **Sanksi:**\n" .
+                    "Pelanggaran netralitas dikenakan sanksi moral, hukuman disiplin sedang (pemotongan TPP), hingga hukuman berat berupa pemberhentian sebagai ASN. Ada hal seputar kode etik dinas yang ingin Anda tanyakan? 😊",
+                'actions' => [
+                    [
+                        'type'   => 'prompt',
+                        'label'  => '⚖️ Sanksi Disiplin PP 94/2021',
+                        'prompt' => 'Apa saja tingkat sanksi disiplin ASN berdasarkan PP 94 Tahun 2021?'
+                    ]
+                ],
+                'source'  => 'fallback_netralitas'
+            ];
+        }
+
+        // 10. HAK DAN KEWAJIBAN ASN
+        if (str_contains($qLower, 'hak asn') || str_contains($qLower, 'kewajiban asn') || str_contains($qLower, 'hak pns') || str_contains($qLower, 'hak pppk') || (str_contains($qLower, 'hak') && str_contains($qLower, 'kewajiban'))) {
+            return [
+                'success' => true,
+                'reply'   => "Berdasarkan **Pasal 21 s.d. 24 UU No. 20 Tahun 2023**, hak dan kewajiban Pegawai ASN (PNS dan PPPK) meliputi:\n\n" .
+                    "🎁 **Hak Pegawai ASN:**\n" .
+                    "1. **Penghasilan:** Gaji pokok sesuai golongan ruang dan masa kerja.\n" .
+                    "2. **Penghargaan & Pengakuan:** Tukin/TPP daerah, fasilitas kedinasan, dan tanda kehormatan Satyalancana Karya Satya.\n" .
+                    "3. **Jaminan Sosial:** Jaminan kesehatan, kecelakaan kerja, kematian, jaminan pensiun, dan hari tua.\n" .
+                    "4. **Lingkungan Kerja:** Perlindungan keselamatan dan kenyamanan kerja.\n" .
+                    "5. **Pengembangan Diri:** Hak mengikuti diklat, workshop, tugas belajar, dan izin belajar.\n" .
+                    "6. **Bantuan Hukum:** Pendampingan hukum dalam perkara kedinasan resmi.\n\n" .
+                    "🛡️ **Kewajiban Pokok Pegawai ASN:**\n" .
+                    "- Setia dan taat sepenuhnya kepada Pancasila, UUD 1945, NKRI, dan pemerintah yang sah.\n" .
+                    "- Menaati ketentuan peraturan perundang-undangan serta jam kerja kedinasan.\n" .
+                    "- Menjaga netralitas, rahasia jabatan, dan integritas birokrasi.\n\n" .
+                    "Apakah ada rincian hak atau kewajiban yang ingin Anda konsultasikan lebih jauh? 😊",
+                'actions' => [],
+                'source'  => 'fallback_hak_kewajiban'
+            ];
+        }
+
+        // 11. STRUKTUR JABATAN ASN MODERN
+        if (str_contains($qLower, 'jabatan asn') || str_contains($qLower, 'jabatan manajerial') || str_contains($qLower, 'jabatan fungsional') || str_contains($qLower, 'jabatan pelaksana') || str_contains($qLower, 'jenis jabatan') || str_contains($qLower, 'jenjang jabatan') || (str_contains($qLower, 'fungsional') && str_contains($qLower, 'struktural'))) {
+            return [
+                'success' => true,
+                'reply'   => "Sesuai regulasi **UU No. 20 Tahun 2023**, struktur jabatan ASN disederhanakan menjadi 2 kategori utama:\n\n" .
+                    "1. **Jabatan Manajerial:**\n" .
+                    "   - **Jabatan Pimpinan Tinggi (JPT):** JPT Utama, JPT Madya, dan JPT Pratama (contoh: Sekda, Kepala Dinas/Badan/BKPSDM).\n" .
+                    "   - **Jabatan Administrator:** Memimpin bidang/substansi kedinasan (contoh: Kepala Bidang, Camat).\n" .
+                    "   - **Jabatan Pengawas:** Memimpin unit operasional teknis (contoh: Lurah, Kepala Subbagian/Seksi operasional).\n\n" .
+                    "2. **Jabatan Non-Manajerial:**\n" .
+                    "   - **Jabatan Fungsional (JF):** Berbasis keahlian dan keterampilan profesi independen:\n" .
+                    "     * *Keahlian:* Ahli Pertama, Ahli Muda, Ahli Madya, dan Ahli Utama.\n" .
+                    "     * *Keterampilan:* Pemula, Terampil, Mahir, dan Penyelia.\n" .
+                    "   - **Jabatan Pelaksana:** Melaksanakan tugas pelayanan teknis administratif dan operasional kedinasan.\n\n" .
+                    "Peralihan ke Jabatan Fungsional bertujuan menciptakan birokrasi yang lincah (*agile governance*). Ada jenjang jabatan tertentu yang ingin Anda tanyakan? 😊",
+                'actions' => [],
+                'source'  => 'fallback_struktur_jabatan'
+            ];
+        }
+
+        // 12. TAMBAHAN PENGHASILAN PEGAWAI (TPP) & KESEJAHTERAAN
+        if (str_contains($qLower, 'tpp') || str_contains($qLower, 'tukin') || str_contains($qLower, 'tambahan penghasilan') || str_contains($qLower, 'kesejahteraan asn')) {
+            return [
+                'success' => true,
+                'reply'   => "**Tambahan Penghasilan Pegawai (TPP)** bagi ASN di lingkungan Pemerintah Kabupaten Buleleng diberikan berdasarkan kriteria resmi:\n\n" .
+                    "1. **Beban Kerja:** Berdasarkan evaluasi beban jabatan dan tanggung jawab dinas.\n" .
+                    "2. **Prestasi Kerja:** Berdasarkan capaian Sasaran Kinerja Pegawai (SKP) dan realisasi target kinerja harian/bulanan.\n" .
+                    "3. **Tempat Bertugas & Kondisi Kerja:** Menyesuaikan tingkat kesulitan geografis atau risiko kerja tertentu.\n" .
+                    "4. **Kelangkaan Profesi:** Bagi kelompok profesi yang memerlukan kualifikasi langka dan keahlian spesifik.\n\n" .
+                    "⚠️ **Pengurangan/Pemotongan TPP:**\n" .
+                    "Pembayaran TPP terikat langsung dengan kepatuhan jam kerja/absensi serta penjatuhan sanksi disiplin ASN sesuai **PP No. 94 Tahun 2021** (misalnya pemotongan sebesar 25% bagi hukuman disiplin sedang).\n\n" .
+                    "Apakah ada hal lain seputar TPP atau ketentuan absensi yang ingin Anda konsultasikan? 😊",
+                'actions' => [],
+                'source'  => 'fallback_tpp'
+            ];
+        }
+
+        // 13. Tugas dan Fungsi BKPSDM
+        if (str_contains($qLower, 'fungsi bkpsdm') || str_contains($qLower, 'tugas bkpsdm') || str_contains($qLower, 'tentang bkpsdm') || str_contains($qLower, 'apa itu bkpsdm') || str_contains($qLower, 'profil bkpsdm')) {
             return [
                 'success' => true,
                 'reply'   => "BKPSDM (Badan Kepegawaian dan Pengembangan Sumber Daya Manusia) Kabupaten Buleleng adalah instansi pemerintah daerah yang bertugas melaksanakan manajemen kepegawaian ASN dan pengembangan kompetensi aparatur di lingkungan Pemerintah Kabupaten Buleleng.\n\n📌 **Fungsi Utama BKPSDM Buleleng:**\n1. **Pengadaan, Pemberhentian, dan Informasi Kepegawaian** (perekrutan CASN, pensiun, kartu pegawai, data ASN).\n2. **Mutasi dan Promosi** (kenaikan pangkat, penempatan jabatan, perpindahan instansi).\n3. **Pengembangan Kompetensi** (pelatihan, tugas belajar, izin belajar, ujian dinas).\n4. **Penilaian Kinerja dan Disiplin** (pengelolaan SKP, penegakan disiplin ASN, izin cuti).\n\nApakah ada layanan BKPSDM tertentu yang ingin Anda ketahui lebih lanjut? 😊",
@@ -905,14 +1156,14 @@ EOT;
             ];
         }
 
-        // 5. DISIPLIN ASN & HAK KEWAJIBAN (PP 94/2021)
+        // 14. DISIPLIN ASN & HAK KEWAJIBAN (PP 94/2021)
         if (str_contains($qLower, 'disiplin') || str_contains($qLower, 'hukuman') || str_contains($qLower, 'sanksi') || str_contains($qLower, 'kewajiban') || str_contains($qLower, 'larangan') || str_contains($qLower, 'absen') || str_contains($qLower, 'jam kerja')) {
             return [
                 'success' => true,
                 'reply'   => "Berdasarkan **PP No. 94 Tahun 2021 tentang Disiplin PNS**, penegakan disiplin pegawai negeri mencakup kewajiban, larangan, serta tingkat dan jenis hukuman disiplin:\n\n" .
                     "📌 **Tingkat Hukuman Disiplin ASN:**\n" .
                     "1. **Hukuman Ringan:** Teguran lisan, teguran tertulis, dan pernyataan tidak puas secara tertulis.\n" .
-                    "2. **Hukuman Sedang:** Pemotongan Tukin sebesar 25% selama 6 bulan, 9 bulan, atau 12 bulan.\n" .
+                    "2. **Hukuman Sedang:** Pemotongan Tukin/TPP sebesar 25% selama 6 bulan, 9 bulan, atau 12 bulan.\n" .
                     "3. **Hukuman Berat:** Penurunan jabatan setingkat lebih rendah (12 bulan), pembebasan dari jabatan menjadi pelaksana (12 bulan), hingga Pemberhentian Dengan Hormat Tidak Atas Permintaan Sendiri (PTDH).\n\n" .
                     "⏱️ **Kewajiban Jam Kerja:**\n" .
                     "Pelanggaran jam kerja tanpa alasan sah secara kumulatif dihitung hariannya dan dapat dikenai sanksi sedang hingga berat jika mencapai batas akumulasi hari yang ditentukan regulasi.\n\n" .
@@ -922,7 +1173,7 @@ EOT;
             ];
         }
 
-        // 6. CUTI ASN (Informasi Umum)
+        // 15. CUTI ASN (Informasi Umum)
         if (str_contains($qLower, 'cuti')) {
             return [
                 'success' => true,
@@ -940,7 +1191,7 @@ EOT;
             ];
         }
 
-        // 7. KENAIKAN PANGKAT (Informasi Umum)
+        // 16. KENAIKAN PANGKAT (Informasi Umum)
         if (str_contains($qLower, 'pangkat') || str_contains($qLower, 'golongan') || str_contains($qLower, 'kp')) {
             return [
                 'success' => true,
@@ -949,14 +1200,14 @@ EOT;
                     "📌 **Jenis Kenaikan Pangkat:**\n" .
                     "- **KP Reguler:** Minimal 4 tahun dalam pangkat terakhir dengan predikat kinerja (SKP) minimal 'Baik' selama 2 tahun terakhir.\n" .
                     "- **KP Pilihan (Jabatan Fungsional / Struktural):** Mengacu pada pencapaian angka kredit dan formasi jenjang jabatan.\n" .
-                    "- **KP Penyesuaian Ijazah:** Bagi PNS yang telah memperoleh ijazah lebih tinggi dan lulus Ujian Penyesuaian Ijazah (PI).\n\n" .
+                    "- **KP Penyesuaian Ijazah:** Bagi PNS yang telah memperoleh ijazah lebih tinggi dan lulus Ujian Penyesuaian Kenaikan Pangkat (UPKP).\n\n" .
                     "Apakah ada jenis kenaikan pangkat yang ingin Anda tanyakan mekanismenya? 😊",
                 'actions' => [],
                 'source'  => 'fallback_pangkat'
             ];
         }
 
-        // 8. PENSIUN (Informasi Umum)
+        // 17. PENSIUN (Informasi Umum)
         if (str_contains($qLower, 'pensiun') || str_contains($qLower, 'bup')) {
             return [
                 'success' => true,
@@ -972,7 +1223,7 @@ EOT;
             ];
         }
 
-        // 9. TUGAS BELAJAR & IZIN BELAJAR
+        // 18. TUGAS BELAJAR & IZIN BELAJAR
         if (str_contains($qLower, 'belajar') || str_contains($qLower, 'tubel') || str_contains($qLower, 'ijin belajar') || str_contains($qLower, 'izin belajar') || str_contains($qLower, 'kuliah')) {
             return [
                 'success' => true,
@@ -989,8 +1240,8 @@ EOT;
             ];
         }
 
-        // 10. EVALUASI KINERJA ASN / SKP
-        if (str_contains($qLower, 'kinerja') || str_contains($qLower, 'skp') || str_contains($qLower, 'berakhlak')) {
+        // 19. EVALUASI KINERJA ASN / SKP
+        if (str_contains($qLower, 'kinerja') || str_contains($qLower, 'skp') || str_contains($qLower, 'evaluasi kinerja')) {
             return [
                 'success' => true,
                 'reply'   => "Berdasarkan **PermenPAN-RB No. 6 Tahun 2022 tentang Pengelolaan Kinerja Pegawai ASN**, penilaian kinerja difokuskan pada dialog kinerja berkelanjutan:\n\n" .
@@ -1004,7 +1255,7 @@ EOT;
             ];
         }
 
-        // 11. KENAIKAN GAJI BERKALA (KGB)
+        // 20. KENAIKAN GAJI BERKALA (KGB)
         if (str_contains($qLower, 'gaji berkala') || str_contains($qLower, 'kgb') || (str_contains($qLower, 'kenaikan gaji') && !str_contains($qLower, 'pangkat'))) {
             return [
                 'success' => true,
@@ -1024,12 +1275,44 @@ EOT;
             ];
         }
 
+        // 21. FALLBACK GENERAL EDUKATIF (Jika tidak ada kata kunci yang cocok)
         $followUps = $this->generateFollowUpSuggestions($question, $serviceData, 'fallback');
 
         return [
             'success' => true,
-            'reply'   => "Terima kasih atas pertanyaan Anda. 😊\n\nSebagai asisten virtual LILI di BKPSDM Kabupaten Buleleng, saya siap membantu menjelaskan regulasi kepegawaian, ketentuan cuti, kenaikan pangkat, pensiun, tugas belajar, evaluasi kinerja SKP, maupun disiplin ASN. Silakan sampaikan pertanyaan spesifik yang ingin Anda ketahui.",
-            'actions' => array_merge($actions, $followUps),
+            'reply'   => "Terima kasih atas pertanyaan Anda. 😊\n\nSebagai asisten virtual LILI di BKPSDM Kabupaten Buleleng, saya siap mendampingi Anda dalam memahami regulasi kepegawaian ASN, prinsip manajemen aparatur negara, maupun panduan layanan administrasi kepegawaian di lingkungan Pemerintah Kabupaten Buleleng.\n\nSilakan pilih salah satu topik konsultasi di bawah ini atau sampaikan pertanyaan spesifik yang ingin Anda ketahui:",
+            'actions' => [
+                [
+                    'type'   => 'prompt',
+                    'label'  => '📖 Konsep Kepegawaian ASN',
+                    'prompt' => 'Apa itu kepegawaian menurut anda?'
+                ],
+                [
+                    'type'   => 'prompt',
+                    'label'  => '👥 Perbedaan PNS & PPPK',
+                    'prompt' => 'Apa perbedaan antara PNS dan PPPK?'
+                ],
+                [
+                    'type'   => 'prompt',
+                    'label'  => '⚖️ Disiplin & Kode Etik PP 94',
+                    'prompt' => 'Apa saja tingkat sanksi disiplin ASN berdasarkan PP 94 Tahun 2021?'
+                ],
+                [
+                    'type'   => 'prompt',
+                    'label'  => '🏖️ Ketentuan Cuti ASN',
+                    'prompt' => 'Apa saja jenis cuti ASN dan syaratnya?'
+                ],
+                [
+                    'type'   => 'prompt',
+                    'label'  => '📈 6 Periode Kenaikan Pangkat',
+                    'prompt' => 'Kapan saja periode kenaikan pangkat PNS dalam setahun?'
+                ],
+                [
+                    'type'   => 'prompt',
+                    'label'  => '🔍 Cek Status Usulan / NIP',
+                    'prompt' => 'Bagaimana cara cek status usulan berkas kepegawaian saya?'
+                ]
+            ],
             'source'  => 'fallback_general'
         ];
     }

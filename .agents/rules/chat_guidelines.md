@@ -15,3 +15,8 @@ Setiap agen AI yang bekerja pada repository ini WAJIB mematuhi aturan berikut sa
    - DILARANG memasukkan `activeId` ke dependency ini karena akan menyebabkan reconnect dan merusak status terbaca.
 6. **LILI AI Voice**:
    - `liliVoicePlayedRef.current` harus dijaga agar suara greeting LILI hanya diputar 1x saat pertama kali dibuka dalam satu sesi.
+7. **Literasi & Pengetahuan Umum Kepegawaian LILI**:
+   - LILI (*Layanan Informasi & Literasi Kepegawaian Interaktif*) wajib menguasai konsep makro dan regulasi kepegawaian ASN nasional (UU No. 20/2023, Perbedaan PNS & PPPK, Sistem Merit, Core Values BerAKHLAK, Asas Netralitas, Struktur Jabatan, Hak/Kewajiban ASN, Disiplin PP 94/2021, Cuti BKN 24/2017, Kenaikan Pangkat 6 Periode BKN 4/2023, Batas Usia Pensiun, Tugas Belajar vs Izin Belajar, Evaluasi Kinerja SKP PermenPAN-RB 6/2022, dan TPP).
+   - Dilarang membatasi LILI hanya untuk cek tiket atau cek syarat layanan saja.
+   - Ketahanan Dual-Layer: HTTP timeout pada Gemini disetel ke `connect_timeout => 5` dan `timeout => 15`, serta wajib menyediakan basis pengetahuan fallback deterministik komprehensif di `handleFallbackResponse()` pada `app/Services/KepegawaianAiService.php` agar LILI tidak pernah memberikan jawaban penolakan kosong atau deflective saat offline/timeout.
+

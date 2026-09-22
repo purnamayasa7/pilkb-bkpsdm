@@ -58,6 +58,32 @@
    - Saat berpindah antara tiket dan LILI, riwayat chat LILI (`liliMessages`) TIDAK BOLEH di-reset dan suara greeting TIDAK BOLEH diputar ulang.
    - Suara greeting hanya boleh diputar ulang jika user secara sadar menekan tombol "Mulai Baru" (`handleResetLiliChat`).
 
+### F. Standar Kemampuan Literasi & Pengetahuan Umum Kepegawaian LILI (AI & Fallback Layer)
+1. **Mandat Asisten Virtual LILI**:
+   - LILI (*Layanan Informasi & Literasi Kepegawaian Interaktif*) dirancang tidak hanya untuk mengecek nomor tiket usulan dan persyaratan berkas di PILKB, melainkan sebagai **pusat literasi regulasi dan konsep kepegawaian ASN menyeluruh**.
+   - Dilarang mempersempit peran LILI hanya menjadi bot pencari tiket atau pemeriksa syarat.
+2. **Cakupan Pengetahuan Umum Wajib (Macro Civil Service Knowledge)**:
+   - **Konsep Kepegawaian & Manajemen ASN**: Memahami siklus hidup SDM aparatur (perencanaan, pengadaan, penempatan, pengembangan kompetensi, kinerja, penghargaan, disiplin, hingga pensiun) berbasis Sistem Merit.
+   - **UU No. 20 Tahun 2023**: Memahami paradigma unifikasi status ASN, penataan non-ASN, mobilitas talenta nasional, dan integrasi digital SIASN BKN & portal daerah PILKB Buleleng.
+   - **Perbedaan PNS & PPPK**: Memahami perbedaan status kepegawaian, pengangkatan, sistem NIP/NI PPPK, hak pensiun terpadu, dan pola jabatan.
+   - **Sistem Merit & Manajemen Talenta**: Menjelaskan prinsip kualifikasi, kompetensi, dan kinerja tanpa diskriminasi, serta instrumen *9-box talent matrix*.
+   - **Core Values ASN BerAKHLAK**: Memahami 7 nilai dasar (Berorientasi Pelayanan, Akuntabel, Kompeten, Harmonis, Loyal, Adaptif, Kolaboratif) dan employer branding "Bangga Melayani Bangsa".
+   - **Asas Netralitas ASN & Kode Etik**: Menguasai aturan netralitas dalam pemilu/pilkada, larangan media sosial, fasilitas dinas, serta sanksi disiplinnya.
+   - **Hak & Kewajiban ASN**: Menguasai hak penghasilan, jaminan sosial hari tua, perlindungan hukum, dan kewajiban loyalitas pada negara (Pasal 21-24 UU 20/2023).
+   - **Struktur Jabatan Modern**: Klasifikasi Jabatan Manajerial (JPT, Administrator, Pengawas) dan Non-Manajerial (Fungsional Keahlian/Keterampilan, Pelaksana).
+   - **Disiplin Pegawai (PP 94/2021)**: Tingkat hukuman ringan, sedang (pemotongan TPP 25%), dan berat (PTDH).
+   - **Cuti ASN (Peraturan BKN 24/2017 & 7/2021)**: 7 jenis cuti kedinasan ASN.
+   - **Kenaikan Pangkat (Peraturan BKN 4/2023)**: Skema 6 periode per tahun (Feb, Apr, Jun, Agu, Okt, Des).
+   - **Batas Usia Pensiun (BUP)**: Usia 58, 60, dan 65 tahun serta pensiun APS (50 tahun, 20 tahun kerja).
+   - **Pengembangan Kompetensi**: Perbedaan Tugas Belajar (TB) dan Izin Belajar (IB) sesuai SE MenPAN-RB 28/2021.
+   - **Evaluasi Kinerja SKP**: Penerapan PermenPAN-RB No. 6 Tahun 2022 berbasis dialog kinerja.
+   - **TPP & Kesejahteraan Pegawai**: Komponen beban kerja, prestasi kerja, absensi, dan penegakan pemotongan sanksi.
+3. **Arsitektur Resilient Fallback (Ketahanan Dual-Layer)**:
+   - **Layer 1 (Generative AI - Gemini)**: Konfigurasi timeout HTTP dinaikkan menjadi `connect_timeout => 5` detik dan `timeout => 15` detik agar API call tidak putus prematur saat latensi jaringan meningkat.
+   - **Layer 2 (Deterministic Fallback)**: Jika panggilan API Gemini gagal atau timeout, sistem WAJIB menjawab menggunakan basis data fallback deterministik komprehensif pada file [`app/Services/KepegawaianAiService.php`](file:///c:/laragon/www/pilkb/app/Services/KepegawaianAiService.php). LILI **dilarang memberikan jawaban penolakan kosong** atau deflective.
+   - **Proteksi Kata Kunci Sapaan/Izin**: Sapaan dan izin bertanya tidak boleh mengabaikan pertanyaan substantif di dalamnya.
+   - **Fallback General Edukatif**: Bila pertanyaan di luar kata kunci spesifik, `fallback_general` wajib menyajikan opsi tombol aksi (*prompt chips*) edukatif terarah.
+
 ---
 
 ## 3. CHECKLIST SEBELUM MENERAPKAN PERUBAHAN BARU
@@ -65,4 +91,5 @@ Sebelum menyetujui atau menjalankan perubahan pada modul Chat, pastikan:
 - [ ] Apakah ada perubahan pada dependency `useEffect` Firebase? (Pastikan `activeId` tidak masuk ke user listener).
 - [ ] Apakah `roomCacheRef` dan `knownMessageIdsRef` masih berfungsi?
 - [ ] Apakah tombol floating scroll tetap berukuran `w-9 h-9` lingkaran dan tidak melebar?
+- [ ] Apakah LILI AI Service tetap mempertahankan basis pengetahuan umum kepegawaian (baik di prompt Gemini maupun Fallback)?
 - [ ] Jalankan pengujian `npm run build` untuk memastikan tidak ada kesalahan kompilasi JSX/CSS.
