@@ -2,11 +2,14 @@
 
 namespace App\Services;
 
+use App\Models\AiKnowledge;
 use App\Models\Layanan;
 use App\Models\Regtiket;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
 
 class KepegawaianAiService
 {
@@ -173,6 +176,43 @@ EOT;
         $actions = [];
         $groundingContext = '';
 
+        // 4a. DYNAMIC KNOWLEDGE BASE — Layer 0 (Prioritas Tertinggi)
+        // Cek tb_ai_knowledge terlebih dahulu sebelum membangun grounding context Gemini
+        $dynamicKnowledge = $this->lookupDynamicKnowledge($sanitizedQuestion);
+        if ($dynamicKnowledge) {
+            $kategoriLabel = $dynamicKnowledge->kategori_label;
+            $groundingContext .= "\n\n[BASIS PENGETAHUAN RESMI BKPSDM — {$kategoriLabel}]:\n"
+                . "Topik: {$dynamicKnowledge->topik}\n"
+                . (! empty($dynamicKnowledge->nomor_referensi)
+                    ? "Nomor Referensi: {$dynamicKnowledge->nomor_referensi}\n"
+                    : '')
+                . "Konten Resmi:\n{$dynamicKnowledge->konten_jawaban}\n\n"
+                . "PETUNJUK JAWABAN KHUSUS: Gunakan konten resmi di atas sebagai rujukan UTAMA dan PRIORITAS jawaban Anda. "
+                . "Jawab sesuai konteks pertanyaan dengan bahasa yang ramah, jelas, dan terstruktur. "
+                . "Jika konten tidak menjawab sepenuhnya, tambahkan informasi relevan dari pengetahuan kepegawaian Anda.";
+
+            // Tambahkan action chip PDF jika ada lampiran
+            if (! empty($dynamicKnowledge->file_path)) {
+                $pdfUrl = url('/root/ai-knowledge/' . $dynamicKnowledge->id . '/pdf');
+                $actions[] = [
+                    'type'  => 'pdf',
+                    'label' => 'Unduh Dokumen Resmi',
+                    'url'   => $pdfUrl,
+                ];
+            }
+
+            // Tambahkan saran pertanyaan dari database
+            foreach ($dynamicKnowledge->getSaranArray() as $saranTeks) {
+                if (! empty(trim($saranTeks))) {
+                    $actions[] = [
+                        'type'   => 'prompt',
+                        'label'  => $saranTeks,
+                        'prompt' => $saranTeks,
+                    ];
+                }
+            }
+        }
+
         if ($serviceData) {
             if (($serviceData['type'] ?? 'single') === 'catalog') {
                 $groundingContext .= "\n\n[PENGGUNA MENANYAKAN KATALOG / DAFTAR LAYANAN SECARA UMUM]:\n" .
@@ -312,7 +352,8 @@ EOT;
                 'message' => $e->getMessage()
             ]);
 
-            return $this->handleFallbackResponse($sanitizedQuestion, $serviceData, $actions);
+            // FIX #3: Teruskan hasil lookup yang sudah ada agar tidak dipanggil ulang di fallback
+            return $this->handleFallbackResponse($sanitizedQuestion, $serviceData, $actions, $dynamicKnowledge);
         }
     }
 
@@ -841,10 +882,114 @@ EOT;
     }
 
     /**
-     * Fallback cerdas jika koneksi LLM belum dikonfigurasi / mengalami kendala kuota.
+     * Lookup Dynamic Knowledge Base (tb_ai_knowledge) — Layer 0, Prioritas Tertinggi.
+     *
+     * Mencocokkan kata kunci dari pertanyaan pengguna dengan daftar kata_kunci di setiap record.
+     * Menggunakan Cache 5 menit untuk performa tinggi.
+     * Jika ada kecocokan, increment hit_count secara langsung dan kembalikan record terbaik.
      */
-    private function handleFallbackResponse(string $question, ?array $serviceData = null, array $actions = []): array
+    private function lookupDynamicKnowledge(string $question): ?AiKnowledge
     {
+        $qLower = mb_strtolower(trim($question), 'UTF-8');
+
+        // Ambil semua materi aktif dari cache (5 menit)
+        // Cache hanya di-invalidasi saat data berubah (CREATE/UPDATE/DELETE/Toggle di controller)
+        $allKnowledge = Cache::remember('ai_knowledge_active', 300, function () {
+            return AiKnowledge::active()
+                ->orderByDesc('hit_count')
+                ->orderByDesc('updated_at')
+                ->get();
+        });
+
+        if ($allKnowledge->isEmpty()) {
+            return null;
+        }
+
+        $bestMatch      = null;
+        $bestMatchScore = 0;
+
+        foreach ($allKnowledge as $knowledge) {
+            $keywords = $knowledge->getKataKunciArray();
+            if (empty($keywords)) continue;
+
+            $matchScore = 0;
+            foreach ($keywords as $keyword) {
+                $kw = mb_strtolower(trim($keyword), 'UTF-8');
+                if (empty($kw) || ! str_contains($qLower, $kw)) {
+                    continue;
+                }
+                // FIX #2: Beri bobot lebih tinggi untuk frasa multi-kata (lebih spesifik)
+                // Frasa 2+ kata → bobot 3x, kata tunggal → bobot 1x
+                $kwWordCount = count(preg_split('/\s+/', $kw, -1, PREG_SPLIT_NO_EMPTY));
+                $matchScore += ($kwWordCount >= 2) ? 3 : 1;
+            }
+
+            if ($matchScore > 0 && $matchScore > $bestMatchScore) {
+                $bestMatchScore = $matchScore;
+                $bestMatch      = $knowledge;
+            }
+        }
+
+        if ($bestMatch) {
+            // Increment hit_count langsung via raw DB (akurat, tidak tergantung cache)
+            // FIX #1: TIDAK lagi memanggil Cache::forget di sini —
+            // cache hanya perlu di-invalidasi saat data berubah, bukan saat dibaca/dihit.
+            DB::table('tb_ai_knowledge')
+                ->where('id', $bestMatch->id)
+                ->increment('hit_count');
+        }
+
+        return $bestMatch;
+    }
+
+    /**
+     * Fallback cerdas jika koneksi LLM belum dikonfigurasi / mengalami kendala kuota.
+     *
+     * FIX #3: Menerima parameter $preloadedKnowledge agar tidak memanggil lookupDynamicKnowledge
+     * dua kali (sekali di ask(), sekali di sini), yang sebelumnya menyebabkan hit_count
+     * di-increment ganda untuk satu pertanyaan yang sama.
+     */
+    private function handleFallbackResponse(
+        string $question,
+        ?array $serviceData = null,
+        array $actions = [],
+        ?AiKnowledge $preloadedKnowledge = null
+    ): array {
+        // Layer 0: Dynamic Knowledge Base (tb_ai_knowledge) — Prioritas tertinggi di fallback
+        // Gunakan hasil lookup yang sudah ada jika tersedia, hindari double-call
+        $dynamicKnowledge = $preloadedKnowledge ?? $this->lookupDynamicKnowledge($question);
+        if ($dynamicKnowledge) {
+            $dynamicActions = $actions;
+
+            // Tambahkan action chip PDF jika ada lampiran
+            if (! empty($dynamicKnowledge->file_path)) {
+                $pdfUrl = url('/root/ai-knowledge/' . $dynamicKnowledge->id . '/pdf');
+                $dynamicActions[] = [
+                    'type'  => 'pdf',
+                    'label' => 'Unduh Dokumen Resmi',
+                    'url'   => $pdfUrl,
+                ];
+            }
+
+            // Tambahkan saran pertanyaan dari database
+            foreach ($dynamicKnowledge->getSaranArray() as $saranTeks) {
+                if (! empty(trim($saranTeks))) {
+                    $dynamicActions[] = [
+                        'type'   => 'prompt',
+                        'label'  => $saranTeks,
+                        'prompt' => $saranTeks,
+                    ];
+                }
+            }
+
+            return [
+                'success' => true,
+                'reply'   => $dynamicKnowledge->konten_jawaban,
+                'actions' => $dynamicActions,
+                'source'  => 'dynamic_knowledge_' . $dynamicKnowledge->kategori,
+            ];
+        }
+
         // 1. Jika ada data syarat layanan spesifik yang diminta pengguna
         if ($serviceData) {
             if (($serviceData['type'] ?? 'single') === 'catalog') {

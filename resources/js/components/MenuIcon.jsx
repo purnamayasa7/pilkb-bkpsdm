@@ -29,9 +29,11 @@ import {
     AlertCircle,
     Star,
     Megaphone,
+    Brain,
 } from 'lucide-react';
 
 const iconMap = {
+    brain: Brain,
     home: Home,
     users: Users,
     layers: Layers,

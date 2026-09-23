@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AiKnowledgeController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\BackupController;
 use App\Http\Controllers\BidangController;
@@ -225,6 +226,17 @@ Route::prefix('root')
         Route::get('faq/{id}', [FaQController::class, 'edit'])->name('faq.edit');
         Route::put('faq/{id}', [FaQController::class, 'update'])->name('faq.update');
         Route::delete('faq/{id}', [FaQController::class, 'destroy'])->name('faq.destroy');
+
+        // LILI AI KNOWLEDGE BASE
+        Route::get('ai-knowledge', [AiKnowledgeController::class, 'index'])->name('ai-knowledge.index');
+        Route::get('ai-knowledge/create', [AiKnowledgeController::class, 'create'])->name('ai-knowledge.create');
+        Route::post('ai-knowledge', [AiKnowledgeController::class, 'store'])->name('ai-knowledge.store');
+        Route::post('ai-knowledge/test-simulator', [AiKnowledgeController::class, 'testSimulator'])->name('ai-knowledge.test');
+        Route::get('ai-knowledge/{id}/edit', [AiKnowledgeController::class, 'edit'])->name('ai-knowledge.edit');
+        Route::get('ai-knowledge/{id}/pdf', [AiKnowledgeController::class, 'downloadPdf'])->name('ai-knowledge.pdf');
+        Route::put('ai-knowledge/{id}', [AiKnowledgeController::class, 'update'])->name('ai-knowledge.update');
+        Route::put('ai-knowledge/{id}/toggle-aktif', [AiKnowledgeController::class, 'toggleAktif'])->name('ai-knowledge.toggle-aktif');
+        Route::delete('ai-knowledge/{id}', [AiKnowledgeController::class, 'destroy'])->name('ai-knowledge.destroy');
 
         // Backup Database
         Route::get('backup', [BackupController::class, 'index'])->name('backup.index');

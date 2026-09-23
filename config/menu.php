@@ -66,7 +66,7 @@ return [
         // Heading
         [
             'type' => 'heading',
-            'title' => 'Manajemen Layanan',
+            'title' => 'Pelayanan & Tiket',
         ],
 
         [
@@ -80,7 +80,7 @@ return [
         // Heading
         [
             'type' => 'heading',
-            'title' => 'Lainnya',
+            'title' => 'Pusat Komunikasi & Bantuan',
         ],
 
         [
@@ -93,27 +93,32 @@ return [
 
         [
             'type' => 'item',
-            'title' => 'Log Aktivitas',
-            'path' => 'log-aktivitas',
-            'icon' => 'activity',
-            'active_key' => 'aktivitas',
-        ],
-
-        [
-            'type' => 'item',
-            'title' => 'Log Error Sistem',
-            'path' => 'log-viewer',
-            'icon' => 'alert-triangle',
-            'active_key' => 'log-viewer',
-            'target' => '_blank',
-        ],
-
-        [
-            'type' => 'item',
             'title' => 'Papan Informasi',
             'path' => 'pengumuman',
             'icon' => 'megaphone',
             'active_key' => 'pengumuman',
+        ],
+
+        [
+            'type' => 'item',
+            'title' => 'FAQ',
+            'path' => 'root/faq',
+            'icon' => 'message-circle',
+            'active_key' => 'faq',
+        ],
+
+        [
+            'type' => 'item',
+            'title' => 'Basis Pengetahuan LILI',
+            'path' => 'root/ai-knowledge',
+            'icon' => 'brain',
+            'active_key' => 'ai-knowledge',
+        ],
+
+        // Heading
+        [
+            'type' => 'heading',
+            'title' => 'Laporan & Audit',
         ],
 
         [
@@ -126,6 +131,20 @@ return [
 
         [
             'type' => 'item',
+            'title' => 'Log Aktivitas',
+            'path' => 'log-aktivitas',
+            'icon' => 'activity',
+            'active_key' => 'aktivitas',
+        ],
+
+        // Heading
+        [
+            'type' => 'heading',
+            'title' => 'Sistem & Pemeliharaan',
+        ],
+
+        [
+            'type' => 'item',
             'title' => 'Backup Database',
             'path' => 'root/backup',
             'icon' => 'database',
@@ -134,10 +153,11 @@ return [
 
         [
             'type' => 'item',
-            'title' => 'FAQ',
-            'path' => 'root/faq',
-            'icon' => 'message-circle',
-            'active_key' => 'faq',
+            'title' => 'Log Error Sistem',
+            'path' => 'log-viewer',
+            'icon' => 'alert-triangle',
+            'active_key' => 'log-viewer',
+            'target' => '_blank',
         ],
     ],
 
@@ -160,7 +180,7 @@ return [
         // Heading
         [
             'type' => 'heading',
-            'title' => 'Manajemen Layanan',
+            'title' => 'Pelayanan Loket',
         ],
 
         [
@@ -228,15 +248,7 @@ return [
         // Heading
         [
             'type' => 'heading',
-            'title' => 'Lainnya',
-        ],
-
-        [
-            'type' => 'item',
-            'title' => 'Percakapan',
-            'path' => 'chat',
-            'icon' => 'message-square',
-            'active_key' => 'chat-center',
+            'title' => 'Laporan & Referensi',
         ],
 
         [
@@ -253,6 +265,14 @@ return [
             'path' => 'adminBawah/cetakSyarat',
             'icon' => 'file-text',
             'active_key' => 'cetak-syarat',
+        ],
+
+        [
+            'type' => 'item',
+            'title' => 'Percakapan',
+            'path' => 'chat',
+            'icon' => 'message-square',
+            'active_key' => 'chat-center',
         ],
     ],
 
@@ -275,7 +295,7 @@ return [
         // Heading
         [
             'type' => 'heading',
-            'title' => 'Manajemen Layanan',
+            'title' => 'Usulan Layanan',
         ],
 
         [
@@ -292,12 +312,6 @@ return [
             'path' => 'adminOpd/tiket',
             'icon' => 'clipboard',
             'active_key' => 'list-permintaan',
-        ],
-
-        // Heading
-        [
-            'type' => 'heading',
-            'title' => 'Manajemen Tiket',
         ],
 
         [
@@ -319,15 +333,15 @@ return [
         // Heading
         [
             'type' => 'heading',
-            'title' => 'Lainnya',
+            'title' => 'Informasi & Bantuan',
         ],
 
         [
             'type' => 'item',
-            'title' => 'Percakapan',
-            'path' => 'chat',
-            'icon' => 'message-square',
-            'active_key' => 'chat-center',
+            'title' => 'Cetak Syarat',
+            'path' => 'adminOpd/cetakSyarat',
+            'icon' => 'file-text',
+            'active_key' => 'cetak-syarat',
         ],
 
         [
@@ -340,10 +354,10 @@ return [
 
         [
             'type' => 'item',
-            'title' => 'Cetak Syarat',
-            'path' => 'adminOpd/cetakSyarat',
-            'icon' => 'file-text',
-            'active_key' => 'cetak-syarat',
+            'title' => 'Percakapan',
+            'path' => 'chat',
+            'icon' => 'message-square',
+            'active_key' => 'chat-center',
         ],
     ],
 
@@ -366,7 +380,7 @@ return [
         // Heading
         [
             'type' => 'heading',
-            'title' => 'Master Data',
+            'title' => 'Master Layanan',
         ],
 
         [
@@ -388,7 +402,7 @@ return [
         // Heading
         [
             'type' => 'heading',
-            'title' => 'Manajemen Layanan',
+            'title' => 'Verifikasi & Proses',
         ],
 
         [
@@ -418,15 +432,7 @@ return [
         // Heading
         [
             'type' => 'heading',
-            'title' => 'Lainnya',
-        ],
-
-        [
-            'type' => 'item',
-            'title' => 'Percakapan',
-            'path' => 'chat',
-            'icon' => 'message-square',
-            'active_key' => 'chat-center',
+            'title' => 'Laporan & Informasi',
         ],
 
         [
@@ -443,6 +449,14 @@ return [
             'path'       => 'adminBidang/cetakSyarat',
             'icon'       => 'file-text',
             'active_key' => 'cetak-syarat',
+        ],
+
+        [
+            'type' => 'item',
+            'title' => 'Percakapan',
+            'path' => 'chat',
+            'icon' => 'message-square',
+            'active_key' => 'chat-center',
         ],
 
         [
@@ -503,15 +517,7 @@ return [
         // Heading
         [
             'type'  => 'heading',
-            'title' => 'Lainnya',
-        ],
-
-        [
-            'type'       => 'item',
-            'title'      => 'Percakapan',
-            'path'       => 'chat',
-            'icon'       => 'message-square',
-            'active_key' => 'chat-center',
+            'title' => 'Komunikasi & Informasi',
         ],
 
         [
@@ -520,6 +526,14 @@ return [
             'path'       => 'pengumuman',
             'icon'       => 'megaphone',
             'active_key' => 'pengumuman',
+        ],
+
+        [
+            'type'       => 'item',
+            'title'      => 'Percakapan',
+            'path'       => 'chat',
+            'icon'       => 'message-square',
+            'active_key' => 'chat-center',
         ],
     ],
 ];

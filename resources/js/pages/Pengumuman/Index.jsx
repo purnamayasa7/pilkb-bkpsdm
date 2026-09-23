@@ -166,13 +166,13 @@ export default function PengumumanIndex({
                 };
             case 'success':
                 return {
-                    label: 'Resmi',
+                    label: 'Pengumuman Resmi',
                     class: 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300 border-emerald-200/80 dark:border-emerald-900/50',
                     icon: CheckCircle2,
                 };
             default:
                 return {
-                    label: 'Info',
+                    label: 'Informasi',
                     class: 'bg-blue-50 text-blue-700 dark:bg-blue-950/60 dark:text-blue-300 border-blue-200/80 dark:border-blue-900/50',
                     icon: Info,
                 };
