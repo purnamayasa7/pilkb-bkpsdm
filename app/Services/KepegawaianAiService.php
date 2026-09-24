@@ -1032,14 +1032,39 @@ EOT;
         $qLower = mb_strtolower(trim($question), 'UTF-8');
 
         // 2. Deteksi sapaan ramah / greeting (hanya jika pesan murni sapaan tanpa pertanyaan substansi)
-        $isSubstantiveInquiry = str_contains($qLower, 'kepegawaian') || str_contains($qLower, 'asn') ||
-            str_contains($qLower, 'pns') || str_contains($qLower, 'pppk') || str_contains($qLower, 'cuti') ||
-            str_contains($qLower, 'pangkat') || str_contains($qLower, 'pensiun') || str_contains($qLower, 'belajar') ||
-            str_contains($qLower, 'disiplin') || str_contains($qLower, 'syarat') || str_contains($qLower, 'layanan') ||
-            str_contains($qLower, 'tiket') || str_contains($qLower, 'nip') || str_contains($qLower, 'tpp') ||
-            str_contains($qLower, 'skp') || str_contains($qLower, 'kinerja') || str_contains($qLower, 'merit') ||
-            str_contains($qLower, 'berakhlak') || str_contains($qLower, 'netralitas') || str_contains($qLower, 'kode etik') ||
-            str_contains($qLower, 'jabatan') || str_contains($qLower, 'kewajiban') || str_contains($qLower, 'hak');
+        // DIPERLUAS: tambah kata kunci umum kepegawaian agar pertanyaan campuran ("Halo, apa itu CPNS?")
+        // tidak tersangkut sebagai sapaan murni dan langsung diproses ke pipeline utama.
+        $isSubstantiveInquiry =
+            // Terminologi dasar ASN & kepegawaian
+            str_contains($qLower, 'kepegawaian') || str_contains($qLower, 'asn') ||
+            str_contains($qLower, 'pns') || str_contains($qLower, 'pppk') ||
+            str_contains($qLower, 'pegawai negeri') || str_contains($qLower, 'aparatur') ||
+            str_contains($qLower, 'birokrasi') || str_contains($qLower, 'cpns') ||
+            str_contains($qLower, 'casn') || str_contains($qLower, 'honorer') ||
+            str_contains($qLower, 'non asn') || str_contains($qLower, 'tenaga kontrak') ||
+            // Layanan & proses kepegawaian
+            str_contains($qLower, 'cuti') || str_contains($qLower, 'pangkat') ||
+            str_contains($qLower, 'pensiun') || str_contains($qLower, 'belajar') ||
+            str_contains($qLower, 'disiplin') || str_contains($qLower, 'syarat') ||
+            str_contains($qLower, 'layanan') || str_contains($qLower, 'mutasi') ||
+            str_contains($qLower, 'promosi') || str_contains($qLower, 'formasi') ||
+            str_contains($qLower, 'seleksi') || str_contains($qLower, 'rekrutmen') ||
+            str_contains($qLower, 'karier') || str_contains($qLower, 'golongan') ||
+            // Identifikasi & sistem
+            str_contains($qLower, 'tiket') || str_contains($qLower, 'nip') ||
+            str_contains($qLower, 'pilkb') || str_contains($qLower, 'simpeg') ||
+            str_contains($qLower, 'siasn') || str_contains($qLower, 'taspen') ||
+            str_contains($qLower, 'bpjs') || str_contains($qLower, 'karpeg') ||
+            str_contains($qLower, 'karis') || str_contains($qLower, 'karsu') ||
+            str_contains($qLower, 'angka kredit') || str_contains($qLower, 'dupak') ||
+            str_contains($qLower, 'pak') ||
+            // Kesejahteraan & kinerja
+            str_contains($qLower, 'tpp') || str_contains($qLower, 'tukin') ||
+            str_contains($qLower, 'gaji') || str_contains($qLower, 'skp') ||
+            str_contains($qLower, 'kinerja') || str_contains($qLower, 'merit') ||
+            str_contains($qLower, 'berakhlak') || str_contains($qLower, 'netralitas') ||
+            str_contains($qLower, 'kode etik') || str_contains($qLower, 'jabatan') ||
+            str_contains($qLower, 'kewajiban') || str_contains($qLower, 'hak');
 
         if (!$isSubstantiveInquiry) {
             $greetings = ['halo', 'hai', 'hello', 'hey', 'pagi', 'siang', 'sore', 'malam', 'assalam', 'swastiastu', 'om swastyastu'];
@@ -1138,8 +1163,24 @@ EOT;
             ];
         }
 
-        // 6. PERBEDAAN PNS DAN PPPK
-        if (str_contains($qLower, 'pns dan pppk') || str_contains($qLower, 'pns vs pppk') || str_contains($qLower, 'beda pns') || str_contains($qLower, 'perbedaan pns') || str_contains($qLower, 'apa itu pppk') || str_contains($qLower, 'status pppk') || str_contains($qLower, 'apakah pppk bisa jadi pns')) {
+        // 6. DEFINISI PNS & PERBEDAAN PNS DAN PPPK
+        // Diperluas: menangkap "apa itu pns", "pengertian pns", dan variasinya
+        if (
+            str_contains($qLower, 'pns dan pppk') || str_contains($qLower, 'pns vs pppk') ||
+            str_contains($qLower, 'beda pns') || str_contains($qLower, 'perbedaan pns') ||
+            str_contains($qLower, 'apa itu pppk') || str_contains($qLower, 'status pppk') ||
+            str_contains($qLower, 'apakah pppk bisa jadi pns') ||
+            // Tambahan: definisi PNS murni
+            str_contains($qLower, 'apa itu pns') || str_contains($qLower, 'pengertian pns') ||
+            str_contains($qLower, 'pns itu apa') || str_contains($qLower, 'apakah itu pns') ||
+            str_contains($qLower, 'tentang pns') || str_contains($qLower, 'pengertian pegawai negeri') ||
+            str_contains($qLower, 'pegawai negeri sipil itu') ||
+            (str_contains($qLower, 'pns') && (
+                str_contains($qLower, 'jelaskan') || str_contains($qLower, 'maksud') ||
+                str_contains($qLower, 'artinya') || str_contains($qLower, 'mengetahui') ||
+                str_contains($qLower, 'ingin tahu') || str_contains($qLower, 'mau tahu')
+            ))
+        ) {
             return [
                 'success' => true,
                 'reply'   => "Berdasarkan **UU No. 20 Tahun 2023 tentang ASN**, PNS dan PPPK sama-sama berstatus sebagai Pegawai ASN dengan karakteristik regulasi sebagai berikut:\n\n" .
@@ -1165,6 +1206,205 @@ EOT;
                     ]
                 ],
                 'source'  => 'fallback_pns_pppk'
+            ];
+        }
+
+        // 6B. CPNS, CASN & SELEKSI ASN
+        if (
+            str_contains($qLower, 'cpns') || str_contains($qLower, 'casn') ||
+            str_contains($qLower, 'seleksi asn') || str_contains($qLower, 'seleksi cpns') ||
+            str_contains($qLower, 'pendaftaran asn') || str_contains($qLower, 'daftar cpns') ||
+            str_contains($qLower, 'rekrutmen asn') || str_contains($qLower, 'formasi cpns') ||
+            str_contains($qLower, 'tes cpns') || str_contains($qLower, 'ujian cpns') ||
+            str_contains($qLower, 'lulus cpns') || str_contains($qLower, 'lolos seleksi')
+        ) {
+            return [
+                'success' => true,
+                'reply'   => "**CPNS (Calon Pegawai Negeri Sipil)** dan **CASN (Calon Aparatur Sipil Negara)** adalah sebutan untuk peserta yang sedang menjalani proses seleksi penerimaan pegawai pemerintah secara terbuka.\n\n" .
+                    "📌 **Tahapan Seleksi CPNS/CASN Nasional:**\n" .
+                    "1. **Pengumuman Formasi:** BKN dan Kementerian PANRB mengumumkan kebutuhan formasi secara resmi di portal SSCASN (sscasn.bkn.go.id).\n" .
+                    "2. **Pendaftaran Online:** Calon pelamar mendaftar secara daring, mengunggah dokumen administrasi, dan memilih formasi jabatan.\n" .
+                    "3. **Seleksi Administrasi:** Verifikasi kelengkapan dan kesesuaian berkas persyaratan.\n" .
+                    "4. **SKD (Seleksi Kompetensi Dasar):** Ujian berbasis komputer (CAT) mencakup Tes Wawasan Kebangsaan (TWK), Tes Intelegensia Umum (TIU), dan Tes Karakteristik Pribadi (TKP).\n" .
+                    "5. **SKB (Seleksi Kompetensi Bidang):** Ujian teknis sesuai bidang jabatan yang dilamar, termasuk wawancara atau praktik kerja.\n" .
+                    "6. **Pengumuman Kelulusan & Pemberkasan:** Peserta yang lulus mengikuti pemberkasan untuk NIP dan pengangkatan sebagai CPNS.\n\n" .
+                    "⏳ **Masa CPNS:** Setelah dinyatakan lulus dan diangkat sebagai CPNS, pegawai menjalani masa prajabatan (Latsar CPNS) sebelum diangkat sebagai PNS penuh.\n\n" .
+                    "Untuk informasi formasi dan jadwal seleksi terbaru, pantau pengumuman resmi di **BKPSDM Kabupaten Buleleng** atau portal nasional SSCASN BKN. Ada yang ingin ditanyakan lebih lanjut? 😊",
+                'actions' => [
+                    ['type' => 'prompt', 'label' => '👥 Perbedaan PNS & PPPK', 'prompt' => 'Apa perbedaan antara PNS dan PPPK?'],
+                    ['type' => 'prompt', 'label' => '🏛️ Info Formasi BKPSDM', 'prompt' => 'Bagaimana cara mengetahui formasi kepegawaian di BKPSDM Buleleng?'],
+                ],
+                'source'  => 'fallback_cpns_casn'
+            ];
+        }
+
+        // 6C. HONORER & NON-ASN
+        if (
+            str_contains($qLower, 'honorer') || str_contains($qLower, 'non asn') ||
+            str_contains($qLower, 'tenaga kontrak') || str_contains($qLower, 'penataan honorer') ||
+            str_contains($qLower, 'pegawai tidak tetap') || str_contains($qLower, 'pegawai harian') ||
+            str_contains($qLower, 'nasib honorer') || str_contains($qLower, 'honorer k2') ||
+            str_contains($qLower, 'tenaga ahok') || str_contains($qLower, 'r2/r3')
+        ) {
+            return [
+                'success' => true,
+                'reply'   => "**Tenaga Honorer / Non-ASN** adalah pegawai yang bekerja di instansi pemerintah namun belum berstatus sebagai Pegawai ASN (PNS atau PPPK). Berdasarkan **UU No. 20 Tahun 2023 tentang ASN**, pemerintah menetapkan kebijakan berikut:\n\n" .
+                    "📌 **Kebijakan Penataan Tenaga Non-ASN:**\n" .
+                    "1. **Penghapusan Honorer:** Seluruh tenaga honorer/non-ASN secara bertahap dinonaktifkan dari database BKN.\n" .
+                    "2. **Opsi Pengangkatan melalui PPPK:** Tenaga honorer yang memenuhi syarat dapat diikutsertakan dalam seleksi PPPK (Pegawai Pemerintah dengan Perjanjian Kerja) sesuai formasi kebutuhan.\n" .
+                    "3. **Tidak Ada Pengangkatan Langsung (Inpassing):** Tidak ada jalur pengangkatan langsung menjadi ASN tanpa melalui seleksi terbuka.\n" .
+                    "4. **Batas Waktu Penataan:** Pemerintah menetapkan batas waktu penyelesaian penataan tenaga non-ASN.\n\n" .
+                    "⚠️ Untuk informasi status tenaga honorer di lingkungan **Pemerintah Kabupaten Buleleng**, silakan hubungi langsung **BKPSDM Kabupaten Buleleng** atau OPD (Organisasi Perangkat Daerah) tempat bertugas. Ada yang ingin ditanyakan lebih lanjut? 😊",
+                'actions' => [
+                    ['type' => 'prompt', 'label' => '📋 Seleksi CPNS/PPPK', 'prompt' => 'Bagaimana proses seleksi CPNS dan PPPK?'],
+                    ['type' => 'prompt', 'label' => '👥 Perbedaan PNS & PPPK', 'prompt' => 'Apa perbedaan antara PNS dan PPPK?'],
+                ],
+                'source'  => 'fallback_honorer_non_asn'
+            ];
+        }
+
+        // 6D. MUTASI / PERPINDAHAN PEGAWAI (Informatif Umum)
+        // Hanya untuk pertanyaan KONSEP mutasi; pertanyaan SYARAT mutasi ditangani oleh detectAndLookupServiceRequirements()
+        if (
+            str_contains($qLower, 'mutasi itu') || str_contains($qLower, 'apa itu mutasi') ||
+            str_contains($qLower, 'pengertian mutasi') || str_contains($qLower, 'pindah tugas itu') ||
+            str_contains($qLower, 'apa itu pindah tugas') || str_contains($qLower, 'alasan mutasi') ||
+            str_contains($qLower, 'jenis mutasi') || str_contains($qLower, 'tujuan mutasi') ||
+            (str_contains($qLower, 'mutasi') && (
+                str_contains($qLower, 'apa') || str_contains($qLower, 'jelaskan') ||
+                str_contains($qLower, 'maksud') || str_contains($qLower, 'artinya') ||
+                str_contains($qLower, 'pengertian') || str_contains($qLower, 'definisi')
+            ))
+        ) {
+            return [
+                'success' => true,
+                'reply'   => "**Mutasi Pegawai** (atau Perpindahan Tugas) adalah proses pemindahan ASN dari satu jabatan, unit kerja, atau instansi ke jabatan/unit kerja/instansi lain berdasarkan kebutuhan organisasi dan kepentingan dinas.\n\n" .
+                    "📌 **Jenis-Jenis Mutasi ASN:**\n" .
+                    "1. **Mutasi Vertikal (Promosi):** Perpindahan ke jabatan yang lebih tinggi (naik jabatan).\n" .
+                    "2. **Mutasi Horizontal (Rotasi):** Perpindahan ke jabatan setara di unit/instansi berbeda tanpa perubahan eselon.\n" .
+                    "3. **Mutasi Antar-OPD:** Perpindahan dari satu Organisasi Perangkat Daerah ke OPD lain dalam lingkup Pemerintah Kabupaten Buleleng.\n" .
+                    "4. **Mutasi Antar-Daerah:** Perpindahan antar instansi pemerintah daerah atau pusat (memerlukan rekomendasi kepala daerah).\n\n" .
+                    "🎯 **Prinsip Mutasi:**\n" .
+                    "Mutasi dilaksanakan berdasarkan Sistem Merit (kualifikasi, kompetensi, dan kinerja), bukan atas dasar kepentingan pribadi/politik. Di BKPSDM Kabupaten Buleleng, proses mutasi dikelola oleh **Bidang Mutasi dan Promosi**.\n\n" .
+                    "Apakah Anda ingin mengetahui persyaratan berkas untuk pengajuan mutasi/pindah tugas? 😊",
+                'actions' => [
+                    ['type' => 'prompt', 'label' => '📄 Syarat Mutasi Pegawai', 'prompt' => 'Apa syarat mutasi pegawai di BKPSDM Buleleng?'],
+                    ['type' => 'prompt', 'label' => '🏛️ Tugas Bidang Mutasi', 'prompt' => 'Apa tugas Bidang Mutasi dan Promosi di BKPSDM Buleleng?'],
+                ],
+                'source'  => 'fallback_mutasi_informatif'
+            ];
+        }
+
+        // 6E. NIP & NOMOR IDENTITAS KEPEGAWAIAN
+        if (
+            str_contains($qLower, 'apa itu nip') || str_contains($qLower, 'nip itu apa') ||
+            str_contains($qLower, 'pengertian nip') || str_contains($qLower, 'nomor induk pegawai') ||
+            str_contains($qLower, 'ni pppk') || str_contains($qLower, 'nomor induk pppk') ||
+            str_contains($qLower, 'cara baca nip') || str_contains($qLower, 'format nip') ||
+            (str_contains($qLower, 'nip') && (
+                str_contains($qLower, 'apa') || str_contains($qLower, 'jelaskan') ||
+                str_contains($qLower, 'maksud') || str_contains($qLower, 'artinya') ||
+                str_contains($qLower, 'terdiri') || str_contains($qLower, 'berapa digit')
+            ))
+        ) {
+            return [
+                'success' => true,
+                'reply'   => "**NIP (Nomor Induk Pegawai)** adalah nomor identitas resmi yang diberikan kepada setiap Pegawai Negeri Sipil (PNS) oleh Badan Kepegawaian Negara (BKN) secara nasional.\n\n" .
+                    "📌 **Format NIP PNS (18 Digit):**\n" .
+                    "```\n19850811 200901 1 001\n└─────┘ └────┘ │ └─┘\n  TMT    TMT   Jk  No.\nLahir  CPNS  Urut\n```\n" .
+                    "- **8 digit pertama:** Tanggal lahir pegawai (YYYYMMDD)\n" .
+                    "- **6 digit berikut:** Tanggal mulai bekerja sebagai CPNS (YYYYMM)\n" .
+                    "- **1 digit:** Jenis kelamin (1 = Laki-laki, 2 = Perempuan)\n" .
+                    "- **3 digit terakhir:** Nomor urut kepegawaian\n\n" .
+                    "📌 **NI PPPK (Nomor Induk PPPK):**\n" .
+                    "PPPK tidak memiliki NIP seperti PNS, melainkan **NI PPPK** yang juga diterbitkan oleh BKN dengan format berbeda (dimulai angka 20...).\n\n" .
+                    "Di sistem **PILKB BKPSDM Kabupaten Buleleng**, NIP digunakan untuk melacak status usulan kepegawaian Anda. Ada pertanyaan lain? 😊",
+                'actions' => [
+                    ['type' => 'prompt', 'label' => '🔍 Cek Usulan via NIP', 'prompt' => 'Saya mau cek status usulan berkas kepegawaian saya'],
+                    ['type' => 'prompt', 'label' => '👥 Perbedaan PNS & PPPK', 'prompt' => 'Apa perbedaan antara PNS dan PPPK?'],
+                ],
+                'source'  => 'fallback_nip_identitas'
+            ];
+        }
+
+        // 6F. SISTEM INFORMASI KEPEGAWAIAN (PILKB, SIMPEG, SIASN, TASPEN, BPJS)
+        if (
+            str_contains($qLower, 'apa itu pilkb') || str_contains($qLower, 'pilkb itu') ||
+            str_contains($qLower, 'apa itu simpeg') || str_contains($qLower, 'simpeg itu') ||
+            str_contains($qLower, 'apa itu siasn') || str_contains($qLower, 'siasn itu') ||
+            str_contains($qLower, 'apa itu taspen') || str_contains($qLower, 'taspen itu') ||
+            str_contains($qLower, 'apa itu bpjs') || str_contains($qLower, 'bpjs ketenagakerjaan asn') ||
+            str_contains($qLower, 'sistem informasi kepegawaian') || str_contains($qLower, 'aplikasi kepegawaian')
+        ) {
+            return [
+                'success' => true,
+                'reply'   => "Berikut penjelasan sistem informasi kepegawaian utama yang terkait dengan ASN di **Kabupaten Buleleng**:\n\n" .
+                    "🖥️ **PILKB (Portal Informasi Layanan Kepegawaian Buleleng):**\n" .
+                    "Sistem layanan administrasi kepegawaian terpadu milik **BKPSDM Kabupaten Buleleng**. Digunakan untuk pengajuan usulan kepegawaian (kenaikan pangkat, pensiun, cuti, dll), pelacakan nomor tiket usulan, serta komunikasi antara pegawai dan petugas BKPSDM.\n\n" .
+                    "🖥️ **SIASN / MySAPK (BKN Nasional):**\n" .
+                    "Sistem Informasi ASN milik Badan Kepegawaian Negara (BKN) yang menjadi basis data kepegawaian nasional. Data pegawai dari daerah (termasuk Buleleng) terintegrasi ke sistem ini.\n\n" .
+                    "🖥️ **SIMPEG (Sistem Informasi Manajemen Kepegawaian):**\n" .
+                    "Istilah umum untuk sistem informasi pengelolaan data pegawai di lingkungan pemerintah daerah, mencakup riwayat jabatan, pangkat, pendidikan, dan data kepegawaian lainnya.\n\n" .
+                    "💰 **TASPEN (Tabungan dan Asuransi Pegawai Negeri):**\n" .
+                    "Lembaga yang mengelola program **Tabungan Hari Tua (THT)** dan **Pensiun** bagi PNS. Iuran TASPEN dipotong dari gaji PNS setiap bulan (umumnya 4,75%).\n\n" .
+                    "🏥 **BPJS Kesehatan & BPJS Ketenagakerjaan:**\n" .
+                    "ASN (PNS dan PPPK) wajib menjadi peserta BPJS Kesehatan (Jaminan Kesehatan Nasional) dan mendapatkan perlindungan jaminan kecelakaan kerja serta jaminan kematian. Ada yang ingin ditanyakan lebih lanjut? 😊",
+                'actions' => [
+                    ['type' => 'prompt', 'label' => '🔍 Cek Status Usulan PILKB', 'prompt' => 'Saya mau cek status usulan tiket saya'],
+                    ['type' => 'prompt', 'label' => '👴 Info Manfaat Pensiun TASPEN', 'prompt' => 'Bagaimana ketentuan pensiun PNS dan manfaat TASPEN?'],
+                ],
+                'source'  => 'fallback_sistem_informasi'
+            ];
+        }
+
+        // 6G. KARTU IDENTITAS KEPEGAWAIAN (KARPEG, KARIS, KARSU)
+        if (
+            str_contains($qLower, 'karpeg') || str_contains($qLower, 'karis') ||
+            str_contains($qLower, 'karsu') || str_contains($qLower, 'kartu pegawai') ||
+            str_contains($qLower, 'kartu isteri') || str_contains($qLower, 'kartu suami') ||
+            str_contains($qLower, 'kartu istri') || str_contains($qLower, 'kartu identitas pegawai')
+        ) {
+            return [
+                'success' => true,
+                'reply'   => "Berikut penjelasan kartu identitas kepegawaian resmi bagi ASN:\n\n" .
+                    "🪪 **KARPEG (Kartu Pegawai):**\n" .
+                    "Kartu identitas resmi sebagai bukti status kepegawaian PNS yang diterbitkan oleh BKN. Karpeg memuat NIP, nama, dan data kepegawaian dasar. Diperlukan sebagai persyaratan berbagai urusan kepegawaian (kenaikan pangkat, pensiun, dll).\n\n" .
+                    "🪪 **KARIS (Kartu Isteri PNS):**\n" .
+                    "Kartu identitas yang dikeluarkan untuk **isteri sah dari PNS laki-laki**, digunakan sebagai bukti hak mendapatkan jaminan sosial dan fasilitas kedinasan tertentu.\n\n" .
+                    "🪪 **KARSU (Kartu Suami PNS):**\n" .
+                    "Kartu identitas yang dikeluarkan untuk **suami sah dari PNS perempuan**, dengan fungsi serupa seperti KARIS.\n\n" .
+                    "📌 **Catatan Penting:**\n" .
+                    "Pengurusan KARPEG, KARIS, dan KARSU untuk pegawai di lingkungan **Pemerintah Kabupaten Buleleng** diproses melalui **BKPSDM Kabupaten Buleleng** (Bidang Pengadaan, Pemberhentian dan Informasi). Apakah Anda ingin mengetahui persyaratan pengajuannya? 😊",
+                'actions' => [
+                    ['type' => 'prompt', 'label' => '📄 Syarat Pembuatan Karpeg', 'prompt' => 'Apa syarat pembuatan Karpeg di BKPSDM Buleleng?'],
+                    ['type' => 'prompt', 'label' => '💳 Syarat Pembuatan Karis/Karsu', 'prompt' => 'Apa syarat pembuatan Karis atau Karsu di BKPSDM Buleleng?'],
+                ],
+                'source'  => 'fallback_kartu_kepegawaian'
+            ];
+        }
+
+        // 6H. ANGKA KREDIT, PAK & DUPAK (Jabatan Fungsional)
+        if (
+            str_contains($qLower, 'angka kredit') || str_contains($qLower, 'dupak') ||
+            str_contains($qLower, 'penilaian angka kredit') || str_contains($qLower, 'penetapan angka kredit') ||
+            (str_contains($qLower, 'pak') && str_contains($qLower, 'fungsional')) ||
+            str_contains($qLower, 'akumulasi angka kredit') || str_contains($qLower, 'konversi angka kredit') ||
+            (str_contains($qLower, 'angka') && str_contains($qLower, 'kredit'))
+        ) {
+            return [
+                'success' => true,
+                'reply'   => "**Angka Kredit** adalah satuan nilai yang ditetapkan atas dasar penilaian prestasi kerja dan pengembangan profesi seorang **Pejabat Fungsional** ASN. Angka Kredit merupakan syarat utama kenaikan jenjang jabatan fungsional.\n\n" .
+                    "📌 **Sistem Angka Kredit Jabatan Fungsional:**\n" .
+                    "1. **Konversi Predikat Kinerja:** Berdasarkan **PermenPAN-RB No. 1 Tahun 2023**, angka kredit pejabat fungsional kini dihitung secara otomatis dari konversi predikat kinerja SKP tahunan (Sangat Baik = 150%, Baik = 100%, Butuh Perbaikan = 75%, dst.).\n" .
+                    "2. **DUPAK (Daftar Usulan Penilaian Angka Kredit):** Dokumen yang berisi rincian kegiatan dan bukti capaian kerja pejabat fungsional yang diusulkan untuk dinilai angka kreditnya.\n" .
+                    "3. **PAK (Penetapan Angka Kredit):** Dokumen resmi hasil penilaian angka kredit yang ditetapkan oleh pejabat berwenang (biasanya Kepala Dinas/BKN) sebagai dasar kenaikan jenjang jabatan fungsional.\n" .
+                    "4. **Akumulasi:** Setelah angka kredit memenuhi syarat jenjang berikutnya, pejabat fungsional dapat diusulkan untuk kenaikan jabatan/pangkat pilihan.\n\n" .
+                    "Di lingkungan **BKPSDM Kabupaten Buleleng**, pengurusan PAK dan kenaikan pangkat jabatan fungsional diproses oleh **Bidang Mutasi dan Promosi**. Ada yang ingin ditanyakan lebih lanjut? 😊",
+                'actions' => [
+                    ['type' => 'prompt', 'label' => '📈 Kenaikan Pangkat Fungsional', 'prompt' => 'Bagaimana syarat kenaikan pangkat jabatan fungsional?'],
+                    ['type' => 'prompt', 'label' => '📊 Evaluasi Kinerja SKP', 'prompt' => 'Bagaimana evaluasi kinerja SKP ASN berdasarkan PermenPAN-RB No 6 Tahun 2022?'],
+                ],
+                'source'  => 'fallback_angka_kredit'
             ];
         }
 

@@ -225,18 +225,82 @@ class HandleInertiaRequests extends Middleware
 
                 $menuItems = config("menu.{$user->role_id}", []);
 
-                // Admin OPD (role_id = 3): Cek apakah instansi memiliki detail tiket BTL (status = 2)
+                // Admin OPD (role_id = 3): Hitung total usulan tiket yang ada di Daftar Perbaikan
                 if ($user->role_id == 3) {
                     try {
-                        $btlCount = \App\Models\DetailTiket::where('status', 2)
-                            ->whereHas('regtiket', function ($q) use ($user) {
-                                $q->where('kode_ukerja', $user->kode_ukerja);
+                        $btlCount = \App\Models\Regtiket::where('kode_ukerja', $user->kode_ukerja)
+                            ->whereExists(function ($q) {
+                                $q->select(\Illuminate\Support\Facades\DB::raw(1))
+                                    ->from('tb_det_tiket')
+                                    ->whereColumn('tb_det_tiket.no_tiket', 'tb_regtiket.no_tiket')
+                                    ->where(function ($sub) {
+                                        $sub->where('tb_det_tiket.status', 2)
+                                            ->orWhere(function ($s) {
+                                                $s->where('tb_regtiket.diperbaiki', 1)
+                                                  ->whereNull('tb_det_tiket.status');
+                                            });
+                                    });
                             })
                             ->count();
 
                         foreach ($menuItems as &$item) {
                             if (isset($item['title']) && str_contains(strtolower($item['title']), 'perbaikan')) {
                                 $item['badge_count'] = $btlCount;
+                            }
+                        }
+                    } catch (\Throwable $e) {
+                        // Fallback aman jika query bermasalah
+                    }
+                }
+
+                // Admin Bidang (role_id = 4): Hitung badge Daftar Perbaikan & Daftar Permintaan (Bulan Ini)
+                if ($user->role_id == 4) {
+                    try {
+                        $layananIds = !empty($user->bidang_id)
+                            ? \App\Models\Layanan::where('kode_bidang', $user->bidang_id)->pluck('id')
+                            : collect();
+
+                        // 1. Badge Daftar Perbaikan (Usulan Tiket BTL / Perbaikan)
+                        $btlQuery = \App\Models\Regtiket::query();
+                        if ($layananIds->isNotEmpty()) {
+                            $btlQuery->whereIn('kode_layanan', $layananIds);
+                        }
+                        $btlCount = $btlQuery->whereExists(function ($q) {
+                            $q->select(\Illuminate\Support\Facades\DB::raw(1))
+                                ->from('tb_det_tiket')
+                                ->whereColumn('tb_det_tiket.no_tiket', 'tb_regtiket.no_tiket')
+                                ->where(function ($sub) {
+                                    $sub->where('tb_det_tiket.status', 2)
+                                        ->orWhere(function ($s) {
+                                            $s->where('tb_regtiket.diperbaiki', 1)
+                                              ->whereNull('tb_det_tiket.status');
+                                        });
+                                });
+                        })->count();
+
+                        // 2. Badge Daftar Permintaan (Bulan Sekarang sesuai Index PermintaanController via B-INDEX)
+                        $startOfMonth = \Carbon\Carbon::now()->startOfMonth()->toDateTimeString();
+                        $endOfMonth   = \Carbon\Carbon::now()->endOfMonth()->toDateTimeString();
+
+                        $permintaanQuery = \App\Models\Regtiket::whereBetween('tanggal', [$startOfMonth, $endOfMonth])
+                            ->has('tahap', '>', 1)
+                            ->has('detail');
+
+                        if ($layananIds->isNotEmpty()) {
+                            $permintaanQuery->whereIn('kode_layanan', $layananIds);
+                        }
+                        $permintaanCount = $permintaanQuery->count();
+
+                        foreach ($menuItems as &$item) {
+                            if (isset($item['title'])) {
+                                $lowerTitle = strtolower($item['title']);
+                                if (str_contains($lowerTitle, 'perbaikan')) {
+                                    $item['badge_count'] = $btlCount;
+                                    $item['badge_variant'] = 'warning';
+                                } elseif (str_contains($lowerTitle, 'permintaan')) {
+                                    $item['badge_count'] = $permintaanCount;
+                                    $item['badge_variant'] = 'info';
+                                }
                             }
                         }
                     } catch (\Throwable $e) {

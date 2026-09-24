@@ -431,8 +431,23 @@ export default function AuthenticatedLayout({ children, title, fullHeight = fals
                             }
 
                             const isHighlight = !isActive && (item.icon === 'file-plus' || item.active_key === 'register');
-                            const hasBtlWarning = Boolean(item.badge_count && Number(item.badge_count) > 0);
-                            const isWarning = !isActive && hasBtlWarning;
+                            const hasBadge = Boolean(item.badge_count && Number(item.badge_count) > 0);
+                            const isBtlWarning = hasBadge && (item.badge_variant === 'warning' || (!item.badge_variant && item.title && item.title.toLowerCase().includes('perbaikan')));
+                            const isPermintaanBlue = hasBadge && (item.badge_variant === 'info' || item.badge_variant === 'primary' || item.badge_variant === 'blue' || (item.title && item.title.toLowerCase().includes('permintaan')));
+                            const isWarning = !isActive && isBtlWarning;
+                            const isBlueBadge = !isActive && isPermintaanBlue;
+
+                            const tooltipText = sidebarCollapsed
+                                ? hasBadge
+                                    ? isBtlWarning
+                                        ? `${item.title} (${item.badge_count} usulan perlu perbaikan)`
+                                        : `${item.title} (${item.badge_count} usulan bulan ini)`
+                                    : item.title
+                                : undefined;
+
+                            const badgeTitle = isBtlWarning
+                                ? `${item.badge_count} usulan perlu perbaikan`
+                                : `${item.badge_count} usulan masuk bulan ini`;
 
                             return (
                                 <Link
@@ -440,7 +455,7 @@ export default function AuthenticatedLayout({ children, title, fullHeight = fals
                                     href={href}
                                     target={item.target || undefined}
                                     onClick={() => setSidebarOpen(false)}
-                                    title={sidebarCollapsed ? (hasBtlWarning ? `${item.title} (${item.badge_count} berkas BTL)` : item.title) : undefined}
+                                    title={tooltipText}
                                     className={`flex items-center ${
                                         sidebarCollapsed ? 'lg:justify-center lg:px-2 px-3.5 gap-3' : 'gap-3 px-3.5'
                                     } py-2.5 rounded-xl text-sm font-medium transition-all ${
@@ -448,7 +463,7 @@ export default function AuthenticatedLayout({ children, title, fullHeight = fals
                                             ? 'bg-blue-600 text-white shadow-xs font-semibold'
                                             : isWarning
                                             ? 'bg-rose-50/60 dark:bg-rose-950/30 border border-rose-200/80 dark:border-rose-900/50 text-rose-700 dark:text-rose-300 font-semibold hover:bg-rose-100/60 dark:hover:bg-rose-900/40'
-                                            : isHighlight
+                                            : (isHighlight || isBlueBadge)
                                             ? 'bg-blue-50/60 dark:bg-blue-950/30 border border-blue-200/80 dark:border-blue-900/50 text-blue-700 dark:text-blue-300 font-semibold hover:bg-blue-100/60 dark:hover:bg-blue-900/40'
                                             : 'text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800/60 hover:text-slate-900 dark:hover:text-white'
                                     }`}
@@ -460,7 +475,7 @@ export default function AuthenticatedLayout({ children, title, fullHeight = fals
                                                 ? 'text-white'
                                                 : isWarning
                                                 ? 'text-rose-500 dark:text-rose-400'
-                                                : isHighlight
+                                                : (isHighlight || isBlueBadge)
                                                 ? 'text-blue-600 dark:text-blue-400'
                                                 : 'text-slate-600 dark:text-slate-400'
                                         }`}
@@ -469,16 +484,18 @@ export default function AuthenticatedLayout({ children, title, fullHeight = fals
                                         {item.title}
                                     </span>
 
-                                    {hasBtlWarning && (
+                                    {hasBadge && (
                                         <span
                                             className={`px-1.5 py-0.5 min-w-[20px] h-5 rounded-full ${
                                                 isActive
                                                     ? 'bg-white text-blue-600 font-bold'
-                                                    : 'bg-rose-100 dark:bg-rose-950/80 border border-rose-200 dark:border-rose-800 text-rose-600 dark:text-rose-400 font-bold'
+                                                    : isBtlWarning
+                                                    ? 'bg-rose-100 dark:bg-rose-950/80 border border-rose-200 dark:border-rose-800 text-rose-600 dark:text-rose-400 font-bold'
+                                                    : 'bg-blue-100 dark:bg-blue-950/80 border border-blue-200 dark:border-blue-800 text-blue-600 dark:text-blue-400 font-bold'
                                             } text-[11px] flex items-center justify-center flex-shrink-0 ${
                                                 sidebarCollapsed ? 'lg:hidden' : 'flex'
                                             }`}
-                                            title={`${item.badge_count} berkas BTL perlu perbaikan`}
+                                            title={badgeTitle}
                                         >
                                             {item.badge_count}
                                         </span>

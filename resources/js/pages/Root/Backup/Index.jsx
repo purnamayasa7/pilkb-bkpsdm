@@ -113,7 +113,7 @@ export default function RootBackupIndex({ backups = [], stats = {} }) {
                                 Manajemen Backup Database
                             </h1>
                             <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-                                Kelola salinan cadangan basis data aplikasi PILKB, pantau jadwal otomatis, dan unduh berkas arsip.
+                                Kelola <i>backup</i> basis data aplikasi PILKB, pantau jadwal otomatis, dan unduh berkas arsip.
                             </p>
                         </div>
                     </div>
