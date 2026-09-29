@@ -3,6 +3,7 @@
 namespace App\Http\Middleware;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Inertia\Middleware;
 
 class HandleInertiaRequests extends Middleware
@@ -61,36 +62,42 @@ class HandleInertiaRequests extends Middleware
                 'warning' => fn () => $request->session()->get('warning'),
                 'info' => fn () => $request->session()->get('info'),
             ],
+            // KRITIS-1: Cache broadcast_announcements 2 menit
+            // autoNonaktifkanExpired() + SELECT query tidak lagi berjalan tiap request
             'broadcast_announcements' => function () use ($user) {
                 if (!$user) {
                     return [];
                 }
                 try {
-                    \App\Models\Pengumuman::autoNonaktifkanExpired();
+                    return Cache::remember('broadcast_announcements_active', 120, function () {
+                        \App\Models\Pengumuman::autoNonaktifkanExpired();
 
-                    return \App\Models\Pengumuman::with(['bidang:id,nama_bidang', 'author:id,nama,username'])
-                        ->sedangTayang()
-                        ->get()
-                        ->map(function ($item) {
-                            return [
-                                'id'           => $item->id,
-                                'judul'        => $item->judul,
-                                'pesan'        => $item->pesan,
-                                'tipe'         => $item->tipe,
-                                'mulai_pada'   => $item->mulai_pada ? $item->mulai_pada->format('Y-m-d H:i') : null,
-                                'selesai_pada' => $item->selesai_pada ? $item->selesai_pada->format('Y-m-d H:i') : null,
-                                'tautan'       => $item->tautan,
-                                'label_tautan' => $item->label_tautan,
-                                'bidang_nama'  => $item->bidang?->nama_bidang,
-                                'author_nama'  => $item->author?->nama ?? $item->author?->username,
-                                'created_at'   => $item->created_at ? $item->created_at->toISOString() : null,
-                            ];
-                        })
-                        ->toArray();
+                        return \App\Models\Pengumuman::with(['bidang:id,nama_bidang', 'author:id,nama,username'])
+                            ->sedangTayang()
+                            ->get()
+                            ->map(function ($item) {
+                                return [
+                                    'id'           => $item->id,
+                                    'judul'        => $item->judul,
+                                    'pesan'        => $item->pesan,
+                                    'tipe'         => $item->tipe,
+                                    'mulai_pada'   => $item->mulai_pada ? $item->mulai_pada->format('Y-m-d H:i') : null,
+                                    'selesai_pada' => $item->selesai_pada ? $item->selesai_pada->format('Y-m-d H:i') : null,
+                                    'tautan'       => $item->tautan,
+                                    'label_tautan' => $item->label_tautan,
+                                    'bidang_nama'  => $item->bidang?->nama_bidang,
+                                    'author_nama'  => $item->author?->nama ?? $item->author?->username,
+                                    'created_at'   => $item->created_at ? $item->created_at->toISOString() : null,
+                                ];
+                            })
+                            ->toArray();
+                    });
                 } catch (\Throwable $e) {
                     return [];
                 }
             },
+            // KRITIS-3: Gabungkan 2 query notifications menjadi 1
+            // unreadCount dihitung dari koleksi in-memory, bukan query COUNT() terpisah
             'notifications' => function () use ($user) {
                 if (!$user) {
                     return [
@@ -100,21 +107,24 @@ class HandleInertiaRequests extends Middleware
                 }
 
                 try {
-                    $unreadCount = $user->unreadNotifications()->count();
-                    $list = $user->notifications()
+                    // Ambil 10 terbaru dalam 1 query, lalu hitung unread dari koleksi
+                    $allNotifs = $user->notifications()
                         ->latest()
-                        ->take(5)
-                        ->get()
-                        ->map(function ($n) {
-                            return [
-                                'id'         => $n->id,
-                                'data'       => $n->data,
-                                'read_at'    => $n->read_at,
-                                'is_read'    => !is_null($n->read_at),
-                                'time_ago'   => $n->created_at ? $n->created_at->diffForHumans() : '',
-                                'url'        => $n->data['url'] ?? ('/notifications/read/' . $n->id),
-                            ];
-                        });
+                        ->take(10)
+                        ->get();
+
+                    $unreadCount = $allNotifs->whereNull('read_at')->count();
+
+                    $list = $allNotifs->take(5)->map(function ($n) {
+                        return [
+                            'id'         => $n->id,
+                            'data'       => $n->data,
+                            'read_at'    => $n->read_at,
+                            'is_read'    => !is_null($n->read_at),
+                            'time_ago'   => $n->created_at ? $n->created_at->diffForHumans() : '',
+                            'url'        => $n->data['url'] ?? ('/notifications/read/' . $n->id),
+                        ];
+                    });
 
                     return [
                         'unread_count' => $unreadCount,
@@ -136,15 +146,24 @@ class HandleInertiaRequests extends Middleware
                 }
 
                 try {
+                    // KRITIS-2: Kurangi eager load — hanya relasi yang dibutuhkan untuk
+                    // resolusi nama partner & badge navbar (bukan full chat view)
+                    // tiket.layanan.bidang & layanan.bidang dihapus karena tidak dipakai
+                    // di blok format list unread_messages ini
                     $conversations = \App\Models\ChatConversation::with([
-                        'creator.role',
-                        'guest',
-                        'tiket.layanan.bidang',
-                        'layanan.bidang',
-                        'bidang',
-                        'participants.user.role',
-                        'lastMessage',
+                        'creator:id,nama,role_id',
+                        'creator.role:id,name',
+                        'guest:id,nama',
+                        'bidang:id,nama_bidang',
+                        'participants:id,conversation_id,user_id,last_read_message_id',
+                        'participants.user:id,nama,role_id',
+                        'participants.user.role:id,name',
+                        'lastMessage:id,conversation_id,message,sender_user_id,created_at',
                     ])
+                        ->select([
+                            'id', 'no_tiket', 'created_by', 'bidang_id', 'guest_id',
+                            'last_message_id', 'need_reply', 'type', 'status', 'updated_at',
+                        ])
                         ->whereHas('participants', function ($q) use ($user) {
                             $q->where('user_id', $user->id);
                         })

@@ -221,7 +221,7 @@ export default function RootUserIndex({ users = [] }) {
                                 Manajemen User
                             </h1>
                             <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-                                Kelola data akun pengguna, hak akses (role) dan status aktifasi sistem PILKB.
+                                Kelola data akun pengguna, hak akses <i>role</i> dan status aktifasi sistem PILKB.
                             </p>
                         </div>
                     </div>

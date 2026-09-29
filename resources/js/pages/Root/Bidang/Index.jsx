@@ -313,7 +313,6 @@ export default function RootBidangIndex({ bidang = [] }) {
                                 <thead>
                                     <tr className="border-b border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-950/50 text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
                                         <th className="py-3 px-4 text-center w-14">No</th>
-                                        <th className="py-3 px-4 w-36">ID Bidang</th>
                                         <th className="py-3 px-4">Nama Bidang</th>
                                         <th className="py-3 px-4 text-center w-32">Status</th>
                                         <th className="py-3 px-4 text-center w-28">Aksi</th>
@@ -330,13 +329,6 @@ export default function RootBidangIndex({ bidang = [] }) {
                                                 {/* No */}
                                                 <td className="py-3.5 px-4 text-center font-semibold text-slate-400">
                                                     {rowNumber}
-                                                </td>
-
-                                                {/* ID Bidang (Font Mono Badge) */}
-                                                <td className="py-3.5 px-4">
-                                                    <span className="inline-block px-2 py-0.5 rounded-md bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-mono text-[11px] font-bold">
-                                                        {item.id}
-                                                    </span>
                                                 </td>
 
                                                 {/* Nama Bidang */}
@@ -483,8 +475,18 @@ export default function RootBidangIndex({ bidang = [] }) {
                                     <div className="font-bold text-slate-900 dark:text-white">
                                         {toggleModal.bidang.nama_bidang}
                                     </div>
-                                    <div className="text-slate-400 font-mono text-[11px]">
-                                        ID: {toggleModal.bidang.id}
+                                    <div className="mt-0.5">
+                                        {toggleModal.bidang.aktif ? (
+                                            <span className="inline-flex items-center gap-1 text-emerald-600 dark:text-emerald-400 font-semibold text-[11px]">
+                                                <CheckCircle2 className="w-3 h-3" />
+                                                Status Saat Ini: Aktif
+                                            </span>
+                                        ) : (
+                                            <span className="inline-flex items-center gap-1 text-rose-600 dark:text-rose-400 font-semibold text-[11px]">
+                                                <XCircle className="w-3 h-3" />
+                                                Status Saat Ini: Nonaktif
+                                            </span>
+                                        )}
                                     </div>
                                 </div>
                             </div>

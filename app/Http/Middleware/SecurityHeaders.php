@@ -31,6 +31,11 @@ class SecurityHeaders
         // XSS filter for legacy browsers
         $response->headers->set('X-XSS-Protection', '1; mode=block');
 
+        // HSTS (HTTP Strict Transport Security) - Enkripsi in-transit (HTTPS)
+        if ($request->isSecure() || $request->header('X-Forwarded-Proto') === 'https' || app()->isProduction() || config('app.env') === 'production') {
+            $response->headers->set('Strict-Transport-Security', 'max-age=31536000; includeSubDomains; preload');
+        }
+
         return $response;
     }
 }

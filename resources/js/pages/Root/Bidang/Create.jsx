@@ -81,7 +81,7 @@ export default function RootBidangCreate() {
                                 Tambah Bidang Baru
                             </h1>
                             <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-                                Tambahkan master data bidang baru pada sistem PILKB
+                                Tambahkan master data bidang baru pada sistem
                             </p>
                         </div>
                     </div>

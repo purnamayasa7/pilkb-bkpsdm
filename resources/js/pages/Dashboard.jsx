@@ -18,7 +18,20 @@ import {
     Activity,
 } from 'lucide-react';
 
-import Chart from 'chart.js/auto';
+// KRITIS-5: Tree-shaking import — hanya komponen yang dipakai (tipe 'line')
+// Menggantikan 'chart.js/auto' yang mengimport seluruh library Chart.js
+import {
+    Chart,
+    LineController,
+    LineElement,
+    PointElement,
+    LinearScale,
+    CategoryScale,
+    Filler,
+    Tooltip,
+} from 'chart.js';
+
+Chart.register(LineController, LineElement, PointElement, LinearScale, CategoryScale, Filler, Tooltip);
 
 /**
  * DashboardClock
@@ -45,7 +58,9 @@ function DashboardClock() {
         };
 
         updateTime();
-        const interval = setInterval(updateTime, 1000);
+        // RINGAN-3: Interval 60 detik cukup karena hanya menampilkan HH:MM (bukan detik)
+        // Hemat 59 re-render/menit pada komponen DashboardClock
+        const interval = setInterval(updateTime, 60000);
         return () => clearInterval(interval);
     }, []);
 

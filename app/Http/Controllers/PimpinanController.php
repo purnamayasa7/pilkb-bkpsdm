@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 
 namespace App\Http\Controllers;
 
@@ -32,24 +32,8 @@ class PimpinanController extends Controller
         $startOfYear = Carbon::create($year, 1, 1)->startOfDay();
         $endOfYear   = Carbon::create($year, 12, 31)->endOfDay();
 
-        // 2. Daftar tahun tersedia (di-cache 1 jam agar zero query overhead)
-        $availableYears = Cache::remember('pimpinan_available_years', 3600, function () use ($currentYear) {
-            $years = Regtiket::where('dihapus', 0)
-                ->selectRaw('DISTINCT YEAR(tanggal) as yr')
-                ->whereNotNull('tanggal')
-                ->orderByDesc('yr')
-                ->pluck('yr')
-                ->map(fn($y) => (int) $y)
-                ->toArray();
-
-            if (empty($years)) {
-                $years = [$currentYear];
-            } elseif (!in_array($currentYear, $years)) {
-                array_unshift($years, $currentYear);
-                rsort($years);
-            }
-            return $years;
-        });
+        // 2. Daftar tahun tersedia — SEDANG-4: gunakan private method (tidak duplikasi 3x)
+        $availableYears = $this->getAvailableYears($currentYear);
 
         // 3. Metrik Utama untuk Tahun Terpilih (1 Query Agregat Tunggal)
         $metricsRow = Regtiket::where('dihapus', 0)
@@ -185,23 +169,8 @@ class PimpinanController extends Controller
             $year = $currentYear;
         }
 
-        $availableYears = Cache::remember('pimpinan_available_years', 3600, function () use ($currentYear) {
-            $years = Regtiket::where('dihapus', 0)
-                ->selectRaw('DISTINCT YEAR(tanggal) as yr')
-                ->whereNotNull('tanggal')
-                ->orderByDesc('yr')
-                ->pluck('yr')
-                ->map(fn($y) => (int) $y)
-                ->toArray();
-
-            if (empty($years)) {
-                $years = [$currentYear];
-            } elseif (!in_array($currentYear, $years)) {
-                array_unshift($years, $currentYear);
-                rsort($years);
-            }
-            return $years;
-        });
+        // SEDANG-4: gunakan private method getAvailableYears() — tidak duplikasi
+        $availableYears = $this->getAvailableYears($currentYear);
 
         $bidangFilter = $request->bidang;
         $perPage      = (int) $request->input('per_page', 10);
@@ -281,23 +250,8 @@ class PimpinanController extends Controller
         $searchQuery  = $request->search;
 
         // 2. Daftar tahun tersedia dari cache
-        $availableYears = Cache::remember('pimpinan_available_years', 3600, function () use ($currentYear) {
-            $years = Regtiket::where('dihapus', 0)
-                ->selectRaw('DISTINCT YEAR(tanggal) as yr')
-                ->whereNotNull('tanggal')
-                ->orderByDesc('yr')
-                ->pluck('yr')
-                ->map(fn($y) => (int) $y)
-                ->toArray();
-
-            if (empty($years)) {
-                $years = [$currentYear];
-            } elseif (!in_array($currentYear, $years)) {
-                array_unshift($years, $currentYear);
-                rsort($years);
-            }
-            return $years;
-        });
+        // SEDANG-4: gunakan private method getAvailableYears() — tidak duplikasi
+        $availableYears = $this->getAvailableYears($currentYear);
 
         // 3. Metrik Keseluruhan (1 Query Agregat Cepat)
         $metricsRow = DB::table('tb_regtiket')
@@ -658,6 +612,31 @@ class PimpinanController extends Controller
             ->setPaper('a4', 'landscape');
 
         return $pdf->stream('laporan-eksekutif-' . $tglAwal . '-sd-' . $tglAkhir . '.pdf');
+    }
+
+    /**
+     * SEDANG-4: Extract method — daftar tahun tersedia dari DB, di-cache 1 jam.
+     * Sebelumnya blok Cache::remember ini diulang identik di 3 method berbeda.
+     */
+    private function getAvailableYears(int $currentYear): array
+    {
+        return Cache::remember('pimpinan_available_years', 3600, function () use ($currentYear) {
+            $years = Regtiket::where('dihapus', 0)
+                ->selectRaw('DISTINCT YEAR(tanggal) as yr')
+                ->whereNotNull('tanggal')
+                ->orderByDesc('yr')
+                ->pluck('yr')
+                ->map(fn($y) => (int) $y)
+                ->toArray();
+
+            if (empty($years)) {
+                $years = [$currentYear];
+            } elseif (!in_array($currentYear, $years)) {
+                array_unshift($years, $currentYear);
+                rsort($years);
+            }
+            return $years;
+        });
     }
 
     /**

@@ -264,10 +264,7 @@ export default function RootTiketIndex({
                             </h1>
                         </div>
                         <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 pl-11">
-                            Daftar seluruh usulan permohonan layanan kepegawaian lintas perangkat daerah{' '}
-                            <span className="font-semibold text-slate-700 dark:text-slate-300">
-                                ({selectedBidang ? (bidang.find((b) => String(b.id) === String(selectedBidang))?.nama_bidang || 'Bidang Terpilih') : 'Semua Bidang'})
-                            </span>{' '}
+                            Daftar seluruh layanan kepegawaian instansi{' '}
                             periode{' '}
                             <span className="font-semibold text-slate-700 dark:text-slate-300">
                                 {activeMonthLabel} {selectedYear}
@@ -559,7 +556,7 @@ export default function RootTiketIndex({
                                     <th className="py-3.5 px-4 max-w-[220px]">Layanan</th>
                                     <th className="py-3.5 px-4 max-w-[180px]">Unit Kerja</th>
                                     <th className="py-3.5 px-4">Tanggal Masuk</th>
-                                    <th className="py-3.5 px-4 text-center">Status Alur</th>
+                                    <th className="py-3.5 px-4 text-center">Status Terakhir</th>
                                     <th className="py-3.5 px-4 text-center">Status Usulan</th>
                                     <th className="py-3.5 px-4 w-24 text-center">Aksi</th>
                                 </tr>

@@ -179,7 +179,7 @@ export default function RootLayananIndex({ layanan = [], bidang = [], bidangId =
                                 Master Data Layanan
                             </h1>
                             <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-                                Kelola seluruh jenis layanan kepegawaian BKPSDM, persyaratan, dan estimasi waktu
+                                Kelola seluruh jenis layanan kepegawaian BKPSDM, persyaratan, dan estimasi waktu penyelesaian
                             </p>
                         </div>
                     </div>

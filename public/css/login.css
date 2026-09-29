@@ -360,7 +360,7 @@ body::after {
     align-items: center;
     justify-content: center;
     background: #ffffff;
-    padding: 38px 44px;
+    padding: 28px 42px;
     box-sizing: border-box;
     min-width: 0;
     position: relative;
@@ -450,21 +450,21 @@ body::after {
 
 .form-subtitle {
     color: var(--text-muted);
-    font-size: 13.5px;
-    margin-bottom: 20px;
+    font-size: 13px;
+    margin-bottom: 14px;
 }
 
 /* Form Controls & Inputs */
 .form-group-custom {
-    margin-bottom: 14px;
+    margin-bottom: 11px;
     text-align: left;
 }
 
 .form-label-custom {
-    font-size: 13px;
+    font-size: 12.5px;
     font-weight: 600;
     color: #334155;
-    margin-bottom: 6px;
+    margin-bottom: 4px;
     display: block;
 }
 
@@ -487,12 +487,12 @@ body::after {
 
 .input-icon-wrap .form-control {
     width: 100%;
-    height: 46px;
+    height: 44px;
     border-radius: 12px;
     border: 1px solid #e2e8f0;
     background: #f8fafc;
-    padding: 10px 16px 10px 42px;
-    font-size: 13.5px;
+    padding: 9px 16px 9px 40px;
+    font-size: 13px;
     font-weight: 500;
     color: var(--text-primary);
     transition: all 0.2s ease;
@@ -542,14 +542,14 @@ body::after {
    ========================================================================== */
 
 .btn-login-primary {
-    height: 46px;
+    height: 44px;
     width: 100%;
     border: none;
     border-radius: 12px;
     background: linear-gradient(135deg, #1f5b99 0%, #174d86 100%);
     color: #ffffff;
     font-weight: 600;
-    font-size: 14.5px;
+    font-size: 14px;
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -588,14 +588,14 @@ body::after {
 }
 
 .btn-login-outline {
-    height: 46px;
+    height: 44px;
     width: 100%;
     border-radius: 12px;
     border: 1px solid #e2e8f0;
     background: #f8fafc;
     color: var(--blue-primary);
     font-weight: 600;
-    font-size: 13.5px;
+    font-size: 13px;
     display: inline-flex;
     align-items: center;
     justify-content: center;

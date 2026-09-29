@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\Hash;
 use App\Services\PegawaiService;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
+use Illuminate\Validation\Rules\Password;
 use Inertia\Inertia;
 use Maatwebsite\Excel\Facades\Excel;
 
@@ -29,7 +30,19 @@ class UserController extends Controller
     {
         $request->validate([
             'current_password' => ['required'],
-            'password' => ['required', 'confirmed', 'min:8'],
+            'password' => [
+                'required',
+                'confirmed',
+                Password::min(8)
+                    ->letters()
+                    ->mixedCase()
+                    ->numbers()
+                    ->symbols(),
+            ],
+        ], [
+            'password.min' => 'Kata sandi baru minimal 8 karakter.',
+            'password.confirmed' => 'Konfirmasi kata sandi baru tidak cocok.',
+            'password' => 'Kata sandi minimal 8 karakter dengan kombinasi huruf besar, huruf kecil, angka, dan karakter khusus/simbol.',
         ]);
 
         $user = User::find(Auth::id());
@@ -259,8 +272,17 @@ class UserController extends Controller
 
         $request->validate([
             'email' => 'required|email|unique:users,email,' . $user->id,
-            'password' => 'nullable',
+            'password' => [
+                'nullable',
+                Password::min(8)
+                    ->letters()
+                    ->mixedCase()
+                    ->numbers()
+                    ->symbols(),
+            ],
             'bidang_id' => 'required',
+        ], [
+            'password' => 'Kata sandi minimal 8 karakter dengan kombinasi huruf besar, huruf kecil, angka, dan karakter khusus/simbol.',
         ]);
 
         $oldData = [
@@ -463,7 +485,16 @@ class UserController extends Controller
 
         $request->validate([
             'email' => 'required|email|unique:users,email,' . $user->id,
-            'password' => 'nullable|min:5',
+            'password' => [
+                'nullable',
+                Password::min(8)
+                    ->letters()
+                    ->mixedCase()
+                    ->numbers()
+                    ->symbols(),
+            ],
+        ], [
+            'password' => 'Kata sandi minimal 8 karakter dengan kombinasi huruf besar, huruf kecil, angka, dan karakter khusus/simbol.',
         ]);
 
         $oldData = [

@@ -26,7 +26,8 @@ class LayananController extends Controller
 
     public function index(Request $request)
     {
-        $bidang = Bidang::all();
+        // RINGAN-1: select() hanya kolom yang dipakai frontend
+        $bidang = Bidang::select(['id', 'nama_bidang'])->get();
         $bidangId = $request->bidang;
 
         $layanan = Layanan::with('bidang')
@@ -84,7 +85,8 @@ class LayananController extends Controller
 
     public function create()
     {
-        $bidang = Bidang::all();
+        // RINGAN-1: select() hanya kolom yang dipakai frontend
+        $bidang = Bidang::select(['id', 'nama_bidang'])->get();
 
         return Inertia::render('Root/Layanan/Create', [
             'bidang' => $bidang,
@@ -95,7 +97,8 @@ class LayananController extends Controller
     public function createBidang()
     {
         $user = Auth::user();
-        $bidang = Bidang::all();
+        // RINGAN-1: select() hanya kolom yang dipakai frontend
+        $bidang = Bidang::select(['id', 'nama_bidang'])->get();
 
         return Inertia::render('Bidang/Layanan/Create', [
             'bidang' => $bidang,

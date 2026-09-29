@@ -54,7 +54,12 @@ class DashboardController extends Controller
         $lastMonth = $lastMonthDate->month;
         $lastMonthYear = $lastMonthDate->year;
 
-        $user = Auth::user();
+        // SEDANG-1: Hapus duplikat Auth::user() — $user sudah diambil di baris 25
+        // SEDANG-2: Siapkan rentang tanggal SARGable untuk menggantikan whereMonth/whereYear
+        $startOfMonth     = $selectedDate->copy()->startOfMonth()->format('Y-m-d');
+        $endOfMonth       = $selectedDate->copy()->endOfMonth()->format('Y-m-d');
+        $startOfLastMonth = $lastMonthDate->copy()->startOfMonth()->format('Y-m-d');
+        $endOfLastMonth   = $lastMonthDate->copy()->endOfMonth()->format('Y-m-d');
 
         $baseQuery = Regtiket::query();
 
@@ -130,14 +135,13 @@ class DashboardController extends Controller
 
         // Widget 2 Pengajuan Bulan ini
 
+        // SEDANG-2: whereBetween SARGable menggantikan whereMonth + whereYear
         $pengajuanBulanIni = (clone $baseQuery)
-            ->whereMonth('tanggal', $month)
-            ->whereYear('tanggal', $year)
+            ->whereBetween('tanggal', [$startOfMonth, $endOfMonth])
             ->count();
 
         $pengajuanBulanLalu = (clone $baseLastMonthQuery)
-            ->whereMonth('tanggal', $lastMonth)
-            ->whereYear('tanggal', $lastMonthYear)
+            ->whereBetween('tanggal', [$startOfLastMonth, $endOfLastMonth])
             ->count();
 
         $trendPengajuan = $this->calculateTrend(
@@ -149,12 +153,11 @@ class DashboardController extends Controller
 
         $btlBulanIni = DetailTiket::where('status', 2)
             ->whereHas('regtiket', function ($query) use (
-                $month,
-                $year,
+                $startOfMonth,
+                $endOfMonth,
                 $user
             ) {
-                $query->whereMonth('tanggal', $month)
-                    ->whereYear('tanggal', $year);
+                $query->whereBetween('tanggal', [$startOfMonth, $endOfMonth]);
 
                 if (
                     $user->role->name == 'bidang' ||
@@ -170,19 +173,11 @@ class DashboardController extends Controller
 
         $btlBulanLalu = DetailTiket::where('status', 2)
             ->whereHas('regtiket', function ($query) use (
-                $lastMonth,
-                $lastMonthYear,
+                $startOfLastMonth,
+                $endOfLastMonth,
                 $user
             ) {
-                $query->whereMonth('tanggal', $lastMonth)
-                    ->whereYear('tanggal', $lastMonthYear);
-
-                // if ($user->role->name == 'bidang') {
-                //     $query->where(
-                //         'kode_ukerja',
-                //         $user->kode_ukerja
-                //     );
-                // }
+                $query->whereBetween('tanggal', [$startOfLastMonth, $endOfLastMonth]);
 
                 if (
                     $user->role->name == 'bidang' ||
@@ -203,15 +198,14 @@ class DashboardController extends Controller
 
         // Widget 4 Pengajuan Selesai (Archives)
 
+        // SEDANG-2: whereBetween SARGable untuk Widget 4
         $tiketArchives = (clone $baseQuery)
-            ->whereMonth('tanggal', $month)
-            ->whereYear('tanggal', $year)
+            ->whereBetween('tanggal', [$startOfMonth, $endOfMonth])
             ->where('archives', 1)
             ->count();
 
         $tiketArchivesBulanLalu = (clone $baseLastMonthQuery)
-            ->whereMonth('tanggal', $lastMonth)
-            ->whereYear('tanggal', $lastMonthYear)
+            ->whereBetween('tanggal', [$startOfLastMonth, $endOfLastMonth])
             ->where('archives', 1)
             ->count();
 

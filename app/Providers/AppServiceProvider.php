@@ -6,8 +6,10 @@ use Carbon\Carbon;
 use Illuminate\Pagination\Paginator;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
+use Illuminate\Validation\Rules\Password;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -44,6 +46,20 @@ class AppServiceProvider extends ServiceProvider
 
         Paginator::useBootstrapFive();
         Carbon::setLocale('id');
+
+        // Kebijakan Kata Sandi (Password Policy): Min 8 Karakter, Huruf Besar, Huruf Kecil, Angka, & Simbol
+        Password::defaults(function () {
+            return Password::min(8)
+                ->letters()
+                ->mixedCase()
+                ->numbers()
+                ->symbols();
+        });
+
+        // Enforce HTTPS untuk seluruh link dan asset saat di production / reverse proxy HTTPS
+        if (app()->isProduction() || env('FORCE_HTTPS', false) || request()->server('HTTP_X_FORWARDED_PROTO') === 'https') {
+            URL::forceScheme('https');
+        }
 
         Gate::define('viewLogViewer', function ($user) {
             return $user && (int) $user->role_id === 1;

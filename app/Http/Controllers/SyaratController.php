@@ -79,11 +79,15 @@ class SyaratController extends Controller
 
     public function create(Request $request)
     {
-        $bidang = Bidang::orderBy('nama_bidang')->get();
+        // RINGAN-1: select() hanya kolom yang dipakai frontend (id, nama_bidang)
+        $bidang = Bidang::orderBy('nama_bidang')->select(['id', 'nama_bidang'])->get();
 
         $bidangId = $request->bidang ?? $bidang->first()?->id;
 
-        $allLayanan = Layanan::orderBy('kode_bidang')->orderBy('nama_layanan')->get();
+        // RINGAN-2: select() hanya kolom yang dipakai (id, nama_layanan, kode_bidang)
+        $allLayanan = Layanan::orderBy('kode_bidang')->orderBy('nama_layanan')
+            ->select(['id', 'nama_layanan', 'kode_bidang'])
+            ->get();
 
         $layanan = $bidangId
             ? $allLayanan->where('kode_bidang', $bidangId)->values()
@@ -477,12 +481,16 @@ class SyaratController extends Controller
     // Cetak Syarat Menu Admin OPD
     public function indexCetak(Request $request)
     {
-        $bidang = Bidang::all();
+        // RINGAN-1: select() hanya kolom yang dipakai frontend (id, nama_bidang)
+        $bidang = Bidang::select(['id', 'nama_bidang'])->get();
 
         $bidangId = $request->bidang ?? $bidang->first()?->id;
 
         // Semua layanan dikirim agar React bisa filter client-side saat bidang berubah (tanpa reload)
-        $allLayanan = Layanan::orderBy('kode_bidang')->orderBy('nama_layanan')->get();
+        // RINGAN-2: select() hanya kolom yang dipakai (id, nama_layanan, kode_bidang)
+        $allLayanan = Layanan::orderBy('kode_bidang')->orderBy('nama_layanan')
+            ->select(['id', 'nama_layanan', 'kode_bidang'])
+            ->get();
 
         $layanan = $allLayanan->where('kode_bidang', $bidangId)->values();
 
@@ -514,11 +522,15 @@ class SyaratController extends Controller
     // Cetak Syarat Menu Admin Bawah
     public function indexCetakAdminBawah(Request $request)
     {
-        $bidang = Bidang::all();
+        // RINGAN-1: select() hanya kolom yang dipakai frontend (id, nama_bidang)
+        $bidang = Bidang::select(['id', 'nama_bidang'])->get();
 
         $bidangId = $request->bidang ?? $bidang->first()?->id;
 
-        $allLayanan = Layanan::orderBy('kode_bidang')->orderBy('nama_layanan')->get();
+        // RINGAN-2: select() hanya kolom yang dipakai (id, nama_layanan, kode_bidang)
+        $allLayanan = Layanan::orderBy('kode_bidang')->orderBy('nama_layanan')
+            ->select(['id', 'nama_layanan', 'kode_bidang'])
+            ->get();
 
         $layanan = $allLayanan->where('kode_bidang', $bidangId)->values();
 
@@ -551,11 +563,15 @@ class SyaratController extends Controller
     public function indexCetakAdminBidang(Request $request)
     {
         $user = Auth::user();
-        $bidang = Bidang::all();
+        // RINGAN-1: select() hanya kolom yang dipakai frontend (id, nama_bidang)
+        $bidang = Bidang::select(['id', 'nama_bidang'])->get();
 
         $bidangId = $request->bidang ?? ($user->bidang_id ?? $bidang->first()?->id);
 
-        $allLayanan = Layanan::orderBy('kode_bidang')->orderBy('nama_layanan')->get();
+        // RINGAN-2: select() hanya kolom yang dipakai (id, nama_layanan, kode_bidang)
+        $allLayanan = Layanan::orderBy('kode_bidang')->orderBy('nama_layanan')
+            ->select(['id', 'nama_layanan', 'kode_bidang'])
+            ->get();
 
         $layanan = $allLayanan->where('kode_bidang', $bidangId)->values();
 

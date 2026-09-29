@@ -294,6 +294,15 @@
                                 <h4 class="form-title">Selamat Datang</h4>
                                 <p class="form-subtitle">Masukkan akun Anda untuk mengakses sistem</p>
 
+                                @if (session('lockout_seconds') && session('lockout_seconds') > 0)
+                                    <div class="alert alert-danger d-flex align-items-center mb-3 py-2 px-3 rounded-3 border-0 shadow-sm" id="lockoutAlert" role="alert" style="font-size: 12px; line-height: 1.45;">
+                                        <i data-feather="alert-octagon" class="me-2 flex-shrink-0 text-danger" style="width: 16px; height: 16px;"></i>
+                                        <div>
+                                            Anda telah melakukan 3 kali gagal login. Silakan tunggu <strong id="countdownSeconds" class="badge bg-danger text-white px-2 py-0.5 mx-1" style="font-size: 11px; font-weight: 700;">{{ session('lockout_seconds') }}</strong> detik sebelum mencoba lagi.
+                                        </div>
+                                    </div>
+                                @endif
+
                                 @if (session('warning'))
                                     <div class="alert alert-warning alert-dismissible fade show d-flex align-items-center mb-3 rounded-3 border-0 shadow-sm" role="alert">
                                         <i data-feather="alert-triangle" class="me-2 flex-shrink-0 text-warning"></i>
@@ -331,9 +340,11 @@
                                                 value="{{ old('username') }}" placeholder="Masukkan 18 digit NIP" required autofocus>
                                         </div>
                                         @error('username')
+                                        @if (!session('lockout_seconds'))
                                         <div class="invalid-feedback d-block mt-1">
                                             {{ $message }}
                                         </div>
+                                        @endif
                                         @enderror
                                     </div>
 
@@ -348,10 +359,41 @@
                                         </div>
                                     </div>
 
+                                    <!-- KODE KEAMANAN (CAPTCHA) -->
+                                    <div class="form-group-custom">
+                                        <label for="captcha" class="form-label-custom">Capcha</label>
+                                        <div class="d-flex align-items-center gap-2">
+                                            <!-- Box Gambar CAPTCHA -->
+                                            <div class="captcha-img-wrap" onclick="refreshCaptcha()" title="Klik untuk ganti kode" style="cursor: pointer; height: 44px; width: 120px; border-radius: 12px; border: 1px solid #e2e8f0; background: #f8fafc; overflow: hidden; flex-shrink: 0; display: flex; align-items: center; justify-content: center;">
+                                                <img id="captchaImage" src="{{ route('captcha.generate') }}?t={{ time() }}" alt="Kode CAPTCHA" style="width: 100%; height: 100%; object-fit: cover; display: block;">
+                                            </div>
+
+                                            <!-- Tombol Acak Baru -->
+                                            <button type="button" id="btnRefreshCaptcha" onclick="refreshCaptcha()" title="Ganti Kode Baru"
+                                                class="btn d-flex align-items-center justify-content-center"
+                                                style="height: 44px; width: 40px; border-radius: 12px; border: 1px solid #e2e8f0; background: #f8fafc; color: #64748b; flex-shrink: 0; padding: 0;">
+                                                <i data-feather="refresh-cw" id="iconRefreshCaptcha" style="width: 15px; height: 15px;"></i>
+                                            </button>
+
+                                            <!-- Input Teks Kode -->
+                                            <div class="input-icon-wrap flex-grow-1" style="min-width: 0;">
+                                                <input type="text" id="captcha" name="captcha"
+                                                    class="form-control text-uppercase @error('captcha') is-invalid @enderror"
+                                                    placeholder="Captcha" maxlength="5" autocomplete="off" autocorrect="off" autocapitalize="characters" spellcheck="false" required
+                                                    style="height: 44px; padding: 8px 12px; font-weight: 700; letter-spacing: 2px; font-size: 13px; text-transform: uppercase;">
+                                            </div>
+                                        </div>
+                                        @error('captcha')
+                                        <div id="captchaErrorFeedback" class="invalid-feedback d-block mt-1" style="font-size: 11.5px;">
+                                            {{ $message }}
+                                        </div>
+                                        @enderror
+                                    </div>
+
                                     <!-- SUBMIT BUTTON -->
                                     <button type="submit"
                                         id="btnLogin"
-                                        class="btn-login-primary mb-3">
+                                        class="btn-login-primary mb-2">
 
                                         <span class="login-normal">
                                             <i data-feather="log-in" class="me-1"></i>
@@ -364,14 +406,14 @@
                                                 role="status"
                                                 aria-hidden="true">
                                             </span>
-                                            Memproses...
+                                             Memproses...
                                         </span>
                                     </button>
 
                                     <!-- DIVIDER -->
-                                    <div class="d-flex align-items-center my-3">
+                                    <div class="d-flex align-items-center my-2">
                                         <hr class="flex-grow-1 my-0 text-muted opacity-25">
-                                        <span class="px-2 text-muted small fw-medium" style="font-size: 11.5px; letter-spacing: 0.5px;">LAYANAN BANTUAN</span>
+                                        <span class="px-2 text-muted small fw-medium" style="font-size: 11px; letter-spacing: 0.5px;">LAYANAN BANTUAN</span>
                                         <hr class="flex-grow-1 my-0 text-muted opacity-25">
                                     </div>
 
@@ -494,8 +536,12 @@
     </div>
 
     <!-- Page Footer -->
-    <footer class="footer">
-        &copy; {{ date('Y') }} BKPSDM Kabupaten Buleleng. All rights reserved.
+    <footer class="footer d-flex flex-wrap justify-content-center align-items-center gap-2">
+        <span>&copy; {{ date('Y') }} BKPSDM Kabupaten Buleleng. All rights reserved.</span>
+        <span class="text-muted d-none d-sm-inline opacity-50">•</span>
+        <button type="button" id="btnOpenCookieSettings" class="btn btn-link btn-sm p-0 text-decoration-none text-muted" style="font-size: 12px;">
+            <i class="bi bi-shield-check me-1"></i>Pengaturan Cookie
+        </button>
     </footer>
 
     <!-- Live Chat Floating Trigger Button -->
@@ -1069,9 +1115,52 @@
 
             feather.replace();
 
+            // Auto-focus field jika terjadi error captcha
+            const captchaError = document.getElementById('captchaErrorFeedback');
+            if (captchaError) {
+                const captchaInput = document.getElementById('captcha');
+                if (captchaInput) captchaInput.focus();
+            }
+
+            // Countdown Lockout Percobaan Login (Brute-force lockout)
+            const countdownEl = document.getElementById('countdownSeconds');
+            const btnLogin = document.getElementById('btnLogin');
+            if (countdownEl && btnLogin) {
+                let secondsLeft = parseInt(countdownEl.innerText.trim(), 10);
+                if (secondsLeft > 0) {
+                    btnLogin.disabled = true;
+                    btnLogin.style.opacity = '0.65';
+                    btnLogin.style.cursor = 'not-allowed';
+
+                    const timerInterval = setInterval(function() {
+                        secondsLeft--;
+                        if (secondsLeft <= 0) {
+                            clearInterval(timerInterval);
+                            countdownEl.innerText = '0';
+                            btnLogin.disabled = false;
+                            btnLogin.style.opacity = '1';
+                            btnLogin.style.cursor = 'pointer';
+
+                            const alertBox = document.getElementById('lockoutAlert');
+                            if (alertBox) {
+                                alertBox.className = 'alert alert-info d-flex align-items-center mb-3 py-2 px-3 rounded-3 border-0 shadow-sm';
+                                alertBox.style.fontSize = '12px';
+                                alertBox.style.lineHeight = '1.45';
+                                alertBox.innerHTML = `
+                                    <i data-feather="check-circle" class="me-2 flex-shrink-0 text-info" style="width: 16px; height: 16px;"></i>
+                                    <div>Waktu tunggu telah berakhir. Silakan masukkan kredensial Anda kembali.</div>
+                                `;
+                                if (window.feather) feather.replace();
+                            }
+                        } else {
+                            countdownEl.innerText = secondsLeft;
+                        }
+                    }, 1000);
+                }
+            }
+
             // Spinner Login
             const formLogin = document.getElementById('formLogin');
-            const btnLogin = document.getElementById('btnLogin');
 
             if (formLogin && btnLogin) {
                 formLogin.addEventListener('submit', function(e) {
@@ -1424,7 +1513,37 @@
             }
         }
 
+        // Acak Kode CAPTCHA Baru
+        function refreshCaptcha() {
+            const img = document.getElementById('captchaImage');
+            const icon = document.getElementById('iconRefreshCaptcha');
+            if (icon) {
+                icon.style.transition = 'transform 0.5s cubic-bezier(0.16, 1, 0.3, 1)';
+                icon.style.transform = 'rotate(360deg)';
+                setTimeout(function() {
+                    icon.style.transition = 'none';
+                    icon.style.transform = 'rotate(0deg)';
+                }, 500);
+            }
+            if (img) {
+                img.src = '{{ route("captcha.generate") }}?t=' + new Date().getTime();
+            }
+            const input = document.getElementById('captcha');
+            if (input) {
+                input.value = '';
+                input.classList.remove('is-invalid');
+                input.focus();
+            }
+            const errorFeedback = document.getElementById('captchaErrorFeedback');
+            if (errorFeedback) {
+                errorFeedback.classList.add('d-none');
+            }
+        }
+
     </script>
+
+    <!-- Cookie Consent Banner & Preferences Modal -->
+    @include('components.cookie-consent-login')
 </body>
 
 </html>

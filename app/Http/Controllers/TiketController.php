@@ -185,14 +185,17 @@ class TiketController extends Controller
         $month = (int) ($request->month ?? Carbon::now()->month);
         $year = (int) ($request->year ?? Carbon::now()->year);
 
+        // SEDANG-3: whereBetween SARGable menggantikan whereMonth + whereYear
+        $startDate = Carbon::create($year, $month, 1)->startOfMonth()->format('Y-m-d');
+        $endDate   = Carbon::create($year, $month, 1)->endOfMonth()->format('Y-m-d');
+
         $tiket = Regtiket::with([
             'layanan',
             'tahapTerakhir.statusRel',
             'review',           // Untuk keperluan tombol/badge SKM
         ])
             ->where('kode_ukerja', Auth::user()->kode_ukerja)
-            ->whereMonth('tanggal', $month)
-            ->whereYear('tanggal', $year)
+            ->whereBetween('tanggal', [$startDate, $endDate])
             ->orderBy('tanggal', 'desc')
             ->get();
 
@@ -208,14 +211,17 @@ class TiketController extends Controller
         $month = $request->month ?? Carbon::now()->month;
         $year = $request->year ?? Carbon::now()->year;
 
+        // SEDANG-3: whereBetween SARGable menggantikan whereMonth + whereYear
+        $startDate = Carbon::create($year, $month, 1)->startOfMonth()->format('Y-m-d');
+        $endDate   = Carbon::create($year, $month, 1)->endOfMonth()->format('Y-m-d');
+
         $tiket = Regtiket::with([
             'layanan',
             'tahapTerakhir.statusRel'
         ])
             ->where('archives', 0)
             ->where('kode_ukerja', Auth::user()->kode_ukerja)
-            ->whereMonth('tanggal', $month)
-            ->whereYear('tanggal', $year)
+            ->whereBetween('tanggal', [$startDate, $endDate])
             ->orderBy('tanggal', 'desc')
             ->get();
 
@@ -229,11 +235,15 @@ class TiketController extends Controller
         $year = $request->filled('year') ? (int) $request->year : $currentYear;
         $diambil = $request->diambil;
 
+        // RINGAN-4: whereBetween SARGable menggantikan whereYear
+        $startOfYear = Carbon::create($year, 1, 1)->startOfDay()->format('Y-m-d');
+        $endOfYear   = Carbon::create($year, 12, 31)->endOfDay()->format('Y-m-d');
+
         $query = Regtiket::with([
             'layanan',
             'tahapTerakhir.statusRel'
         ])
-            ->whereYear('tanggal', $year);
+            ->whereBetween('tanggal', [$startOfYear, $endOfYear]);
 
         // FILTER STATUS DIAMBIL
         if ($diambil !== null && $diambil !== '') {
@@ -257,7 +267,10 @@ class TiketController extends Controller
             'year' => $year,
             'availableYears' => $availableYears,
             'diambil' => $diambil !== null && $diambil !== '' ? (string) $diambil : '',
-            'layananList' => Layanan::where('aktif', 1)->orderBy('nama_layanan')->get(),
+            // RINGAN-4: select() hanya kolom yang dipakai di dropdown filter frontend
+            'layananList' => Layanan::where('aktif', 1)->orderBy('nama_layanan')
+                ->select(['id', 'nama_layanan'])
+                ->get(),
             'selectedLayanan' => $request->filled('layanan') ? (string) $request->layanan : '',
         ]);
     }
@@ -267,11 +280,15 @@ class TiketController extends Controller
         $year = $request->year ?? Carbon::now()->year;
         $diambil = $request->diambil;
 
+        // RINGAN-4: whereBetween SARGable menggantikan whereYear
+        $startOfYear = Carbon::create($year, 1, 1)->startOfDay()->format('Y-m-d');
+        $endOfYear   = Carbon::create($year, 12, 31)->endOfDay()->format('Y-m-d');
+
         $query = Regtiket::with([
             'layanan',
             'tahapTerakhir.statusRel'
         ])
-            ->whereYear('tanggal', $year);
+            ->whereBetween('tanggal', [$startOfYear, $endOfYear]);
 
         // FILTER STATUS DIAMBIL
         if ($diambil !== null && $diambil !== '') {

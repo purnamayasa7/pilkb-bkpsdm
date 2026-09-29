@@ -106,39 +106,9 @@ class ChatController extends Controller
             }
         }
 
+        // SEDANG-5: gunakan private method formatConversation()
         $formatted = $conversations->map(function ($conversation) use ($user, $initialActiveId) {
-            $lastMsg = $conversation->lastMessage;
-            $partner = $this->getConversationPartner($conversation, $user);
-
-            $layananNama = $conversation->tiket?->layanan?->nama_layanan
-                ?? $conversation->layanan?->nama_layanan
-                ?? null;
-
-            $bidangNama = $conversation->bidang?->nama_bidang
-                ?? $conversation->tiket?->layanan?->bidang?->nama_bidang
-                ?? null;
-
-            $unreadCount = ((int) $conversation->id === (int) $initialActiveId) ? 0 : $conversation->unreadCount($user->id);
-
-            return [
-                'id' => $conversation->id,
-                'no_tiket' => $conversation->no_tiket,
-                'status' => $conversation->status ?? 'open',
-                'last_message_id' => $conversation->last_message_id,
-                'nama_pengirim' => $partner['nama_pengirim'],
-                'sender_role' => $partner['sender_role'],
-                'sender_role_label' => $partner['sender_role_label'],
-                'layanan' => $layananNama,
-                'bidang' => $bidangNama,
-                'last_message' => optional($lastMsg)->message ?? 'Belum ada pesan',
-                'last_message_time' => $lastMsg
-                    ? $lastMsg->created_at->format('Y-m-d H:i:s')
-                    : ($conversation->updated_at ? $conversation->updated_at->format('Y-m-d H:i:s') : null),
-                'is_last_from_me' => $lastMsg ? (int) $lastMsg->sender_user_id === (int) $user->id : false,
-                'unread' => $unreadCount,
-                'need_reply' => (bool) $conversation->need_reply,
-                'type' => $conversation->type,
-            ];
+            return $this->formatConversation($conversation, $user, $initialActiveId);
         });
 
         return Inertia::render('Chat/Index', [
@@ -172,38 +142,10 @@ class ChatController extends Controller
             ->orderByDesc('last_message_id')
             ->get();
 
+        // SEDANG-5: gunakan private method formatConversation()
         return response()->json(
             $conversations->map(function ($conversation) use ($user) {
-                $lastMsg = $conversation->lastMessage;
-                $partner = $this->getConversationPartner($conversation, $user);
-
-                $layananNama = $conversation->tiket?->layanan?->nama_layanan
-                    ?? $conversation->layanan?->nama_layanan
-                    ?? null;
-
-                $bidangNama = $conversation->bidang?->nama_bidang
-                    ?? $conversation->tiket?->layanan?->bidang?->nama_bidang
-                    ?? null;
-
-                return [
-                    'id' => $conversation->id,
-                    'no_tiket' => $conversation->no_tiket,
-                    'status' => $conversation->status ?? 'open',
-                    'last_message_id' => $conversation->last_message_id,
-                    'nama_pengirim' => $partner['nama_pengirim'],
-                    'sender_role' => $partner['sender_role'],
-                    'sender_role_label' => $partner['sender_role_label'],
-                    'layanan' => $layananNama,
-                    'bidang' => $bidangNama,
-                    'last_message' => optional($lastMsg)->message ?? 'Belum ada pesan',
-                    'last_message_time' => $lastMsg
-                        ? $lastMsg->created_at->format('Y-m-d H:i:s')
-                        : ($conversation->updated_at ? $conversation->updated_at->format('Y-m-d H:i:s') : null),
-                    'is_last_from_me' => $lastMsg ? (int) $lastMsg->sender_user_id === (int) $user->id : false,
-                    'unread' => $conversation->unreadCount($user->id),
-                    'need_reply' => (bool) $conversation->need_reply,
-                    'type' => $conversation->type,
-                ];
+                return $this->formatConversation($conversation, $user);
             })
         );
     }
@@ -1553,6 +1495,52 @@ class ChatController extends Controller
             'nama_pengirim'     => $nama ?: 'Pengguna',
             'sender_role'       => $senderRole,
             'sender_role_label' => $senderRoleLabel,
+        ];
+    }
+
+    /**
+     * SEDANG-5: Extract method — format satu percakapan menjadi array response.
+     * Sebelumnya blok mapping identik ini ada di index() dan myConversations().
+     * Kini keduanya memanggil $this->formatConversation($conversation, $user, $initialActiveId).
+     */
+    private function formatConversation(
+        $conversation,
+        $user,
+        $initialActiveId = null
+    ): array {
+        $lastMsg  = $conversation->lastMessage;
+        $partner  = $this->getConversationPartner($conversation, $user);
+
+        $layananNama = $conversation->tiket?->layanan?->nama_layanan
+            ?? $conversation->layanan?->nama_layanan
+            ?? null;
+
+        $bidangNama = $conversation->bidang?->nama_bidang
+            ?? $conversation->tiket?->layanan?->bidang?->nama_bidang
+            ?? null;
+
+        $unreadCount = ($initialActiveId !== null && (int) $conversation->id === (int) $initialActiveId)
+            ? 0
+            : $conversation->unreadCount($user->id);
+
+        return [
+            'id'               => $conversation->id,
+            'no_tiket'         => $conversation->no_tiket,
+            'status'           => $conversation->status ?? 'open',
+            'last_message_id'  => $conversation->last_message_id,
+            'nama_pengirim'    => $partner['nama_pengirim'],
+            'sender_role'      => $partner['sender_role'],
+            'sender_role_label'=> $partner['sender_role_label'],
+            'layanan'          => $layananNama,
+            'bidang'           => $bidangNama,
+            'last_message'     => optional($lastMsg)->message ?? 'Belum ada pesan',
+            'last_message_time'=> $lastMsg
+                ? $lastMsg->created_at->format('Y-m-d H:i:s')
+                : ($conversation->updated_at ? $conversation->updated_at->format('Y-m-d H:i:s') : null),
+            'is_last_from_me'  => $lastMsg ? (int) $lastMsg->sender_user_id === (int) $user->id : false,
+            'unread'           => $unreadCount,
+            'need_reply'       => (bool) $conversation->need_reply,
+            'type'             => $conversation->type,
         ];
     }
 }

@@ -95,8 +95,22 @@ export default function ProfileIndex({ user = {}, pegawai = {}, tiket = [] }) {
             clientErrors.email = 'Format alamat email tidak valid.';
         }
 
-        if (password && password.length < 5) {
-            clientErrors.password = 'Password minimal 5 karakter jika ingin diubah.';
+        if (password) {
+            const hasMinLength = password.length >= 8;
+            const hasUpper = /[A-Z]/.test(password);
+            const hasLower = /[a-z]/.test(password);
+            const hasNumber = /[0-9]/.test(password);
+            const hasSymbol = /[^A-Za-z0-9]/.test(password);
+
+            if (!hasMinLength) {
+                clientErrors.password = 'Password baru minimal 8 karakter.';
+            } else if (!hasUpper || !hasLower) {
+                clientErrors.password = 'Password harus mengombinasikan huruf besar (A-Z) dan huruf kecil (a-z).';
+            } else if (!hasNumber) {
+                clientErrors.password = 'Password harus mengandung minimal satu angka (0-9).';
+            } else if (!hasSymbol) {
+                clientErrors.password = 'Password harus mengandung minimal satu karakter khusus/simbol (@$!%*#?& dll).';
+            }
         }
 
         if (Object.keys(clientErrors).length > 0) {
@@ -444,6 +458,9 @@ export default function ProfileIndex({ user = {}, pegawai = {}, tiket = [] }) {
                                                 <span>{errors.password}</span>
                                             </p>
                                         )}
+                                        <p className="text-[10px] text-slate-400">
+                                            Minimal 8 karakter dengan kombinasi huruf besar, huruf kecil, angka, dan karakter khusus/simbol.
+                                        </p>
                                     </div>
 
                                     {/* Action Button */}

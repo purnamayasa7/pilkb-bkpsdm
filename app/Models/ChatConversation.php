@@ -65,6 +65,14 @@ class ChatConversation extends Model
             return 0;
         }
 
+        // Defensive guard: jika participants di-load parsial tanpa kolom last_read_message_id
+        if ($this->relationLoaded('participants') && !array_key_exists('last_read_message_id', $participant->getAttributes())) {
+            $participant = $this->participants()->where('user_id', $userId)->first();
+            if (!$participant) {
+                return 0;
+            }
+        }
+
         $lastRead = (int) ($participant->last_read_message_id ?? 0);
 
         // Optimasi: jika pesan terakhir sudah terbaca atau sama, unread pasti 0 tanpa query berat
