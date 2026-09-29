@@ -361,7 +361,7 @@
 
                                     <!-- KODE KEAMANAN (CAPTCHA) -->
                                     <div class="form-group-custom">
-                                        <label for="captcha" class="form-label-custom">Capcha</label>
+                                        <label for="captcha" class="form-label-custom">Captcha</label>
                                         <div class="d-flex align-items-center gap-2">
                                             <!-- Box Gambar CAPTCHA -->
                                             <div class="captcha-img-wrap" onclick="refreshCaptcha()" title="Klik untuk ganti kode" style="cursor: pointer; height: 44px; width: 120px; border-radius: 12px; border: 1px solid #e2e8f0; background: #f8fafc; overflow: hidden; flex-shrink: 0; display: flex; align-items: center; justify-content: center;">
