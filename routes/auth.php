@@ -38,6 +38,12 @@ Route::middleware('guest')->group(function () {
 
     Route::post('reset-password', [NewPasswordController::class, 'store'])
         ->name('password.store');
+
+    Route::get('aktivasi-akun/{token}', [\App\Http\Controllers\Auth\UserActivationController::class, 'showActivationForm'])
+        ->name('account.activate');
+
+    Route::post('aktivasi-akun/{token}', [\App\Http\Controllers\Auth\UserActivationController::class, 'activateAccount'])
+        ->name('account.activate.submit');
 });
 
 Route::middleware('auth')->group(function () {

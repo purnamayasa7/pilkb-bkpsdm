@@ -241,7 +241,7 @@
                                 <i data-feather="check-circle"></i>
                             </div>
                             <div class="feature-text">
-                                <div class="feature-title">Pelacakan Usulan Transparan</div>
+                                <div class="feature-title">Pengecekan Usulan Transparan</div>
                                 <div class="feature-desc">Cek progres status usulan layanan kepegawaian transparan via No Tiket.</div>
                             </div>
                         </div>

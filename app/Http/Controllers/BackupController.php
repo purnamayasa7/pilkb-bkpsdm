@@ -119,6 +119,9 @@ class BackupController extends Controller
                 );
             }
 
+            // Pastikan hanya 1 file backup terbaru yang disimpan (menimpa/menghapus file lama)
+            self::pruneOlderBackups(1);
+
             ActivityLogService::log(
                 'Backup Database',
                 'CREATE',
@@ -127,7 +130,7 @@ class BackupController extends Controller
 
             return redirect()->route('root.backup.index')->with(
                 'success',
-                'Backup database berhasil dibuat!'
+                'Backup database berhasil dibuat! File backup lama otomatis diperbarui.'
             );
         } catch (\Throwable $e) {
             Log::error('Backup Database Exception: ' . $e->getMessage(), [
@@ -216,6 +219,9 @@ class BackupController extends Controller
                     'Backup database gagal dibuat.'
                 );
             }
+
+            // Pastikan hanya 1 file backup terbaru yang disimpan (menimpa/menghapus file lama)
+            self::pruneOlderBackups(1);
 
             $disk = Storage::disk('backup');
             $files = collect($disk->allFiles())
@@ -313,6 +319,49 @@ class BackupController extends Controller
             putenv("PATH={$currentPath}");
             $_ENV['PATH'] = $currentPath;
             $_SERVER['PATH'] = $currentPath;
+        }
+    }
+
+    /**
+     * Memastikan hanya tersisa $keep file backup terbaru (default: 1 file).
+     * File backup lama otomatis dihapus sehingga sistem selalu menyimpan 1 file terbaru (menimpa file lama).
+     */
+    public static function pruneOlderBackups(int $keep = 1): int
+    {
+        try {
+            $disk = Storage::disk('backup');
+            $allFiles = collect($disk->allFiles())
+                ->filter(fn($file) => str_ends_with(strtolower($file), '.zip'));
+
+            if ($allFiles->count() <= $keep) {
+                return 0;
+            }
+
+            // Urutkan file berdasarkan waktu modifikasi terbaru (paling baru di index 0)
+            $sortedFiles = $allFiles->sortByDesc(fn($file) => $disk->lastModified($file))->values();
+
+            // Ambil semua file lama di luar batas $keep
+            $filesToDelete = $sortedFiles->slice($keep);
+            $deletedCount = 0;
+
+            foreach ($filesToDelete as $file) {
+                if ($disk->exists($file)) {
+                    $disk->delete($file);
+                    $deletedCount++;
+                }
+            }
+
+            // Bersihkan direktori kosong di dalam storage backup jika ada (misal folder lama 'Laravel')
+            foreach ($disk->directories() as $directory) {
+                if (empty($disk->allFiles($directory))) {
+                    $disk->deleteDirectory($directory);
+                }
+            }
+
+            return $deletedCount;
+        } catch (\Throwable $e) {
+            Log::warning('Gagal merapikan backup lama: ' . $e->getMessage());
+            return 0;
         }
     }
 }

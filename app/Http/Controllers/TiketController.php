@@ -1595,7 +1595,7 @@ class TiketController extends Controller
 
     public function cetak($no_tiket)
     {
-        $tiket = Regtiket::with('layanan')
+        $tiket = Regtiket::with(['layanan', 'tahapTerakhir.statusRel'])
             ->where('no_tiket', $no_tiket)
             ->firstOrFail();
 

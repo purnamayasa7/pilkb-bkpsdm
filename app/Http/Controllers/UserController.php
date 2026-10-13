@@ -6,10 +6,13 @@ use App\Exports\LaporanUserExport;
 use App\Models\Bidang;
 use App\Models\Regtiket;
 use App\Models\User;
+use App\Notifications\UserActivationNotification;
 use App\Services\ActivityLogService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
 use App\Services\PegawaiService;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
@@ -96,6 +99,9 @@ class UserController extends Controller
                     'role' => $u->role ? $u->role->name : null,
                     'nama_role' => $u->nama_role,
                     'aktif' => (bool) $u->aktif,
+                    'is_activated' => !empty($u->email_verified_at) || empty($u->activation_token),
+                    'has_pending_activation' => !empty($u->activation_token),
+                    'activation_token_expires_at' => $u->activation_token_expires_at?->toIso8601String(),
                     'kode_ukerja' => $u->kode_ukerja,
                     'email' => $u->email,
                     'no_wa' => $u->no_wa,
@@ -230,30 +236,33 @@ class UserController extends Controller
             $finalBidangId = $bidang->id;
         }
 
-        // PASSWORD = 5 digit terakhir NIP
-        $passwordDefault = substr($request->username, -5);
-
-        // dd([
-        //     'username' => $request->username,
-        //     'must_change_password' => true,
-        // ]);
+        $activationToken = Str::random(64);
+        $activationExpiresAt = now()->addHours(24);
 
         $user = User::create([
             'username' => $request->username,
             'nama' => $namaLengkap,
-            'password' => Hash::make($passwordDefault),
+            'password' => Hash::make(Str::random(60)),
             'bidang_id' => $finalBidangId,
             'role_id' => $role_id,
-            'aktif' => true,
+            'aktif' => false,
             'kode_ukerja' => $kodeUkerja,
             'email' => $request->email,
-            'must_change_password' => true,
+            'must_change_password' => false,
+            'activation_token' => $activationToken,
+            'activation_token_expires_at' => $activationExpiresAt,
         ]);
+
+        try {
+            $user->notify(new UserActivationNotification($user, $activationToken));
+        } catch (\Throwable $e) {
+            Log::error('Gagal mengirim email aktivasi user: ' . $e->getMessage());
+        }
 
         ActivityLogService::log(
             'Manajemen Data User',
             'CREATE',
-            'Menambah User Baru',
+            'Menambah User Baru (Email Aktivasi Dikirim): ' . $user->username,
             [],
             $user->toArray()
         );
@@ -262,7 +271,7 @@ class UserController extends Controller
             ->route('root.user')
             ->with(
                 'success',
-                'User berhasil ditambahkan.'
+                'User berhasil ditambahkan dan email aktivasi telah dikirim ke ' . $user->email . '.'
             );
     }
 
@@ -415,6 +424,38 @@ class UserController extends Controller
         );
 
         return redirect()->back()->with('success', 'Status user berhasil diubah');
+    }
+
+    // Kirim Ulang Email Aktivasi Akun
+    public function resendActivation($id)
+    {
+        $user = User::findOrFail($id);
+
+        if (empty($user->email)) {
+            return back()->withErrors(['email' => 'User tidak memiliki alamat email yang valid.']);
+        }
+
+        $activationToken = Str::random(64);
+        $user->activation_token = $activationToken;
+        $user->activation_token_expires_at = now()->addHours(24);
+        $user->save();
+
+        try {
+            $user->notify(new UserActivationNotification($user, $activationToken));
+        } catch (\Throwable $e) {
+            Log::error('Gagal mengirim ulang email aktivasi: ' . $e->getMessage());
+            return back()->withErrors(['email' => 'Gagal mengirim email aktivasi. Silakan periksa konfigurasi mail server.']);
+        }
+
+        ActivityLogService::log(
+            'Manajemen Data User',
+            'RESEND_ACTIVATION',
+            'Mengirim ulang email aktivasi untuk user: ' . $user->username,
+            [],
+            ['username' => $user->username, 'email' => $user->email]
+        );
+
+        return redirect()->back()->with('success', 'Email aktivasi berhasil dikirim ulang ke ' . $user->email . '.');
     }
 
     //Tampilkan halaman profile

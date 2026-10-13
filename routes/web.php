@@ -163,6 +163,7 @@ Route::prefix('root')
         // Update Data
         Route::put('user/{id}', [UserController::class, 'update'])->name('update');
         Route::put('user/{id}/toggle-aktif', [UserController::class, 'toggleAktif'])->name('toggle-aktif');
+        Route::post('user/{id}/resend-activation', [UserController::class, 'resendActivation'])->name('user.resendActivation');
         // Export
         Route::get('user/export-excel', [UserController::class, 'exportExcel'])->name('user.exportExcel');
         Route::get('user/export-pdf', [UserController::class, 'exportPdf'])->name('user.exportPdf');

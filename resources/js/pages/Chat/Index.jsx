@@ -1791,7 +1791,7 @@ export default function ChatIndex({
                                                     <div className="absolute left-0 top-0 bottom-0 w-1 bg-blue-600 rounded-r pointer-events-none" />
                                                 )}
                                                 {selectionMode && (
-                                                    <div className="pt-2 shrink-0">
+                                                    <div className="pt-2 shrink-0" onClick={(e) => e.stopPropagation()}>
                                                         <input
                                                             type="checkbox"
                                                             checked={isSelected}
@@ -1893,7 +1893,10 @@ export default function ChatIndex({
                                         </h3>
 
                                         <p className="text-xs text-slate-500 dark:text-slate-400 mt-2 leading-relaxed">
-                                            Pilih salah satu percakapan di sebelah kiri untuk melihat pesan, atau mulai percakapan baru dengan memasukkan nomor tiket layanan kepegawaian Anda.
+                                            Pilih percakapan di sebelah kiri, mulai percakapan via tiket layanan,
+                                            <span className="block mt-1 text-slate-600 dark:text-slate-300">
+                                                atau konsultasikan pertanyaan Anda bersama <span className="font-semibold text-indigo-600 dark:text-indigo-400">Asisten Virtual LILI</span>.
+                                            </span>
                                         </p>
 
                                         <div className="mt-6 flex flex-wrap items-center justify-center gap-2.5">

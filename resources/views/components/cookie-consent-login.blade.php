@@ -352,8 +352,15 @@
             }
         }
 
+        // Flag aktivasi pop-up cookie (Setel false untuk menonaktifkan sementara sebelum rilis, ubah ke true saat siap rilis)
+        const ENABLE_COOKIE_POPUP = false;
+
         // Tampilkan Banner HANYA SETELAH SEMUA KOMPONEN HALAMAN LOGIN SELESAI DIMUAT
         function initBannerAnimation() {
+            if (!ENABLE_COOKIE_POPUP) {
+                return; // Pop-up dinonaktifkan sementara sebelum rilis
+            }
+
             const existingConsent = getStoredConsent();
             if (!existingConsent && banner) {
                 // Tunggu sejenak setelah window.load agar transisi halaman login selesai stabil

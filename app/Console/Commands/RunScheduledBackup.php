@@ -92,6 +92,12 @@ class RunScheduledBackup extends Command
                 Log::warning('Backup cleanup warning: ' . $cleanEx->getMessage());
             }
 
+            // Pastikan hanya 1 file backup database terbaru yang disimpan (menimpa file lama)
+            $pruned = \App\Http\Controllers\BackupController::pruneOlderBackups(1);
+            if ($pruned > 0) {
+                $this->info("Menghapus {$pruned} berkas backup lama. Menyimpan 1 berkas backup terbaru.");
+            }
+
             return Command::SUCCESS;
         } catch (\Throwable $e) {
             $msg = 'Terjadi kesalahan sistem saat backup otomatis: ' . $e->getMessage();

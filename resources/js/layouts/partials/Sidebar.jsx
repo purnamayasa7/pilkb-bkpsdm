@@ -1,4 +1,4 @@
-﻿import React from "react";
+import React from "react";
 import { Link } from "@inertiajs/react";
 import { X } from "lucide-react";
 import MenuIcon from "../../components/MenuIcon";
@@ -78,18 +78,16 @@ const Sidebar = React.memo(function Sidebar({
             <div className={`border-t border-slate-100 dark:border-slate-800 flex-shrink-0 bg-white dark:bg-slate-900 transition-all duration-300 ${sidebarCollapsed ? "lg:p-3 p-5 lg:flex lg:justify-center" : "p-5"}`}>
                 {sidebarCollapsed ? (
                     <>
-                        <div className="hidden lg:flex w-10 h-10 rounded-xl bg-blue-50 dark:bg-blue-950/60 border border-blue-200/80 dark:border-blue-900/60 text-blue-600 dark:text-blue-400 items-center justify-center font-bold text-xs shadow-2xs cursor-default" title={`${user?.nama || "Petugas"} (${user?.role ? user.role.replace("_", " ") : "Petugas"})`}>{getInitials(user?.nama, "P")}</div>
+                        <div className="hidden lg:flex w-10 h-10 rounded-xl bg-blue-50 dark:bg-blue-950/60 border border-blue-200/80 dark:border-blue-900/60 text-blue-600 dark:text-blue-400 items-center justify-center font-bold text-xs shadow-2xs cursor-default" title={user?.role ? user.role.replace("_", " ") : "Petugas"}>{getInitials(user?.nama, "P")}</div>
                         <div className="lg:hidden">
                             <p className="text-xs text-slate-400 dark:text-slate-500 font-normal leading-none">Login sebagai:</p>
                             <h4 className="text-sm font-bold text-slate-900 dark:text-slate-100 capitalize mt-1.5 tracking-tight">{user?.role ? user.role.replace("_", " ") : "Petugas"}</h4>
-                            <p className="text-xs text-slate-400 dark:text-slate-500 truncate mt-0.5">{user?.nama || "-"}</p>
                         </div>
                     </>
                 ) : (
                     <div>
                         <p className="text-xs text-slate-400 dark:text-slate-500 font-normal leading-none">Login sebagai:</p>
                         <h4 className="text-sm font-bold text-slate-900 dark:text-slate-100 capitalize mt-1.5 tracking-tight">{user?.role ? user.role.replace("_", " ") : "Petugas"}</h4>
-                        <p className="text-xs text-slate-400 dark:text-slate-500 truncate mt-0.5">{user?.nama || "-"}</p>
                     </div>
                 )}
             </div>

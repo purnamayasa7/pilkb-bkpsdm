@@ -72,6 +72,26 @@
                         <td class="data-sep">:</td>
                         <td class="data-val">{{ \Carbon\Carbon::parse($tiket->tanggal)->translatedFormat('d-m-Y') }}</td>
                     </tr>
+                    <tr>
+                        <td class="data-label">Status Terakhir</td>
+                        <td class="data-sep">:</td>
+                        <td class="data-val">
+                            @php
+                                $statusNama = $tiket->tahapTerakhir->statusRel->status ?? 'Menunggu Verifikasi';
+                                $hasBtlSyarat = (isset($syarat) && $syarat->contains('status', 2)) || ($tiket->detail && $tiket->detail->contains('status', 2));
+                                $isBtl = $hasBtlSyarat || stripos($statusNama, 'btl') !== false || stripos($statusNama, 'perbaikan') !== false || stripos($statusNama, 'tolak') !== false || stripos($statusNama, 'revisi') !== false;
+                                $isSelesai = stripos($statusNama, 'selesai') !== false || stripos($statusNama, 'disetujui') !== false;
+                            @endphp
+
+                            @if ($isBtl)
+                                <span class="badge-status-btl">{{ $statusNama }}</span>
+                            @elseif ($isSelesai)
+                                <span class="badge-status-valid">{{ $statusNama }}</span>
+                            @else
+                                <span class="badge-status-terakhir">{{ $statusNama }}</span>
+                            @endif
+                        </td>
+                    </tr>
                 </table>
             </td>
 

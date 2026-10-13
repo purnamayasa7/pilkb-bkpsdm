@@ -455,15 +455,15 @@ export default function RootUserCreate({ bidang = [] }) {
                                 )}
                             </div>
 
-                            {/* Info Box Password */}
+                            {/* Info Box Aktivasi Email */}
                             <div className="p-4 rounded-2xl bg-blue-50/70 dark:bg-blue-950/40 border border-blue-200/80 dark:border-blue-900/50 flex items-start gap-3 text-xs">
                                 <Info className="w-4 h-4 text-blue-600 dark:text-blue-400 flex-shrink-0 mt-0.5" />
                                 <div className="space-y-1 text-slate-600 dark:text-slate-300">
                                     <p className="font-semibold text-blue-900 dark:text-blue-200">
-                                        Password Default Akun
+                                        Aktivasi Akun via Email
                                     </p>
                                     <p className="leading-relaxed">
-                                        Password awal otomatis diset menjadi <strong>5 digit terakhir NIP</strong> pengguna. Akun akan ditandai wajib mengganti password saat login pertama kali demi keamanan.
+                                        Sistem akan mengirimkan email aktivasi ke alamat email pegawai di atas. Pengguna akan menentukan kata sandi akun melalui tautan aktivasi rahasia yang dikirimkan.
                                     </p>
                                 </div>
                             </div>
