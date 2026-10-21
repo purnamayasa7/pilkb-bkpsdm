@@ -154,7 +154,24 @@ class KelengkapanService
                 return null;
             }
 
-            return $json['data'];
+            $data = $json['data'];
+
+            // Transform preview_url ke endpoint proxy internal PILKB
+            if (isset($data['dokumen']) && is_array($data['dokumen'])) {
+                foreach ($data['dokumen'] as &$docGroup) {
+                    if (isset($docGroup['riwayat']) && is_array($docGroup['riwayat'])) {
+                        foreach ($docGroup['riwayat'] as &$item) {
+                            if (!empty($item['preview_url'])) {
+                                $item['preview_url_original'] = $item['preview_url'];
+                                $item['preview_url'] = url('/simpeg-dokumen/preview?url=' . urlencode($item['preview_url']));
+                            }
+                        }
+                    }
+                }
+                unset($docGroup, $item);
+            }
+
+            return $data;
         } catch (\Throwable $e) {
 
             Log::error(

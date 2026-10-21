@@ -254,7 +254,14 @@ export default function Create({
         }));
     };
 
-    const getSimpegDocUrl = (doc) => doc?.preview_url || doc?.url || doc?.file_url || null;
+    const getSimpegDocUrl = (doc) => {
+        const raw = doc?.preview_url || doc?.url || doc?.file_url || null;
+        if (!raw) return null;
+        if (typeof raw === 'string' && raw.includes('/dokumen/file/') && !raw.includes('/simpeg-dokumen/preview')) {
+            return `/simpeg-dokumen/preview?url=${encodeURIComponent(raw)}`;
+        }
+        return raw;
+    };
     const getSimpegDocName = (doc, idx) => doc?.label || doc?.nama_file || doc?.nama || doc?.keterangan || (idx !== undefined ? `Dokumen #${idx + 1}` : 'Dokumen SIMPEG');
 
     const handleOpenSimpegDocs = (item) => {

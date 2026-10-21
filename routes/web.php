@@ -19,6 +19,7 @@ use App\Http\Controllers\PerbaikanController;
 use App\Http\Controllers\PermintaanController;
 use App\Http\Controllers\PimpinanController;
 use App\Http\Controllers\SearchController;
+use App\Http\Controllers\SimpegDokumenController;
 use App\Http\Controllers\StatusController;
 use App\Http\Controllers\SyaratController;
 use App\Http\Controllers\TiketController;
@@ -114,6 +115,9 @@ Route::middleware(['auth', 'force.password'])->group(function () {
     // Cetak QR & Riwayat Tiket
     Route::get('/tiket/{no_tiket}/qr', [TiketController::class, 'showQr'])->name('tiket.qr');
     Route::get('/tiket/history/{no_tiket}', [TiketController::class, 'getHistory'])->name('tiket.getHistory');
+
+    // Dokumen SIMPEG Proxy / Preview
+    Route::get('/simpeg-dokumen/preview', [SimpegDokumenController::class, 'preview'])->name('simpeg.dokumen.preview');
 
     // Chat
     Route::get('/chat', [ChatController::class, 'index'])->name('chat.index');

@@ -85,11 +85,20 @@ export default function Edit({
         });
     };
 
+    const getSimpegDocUrl = (raw) => {
+        if (!raw) return null;
+        if (typeof raw === 'string' && raw.includes('/dokumen/file/') && !raw.includes('/simpeg-dokumen/preview')) {
+            return `/simpeg-dokumen/preview?url=${encodeURIComponent(raw)}`;
+        }
+        return raw;
+    };
+
     // Handle SIMPEG Modal docs
     const handleOpenSimpegDocs = (syaratTitle, docs) => {
         // Jika hanya 1 dokumen dan ada url langsung buka di tab baru
         const firstDoc = docs[0];
-        const docUrl = firstDoc?.preview_url || firstDoc?.url || firstDoc?.file_url;
+        const rawUrl = firstDoc?.preview_url || firstDoc?.url || firstDoc?.file_url;
+        const docUrl = getSimpegDocUrl(rawUrl);
         if (docs.length === 1 && docUrl) {
             window.open(docUrl, '_blank', 'noreferrer');
             return;
@@ -596,7 +605,7 @@ export default function Edit({
                                 </div>
                             ) : (
                                 activeSimpegDocs.map((doc, idx) => {
-                                    const url = doc.preview_url || doc.url || doc.file_url;
+                                    const url = getSimpegDocUrl(doc.preview_url || doc.url || doc.file_url);
                                     const name = doc.label || doc.nama_file || doc.nama || `Dokumen #${idx + 1}`;
 
                                     return (
