@@ -319,6 +319,14 @@
                                     </div>
                                 @endif
 
+                                @if (session('success'))
+                                    <div class="alert alert-success alert-dismissible fade show d-flex align-items-center mb-3 rounded-3 border-0 shadow-sm" role="alert">
+                                        <i data-feather="check-circle" class="me-2 flex-shrink-0 text-success"></i>
+                                        <div class="small fw-medium">{{ session('success') }}</div>
+                                        <button type="button" class="btn-close ms-auto" data-bs-dismiss="alert" aria-label="Close"></button>
+                                    </div>
+                                @endif
+
                                 @if (session('error'))
                                     <div class="alert alert-danger alert-dismissible fade show d-flex align-items-center mb-3 rounded-3 border-0 shadow-sm" role="alert">
                                         <i data-feather="alert-circle" class="me-2 flex-shrink-0 text-danger"></i>

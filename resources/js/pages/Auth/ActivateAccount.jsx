@@ -119,13 +119,13 @@ export default function ActivateAccount({
                         )}
 
                         <div className="pt-2">
-                            <Link
+                            <a
                                 href="/login"
                                 className="w-full inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs sm:text-sm transition-colors shadow-2xs cursor-pointer"
                             >
                                 <span>Kembali ke Halaman Login</span>
                                 <ArrowRight className="w-4 h-4" />
-                            </Link>
+                            </a>
                         </div>
                     </div>
                 ) : (
@@ -319,12 +319,12 @@ export default function ActivateAccount({
                 {/* Footer link */}
                 <div className="mt-6 text-center text-xs text-slate-500 dark:text-slate-400">
                     <span>Sudah memiliki akun aktif? </span>
-                    <Link
+                    <a
                         href="/login"
                         className="font-semibold text-blue-600 dark:text-blue-400 hover:underline"
                     >
                         Masuk ke PILKB
-                    </Link>
+                    </a>
                 </div>
             </div>
         </div>

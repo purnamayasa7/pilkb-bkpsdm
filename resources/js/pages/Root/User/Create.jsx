@@ -58,17 +58,17 @@ export default function RootUserCreate({ bidang = [] }) {
             if (!data || !data.status || !data.data) {
                 setNipVerified(false);
                 setPegawaiData(null);
+                setEmail('');
                 setNipError(data?.message || 'Data pegawai tidak ditemukan pada SIMPEG.');
             } else {
                 setNipVerified(true);
                 setPegawaiData(data.data);
-                if (data.data.email && !email) {
-                    setEmail(data.data.email);
-                }
+                setEmail(data.data.email || '');
             }
         } catch (err) {
             setNipVerified(false);
             setPegawaiData(null);
+            setEmail('');
             setNipError('Gagal menghubungkan ke server SIMPEG. Coba beberapa saat lagi.');
         } finally {
             setCheckingNip(false);
@@ -81,7 +81,8 @@ export default function RootUserCreate({ bidang = [] }) {
         setNipVerified(false);
         setPegawaiData(null);
         setNipError('');
-        setErrors((prev) => ({ ...prev, username: null }));
+        setEmail('');
+        setErrors((prev) => ({ ...prev, username: null, email: null }));
     };
 
     // Pre-submit validation

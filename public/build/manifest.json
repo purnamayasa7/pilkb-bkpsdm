@@ -380,7 +380,7 @@
     "isEntry": true
   },
   "resources/js/app.jsx": {
-    "file": "assets/app-bi-RIqLr.js",
+    "file": "assets/app-CmCtfu1R.js",
     "name": "app",
     "src": "resources/js/app.jsx",
     "isEntry": true,
@@ -682,7 +682,7 @@
     ]
   },
   "resources/js/pages/Auth/ActivateAccount.jsx": {
-    "file": "assets/ActivateAccount-lskbdLL1.js",
+    "file": "assets/ActivateAccount-DMCQAC8k.js",
     "name": "ActivateAccount",
     "src": "resources/js/pages/Auth/ActivateAccount.jsx",
     "isDynamicEntry": true,
@@ -928,7 +928,7 @@
     ]
   },
   "resources/js/pages/Chat/Index.jsx": {
-    "file": "assets/Index-YmXITktI.js",
+    "file": "assets/Index-uV4o1xk4.js",
     "name": "Index",
     "src": "resources/js/pages/Chat/Index.jsx",
     "isDynamicEntry": true,
@@ -1691,7 +1691,7 @@
     ]
   },
   "resources/js/pages/Root/User/Create.jsx": {
-    "file": "assets/Create-Dx_PiVem.js",
+    "file": "assets/Create-BWm9loDh.js",
     "name": "Create",
     "src": "resources/js/pages/Root/User/Create.jsx",
     "isDynamicEntry": true,

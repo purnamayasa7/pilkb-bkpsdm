@@ -102,6 +102,9 @@ class UserActivationController extends Controller
             ['username' => $user->username, 'email' => $user->email]
         );
 
-        return redirect()->route('login')->with('success', 'Akun Anda (' . $user->username . ') berhasil diaktifkan! Silakan masuk menggunakan kata sandi baru Anda.');
+        session()->flash('status', 'Akun Anda (' . $user->username . ') berhasil diaktifkan! Silakan masuk menggunakan kata sandi baru Anda.');
+        session()->flash('success', 'Akun Anda (' . $user->username . ') berhasil diaktifkan! Silakan masuk menggunakan kata sandi baru Anda.');
+
+        return Inertia::location(route('login'));
     }
 }
